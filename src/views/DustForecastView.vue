@@ -1,45 +1,101 @@
 <template>
   <section id="dust-forecast-section" class="view">
-    <h2>Playa Dust Forecast</h2>
+    <div class="header-row">
+      <h2>🌪️ Playa Weather & Dust</h2>
+      <div class="header-actions">
+        <button @click="refreshWeather" :disabled="isLoading" class="refresh-btn">
+          <span :class="{ spinning: isLoading }">🔄</span>
+          {{ isLoading ? 'Loading...' : 'Refresh' }}
+        </button>
+      </div>
+    </div>
     
-    <div class="forecast-container">
-      <div class="current-conditions">
+    <div v-if="error" class="error-message">
+      <p>⚠️ {{ error }}</p>
+      <button @click="refreshWeather" class="retry-btn">Try Again</button>
+    </div>
+    
+    <div class="forecast-container" v-else>
+      <!-- Loading State -->
+      <div v-if="isLoading && !currentConditions" class="loading-state">
+        <div class="loading-spinner"></div>
+        <p>Fetching latest weather data...</p>
+      </div>
+      
+      <!-- Current Conditions -->
+      <div v-else class="current-conditions">
         <h3>Current Conditions</h3>
         <div class="condition-card">
-          <div class="dust-level" :class="currentConditions.level">
-            <span class="dust-icon">{{ getDustIcon(currentConditions.level) }}</span>
-            <h4>{{ currentConditions.label }}</h4>
+          <div class="dust-level" :class="currentConditions.dustLevel">
+            <span class="dust-icon">{{ getDustIcon(currentConditions.dustLevel) }}</span>
+            <h4>{{ currentConditions.dustLabel }}</h4>
           </div>
           <div class="metrics">
             <div class="metric">
-              <label>Wind Speed</label>
-              <span>{{ currentConditions.windSpeed }} mph</span>
+              <label>Temperature</label>
+              <span>{{ currentConditions.temperature }}°F</span>
+              <small v-if="currentConditions.feelsLike !== currentConditions.temperature">
+                Feels {{ currentConditions.feelsLike }}°F
+              </small>
             </div>
             <div class="metric">
-              <label>Wind Direction</label>
-              <span>{{ currentConditions.windDirection }}</span>
+              <label>Wind</label>
+              <span>{{ currentConditions.windSpeed }} mph {{ currentConditions.windDirection }}</span>
             </div>
             <div class="metric">
+              <label>Humidity</label>
+              <span>{{ currentConditions.humidity }}%</span>
+            </div>
+            <div class="metric">
+              <label>Pressure</label>
+              <span>{{ currentConditions.pressure }} hPa</span>
+            </div>
+            <div v-if="currentConditions.visibility" class="metric">
               <label>Visibility</label>
-              <span>{{ currentConditions.visibility }}</span>
+              <span>{{ currentConditions.visibility }} mi</span>
+            </div>
+            <div v-if="sunTimes" class="metric">
+              <label>Sun Times</label>
+              <span>{{ sunTimes.sunrise }} - {{ sunTimes.sunset }}</span>
             </div>
           </div>
           <p class="recommendation">{{ currentConditions.recommendation }}</p>
+          <div class="data-source">
+            <small v-if="currentConditions.source === 'cache-expired'">
+              ⚠️ Using cached data (offline)
+            </small>
+            <small v-else-if="currentConditions.source === 'cache'">
+              📱 Cached data • Updated {{ formatUpdateTime(currentConditions.lastUpdated) }}
+            </small>
+            <small v-else>
+              🌐 Live data • {{ formatUpdateTime(currentConditions.lastUpdated) }}
+            </small>
+          </div>
         </div>
       </div>
       
+      <!-- 5-Day Forecast -->
       <div class="forecast-days">
         <h3>5-Day Forecast</h3>
-        <div class="forecast-grid">
+        <div v-if="isLoading && !forecastDays.length" class="loading-state">
+          <div class="loading-spinner small"></div>
+          <p>Loading forecast...</p>
+        </div>
+        <div v-else class="forecast-grid">
           <div 
             v-for="day in forecastDays" 
-            :key="day.date" 
+            :key="day.dateIso" 
             class="forecast-day"
           >
             <h5>{{ day.dayName }}</h5>
-            <span class="forecast-icon">{{ getDustIcon(day.level) }}</span>
-            <p class="forecast-level">{{ day.label }}</p>
-            <small>Wind: {{ day.windSpeed }} mph</small>
+            <span class="forecast-icon">{{ getDustIcon(day.dustLevel) }}</span>
+            <p class="forecast-level">{{ day.dustLabel }}</p>
+            <div class="temp-range">
+              <span class="temp-high">{{ day.temperature.high }}°</span>
+              <span class="temp-low">{{ day.temperature.low }}°</span>
+            </div>
+            <small>Wind: {{ day.windSpeed }} mph {{ day.windDirection }}</small>
+            <small class="humidity">{{ day.humidity }}% humidity</small>
           </div>
         </div>
       </div>
@@ -101,55 +157,22 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
+import { getCurrentWeather, getWeatherForecast, getSunTimes } from '../services/weatherService'
+import { useToast } from '../composables/useToast'
 
-// Mock data - in a real app, this would come from a weather API
-const currentConditions = ref({
-  level: 'moderate',
-  label: 'Moderate Dust',
-  windSpeed: 15,
-  windDirection: 'SW',
-  visibility: 'Reduced',
-  recommendation: 'Dust mask recommended. Secure loose items in camp.'
-})
+const { showError, showSuccess, showWarning } = useToast()
 
-const forecastDays = ref([
-  { 
-    date: '2025-08-26', 
-    dayName: 'Tue',
-    level: 'light',
-    label: 'Light Dust',
-    windSpeed: 10
-  },
-  { 
-    date: '2025-08-27', 
-    dayName: 'Wed',
-    level: 'moderate',
-    label: 'Moderate',
-    windSpeed: 18
-  },
-  { 
-    date: '2025-08-28', 
-    dayName: 'Thu',
-    level: 'clear',
-    label: 'Clear',
-    windSpeed: 5
-  },
-  { 
-    date: '2025-08-29', 
-    dayName: 'Fri',
-    level: 'heavy',
-    label: 'Heavy Dust',
-    windSpeed: 25
-  },
-  { 
-    date: '2025-08-30', 
-    dayName: 'Sat',
-    level: 'moderate',
-    label: 'Moderate',
-    windSpeed: 15
-  }
-])
+// Reactive state
+const currentConditions = ref(null)
+const forecastDays = ref([])
+const sunTimes = ref(null)
+const isLoading = ref(false)
+const error = ref(null)
+
+// Auto-refresh interval
+let autoRefreshInterval = null
+const AUTO_REFRESH_INTERVAL = 15 * 60 * 1000 // 15 minutes
 
 const getDustIcon = (level) => {
   const icons = {
@@ -162,10 +185,124 @@ const getDustIcon = (level) => {
   return icons[level] || '🌫️'
 }
 
-// In a real app, you might fetch weather data here
-onMounted(() => {
+const formatUpdateTime = (timestamp) => {
+  if (!timestamp) return 'Unknown'
+  
+  const date = new Date(timestamp)
+  const now = new Date()
+  const diffMs = now - date
+  const diffMins = Math.floor(diffMs / 60000)
+  
+  if (diffMins < 1) return 'just now'
+  if (diffMins < 60) return `${diffMins}m ago`
+  
+  const diffHours = Math.floor(diffMins / 60)
+  if (diffHours < 24) return `${diffHours}h ago`
+  
+  return date.toLocaleDateString()
+}
+
+const loadWeatherData = async (showLoadingSpinner = true) => {
+  if (showLoadingSpinner) {
+    isLoading.value = true
+  }
+  error.value = null
+
+  try {
+    // Check if we have a weather API key
+    if (!import.meta.env.VITE_WEATHER_API_KEY) {
+      throw new Error('Weather API key not configured. Please add VITE_WEATHER_API_KEY to your .env file.')
+    }
+
+    // Load current conditions and forecast in parallel
+    const [current, forecast, sun] = await Promise.allSettled([
+      getCurrentWeather(),
+      getWeatherForecast(),
+      getSunTimes()
+    ])
+
+    // Handle current weather
+    if (current.status === 'fulfilled') {
+      currentConditions.value = current.value
+    } else {
+      console.error('Failed to load current weather:', current.reason)
+      if (!currentConditions.value) {
+        throw new Error('Failed to load current weather conditions')
+      }
+    }
+
+    // Handle forecast
+    if (forecast.status === 'fulfilled') {
+      forecastDays.value = forecast.value
+    } else {
+      console.error('Failed to load forecast:', forecast.reason)
+      showWarning('Failed to load 5-day forecast')
+    }
+
+    // Handle sun times
+    if (sun.status === 'fulfilled') {
+      sunTimes.value = sun.value
+    } else {
+      console.error('Failed to load sun times:', sun.reason)
+      // Sun times are optional, don't show error
+    }
+
+    // Show success message for manual refreshes
+    if (!showLoadingSpinner && current.status === 'fulfilled') {
+      const source = current.value.source
+      if (source === 'api') {
+        showSuccess('Weather data updated')
+      } else if (source === 'cache') {
+        showSuccess('Using cached weather data')
+      } else if (source === 'cache-expired') {
+        showWarning('Using offline weather data')
+      }
+    }
+
+  } catch (err) {
+    console.error('Weather data error:', err)
+    error.value = err.message || 'Failed to load weather data'
+    
+    if (showLoadingSpinner) {
+      showError(error.value)
+    }
+  } finally {
+    isLoading.value = false
+  }
+}
+
+const refreshWeather = async () => {
+  await loadWeatherData(false)
+}
+
+const startAutoRefresh = () => {
+  // Clear any existing interval
+  if (autoRefreshInterval) {
+    clearInterval(autoRefreshInterval)
+  }
+  
+  // Set up auto-refresh every 15 minutes
+  autoRefreshInterval = setInterval(() => {
+    console.log('Auto-refreshing weather data...')
+    loadWeatherData(false)
+  }, AUTO_REFRESH_INTERVAL)
+}
+
+const stopAutoRefresh = () => {
+  if (autoRefreshInterval) {
+    clearInterval(autoRefreshInterval)
+    autoRefreshInterval = null
+  }
+}
+
+onMounted(async () => {
   console.log('Dust forecast view mounted')
-  // Could fetch real weather data from an API
+  await loadWeatherData()
+  startAutoRefresh()
+})
+
+onUnmounted(() => {
+  stopAutoRefresh()
 })
 </script>
 
@@ -176,9 +313,110 @@ onMounted(() => {
   margin: 0 auto;
 }
 
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  gap: 1rem;
+}
+
 h2 {
   color: #ccc;
+  margin: 0;
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.refresh-btn {
+  background: #2a2a2a;
+  color: #ccc;
+  border: 1px solid #444;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.refresh-btn:hover:not(:disabled) {
+  background: #8B0000;
+  color: #fff;
+}
+
+.refresh-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.error-message {
+  background: #2a1f1f;
+  border: 1px solid #ff4444;
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-align: center;
   margin-bottom: 1.5rem;
+}
+
+.error-message p {
+  color: #ff6666;
+  margin: 0 0 1rem 0;
+}
+
+.retry-btn {
+  background: #8B0000;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.loading-state {
+  text-align: center;
+  padding: 2rem;
+  color: #999;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #444;
+  border-top: 3px solid #8B0000;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+.loading-spinner.small {
+  width: 20px;
+  height: 20px;
+  border-width: 2px;
+}
+
+.data-source {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #333;
+  text-align: center;
+}
+
+.data-source small {
+  color: #999;
+  font-size: 0.8rem;
 }
 
 .forecast-container {
@@ -229,7 +467,7 @@ h2 {
 
 .metrics {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 1rem;
   margin-bottom: 1rem;
 }
@@ -249,6 +487,13 @@ h2 {
   color: #fff;
   font-size: 1.1rem;
   font-weight: bold;
+}
+
+.metric small {
+  display: block;
+  color: #999;
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
 }
 
 .recommendation {
@@ -304,6 +549,28 @@ h2 {
 
 .forecast-day small {
   color: #999;
+  display: block;
+  margin-top: 0.25rem;
+}
+
+.temp-range {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 0.5rem 0;
+}
+
+.temp-high {
+  color: #fff;
+  font-weight: bold;
+}
+
+.temp-low {
+  color: #999;
+}
+
+.humidity {
+  font-size: 0.8rem !important;
 }
 
 .dust-tips {
@@ -388,8 +655,18 @@ h2 {
 .scale-item.whiteout { border-left: 4px solid #F44336; }
 
 @media (max-width: 768px) {
+  .header-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+  
+  .header-actions {
+    justify-content: center;
+  }
+  
   .metrics {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
   }
   
   .tips-grid {
@@ -404,6 +681,16 @@ h2 {
     grid-column: 2;
     text-align: left;
     margin-top: 0.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .metrics {
+    grid-template-columns: 1fr;
+  }
+  
+  .forecast-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 </style>
