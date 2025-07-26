@@ -168,7 +168,7 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
-import { getCurrentWeather, getWeatherForecast, getSunTimes } from '../services/weatherService'
+import { getCurrentWeatherRobust, getWeatherForecastRobust, getSunTimesRobust } from '../services/weatherServiceCombined'
 import { useToast } from '../composables/useToast'
 
 const { showError, showSuccess, showWarning } = useToast()
@@ -219,16 +219,11 @@ const loadWeatherData = async (showLoadingSpinner = true) => {
   error.value = null
 
   try {
-    // Check if we have a weather API key
-    if (!import.meta.env.VITE_WEATHER_API_KEY) {
-      throw new Error('Weather API key not configured. Please add VITE_WEATHER_API_KEY to your .env file.')
-    }
-
     // Load current conditions and forecast in parallel
     const [current, forecast, sun] = await Promise.allSettled([
-      getCurrentWeather(),
-      getWeatherForecast(),
-      getSunTimes()
+      getCurrentWeatherRobust(),
+      getWeatherForecastRobust(),
+      getSunTimesRobust()
     ])
 
     // Handle current weather

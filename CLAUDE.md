@@ -270,6 +270,14 @@ Database: bm2025-db
 - `emergency_contacts` - Emergency info
 - `sync_[type]_[year]` - Sync metadata
 
+## Development Server
+
+**IMPORTANT**: The development server is always running on port 8000.
+- **URL**: http://localhost:8000
+- **Status**: Always available during development
+- **No need to start**: The server is persistent and ready to use
+- If you need to restart: `npm run dev` (will use port 8000 or find next available)
+
 ## Common Development Tasks
 
 ### Add New View/Route
