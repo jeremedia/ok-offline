@@ -273,7 +273,7 @@ export function getSpecialLocationCoords(name) {
     'THE MAN': BRC_CONFIG.center,
     'GOLDEN SPIKE': BRC_CONFIG.center,
     'TEMPLE': brcAddressToLatLon('12:00 & K'), // Temple location varies by year
-    'AIRPORT': [40.804, -119.217], // Approximate airport location
+    'AIRPORT': [40.764261391285487, -119.205226911], // Airport from GIS data
     'DPOW': brcAddressToLatLon('5:30 & H'), // DPW location
     'MEDICAL': brcAddressToLatLon('5:30 & ESPLANADE'), // Medical station
     'RANGER HQ': brcAddressToLatLon('5:45 & ESPLANADE'), // Ranger HQ

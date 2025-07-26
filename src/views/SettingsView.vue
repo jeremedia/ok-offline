@@ -793,19 +793,33 @@ const releaseNotes = [
       'Dust level scale and safety tips',
       'Sun times (sunrise/sunset) for Black Rock City',
       'Weather data caching for offline use',
-      'Apple WeatherKit data source attribution'
+      'Apple WeatherKit data source attribution',
+      'Professional GIS data integration with complete street network',
+      'leaflet-rotate plugin for professional map rotation',
+      'City alignment feature (gate at bottom, temple at top)',
+      'Comprehensive map layers: streets, trash fence, city blocks, plazas, CPNs',
+      'Map Settings view with detailed Black Rock City geometric information',
+      'Interactive GIS layer controls and map legend',
+      'Base map toggle for satellite imagery',
+      'Enhanced map view with rotation slider and alignment controls'
     ],
     changed: [
       'Emergency button moved from navigation header to Settings tab',
       'Dev server port documentation updated to 8000',
       'Enhanced dust forecast view with real weather data',
-      'Improved weather service architecture with multiple fallbacks'
+      'Improved weather service architecture with multiple fallbacks',
+      'Map view enhanced with professional rotation and GIS layers',
+      'Settings reorganized with separate Emergency and Maps tabs',
+      'BRC geocoding improved with GIS data intersection detection'
     ],
     fixed: [
       'Console errors from weather API calls',
       'CORS issues with Apple WeatherKit by creating Rails backend',
       'Doubled padding in weather UI components',
-      'Template null reference errors in weather display'
+      'Template null reference errors in weather display',
+      'Airport location corrected using accurate GIS coordinates',
+      'Map rotation now maintains proper drag/zoom interactions',
+      'GIS layer loading and error handling improved'
     ]
   },
   {
