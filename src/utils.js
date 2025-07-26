@@ -122,3 +122,88 @@ export function getSector(clockPos) {
   if (num <= 10) return '8:30-10:00';
   return 'Unknown';
 }
+
+// Format event date/time
+export function formatEventTime(event) {
+  if (!event.occurrence_set || event.occurrence_set.length === 0) {
+    return event.all_day ? 'All Day' : ''
+  }
+  
+  // Get the first occurrence for display
+  const occurrence = event.occurrence_set[0]
+  if (!occurrence.start_time) return ''
+  
+  const start = new Date(occurrence.start_time)
+  const end = occurrence.end_time ? new Date(occurrence.end_time) : null
+  
+  // Format day of week
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+  const day = days[start.getDay()]
+  
+  // Format time
+  const startTime = formatTime(start)
+  const endTime = end ? formatTime(end) : ''
+  
+  if (event.all_day) {
+    return `${day} - All Day`
+  }
+  
+  if (endTime && !isSameDay(start, end)) {
+    // Multi-day event
+    const endDay = days[end.getDay()]
+    return `${day} ${startTime} - ${endDay} ${endTime}`
+  }
+  
+  return endTime ? `${day} ${startTime}-${endTime}` : `${day} ${startTime}`
+}
+
+// Format time as 12-hour with am/pm
+function formatTime(date) {
+  let hours = date.getHours()
+  const minutes = date.getMinutes()
+  const ampm = hours >= 12 ? 'pm' : 'am'
+  hours = hours % 12
+  hours = hours ? hours : 12 // 0 should be 12
+  const minutesStr = minutes < 10 ? '0' + minutes : minutes
+  return minutes === 0 ? `${hours}${ampm}` : `${hours}:${minutesStr}${ampm}`
+}
+
+// Check if two dates are on the same day
+function isSameDay(date1, date2) {
+  return date1.getFullYear() === date2.getFullYear() &&
+         date1.getMonth() === date2.getMonth() &&
+         date1.getDate() === date2.getDate()
+}
+
+// Get next occurrence of an event
+export function getNextOccurrence(event) {
+  if (!event.occurrence_set || event.occurrence_set.length === 0) return null
+  
+  const now = new Date()
+  for (const occurrence of event.occurrence_set) {
+    const startTime = new Date(occurrence.start_time)
+    if (startTime > now) {
+      return occurrence
+    }
+  }
+  
+  // If no future occurrences, return the first one
+  return event.occurrence_set[0]
+}
+
+// Check if event is happening now
+export function isHappeningNow(event) {
+  if (!event.occurrence_set) return false
+  
+  const now = new Date()
+  for (const occurrence of event.occurrence_set) {
+    const start = new Date(occurrence.start_time)
+    const end = occurrence.end_time ? new Date(occurrence.end_time) : new Date(start.getTime() + 60 * 60 * 1000) // Default 1 hour
+    
+    if (now >= start && now <= end) {
+      return true
+    }
+  }
+  
+  return false
+}

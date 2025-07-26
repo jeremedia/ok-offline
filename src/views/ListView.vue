@@ -20,6 +20,7 @@
         <option value="sector">Sector (Clock Position)</option>
         <option value="avenue">Avenue (A-L)</option>
         <option value="distance" v-if="userLocation">Distance</option>
+        <option value="date" v-if="props.type === 'event'">Date/Time</option>
       </select>
       <span v-if="!loading && !error && items.length > 0" class="items-count">
         {{ sortedItems.length }} of {{ items.length }}
@@ -53,13 +54,32 @@
         </label>
       </div>
     </div>
+    <div id="event-type-filters" v-if="type === 'event'">
+      <div class="filter-label">Filter by type:</div>
+      <div class="filter-controls">
+        <button @click="selectAllEventTypes" class="filter-btn">All</button>
+        <button @click="clearAllEventTypes" class="filter-btn">None</button>
+      </div>
+      <div class="event-type-checkboxes">
+        <label v-for="eventType in availableEventTypes" :key="eventType.value" class="event-type-checkbox">
+          <input 
+            type="checkbox" 
+            :value="eventType.value"
+            :checked="selectedEventTypes.includes(eventType.value)"
+            @change="toggleEventType(eventType.value)"
+          />
+          <span class="type-label">{{ eventType.label }}</span>
+          <span class="type-count">({{ eventType.count }})</span>
+        </label>
+      </div>
+    </div>
     <ul id="items-list">
       <li v-if="sortedItems.length === 0" class="empty-state">
         <p>No {{ type }}s found</p>
         <p class="empty-hint" v-if="searchQuery">Try adjusting your search</p>
         <p class="empty-hint" v-else-if="showFavoritesOnly">No favorites yet</p>
       </li>
-      <template v-else-if="sortBy === 'name' || sortBy === 'sector' || sortBy === 'avenue'">
+      <template v-else-if="sortBy === 'name' || sortBy === 'sector' || sortBy === 'avenue' || sortBy === 'date'">
         <template v-for="(group, header) in groupedItems" :key="header">
           <li class="section-header" @click="toggleGroup(header)">
             <span class="collapse-icon">{{ collapsedGroups[header] ? '▶' : '▼' }}</span>
@@ -79,17 +99,33 @@
                   <span v-if="hasBeenVisited(item)" class="visited-badge">✓</span>
                 </strong>
                 <small>
+                  <span v-if="props.type === 'event' && formatEventTime(item)" class="event-time">
+                    {{ formatEventTime(item) }}
+                    <span v-if="isHappeningNow(item)" class="happening-now">🔴 NOW</span>
+                    •
+                  </span>
                   {{ getItemLocation(item) }}
                   <span v-if="getItemDistance(item)" class="distance">• {{ getItemDistance(item) }}</span>
                 </small>
               </span>
-              <button 
-                @click.stop="handleToggleFavorite(item)"
-                class="favorite-btn"
-                :class="{ active: favoriteItems.has(item.uid) }"
-              >
-                {{ favoriteItems.has(item.uid) ? '★' : '☆' }}
-              </button>
+              <span class="item-actions">
+                <button
+                  v-if="props.type === 'event' && item.occurrence_set && item.occurrence_set.length > 0"
+                  @click.stop="handleToggleSchedule(item, item.occurrence_set[0])"
+                  class="schedule-btn"
+                  :class="{ active: isInSchedule(item, item.occurrence_set[0]) }"
+                  :title="isInSchedule(item, item.occurrence_set[0]) ? 'Remove from schedule' : 'Add to schedule'"
+                >
+                  {{ isInSchedule(item, item.occurrence_set[0]) ? '📅' : '📆' }}
+                </button>
+                <button 
+                  @click.stop="handleToggleFavorite(item)"
+                  class="favorite-btn"
+                  :class="{ active: favoriteItems.has(item.uid) }"
+                >
+                  {{ favoriteItems.has(item.uid) ? '★' : '☆' }}
+                </button>
+              </span>
             </li>
           </template>
         </template>
@@ -107,17 +143,33 @@
             <span v-if="hasBeenVisited(item)" class="visited-badge">✓</span>
           </strong>
           <small>
+            <span v-if="props.type === 'event' && formatEventTime(item)" class="event-time">
+              {{ formatEventTime(item) }}
+              <span v-if="isHappeningNow(item)" class="happening-now">🔴 NOW</span>
+              •
+            </span>
             {{ getItemLocation(item) }}
             <span v-if="getItemDistance(item)" class="distance">• {{ getItemDistance(item) }}</span>
           </small>
         </span>
-        <button 
-          @click.stop="handleToggleFavorite(item)"
-          class="favorite-btn"
-          :class="{ active: favoriteItems.has(item.uid) }"
-        >
-          {{ favoriteItems.has(item.uid) ? '★' : '☆' }}
-        </button>
+        <span class="item-actions">
+          <button
+            v-if="props.type === 'event' && item.occurrence_set && item.occurrence_set.length > 0"
+            @click.stop="handleToggleSchedule(item, item.occurrence_set[0])"
+            class="schedule-btn"
+            :class="{ active: isInSchedule(item, item.occurrence_set[0]) }"
+            :title="isInSchedule(item, item.occurrence_set[0]) ? 'Remove from schedule' : 'Add to schedule'"
+          >
+            {{ isInSchedule(item, item.occurrence_set[0]) ? '📅' : '📆' }}
+          </button>
+          <button 
+            @click.stop="handleToggleFavorite(item)"
+            class="favorite-btn"
+            :class="{ active: favoriteItems.has(item.uid) }"
+          >
+            {{ favoriteItems.has(item.uid) ? '★' : '☆' }}
+          </button>
+        </span>
       </li>
     </ul>
     </template>
@@ -127,16 +179,19 @@
 <script setup>
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getItemName, getItemLocation, extractClockPosition, extractAvenue, clockPositionToNumber, getSector } from '../utils'
+import { getItemName, getItemLocation, extractClockPosition, extractAvenue, clockPositionToNumber, getSector, formatEventTime, isHappeningNow, getNextOccurrence } from '../utils'
 import { getFromCache } from '../services/storage'
 import { isFavorite, toggleFavorite, getFavorites } from '../services/favorites'
 import { useGeolocation } from '../composables/useGeolocation'
 import { getVisitInfo } from '../services/visits'
+import { isEventScheduled, addEventToSchedule, removeEventFromSchedule } from '../services/schedule'
+import { useToast } from '../composables/useToast'
 import LoadingSpinner from '../components/LoadingSpinner.vue'
 
 const props = defineProps(['type', 'year'])
 const router = useRouter()
 const route = useRoute()
+const { showSuccess, showError } = useToast()
 
 const items = ref([])
 const loading = ref(true)
@@ -147,6 +202,22 @@ const selectedId = computed(() => route.params.id)
 
 const availableSectors = ['2:00-3:00', '3:00-4:00', '4:30-5:30', '5:30-6:30', '6:30-7:30', '7:30-8:30', '8:30-10:00']
 const selectedSectors = ref([...availableSectors]) // All selected by default
+
+// Event type filters
+const availableEventTypes = ref([
+  { value: 'work', label: 'Class/Workshop', count: 0 },
+  { value: 'prty', label: 'Music/Party', count: 0 },
+  { value: 'food', label: 'Food', count: 0 },
+  { value: 'care', label: 'Self Care', count: 0 },
+  { value: 'game', label: 'Games', count: 0 },
+  { value: 'yoga', label: 'Yoga/Movement', count: 0 },
+  { value: 'arts', label: 'Arts & Crafts', count: 0 },
+  { value: 'cere', label: 'Ritual/Ceremony', count: 0 },
+  { value: 'live', label: 'Live Music', count: 0 },
+  { value: 'perf', label: 'Performance', count: 0 }
+])
+const selectedEventTypes = ref([]) // Will be populated with all types after data loads
+
 const collapsedGroups = ref({})
 const showFavoritesOnly = ref(false)
 const favoriteItems = ref(new Set())
@@ -162,6 +233,21 @@ if (savedSectors) {
   } catch (e) {
     console.error('Failed to load saved sectors:', e)
   }
+}
+
+// Load saved event type filters from localStorage  
+const savedEventTypes = localStorage.getItem('selectedEventTypes')
+if (savedEventTypes) {
+  try {
+    selectedEventTypes.value = JSON.parse(savedEventTypes)
+  } catch (e) {
+    console.error('Failed to load saved event types:', e)
+    // Default to all types
+    selectedEventTypes.value = availableEventTypes.value.map(t => t.value)
+  }
+} else {
+  // Default to all types
+  selectedEventTypes.value = availableEventTypes.value.map(t => t.value)
 }
 
 // Load saved collapsed groups from localStorage
@@ -182,6 +268,26 @@ const toggleSector = (sector) => {
     selectedSectors.value.push(sector)
   }
   localStorage.setItem(`selectedSectors_${props.type}`, JSON.stringify(selectedSectors.value))
+}
+
+const toggleEventType = (type) => {
+  const index = selectedEventTypes.value.indexOf(type)
+  if (index > -1) {
+    selectedEventTypes.value.splice(index, 1)
+  } else {
+    selectedEventTypes.value.push(type)
+  }
+  localStorage.setItem('selectedEventTypes', JSON.stringify(selectedEventTypes.value))
+}
+
+const selectAllEventTypes = () => {
+  selectedEventTypes.value = availableEventTypes.value.map(t => t.value)
+  localStorage.setItem('selectedEventTypes', JSON.stringify(selectedEventTypes.value))
+}
+
+const clearAllEventTypes = () => {
+  selectedEventTypes.value = []
+  localStorage.setItem('selectedEventTypes', JSON.stringify(selectedEventTypes.value))
 }
 
 const toggleGroup = (groupName) => {
@@ -224,6 +330,14 @@ const sortedItems = computed(() => {
     })
   }
   
+  // Apply event type filter
+  if (props.type === 'event' && selectedEventTypes.value.length < availableEventTypes.value.length) {
+    filtered = filtered.filter(item => {
+      const eventType = item.event_type?.abbr
+      return eventType && selectedEventTypes.value.includes(eventType)
+    })
+  }
+  
   // Apply favorites filter
   if (showFavoritesOnly.value) {
     filtered = filtered.filter(item => favoriteItems.value.has(item.uid))
@@ -258,6 +372,20 @@ const sortedItems = computed(() => {
     })
   } else if (sortBy.value === 'distance' && userLocation.value) {
     filtered = sortByDistance(filtered, getItemLocation)
+  } else if (sortBy.value === 'date' && props.type === 'event') {
+    // Sort by date/time
+    filtered.sort((a, b) => {
+      const occA = getNextOccurrence(a)
+      const occB = getNextOccurrence(b)
+      
+      if (!occA && !occB) return 0
+      if (!occA) return 1
+      if (!occB) return -1
+      
+      const dateA = new Date(occA.start_time)
+      const dateB = new Date(occB.start_time)
+      return dateA - dateB
+    })
   }
   
   return filtered
@@ -298,6 +426,30 @@ const groupedItems = computed(() => {
       }
       groups[avenue].push(item)
     })
+  } else if (sortBy.value === 'date' && props.type === 'event') {
+    // Group by day
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+    sortedItems.value.forEach(item => {
+      const occurrence = getNextOccurrence(item)
+      if (!occurrence || !occurrence.start_time) {
+        if (!groups['Unknown Date']) {
+          groups['Unknown Date'] = []
+        }
+        groups['Unknown Date'].push(item)
+        return
+      }
+      
+      const date = new Date(occurrence.start_time)
+      const dayName = days[date.getDay()]
+      const month = date.toLocaleDateString('en-US', { month: 'short' })
+      const dayNum = date.getDate()
+      const header = `${dayName}, ${month} ${dayNum}`
+      
+      if (!groups[header]) {
+        groups[header] = []
+      }
+      groups[header].push(item)
+    })
   }
   
   return groups
@@ -318,6 +470,11 @@ const loadData = async () => {
     if (cachedItems && cachedItems.length > 0) {
       console.log(`Using cached data for ${props.type}s ${props.year}`)
       items.value = cachedItems
+      
+      // Update event type counts if we're loading events
+      if (props.type === 'event') {
+        updateEventTypeCounts()
+      }
     } else {
       // No cached data - redirect to settings page
       console.log(`No cached data for ${props.type}, redirecting to settings`)
@@ -341,6 +498,24 @@ const selectItem = (item) => {
 const favoriteCount = computed(() => {
   return items.value.filter(item => favoriteItems.value.has(item.uid)).length
 })
+
+const updateEventTypeCounts = () => {
+  // Reset counts
+  availableEventTypes.value.forEach(type => {
+    type.count = 0
+  })
+  
+  // Count events by type
+  items.value.forEach(event => {
+    const eventType = event.event_type?.abbr
+    if (eventType) {
+      const typeObj = availableEventTypes.value.find(t => t.value === eventType)
+      if (typeObj) {
+        typeObj.count++
+      }
+    }
+  })
+}
 
 const handleToggleFavorite = (item) => {
   const wasAdded = toggleFavorite(props.type, item.uid)
@@ -385,6 +560,36 @@ const enableLocation = async () => {
 
 const hasBeenVisited = (item) => {
   return !!getVisitInfo(props.type, item.uid, props.year)
+}
+
+const isInSchedule = (event, occurrence) => {
+  if (!occurrence || !occurrence.start_time) return false
+  return isEventScheduled(event.uid, occurrence.start_time)
+}
+
+const handleToggleSchedule = (event, occurrence) => {
+  if (!occurrence || !occurrence.start_time) return
+  
+  try {
+    if (isEventScheduled(event.uid, occurrence.start_time)) {
+      const removed = removeEventFromSchedule(event.uid, occurrence.start_time)
+      if (removed) {
+        showSuccess(`Removed "${event.title}" from schedule`)
+      } else {
+        showError('Failed to remove event from schedule')
+      }
+    } else {
+      const added = addEventToSchedule(event, occurrence)
+      if (added) {
+        showSuccess(`Added "${event.title}" to schedule`)
+      } else {
+        showError('Event is already in your schedule')
+      }
+    }
+  } catch (error) {
+    console.error('Error toggling schedule:', error)
+    showError('Failed to update schedule')
+  }
 }
 
 onMounted(() => {
@@ -443,6 +648,63 @@ watch(() => [props.type, props.year], () => {
 
 .sector-checkbox input {
   margin-right: 0.25rem;
+}
+
+#event-type-filters {
+  padding: 0.75rem 1rem;
+  background-color: #2a2a2a;
+  border-bottom: 1px solid #444;
+  color: #ccc;
+}
+
+.filter-controls {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.filter-btn {
+  background: #444;
+  color: #ccc;
+  border: 1px solid #555;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+
+.filter-btn:hover {
+  background: #555;
+  color: #fff;
+}
+
+.event-type-checkboxes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.5rem;
+}
+
+.event-type-checkbox {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 0.25rem 0;
+}
+
+.event-type-checkbox input {
+  margin-right: 0.5rem;
+}
+
+.type-label {
+  flex: 1;
+}
+
+.type-count {
+  color: #888;
+  font-size: 0.85rem;
+  margin-left: 0.5rem;
 }
 
 #list-controls {
@@ -535,6 +797,30 @@ watch(() => [props.type, props.year], () => {
 
 #items-list li .item-content {
   flex: 1;
+}
+
+.item-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.schedule-btn {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.2rem 0.5rem;
+  color: #666;
+  transition: all 0.2s;
+}
+
+.schedule-btn:hover {
+  transform: scale(1.1);
+}
+
+.schedule-btn.active {
+  color: #4CAF50;
 }
 
 .favorite-btn {
@@ -642,5 +928,23 @@ watch(() => [props.type, props.year], () => {
 .empty-hint {
   font-size: 0.9rem;
   color: #555;
+}
+
+.event-time {
+  color: #90CAF9;
+  font-weight: 500;
+}
+
+.happening-now {
+  color: #ff4444;
+  font-weight: bold;
+  font-size: 0.8rem;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.6; }
+  100% { opacity: 1; }
 }
 </style>

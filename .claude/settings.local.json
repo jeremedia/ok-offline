@@ -17,7 +17,8 @@
       "Bash(env)",
       "Bash(chmod:*)",
       "Bash(ls:*)",
-      "Bash(gh issue create:*)"
+      "Bash(gh issue create:*)",
+      "Bash(git worktree:*)"
     ],
     "deny": []
   }
