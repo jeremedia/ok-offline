@@ -714,6 +714,37 @@ const showReleaseNotes = ref(false)
 // Release notes data
 const releaseNotes = [
   {
+    version: '1.3.0',
+    date: '2025-01-26',
+    added: [
+      'Real-time weather and dust forecast for Black Rock City',
+      'Apple WeatherKit integration with JWT authentication',
+      'Moon phase data for navigation at Burning Man',
+      'OpenWeatherMap primary weather service with fallback strategy',
+      'Emergency features moved to Settings tab (cleaner navigation)',
+      'Rails API service (ok-offline-api) for server-side weather integration',
+      'Auto-refresh weather data every 15 minutes',
+      'Detailed weather metrics (temperature, wind, humidity, pressure, visibility)',
+      '5-day dust forecast with protection recommendations',
+      'Dust level scale and safety tips',
+      'Sun times (sunrise/sunset) for Black Rock City',
+      'Weather data caching for offline use',
+      'Apple WeatherKit data source attribution'
+    ],
+    changed: [
+      'Emergency button moved from navigation header to Settings tab',
+      'Dev server port documentation updated to 8000',
+      'Enhanced dust forecast view with real weather data',
+      'Improved weather service architecture with multiple fallbacks'
+    ],
+    fixed: [
+      'Console errors from weather API calls',
+      'CORS issues with Apple WeatherKit by creating Rails backend',
+      'Doubled padding in weather UI components',
+      'Template null reference errors in weather display'
+    ]
+  },
+  {
     version: '1.2.5',
     date: '2025-01-26',
     added: [

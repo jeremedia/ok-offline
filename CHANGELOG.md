@@ -8,26 +8,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Auto-sync functionality that automatically loads data when none is detected
-- Sync dialog component showing progress during data loading
-- useAutoSync composable for managing automatic data synchronization
-- Camp name links in event details (click to navigate to camp page)
-- Event features including:
-  - Event times displayed in list view
-  - Date/time sorting with day grouping
-  - Event type filters (workshops, parties, etc.)
-  - Quick schedule add/remove buttons in lists
-  - "Happening now" indicator for current events
-  - Toast notifications for schedule actions
+- Real-time weather and dust forecast for Black Rock City
+- Apple WeatherKit integration with JWT authentication
+- Moon phase data for navigation at Burning Man
+- OpenWeatherMap primary weather service with fallback strategy
+- Emergency features moved to Settings tab (cleaner navigation)
+- Rails API service (ok-offline-api) for server-side weather integration
+- CORS-compliant weather data fetching
+- Auto-refresh weather data every 15 minutes
+- Detailed weather metrics (temperature, wind, humidity, pressure, visibility)
+- 5-day dust forecast with protection recommendations
+- Dust level scale and safety tips
+- Sun times (sunrise/sunset) for Black Rock City
+- Weather data caching for offline use
+- Apple WeatherKit data source attribution
+- Robust error handling for weather services
 
 ### Changed
-- Improved user experience by eliminating redirects to settings
-- Better onboarding for new users with automatic data loading
-- Enhanced event list view with comprehensive filtering and sorting
+- Emergency button moved from navigation header to Settings tab
+- Dev server port documentation updated to 8000
+- Enhanced dust forecast view with real weather data
+- Improved weather service architecture with multiple fallbacks
 
 ### Fixed
-- Resolved branch management issues during development
-- Fixed lost event feature implementations
+- Console errors from weather API calls
+- CORS issues with Apple WeatherKit by creating Rails backend
+- Doubled padding in weather UI components
+- Template null reference errors in weather display
 
 ## [1.2.5] - 2025-01-26
 
