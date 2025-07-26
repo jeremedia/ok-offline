@@ -24,7 +24,8 @@
       
       <!-- Current Conditions -->
       <div v-else-if="currentConditions" class="current-conditions">
-        <h3>Current Conditions</h3>
+        <h3>Current Conditions for BRC</h3>
+        <div class="current-date">{{ formatCurrentDate() }}</div>
         <div class="condition-card">
           <div class="dust-level" :class="currentConditions.dustLevel">
             <span class="dust-icon">{{ getDustIcon(currentConditions.dustLevel) }}</span>
@@ -231,6 +232,21 @@ const formatUpdateTime = (timestamp) => {
   if (diffHours < 24) return `${diffHours}h ago`
   
   return date.toLocaleDateString()
+}
+
+const formatCurrentDate = () => {
+  const now = new Date()
+  const options = {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    timeZoneName: 'short',
+    timeZone: 'America/Los_Angeles' // PST/PDT for Black Rock City
+  }
+  return now.toLocaleDateString('en-US', options).replace(' at ', ' @ ')
 }
 
 const loadWeatherData = async (showLoadingSpinner = true) => {
@@ -530,12 +546,18 @@ h2 {
   background: #1a1a1a;
   border: 1px solid #444;
   border-radius: 8px;
-  padding: 1.5rem;
+  padding: 0 1.5rem 1.5rem 1.5rem;
 }
 
 .current-conditions h3 {
   color: #fff;
-  margin-bottom: 1rem;
+  margin: 1.5rem 0 0.5rem 0;
+}
+
+.current-date {
+  color: #999;
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
 }
 
 .condition-card {
@@ -611,12 +633,12 @@ h2 {
   background: #1a1a1a;
   border: 1px solid #444;
   border-radius: 8px;
-  padding: 1.5rem;
+  padding: 0 1.5rem 1.5rem 1.5rem;
 }
 
 .forecast-days h3 {
   color: #fff;
-  margin-bottom: 1rem;
+  margin: 1.5rem 0 1rem 0;
 }
 
 .forecast-grid {
@@ -679,12 +701,12 @@ h2 {
   background: #1a1a1a;
   border: 1px solid #444;
   border-radius: 8px;
-  padding: 1.5rem;
+  padding: 0 1.5rem 1.5rem 1.5rem;
 }
 
 .dust-tips h3 {
   color: #fff;
-  margin-bottom: 1rem;
+  margin: 1.5rem 0 1rem 0;
 }
 
 .tips-grid {
@@ -715,12 +737,12 @@ h2 {
   background: #1a1a1a;
   border: 1px solid #444;
   border-radius: 8px;
-  padding: 1.5rem;
+  padding: 0 1.5rem 1.5rem 1.5rem;
 }
 
 .dust-scale h3 {
   color: #fff;
-  margin-bottom: 1rem;
+  margin: 1.5rem 0 1rem 0;
 }
 
 .scale-items {
