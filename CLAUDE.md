@@ -338,6 +338,65 @@ Database: bm2025-db
 
 The Burning Man API returns different data based on the year and proximity to the event. Camp placement data (location assignments) is typically not available until closer to the event date.
 
+## Deployment & Version Management
+
+### Automatic Deployment
+The app automatically deploys to production at https://offline.oknotok.com on every push to the main branch:
+
+1. **GitHub Actions Workflow** (`.github/workflows/deploy.yml`)
+   - Triggers on push to main
+   - Builds the Vue app
+   - Deploys via SSH to Caddy server
+   - Zero-downtime deployment
+
+2. **Production URL**: https://offline.oknotok.com
+   - Hosted on Caddy server
+   - SSL automatically provisioned
+   - PWA headers configured
+
+### Semantic Versioning
+The app uses automatic semantic versioning based on commit messages:
+
+1. **Version Bumping** (`.github/workflows/version-bump.yml`)
+   - Runs on every push to main
+   - Reads commit messages to determine version bump
+   - Updates package.json version
+   - Creates git tag
+
+2. **Commit Message Conventions**:
+   ```bash
+   # Patch bump (1.0.0 → 1.0.1)
+   fix: Correct event location display
+   
+   # Minor bump (1.0.1 → 1.1.0)
+   feat: Add voice search functionality
+   
+   # Major bump (1.1.0 → 2.0.0)
+   feat: [major] Complete redesign of UI
+   ```
+
+3. **Version Display**:
+   - Current version shown in Settings > About tab
+   - Build timestamp included
+   - Version injected at build time via Vite
+
+### Release Notes
+Maintain release history in `CHANGELOG.md`:
+
+1. **Changelog Format**: Follow [Keep a Changelog](https://keepachangelog.com/) format
+2. **View in App**: Settings > About > "View Release Notes" button
+3. **Update Process**: 
+   - Add changes to CHANGELOG.md
+   - Update release notes in SettingsView.vue
+   - Consider using `scripts/parse-changelog.js` for automation
+
+### Deployment Checklist
+Before pushing to main:
+- [ ] Test locally with `npm run build && npm run preview`
+- [ ] Update CHANGELOG.md if adding features
+- [ ] Use conventional commit messages for proper versioning
+- [ ] Check GitHub Actions after push for deployment status
+
 ## Contributing
 
 When making changes:
@@ -346,5 +405,6 @@ When making changes:
 3. Test with/without connectivity
 4. Update this documentation
 5. Add comments for complex logic
+6. Use conventional commits for automatic versioning
 
 Remember: This app is designed to work in the harsh conditions of Black Rock City where connectivity is limited or non-existent. Every feature should work offline once data is synced.
