@@ -1,86 +1,330 @@
 <template>
   <section id="settings-section" class="view">
-    <h2>Data Sync Settings</h2>
-    
-    <div class="sync-all-container">
+    <div class="settings-tabs">
       <button 
-        @click="syncAllYears" 
-        :disabled="syncingAll"
-        class="sync-all-button"
+        v-for="tab in tabs" 
+        :key="tab"
+        @click="activeTab = tab"
+        :class="['tab-button', { active: activeTab === tab }]"
       >
-        {{ syncingAll ? 'Syncing All Years...' : 'Sync All Years' }}
+        {{ tab }}
       </button>
-      <div v-if="syncingAll" class="sync-all-progress">
-        {{ syncAllProgress }}
-      </div>
     </div>
-    
-    <div class="settings-content">
-      <div v-for="year in years" :key="year" class="year-section">
-        <h3>{{ year }} Data</h3>
-        
-        <div class="sync-status">
-          <div v-for="type in types" :key="type" class="status-row">
-            <span class="type-label">{{ capitalize(type) }}s:</span>
-            <span class="count">{{ syncStatus[year]?.[type]?.count || 0 }} items</span>
-            <span class="last-sync" v-if="syncStatus[year]?.[type]?.lastSync">
-              Last sync: {{ formatDate(syncStatus[year][type].lastSync) }}
-            </span>
-            <span class="never-synced" v-else>Never synced</span>
-          </div>
-        </div>
-        
-        <div class="sync-actions">
-          <button 
-            @click="syncYear(year)" 
-            :disabled="syncing[year]"
-            class="sync-button"
-          >
-            {{ syncing[year] ? 'Syncing...' : 'Sync All Data' }}
-          </button>
-          
-          <button 
-            @click="clearYear(year)"
-            :disabled="syncing[year]"
-            class="clear-button"
-            v-if="syncStatus[year] && hasData(year)"
-          >
-            Clear Data
-          </button>
-        </div>
-        
-        <div v-if="syncing[year]" class="progress">
-          <div class="progress-bar">
-            <div 
-              class="progress-fill" 
-              :style="{ width: `${progress[year] || 0}%` }"
-            ></div>
-          </div>
-          <span class="progress-text">{{ progressText[year] || 'Starting...' }}</span>
+
+    <!-- Data Sync Tab -->
+    <div v-if="activeTab === 'Data Sync'" class="tab-content">
+      <h2>Data Sync Settings</h2>
+      
+      <div class="sync-all-container">
+        <button 
+          @click="syncAllYears" 
+          :disabled="syncingAll"
+          class="sync-all-button"
+        >
+          {{ syncingAll ? 'Syncing All Years...' : 'Sync All Years' }}
+        </button>
+        <div v-if="syncingAll" class="sync-all-progress">
+          {{ syncAllProgress }}
         </div>
       </div>
       
-      <div class="storage-info">
-        <h3>Storage Information</h3>
-        <p>IndexedDB is used to store data for offline access.</p>
-        <p class="note">Note: Historical data (2023, 2024) doesn't change and only needs to be synced once.</p>
-        <p class="note">2025 data can be refreshed before heading to the playa.</p>
+      <div class="settings-content">
+        <div v-for="year in years" :key="year" class="year-section">
+          <h3>{{ year }} Data</h3>
+          
+          <div class="sync-status">
+            <div v-for="type in types" :key="type" class="status-row">
+              <span class="type-label">{{ capitalize(type) }}s:</span>
+              <span class="count">{{ syncStatus[year]?.[type]?.count || 0 }} items</span>
+              <span class="last-sync" v-if="syncStatus[year]?.[type]?.lastSync">
+                Last sync: {{ formatDate(syncStatus[year][type].lastSync) }}
+              </span>
+              <span class="never-synced" v-else>Never synced</span>
+            </div>
+          </div>
+          
+          <div class="sync-actions">
+            <button 
+              @click="syncYear(year)" 
+              :disabled="syncing[year]"
+              class="sync-button"
+            >
+              {{ syncing[year] ? 'Syncing...' : 'Sync All Data' }}
+            </button>
+            
+            <button 
+              @click="clearYear(year)"
+              :disabled="syncing[year]"
+              class="clear-button"
+              v-if="syncStatus[year] && hasData(year)"
+            >
+              Clear Data
+            </button>
+          </div>
+          
+          <div v-if="progress[year]" class="progress-bar">
+            <div class="progress-fill" :style="{ width: progress[year] + '%' }"></div>
+            <span class="progress-text">{{ progressText[year] }}</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="global-actions">
+        <button @click="clearAllData" class="danger-button">
+          Clear All Cached Data
+        </button>
       </div>
     </div>
-    
-    <button id="back-to-app" @click="goBack">← Back to App</button>
+
+    <!-- About Tab -->
+    <div v-if="activeTab === 'About'" class="tab-content about-content">
+      <h2>About OK-OFFLINE</h2>
+      
+      <div class="about-section">
+        <p>
+          OK-OFFLINE is an offline-first Progressive Web App for Burning Man that lets you browse camps, 
+          art installations, and events without connectivity.
+        </p>
+        
+        <p>
+          Created by <strong>Jeremy Roush</strong> and brought to you by <strong>Mr. OK of OKNOTOK</strong>.
+        </p>
+      </div>
+
+      <div class="about-section">
+        <h3>How It Works</h3>
+        <ol>
+          <li>Sync data while you have internet (WiFi recommended)</li>
+          <li>All data is stored locally on your device</li>
+          <li>Browse camps, art, and events completely offline</li>
+          <li>Your favorites, schedule, and notes stay private</li>
+        </ol>
+      </div>
+
+      <div class="about-section">
+        <h3>Privacy First</h3>
+        <p>
+          OK-OFFLINE respects your privacy:
+        </p>
+        <ul>
+          <li>No account or login required</li>
+          <li>No personal data uploaded</li>
+          <li>No tracking or analytics</li>
+          <li>Emergency info stays local only</li>
+        </ul>
+      </div>
+
+      <div class="about-section">
+        <h3>Open Source</h3>
+        <p>
+          OK-OFFLINE is open source and available on GitHub:<br>
+          <a href="https://github.com/jeremedia/ok-offline" target="_blank" rel="noopener">
+            github.com/jeremedia/ok-offline
+          </a>
+        </p>
+      </div>
+
+      <div class="about-section">
+        <h3>Acknowledgments</h3>
+        <ul>
+          <li>Data provided by the <a href="https://api.burningman.org" target="_blank" rel="noopener">Burning Man Public API</a></li>
+          <li>Map data from Burning Man Innovate GIS</li>
+          <li>Built with Vue 3, Vite, and Leaflet</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Features Tab -->
+    <div v-if="activeTab === 'Features'" class="tab-content features-content">
+      <h2>Features</h2>
+      
+      <div class="feature-section">
+        <h3>🗺️ Interactive Map</h3>
+        <ul>
+          <li>View camps, art, and events on the playa map</li>
+          <li>Toggle layers to show/hide different types</li>
+          <li>Filter to show only your favorites</li>
+          <li>Click markers for quick details</li>
+        </ul>
+      </div>
+
+      <div class="feature-section">
+        <h3>📋 Smart Lists</h3>
+        <ul>
+          <li>Sort by name, location, sector, or distance</li>
+          <li>Filter by sectors (clock positions)</li>
+          <li>Live search as you type</li>
+          <li>Collapsible section headers</li>
+          <li>Track visited camps with badges</li>
+        </ul>
+      </div>
+
+      <div class="feature-section">
+        <h3>⭐ Personal Features</h3>
+        <ul>
+          <li><strong>Favorites</strong> - Star items to save them</li>
+          <li><strong>Schedule Builder</strong> - Plan your burn with conflict detection</li>
+          <li><strong>Visit Tracking</strong> - Mark camps as visited with notes</li>
+          <li><strong>Emergency Info</strong> - Store contacts and medical details</li>
+        </ul>
+      </div>
+
+      <div class="feature-section">
+        <h3>🔍 Search & Navigation</h3>
+        <ul>
+          <li>Global search across all camps, art, and events</li>
+          <li>Keyboard shortcuts (1-8 for quick nav)</li>
+          <li>Location-based sorting when GPS enabled</li>
+          <li>Direct links to share specific items</li>
+        </ul>
+      </div>
+
+      <div class="feature-section">
+        <h3>📱 Offline & PWA</h3>
+        <ul>
+          <li>Works completely offline once synced</li>
+          <li>Install as an app on your device</li>
+          <li>Fast loading and responsive design</li>
+          <li>Dark theme for night use</li>
+        </ul>
+      </div>
+
+      <div class="feature-section">
+        <h3>🌪️ Playa Tools</h3>
+        <ul>
+          <li><strong>Dust Forecast</strong> - Check weather conditions</li>
+          <li><strong>BRC Geocoding</strong> - Accurate address mapping</li>
+          <li><strong>Event Locations</strong> - See where events happen</li>
+          <li><strong>Distance Calculator</strong> - Know how far to bike</li>
+        </ul>
+      </div>
+
+      <div class="keyboard-shortcuts">
+        <h3>⌨️ Keyboard Shortcuts</h3>
+        <table>
+          <tbody>
+            <tr><td><kbd>1</kbd></td><td>Go to Map</td></tr>
+            <tr><td><kbd>2</kbd></td><td>Go to Camps</td></tr>
+            <tr><td><kbd>3</kbd></td><td>Go to Art</td></tr>
+            <tr><td><kbd>4</kbd></td><td>Go to Events</td></tr>
+            <tr><td><kbd>5</kbd></td><td>Go to Search</td></tr>
+            <tr><td><kbd>6</kbd></td><td>Go to Schedule</td></tr>
+            <tr><td><kbd>7</kbd></td><td>Go to Emergency</td></tr>
+            <tr><td><kbd>8</kbd></td><td>Go to Dust Forecast</td></tr>
+            <tr><td><kbd>F</kbd></td><td>Toggle Favorites</td></tr>
+            <tr><td><kbd>L</kbd></td><td>Toggle Layers (Map)</td></tr>
+            <tr><td><kbd>/</kbd></td><td>Show Shortcuts</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Implementation Tab -->
+    <div v-if="activeTab === 'Implementation'" class="tab-content implementation-content">
+      <h2>Technical Implementation</h2>
+      
+      <div class="impl-section">
+        <h3>Architecture</h3>
+        <p>
+          OK-OFFLINE follows a strict offline-first architecture:
+        </p>
+        <ul>
+          <li>Data synced only through this settings page</li>
+          <li>All views load exclusively from cache</li>
+          <li>No background API calls</li>
+          <li>Events enriched with location data during sync</li>
+        </ul>
+      </div>
+
+      <div class="impl-section">
+        <h3>Tech Stack</h3>
+        <ul>
+          <li><strong>Vue 3</strong> - Composition API for reactive UI</li>
+          <li><strong>Vite</strong> - Fast build tool with HMR</li>
+          <li><strong>Vue Router</strong> - Client-side routing</li>
+          <li><strong>Leaflet</strong> - Interactive maps</li>
+          <li><strong>IndexedDB</strong> - Offline data storage</li>
+          <li><strong>Service Workers</strong> - PWA functionality</li>
+        </ul>
+      </div>
+
+      <div class="impl-section">
+        <h3>Data Storage</h3>
+        <code>
+Database: bm2025-db
+├── art (object store)
+│   ├── Key: uid
+│   └── Index: year
+├── camp (object store)
+│   ├── Key: uid
+│   └── Index: year
+└── event (object store)
+    ├── Key: uid
+    └── Index: year
+        </code>
+      </div>
+
+      <div class="impl-section">
+        <h3>BRC Geocoding</h3>
+        <p>
+          Converts addresses like "7:30 & E" to coordinates:
+        </p>
+        <ol>
+          <li>Parse clock position and avenue</li>
+          <li>Account for 45° city rotation</li>
+          <li>Calculate distance from Golden Spike</li>
+          <li>Apply trigonometry for lat/lon</li>
+        </ol>
+      </div>
+
+      <div class="impl-section">
+        <h3>Event Enrichment</h3>
+        <p>
+          During sync, events are enriched with location data:
+        </p>
+        <ol>
+          <li>Match events to camps via <code>hosted_by_camp</code></li>
+          <li>Add <code>camp_name</code> and <code>enriched_location</code></li>
+          <li>Fall back to <code>other_location</code> if no camp</li>
+          <li>Preserve enrichment in cache</li>
+        </ol>
+      </div>
+
+      <div class="impl-section">
+        <h3>Performance</h3>
+        <ul>
+          <li>Lazy loaded views with code splitting</li>
+          <li>Debounced search inputs</li>
+          <li>Reactive computed properties</li>
+          <li>Minimal bundle size (~500KB)</li>
+        </ul>
+      </div>
+
+      <div class="impl-section">
+        <h3>Contributing</h3>
+        <p>
+          View the full source code and contribute on GitHub:<br>
+          <a href="https://github.com/jeremedia/ok-offline" target="_blank" rel="noopener">
+            github.com/jeremedia/ok-offline
+          </a>
+        </p>
+      </div>
+    </div>
   </section>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 import { syncYear as syncYearData, getSyncStatus, clearYear as clearYearData } from '../services/dataSync'
+import { clearCache } from '../services/storage'
 
-const router = useRouter()
+// Tab management
+const tabs = ['Data Sync', 'About', 'Features', 'Implementation']
+const activeTab = ref('Data Sync')
+
+// Original data sync logic
 const years = ['2023', '2024', '2025']
 const types = ['camp', 'art', 'event']
-
 const syncStatus = ref({})
 const syncing = ref({})
 const progress = ref({})
@@ -95,8 +339,8 @@ const formatDate = (dateStr) => {
   const now = new Date()
   const diffMs = now - date
   const diffMins = Math.floor(diffMs / 60000)
-  const diffHours = Math.floor(diffMs / 3600000)
-  const diffDays = Math.floor(diffMs / 86400000)
+  const diffHours = Math.floor(diffMins / 60)
+  const diffDays = Math.floor(diffHours / 24)
   
   if (diffMins < 1) return 'Just now'
   if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`
@@ -148,24 +392,10 @@ const syncYear = async (year) => {
       progressText.value[year] = ''
     }, 2000)
   } catch (err) {
-    console.error(`Failed to sync ${year}:`, err)
+    console.error('Sync failed:', err)
     progressText.value[year] = `Error: ${err.message}`
   } finally {
     syncing.value[year] = false
-  }
-}
-
-const clearYear = async (year) => {
-  if (syncing.value[year]) return
-  
-  if (confirm(`Are you sure you want to clear all ${year} data? This cannot be undone.`)) {
-    try {
-      await clearYearData(year)
-      await loadSyncStatus()
-    } catch (err) {
-      console.error(`Failed to clear ${year} data:`, err)
-      alert(`Failed to clear data: ${err.message}`)
-    }
   }
 }
 
@@ -173,24 +403,33 @@ const syncAllYears = async () => {
   if (syncingAll.value) return
   
   syncingAll.value = true
-  let completedYears = 0
   
-  for (const year of years) {
-    syncAllProgress.value = `Syncing ${year} data... (${completedYears + 1}/3)`
+  for (let i = 0; i < years.length; i++) {
+    const year = years[i]
+    syncAllProgress.value = `Syncing ${year} (${i + 1} of ${years.length})...`
     await syncYear(year)
-    completedYears++
   }
   
-  syncAllProgress.value = 'All years synced successfully!'
+  syncAllProgress.value = 'All years synced!'
   setTimeout(() => {
     syncingAll.value = false
     syncAllProgress.value = ''
   }, 2000)
 }
 
-const goBack = () => {
-  const year = localStorage.getItem('selectedYear') || '2025'
-  router.push(`/${year}/map`)
+const clearYear = async (year) => {
+  if (confirm(`Are you sure you want to clear all ${year} data? This cannot be undone.`)) {
+    await clearYearData(year)
+    await loadSyncStatus()
+  }
+}
+
+const clearAllData = async () => {
+  if (confirm('Are you sure you want to clear ALL cached data? This cannot be undone.')) {
+    await clearCache()
+    localStorage.clear()
+    await loadSyncStatus()
+  }
 }
 
 onMounted(() => {
@@ -201,33 +440,98 @@ onMounted(() => {
 <style scoped>
 #settings-section {
   padding: 1rem;
-  max-width: 800px;
+  max-width: 1200px;
   margin: 0 auto;
-  background: #1a1a1a;
-  color: #ccc;
-  min-height: 100vh;
+  overflow-y: auto;
+  height: 100%;
+}
+
+.settings-tabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid #444;
+  flex-wrap: wrap;
+}
+
+.tab-button {
+  background: none;
+  border: none;
+  color: #999;
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.2s;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+}
+
+.tab-button:hover {
+  color: #fff;
+}
+
+.tab-button.active {
+  color: #fff;
+  border-bottom-color: #8B0000;
+}
+
+.tab-content {
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 h2 {
+  margin-bottom: 1.5rem;
   color: #fff;
-  margin-bottom: 2rem;
 }
 
 h3 {
-  color: #fff;
-  margin-bottom: 1rem;
+  color: #ccc;
+  margin: 1.5rem 0 1rem;
 }
 
-.settings-content {
+/* Data Sync Tab Styles */
+.sync-all-container {
   margin-bottom: 2rem;
+  padding: 1rem;
+  background: #2a2a2a;
+  border-radius: 8px;
+}
+
+.sync-all-button {
+  background: #8B0000;
+  color: #fff;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.2s;
+}
+
+.sync-all-button:hover:not(:disabled) {
+  background: #a00000;
+}
+
+.sync-all-button:disabled {
+  background: #666;
+  cursor: not-allowed;
+}
+
+.sync-all-progress {
+  margin-top: 0.5rem;
+  color: #999;
 }
 
 .year-section {
   background: #2a2a2a;
-  border: 1px solid #444;
-  border-radius: 8px;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
+  border-radius: 8px;
 }
 
 .sync-status {
@@ -235,32 +539,30 @@ h3 {
 }
 
 .status-row {
-  display: flex;
-  align-items: center;
+  display: grid;
+  grid-template-columns: 100px 100px 1fr;
   gap: 1rem;
-  margin-bottom: 0.5rem;
-  font-size: 0.9rem;
+  padding: 0.5rem 0;
+  align-items: center;
 }
 
 .type-label {
   font-weight: bold;
-  width: 80px;
+  color: #ccc;
 }
 
 .count {
   color: #fff;
-  min-width: 100px;
 }
 
 .last-sync {
   color: #999;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
 }
 
 .never-synced {
   color: #666;
   font-style: italic;
-  font-size: 0.85rem;
 }
 
 .sync-actions {
@@ -269,45 +571,48 @@ h3 {
   margin-top: 1rem;
 }
 
-.sync-button, .clear-button {
-  background: #555;
+.sync-button {
+  background: #444;
   color: #fff;
   border: none;
   padding: 0.5rem 1rem;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 0.9rem;
   transition: background 0.2s;
 }
 
-.sync-button:hover {
-  background: #8B0000;
+.sync-button:hover:not(:disabled) {
+  background: #555;
 }
 
 .sync-button:disabled {
   background: #333;
+  color: #666;
   cursor: not-allowed;
 }
 
 .clear-button {
-  background: #444;
+  background: transparent;
+  color: #ff6666;
+  border: 1px solid #ff6666;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
-.clear-button:hover {
-  background: #a00;
-}
-
-.progress {
-  margin-top: 1rem;
+.clear-button:hover:not(:disabled) {
+  background: #ff6666;
+  color: #fff;
 }
 
 .progress-bar {
-  width: 100%;
+  margin-top: 1rem;
   height: 20px;
   background: #333;
   border-radius: 10px;
   overflow: hidden;
-  margin-bottom: 0.5rem;
+  position: relative;
 }
 
 .progress-fill {
@@ -317,72 +622,177 @@ h3 {
 }
 
 .progress-text {
-  font-size: 0.85rem;
-  color: #999;
-}
-
-.storage-info {
-  background: #2a2a2a;
-  border: 1px solid #444;
-  border-radius: 8px;
-  padding: 1.5rem;
-}
-
-.note {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #fff;
   font-size: 0.9rem;
-  color: #999;
-  margin: 0.5rem 0;
 }
 
-#back-to-app {
-  background: #555;
+.global-actions {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #444;
+}
+
+.danger-button {
+  background: #ff4444;
   color: #fff;
   border: none;
-  padding: 0.5rem 1rem;
+  padding: 0.75rem 1.5rem;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 0.9rem;
-  margin-bottom: 2rem;
   transition: background 0.2s;
 }
 
-#back-to-app:hover {
-  background: #8B0000;
+.danger-button:hover {
+  background: #ff6666;
 }
 
-.sync-all-container {
+/* About Tab Styles */
+.about-content {
+  max-width: 800px;
+}
+
+.about-section {
+  margin-bottom: 2rem;
+}
+
+.about-section p {
+  line-height: 1.6;
+  color: #ccc;
+  margin-bottom: 1rem;
+}
+
+.about-section ul,
+.about-section ol {
+  margin-left: 1.5rem;
+  color: #ccc;
+  line-height: 1.8;
+}
+
+.about-section a {
+  color: #8B0000;
+  text-decoration: none;
+}
+
+.about-section a:hover {
+  text-decoration: underline;
+}
+
+/* Features Tab Styles */
+.features-content {
+  max-width: 900px;
+}
+
+.feature-section {
   background: #2a2a2a;
-  border: 1px solid #444;
-  border-radius: 8px;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
-  text-align: center;
+  border-radius: 8px;
 }
 
-.sync-all-button {
-  background: #8B0000;
+.feature-section h3 {
+  margin-top: 0;
   color: #fff;
-  border: none;
-  padding: 0.75rem 2rem;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 1.1rem;
-  font-weight: bold;
-  transition: background 0.2s;
 }
 
-.sync-all-button:hover {
-  background: #a00;
-}
-
-.sync-all-button:disabled {
-  background: #555;
-  cursor: not-allowed;
-}
-
-.sync-all-progress {
-  margin-top: 1rem;
+.feature-section ul {
+  margin: 0;
+  padding-left: 1.5rem;
   color: #ccc;
+  line-height: 1.8;
+}
+
+.keyboard-shortcuts {
+  background: #2a2a2a;
+  padding: 1.5rem;
+  border-radius: 8px;
+}
+
+.keyboard-shortcuts table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.keyboard-shortcuts td {
+  padding: 0.5rem;
+  border-bottom: 1px solid #444;
+}
+
+.keyboard-shortcuts kbd {
+  background: #444;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-family: 'Berkeley Mono', monospace;
   font-size: 0.9rem;
+}
+
+/* Implementation Tab Styles */
+.implementation-content {
+  max-width: 900px;
+}
+
+.impl-section {
+  margin-bottom: 2rem;
+}
+
+.impl-section p {
+  color: #ccc;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+.impl-section ul,
+.impl-section ol {
+  margin-left: 1.5rem;
+  color: #ccc;
+  line-height: 1.8;
+}
+
+.impl-section code {
+  display: block;
+  background: #1a1a1a;
+  padding: 1rem;
+  border-radius: 4px;
+  font-family: 'Berkeley Mono', monospace;
+  font-size: 0.9rem;
+  white-space: pre-wrap;
+  color: #aaa;
+  overflow-x: auto;
+}
+
+.impl-section a {
+  color: #8B0000;
+  text-decoration: none;
+}
+
+.impl-section a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  #settings-section {
+    padding: 0.5rem;
+  }
+  
+  .settings-tabs {
+    gap: 0.5rem;
+  }
+  
+  .tab-button {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .status-row {
+    grid-template-columns: 80px 80px 1fr;
+    font-size: 0.9rem;
+  }
+  
+  .sync-actions {
+    flex-direction: column;
+  }
 }
 </style>
