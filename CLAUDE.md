@@ -145,11 +145,16 @@ ok-offline/
 - `L`: Toggle layers (map view)
 - `/`: Quick actions
 
-### 13. **Dust Forecast**
-- Mock weather data
-- 5-day forecast
-- Dust level indicators
-- Protection recommendations
+### 13. **Enhanced Weather & Dust Forecast**
+- Real-time weather data from OpenWeatherMap API
+- Live temperature, humidity, pressure, and wind data
+- Smart dust level calculation based on weather conditions
+- 5-day detailed forecast with temperature ranges
+- Sunrise/sunset times and UV index
+- Auto-refresh every 15 minutes with manual refresh option
+- Offline caching with 10-minute cache duration
+- Comprehensive error handling and loading states
+- Protection recommendations based on current conditions
 
 ## Data Flow
 
@@ -312,6 +317,9 @@ Database: bm2025-db
 - [ ] Check responsive design
 - [ ] Test PWA installation
 - [ ] Verify keyboard shortcuts
+- [ ] Test weather API integration and caching
+- [ ] Verify weather data displays correctly offline
+- [ ] Test weather auto-refresh functionality
 
 ## Known Issues & Limitations
 
@@ -423,3 +431,21 @@ When making changes:
 6. Use conventional commits for automatic versioning
 
 Remember: This app is designed to work in the harsh conditions of Black Rock City where connectivity is limited or non-existent. Every feature should work offline once data is synced.
+
+## Weather API Configuration
+
+The enhanced weather/dust forecast feature requires an OpenWeatherMap API key:
+
+1. **Get API Key**: Sign up at https://openweathermap.org/api for a free account
+2. **Environment Setup**: Copy `.env.example` to `.env` and add your key:
+   ```
+   VITE_WEATHER_API_KEY=your_weather_api_key_here
+   ```
+3. **Features**: 
+   - 1 million free API calls per month
+   - Real-time weather for Black Rock City coordinates
+   - Smart caching for offline use
+   - Auto-refresh every 15 minutes
+   - Graceful fallback when offline
+
+Without an API key, the app will show a configuration error but all other features remain functional.
