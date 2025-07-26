@@ -158,7 +158,10 @@ export const getCurrentWeather = async () => {
     
     return processedData
   } catch (error) {
-    console.error('Failed to fetch current weather:', error)
+    // Don't log 401 errors as they're expected when API key isn't activated
+    if (!error.message.includes('401')) {
+      console.error('Failed to fetch current weather:', error)
+    }
     
     // Try to return cached data even if expired
     const expiredCache = getCachedWeather()
@@ -239,7 +242,10 @@ export const getWeatherForecast = async () => {
     
     return dailyForecasts
   } catch (error) {
-    console.error('Failed to fetch weather forecast:', error)
+    // Don't log 401 errors as they're expected when API key isn't activated
+    if (!error.message.includes('401')) {
+      console.error('Failed to fetch weather forecast:', error)
+    }
     
     // Try to return cached data even if expired
     const expiredCache = getCachedWeather()
@@ -298,7 +304,10 @@ export const getSunTimes = async () => {
     
     return sunTimes
   } catch (error) {
-    console.error('Failed to fetch sun times:', error)
+    // Don't log 401 errors as they're expected when API key isn't activated
+    if (!error.message.includes('401')) {
+      console.error('Failed to fetch sun times:', error)
+    }
     
     // Try to return cached data even if expired
     const expiredCache = getCachedWeather()
@@ -307,7 +316,7 @@ export const getSunTimes = async () => {
       return expiredCache.sunTimes
     }
     
-    // Return fallback values
+    // Return fallback values for Black Rock City
     return {
       sunrise: '6:30 AM',
       sunset: '7:45 PM',

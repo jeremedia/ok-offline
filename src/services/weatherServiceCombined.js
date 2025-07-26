@@ -160,7 +160,12 @@ export const getCurrentWeatherRobust = async () => {
     console.log('✅ OpenWeatherMap succeeded')
     return data
   } catch (error) {
-    console.log('❌ OpenWeatherMap failed:', error.message)
+    // Only log non-401 errors to reduce console noise
+    if (!error.message.includes('401')) {
+      console.log('❌ OpenWeatherMap failed:', error.message)
+    } else {
+      console.log('⏳ OpenWeatherMap API key still activating, trying fallback...')
+    }
     errors.push(`OpenWeatherMap: ${error.message}`)
   }
 
