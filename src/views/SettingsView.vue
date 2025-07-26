@@ -89,6 +89,15 @@
         <p>
           Created by <strong>Jeremy Roush</strong> and brought to you by <strong>Mr. OK of OKNOTOK</strong>.
         </p>
+        
+        <p class="version-info">
+          Version: <strong>{{ appVersion }}</strong><br>
+          <span class="build-time">Built: {{ buildTime }}</span>
+        </p>
+        
+        <button @click="showReleaseNotes = true" class="release-notes-button">
+          📋 View Release Notes
+        </button>
       </div>
 
       <div class="about-section">
@@ -414,6 +423,49 @@ Database: bm2025-db
         </p>
       </div>
     </div>
+    
+    <!-- Release Notes Modal -->
+    <div v-if="showReleaseNotes" class="modal-overlay" @click="showReleaseNotes = false">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h2>Release Notes</h2>
+          <button @click="showReleaseNotes = false" class="close-button">×</button>
+        </div>
+        <div class="modal-body">
+          <div v-for="release in releaseNotes" :key="release.version" class="release-section">
+            <h3>Version {{ release.version }} - {{ release.date }}</h3>
+            
+            <div v-if="release.added?.length" class="release-group">
+              <h4>✨ Added</h4>
+              <ul>
+                <li v-for="(item, idx) in release.added" :key="idx">{{ item }}</li>
+              </ul>
+            </div>
+            
+            <div v-if="release.changed?.length" class="release-group">
+              <h4>🔄 Changed</h4>
+              <ul>
+                <li v-for="(item, idx) in release.changed" :key="idx">{{ item }}</li>
+              </ul>
+            </div>
+            
+            <div v-if="release.fixed?.length" class="release-group">
+              <h4>🐛 Fixed</h4>
+              <ul>
+                <li v-for="(item, idx) in release.fixed" :key="idx">{{ item }}</li>
+              </ul>
+            </div>
+            
+            <div v-if="release.technical?.length" class="release-group">
+              <h4>🔧 Technical</h4>
+              <ul>
+                <li v-for="(item, idx) in release.technical" :key="idx">{{ item }}</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </section>
 </template>
 
@@ -425,6 +477,72 @@ import { clearCache } from '../services/storage'
 // Tab management
 const tabs = ['Data Sync', 'About', 'Features', 'Implementation', 'Feedback']
 const activeTab = ref('Data Sync')
+
+// App version
+const appVersion = __APP_VERSION__
+const buildTime = new Date(__BUILD_TIME__).toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit'
+})
+
+// Release notes modal
+const showReleaseNotes = ref(false)
+
+// Release notes data
+const releaseNotes = [
+  {
+    version: '1.1.0',
+    date: '2025-01-26',
+    added: [
+      'Comprehensive in-app documentation with tabbed interface',
+      'About tab with version display and build timestamp',
+      'Features tab documenting all app capabilities',
+      'Implementation tab with technical details',
+      'Feedback tab with GitHub issue integration',
+      'Automatic semantic versioning with CI/CD pipeline',
+      'Version display in settings (click OK-OFFLINE header)'
+    ],
+    changed: [
+      'Settings view transformed into multi-tab interface',
+      'Updated attribution to Jeremy Roush and Mr. OK of OKNOTOK'
+    ],
+    fixed: [
+      'Table HTML structure warnings (added tbody elements)'
+    ]
+  },
+  {
+    version: '1.0.0',
+    date: '2025-01-26',
+    added: [
+      'Initial release of OK-OFFLINE',
+      'Offline-first Progressive Web App for Burning Man',
+      'Complete data sync for camps, art, and events (2023-2025)',
+      'Interactive map with layer toggles',
+      'Smart lists with sorting and filtering',
+      'Personal schedule builder with conflict detection',
+      'Favorites system across all data types',
+      'Visit tracking with notes for camps',
+      'Emergency contacts storage',
+      'Search functionality across all content',
+      'BRC geocoding for accurate address mapping',
+      'Event location enrichment during sync',
+      'Dust forecast widget',
+      'Keyboard shortcuts for navigation',
+      'PWA installation support',
+      'Dark theme optimized for playa conditions'
+    ],
+    technical: [
+      'Built with Vue 3 and Vite',
+      'IndexedDB for offline storage',
+      'Service Worker for PWA functionality',
+      'Leaflet maps integration',
+      'Strict offline-first architecture'
+    ]
+  }
+]
 
 // Original data sync logic
 const years = ['2023', '2024', '2025']
@@ -785,6 +903,19 @@ h3 {
   text-decoration: underline;
 }
 
+.version-info {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: #1a1a1a;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.build-time {
+  font-size: 0.8rem;
+  color: #666;
+}
+
 /* Features Tab Styles */
 .features-content {
   max-width: 900px;
@@ -938,6 +1069,124 @@ h3 {
   border-radius: 4px;
   font-size: 0.9rem;
   margin-top: 1rem;
+}
+
+/* Release Notes Button */
+.release-notes-button {
+  background: #444;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+.release-notes-button:hover {
+  background: #555;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modal-content {
+  background: #1a1a1a;
+  border-radius: 8px;
+  max-width: 800px;
+  max-height: 90vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #444;
+}
+
+.modal-header h2 {
+  margin: 0;
+  color: #fff;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 2rem;
+  cursor: pointer;
+  transition: color 0.2s;
+  line-height: 1;
+  padding: 0;
+  width: 2rem;
+  height: 2rem;
+}
+
+.close-button:hover {
+  color: #fff;
+}
+
+.modal-body {
+  padding: 1.5rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.release-section {
+  margin-bottom: 2.5rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid #333;
+}
+
+.release-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.release-section h3 {
+  color: #fff;
+  margin: 0 0 1.5rem 0;
+  font-size: 1.2rem;
+}
+
+.release-group {
+  margin-bottom: 1.5rem;
+}
+
+.release-group h4 {
+  color: #ccc;
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.release-group ul {
+  margin: 0;
+  padding-left: 1.5rem;
+  color: #999;
+  line-height: 1.8;
+}
+
+.release-group li {
+  margin-bottom: 0.25rem;
 }
 
 @media (max-width: 768px) {
