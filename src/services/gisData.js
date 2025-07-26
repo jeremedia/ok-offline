@@ -8,7 +8,14 @@ const gisDataCache = {
   trashFence: null,
   cpns: null,
   plazas: null,
-  cityBlocks: null
+  cityBlocks: null,
+};
+
+// Loading state
+const loadingState = {
+  isLoading: false,
+  error: null,
+  loadedLayers: new Set()
 };
 
 // Load GeoJSON data from file
@@ -27,31 +34,55 @@ async function loadGeoJSON(filename) {
 
 // Load all GIS data
 export async function loadAllGISData() {
+  if (loadingState.isLoading) {
+    console.log('GIS data is already loading...');
+    return gisDataCache;
+  }
+
+  loadingState.isLoading = true;
+  loadingState.error = null;
+  loadingState.loadedLayers.clear();
+
   console.log('Loading GIS data...');
   
-  const [streetLines, trashFence, cpns, plazas, cityBlocks] = await Promise.all([
-    loadGeoJSON('street_lines.geojson'),
-    loadGeoJSON('trash_fence.geojson'),
-    loadGeoJSON('cpns.geojson'),
-    loadGeoJSON('plazas.geojson'),
-    loadGeoJSON('city_blocks.geojson')
-  ]);
+  try {
+    const [streetLines, trashFence, cpns, plazas, cityBlocks] = await Promise.all([
+      loadGeoJSON('street_lines.geojson'),
+      loadGeoJSON('trash_fence.geojson'),
+      loadGeoJSON('cpns.geojson'),
+      loadGeoJSON('plazas.geojson'),
+      loadGeoJSON('city_blocks.geojson')
+    ]);
 
-  gisDataCache.streetLines = streetLines;
-  gisDataCache.trashFence = trashFence;
-  gisDataCache.cpns = cpns;
-  gisDataCache.plazas = plazas;
-  gisDataCache.cityBlocks = cityBlocks;
+    gisDataCache.streetLines = streetLines;
+    gisDataCache.trashFence = trashFence;
+    gisDataCache.cpns = cpns;
+    gisDataCache.plazas = plazas;
+    gisDataCache.cityBlocks = cityBlocks;
 
-  console.log('GIS data loaded:', {
-    streetLines: streetLines?.features?.length || 0,
-    trashFence: trashFence?.features?.length || 0,
-    cpns: cpns?.features?.length || 0,
-    plazas: plazas?.features?.length || 0,
-    cityBlocks: cityBlocks?.features?.length || 0
-  });
+    // Track loaded layers
+    if (streetLines) loadingState.loadedLayers.add('streetLines');
+    if (trashFence) loadingState.loadedLayers.add('trashFence');
+    if (cpns) loadingState.loadedLayers.add('cpns');
+    if (plazas) loadingState.loadedLayers.add('plazas');
+    if (cityBlocks) loadingState.loadedLayers.add('cityBlocks');
 
-  return gisDataCache;
+    console.log('GIS data loaded:', {
+      streetLines: streetLines?.features?.length || 0,
+      trashFence: trashFence?.features?.length || 0,
+      cpns: cpns?.features?.length || 0,
+      plazas: plazas?.features?.length || 0,
+      cityBlocks: cityBlocks?.features?.length || 0
+    });
+
+    return gisDataCache;
+  } catch (error) {
+    loadingState.error = error;
+    console.error('Failed to load GIS data:', error);
+    throw error;
+  } finally {
+    loadingState.isLoading = false;
+  }
 }
 
 // Get street lines data
@@ -77,6 +108,16 @@ export function getPlazas() {
 // Get city blocks data
 export function getCityBlocks() {
   return gisDataCache.cityBlocks;
+}
+
+
+// Get loading state
+export function getLoadingState() {
+  return {
+    isLoading: loadingState.isLoading,
+    error: loadingState.error,
+    loadedLayers: Array.from(loadingState.loadedLayers)
+  };
 }
 
 // Find nearest street to a given coordinate
