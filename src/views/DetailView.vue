@@ -105,7 +105,16 @@
         
         <div class="detail-field" v-if="props.type === 'event' && item.camp_name">
           <label>Hosted By</label>
-          <div class="value">{{ item.camp_name }}</div>
+          <div class="value">
+            <router-link 
+              v-if="item.hosted_by_camp"
+              :to="`/${props.year}/camps/${item.hosted_by_camp}`"
+              class="camp-link"
+            >
+              {{ item.camp_name }}
+            </router-link>
+            <span v-else>{{ item.camp_name }}</span>
+          </div>
         </div>
         
         <div class="detail-field" v-if="props.type === 'event' && item.event_type">
@@ -148,6 +157,12 @@
     </div>
     <div v-else-if="loading">Loading...</div>
     <div v-else-if="error">{{ error }}</div>
+    <SyncDialog 
+      :show="showSyncDialog"
+      :title="`Syncing ${props.type}s`"
+      :message="`Getting ${props.year} data ready for offline use...`"
+      :status="syncStatus"
+    />
   </section>
 </template>
 
@@ -163,9 +178,12 @@ import { isFavorite, toggleFavorite } from '../services/favorites'
 import { brcAddressToLatLon } from '../utils/geocoding'
 import { recordVisit, getVisitInfo, saveItemNotes, getItemNotes } from '../services/visits'
 import { addEventToSchedule, removeEventFromSchedule, isEventScheduled } from '../services/schedule'
+import { useAutoSync } from '../composables/useAutoSync'
+import SyncDialog from '../components/SyncDialog.vue'
 
 const props = defineProps(['type', 'year', 'id'])
 const router = useRouter()
+const { showSyncDialog, checkAndAutoSync } = useAutoSync()
 
 const mapContainer = ref(null)
 const item = ref(null)
@@ -176,6 +194,7 @@ const isFavorited = ref(false)
 const visitInfo = ref(null)
 const notes = ref('')
 const scheduledOccurrences = ref(new Map()) // Track which occurrences are scheduled
+const syncStatus = ref('Checking for data...')
 let detailMap = null
 let detailMarker = null
 
@@ -294,9 +313,10 @@ const loadItem = async () => {
       }
     }
     
-    // No cache or item not found in cache - redirect to settings
-    console.log(`No cached data for ${props.type}, redirecting to settings`)
-    router.push('/settings')
+    // No cache or item not found in cache - trigger auto-sync
+    console.log(`No cached data for ${props.type}, triggering auto-sync`)
+    syncStatus.value = `Downloading ${props.type} data...`
+    await checkAndAutoSync(props.type, props.year)
   } catch (err) {
     error.value = `Error loading item: ${err.message}`
     console.error(err)
@@ -616,5 +636,16 @@ h2 {
 .schedule-btn.scheduled:hover {
   background: #8B0000;
   border-color: #8B0000;
+}
+
+.camp-link {
+  color: #90CAF9;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.camp-link:hover {
+  color: #64B5F6;
+  text-decoration: underline;
 }
 </style>

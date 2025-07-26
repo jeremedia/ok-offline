@@ -1,6 +1,12 @@
 <template>
   <section id="list-section" class="view">
-    <LoadingSpinner v-if="loading" message="Loading data..." />
+    <SyncDialog 
+      :show="showSyncDialog"
+      :title="`Syncing ${props.type}s`"
+      :message="`Getting ${props.year} data ready for offline use...`"
+      :status="syncStatus"
+    />
+    <LoadingSpinner v-if="loading && !showSyncDialog" message="Loading data..." />
     <div v-else-if="error" class="error-state">
       <p>{{ error }}</p>
       <button @click="loadData" class="retry-button">Try Again</button>
@@ -186,12 +192,15 @@ import { useGeolocation } from '../composables/useGeolocation'
 import { getVisitInfo } from '../services/visits'
 import { isEventScheduled, addEventToSchedule, removeEventFromSchedule } from '../services/schedule'
 import { useToast } from '../composables/useToast'
+import { useAutoSync } from '../composables/useAutoSync'
 import LoadingSpinner from '../components/LoadingSpinner.vue'
+import SyncDialog from '../components/SyncDialog.vue'
 
 const props = defineProps(['type', 'year'])
 const router = useRouter()
 const route = useRoute()
 const { showSuccess, showError } = useToast()
+const { showSyncDialog, checkAndAutoSync } = useAutoSync()
 
 const items = ref([])
 const loading = ref(true)
@@ -199,6 +208,7 @@ const error = ref(null)
 const sortBy = ref('name')
 const searchQuery = ref('')
 const selectedId = computed(() => route.params.id)
+const syncStatus = ref('Checking for data...')
 
 const availableSectors = ['2:00-3:00', '3:00-4:00', '4:30-5:30', '5:30-6:30', '6:30-7:30', '7:30-8:30', '8:30-10:00']
 const selectedSectors = ref([...availableSectors]) // All selected by default
@@ -476,9 +486,10 @@ const loadData = async () => {
         updateEventTypeCounts()
       }
     } else {
-      // No cached data - redirect to settings page
-      console.log(`No cached data for ${props.type}, redirecting to settings`)
-      router.push('/settings')
+      // No cached data - trigger auto-sync
+      console.log(`No cached data for ${props.type}, triggering auto-sync`)
+      syncStatus.value = `Downloading ${props.type} data...`
+      await checkAndAutoSync(props.type, props.year)
       return
     }
   } catch (err) {
