@@ -448,8 +448,11 @@ Maintain release history in `CHANGELOG.md`:
 Before pushing to main:
 - [ ] Test locally with `npm run build && npm run preview`
 - [ ] Update CHANGELOG.md if adding features
+- [ ] **Increment service worker cache version** in `public/sw.js` (e.g., `ok-offline-v4` → `ok-offline-v5`)
 - [ ] Use conventional commit messages for proper versioning
 - [ ] Check GitHub Actions after push for deployment status
+
+**Important**: Always bump the service worker cache version for each release. Safari and other browsers aggressively cache service workers, and without a version bump, users may not receive the latest updates.
 
 ## Contributing
 
