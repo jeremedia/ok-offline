@@ -480,3 +480,56 @@ The enhanced weather/dust forecast feature requires an OpenWeatherMap API key:
    - Graceful fallback when offline
 
 Without an API key, the app will show a configuration error but all other features remain functional.
+
+## Visual Testing Protocol
+
+When testing UI changes, especially for mobile optimization:
+
+### 1. Screenshot Workflow
+**ALWAYS follow this two-step process:**
+```javascript
+// Step 1: Take screenshot
+playwright_screenshot(name: "descriptive-name")
+// Step 2: IMMEDIATELY read the file
+Read(file_path: "../../Downloads/[screenshot-filename].png")
+```
+
+### 2. Screenshot Analysis Template
+When viewing a screenshot, analyze using this structure:
+```
+SCREENSHOT ANALYSIS:
+1. **Overall Layout**: What is the general structure?
+2. **Header/Navigation**: What's at the top?
+3. **Main Content**: What's in the center/body?
+4. **Interactive Elements**: Buttons, forms, controls visible?
+5. **Visual Issues**: Anything broken, overlapping, cut off?
+6. **Mobile-Specific**: Touch targets, spacing, readability?
+```
+
+### 3. Testing Multiple Viewports
+Always test at these viewport sizes:
+- **Mobile**: 390x844 (iPhone 14)
+- **Tablet**: 768x1024 (iPad Mini)  
+- **Desktop**: 1920x1080
+
+### 4. Mobile Testing Checklist
+- [ ] Touch targets minimum 44x44px
+- [ ] No horizontal scrolling
+- [ ] Bottom navigation accessible
+- [ ] Modals/overlays properly positioned
+- [ ] Text readable (min 16px)
+- [ ] Proper spacing between elements
+- [ ] Landscape orientation works
+
+### 5. Development Testing Notes
+- **Service Worker**: May cache old code - disable for testing
+- **Mobile Detection**: Uses width < 600px for development
+- **Real Devices**: Production uses touch + user agent detection
+
+### 6. Helper Functions
+Use the screenshot helper for consistent analysis:
+```javascript
+import { logScreenshotReminder, documentVisualTest } from './utils/screenshotHelper'
+```
+
+**IMPORTANT**: Never claim to "see" a screenshot without reading the file first. Be explicit when visual verification is needed.

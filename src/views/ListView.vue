@@ -1,4 +1,5 @@
 <template>
+  <PullToRefresh @refresh="handleRefresh">
   <section id="list-section" class="view">
     <SyncDialog 
       :show="showSyncDialog"
@@ -180,6 +181,7 @@
     </ul>
     </template>
   </section>
+  </PullToRefresh>
 </template>
 
 <script setup>
@@ -195,6 +197,7 @@ import { useToast } from '../composables/useToast'
 import { useAutoSync } from '../composables/useAutoSync'
 import LoadingSpinner from '../components/LoadingSpinner.vue'
 import SyncDialog from '../components/SyncDialog.vue'
+import PullToRefresh from '../components/PullToRefresh.vue'
 
 const props = defineProps(['type', 'year'])
 const router = useRouter()
@@ -464,6 +467,14 @@ const groupedItems = computed(() => {
   
   return groups
 })
+
+const handleRefresh = async () => {
+  // Refresh data from cache
+  await loadData()
+  // Show toast notification
+  const { showToast } = await import('../composables/useToast')
+  showToast('Data refreshed', 'success')
+}
 
 const loadData = async () => {
   loading.value = true

@@ -9,7 +9,7 @@ export default defineConfig({
     __BUILD_TIME__: JSON.stringify(new Date().toISOString())
   },
   server: {
-    port: 8000,
+    port: 8002,
     proxy: {
       '/api': {
         target: 'https://api.burningman.org',

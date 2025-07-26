@@ -105,7 +105,9 @@ createApp(App)
   .use(router)
   .mount('#app')
 
-// Register service worker
+// Service worker disabled for development
+// TODO: Re-enable for production
+/*
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js')
@@ -117,3 +119,4 @@ if ('serviceWorker' in navigator) {
       })
   })
 }
+*/

@@ -8,6 +8,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "hammerjs": "^2.0.8",
     "jose": "^6.0.12",
     "leaflet": "^1.9.3",
     "leaflet-rotate": "^0.2.8",
