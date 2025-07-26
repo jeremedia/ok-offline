@@ -67,8 +67,20 @@
             <small v-else-if="currentConditions.source === 'cache'">
               📱 Cached data • Updated {{ formatUpdateTime(currentConditions.lastUpdated) }}
             </small>
+            <small v-else-if="currentConditions.source === 'apple-api' || currentConditions.source === 'apple-cache-expired'">
+              🍎 Apple WeatherKit • {{ formatUpdateTime(currentConditions.lastUpdated) }}
+            </small>
             <small v-else>
-              🌐 Live data • {{ formatUpdateTime(currentConditions.lastUpdated) }}
+              🌐 OpenWeatherMap • {{ formatUpdateTime(currentConditions.lastUpdated) }}
+            </small>
+          </div>
+          
+          <!-- Apple Weather Attribution -->
+          <div v-if="currentConditions.source === 'apple-api' || currentConditions.source === 'apple-cache-expired'" class="apple-attribution">
+            <small>
+              <a href="https://developer.apple.com/weatherkit/data-source-attribution/" target="_blank" rel="noopener">
+                Weather data provided by Apple WeatherKit
+              </a>
             </small>
           </div>
         </div>
@@ -161,6 +173,15 @@
             <small>Near-zero visibility, shelter immediately</small>
           </div>
         </div>
+      </div>
+      
+      <!-- Global Apple Weather Attribution (when using Apple data) -->
+      <div v-if="currentConditions && (currentConditions.source === 'apple-api' || currentConditions.source === 'apple-cache-expired')" class="global-attribution">
+        <small>
+          <a href="https://developer.apple.com/weatherkit/data-source-attribution/" target="_blank" rel="noopener">
+            Weather data provided by Apple WeatherKit
+          </a>
+        </small>
       </div>
     </div>
   </section>
@@ -422,6 +443,53 @@ h2 {
 .data-source small {
   color: #999;
   font-size: 0.8rem;
+}
+
+.apple-attribution {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #333;
+  text-align: center;
+}
+
+.apple-attribution small {
+  color: #999;
+  font-size: 0.75rem;
+}
+
+.apple-attribution a {
+  color: #666;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.apple-attribution a:hover {
+  color: #999;
+  text-decoration: underline;
+}
+
+.global-attribution {
+  margin-top: 2rem;
+  padding: 1rem;
+  text-align: center;
+  border-top: 1px solid #333;
+  background: #1a1a1a;
+}
+
+.global-attribution small {
+  color: #666;
+  font-size: 0.75rem;
+}
+
+.global-attribution a {
+  color: #666;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.global-attribution a:hover {
+  color: #999;
+  text-decoration: underline;
 }
 
 .no-data-state {
