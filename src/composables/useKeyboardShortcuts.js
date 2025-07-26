@@ -89,7 +89,7 @@ Navigation:
 • A - Art list
 • E - Events list
 • S or / - Search
-• G - Settings
+• G - Settings (includes Emergency tab)
 • ESC - Go back
 
 Year Switching:

@@ -15,7 +15,6 @@
           <button @click="navigate('events')" :class="{ active: isActive('events') }">Events</button>
           <button @click="navigate('search')" :class="{ active: isActive('search') }">🔍 Search</button>
           <button @click="navigate('schedule')" :class="{ active: isActive('schedule') }">📅 Schedule</button>
-          <button @click="navigateToEmergency" :class="['emergency-btn', { active: isActive('emergency') }]">🚨 Emergency</button>
           <button @click="navigateToDust" :class="{ active: isActive('dust') }">🌪️ Dust</button>
         </nav>
         <h1 @click="navigateToSettings" class="app-title">OK-OFFLINE</h1>
@@ -157,10 +156,6 @@ const navigateToSettings = () => {
   router.push('/settings')
 }
 
-const navigateToEmergency = () => {
-  router.push('/emergency')
-}
-
 const navigateToDust = () => {
   router.push('/dust')
 }
@@ -232,20 +227,6 @@ button.active {
 .last-sync {
   color: #999;
   font-size: 0.75rem;
-}
-
-.emergency-btn {
-  background: #8B0000 !important;
-  color: #fff !important;
-  border: 1px solid #a00000 !important;
-}
-
-.emergency-btn:hover {
-  background: #a00000 !important;
-}
-
-.emergency-btn.active {
-  background: #ff0000 !important;
 }
 
 @media (max-width: 768px) {

@@ -9,7 +9,6 @@ import DetailView from './views/DetailView.vue'
 import SettingsView from './views/SettingsView.vue'
 import SearchView from './views/SearchView.vue'
 import ScheduleView from './views/ScheduleView.vue'
-import EmergencyView from './views/EmergencyView.vue'
 import DustForecastView from './views/DustForecastView.vue'
 
 // Import CSS
@@ -83,11 +82,6 @@ const routes = [
     name: 'schedule',
     component: ScheduleView,
     props: true
-  },
-  {
-    path: '/emergency',
-    name: 'emergency',
-    component: EmergencyView
   },
   {
     path: '/dust',
