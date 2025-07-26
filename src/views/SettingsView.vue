@@ -707,6 +707,20 @@ Database: bm2025-db
               </ul>
             </div>
             
+            <div v-if="release.security?.length" class="release-group">
+              <h4>🔒 Security</h4>
+              <ul>
+                <li v-for="(item, idx) in release.security" :key="idx">{{ item }}</li>
+              </ul>
+            </div>
+            
+            <div v-if="release.breaking?.length" class="release-group">
+              <h4>💥 Breaking Changes</h4>
+              <ul>
+                <li v-for="(item, idx) in release.breaking" :key="idx">{{ item }}</li>
+              </ul>
+            </div>
+            
             <div v-if="release.technical?.length" class="release-group">
               <h4>🔧 Technical</h4>
               <ul>
@@ -778,15 +792,18 @@ const showReleaseNotes = ref(false)
 // Release notes data
 const releaseNotes = [
   {
-    version: '1.3.0',
-    date: '2025-01-26',
+    version: '2.0.0',
+    date: '2025-07-26',
     added: [
+      'Secure Rails API proxy for weather data integration',
+      'Vite development proxy for local Rails backend connection',
       'Real-time weather and dust forecast for Black Rock City',
-      'Apple WeatherKit integration with JWT authentication',
+      'Apple WeatherKit integration via secure JWT authentication proxy',
       'Moon phase data for navigation at Burning Man',
-      'OpenWeatherMap primary weather service with fallback strategy',
+      'OpenWeatherMap primary weather service with Rails fallback strategy',
       'Emergency features moved to Settings tab (cleaner navigation)',
       'Rails API service (ok-offline-api) for server-side weather integration',
+      'CORS-compliant weather data fetching through proxy',
       'Auto-refresh weather data every 15 minutes',
       'Detailed weather metrics (temperature, wind, humidity, pressure, visibility)',
       '5-day dust forecast with protection recommendations',
@@ -794,32 +811,36 @@ const releaseNotes = [
       'Sun times (sunrise/sunset) for Black Rock City',
       'Weather data caching for offline use',
       'Apple WeatherKit data source attribution',
-      'Professional GIS data integration with complete street network',
-      'leaflet-rotate plugin for professional map rotation',
-      'City alignment feature (gate at bottom, temple at top)',
-      'Comprehensive map layers: streets, trash fence, city blocks, plazas, CPNs',
-      'Map Settings view with detailed Black Rock City geometric information',
-      'Interactive GIS layer controls and map legend',
-      'Base map toggle for satellite imagery',
-      'Enhanced map view with rotation slider and alignment controls'
+      'Robust error handling for weather services',
+      'Professional GIS data integration with map rotation capabilities'
     ],
     changed: [
+      'SECURITY: All API credentials now handled server-side only',
+      'Weather services completely refactored to use Rails API endpoints',
       'Emergency button moved from navigation header to Settings tab',
-      'Dev server port documentation updated to 8000',
+      'Dev server port updated to 8005 for proxy configuration',
       'Enhanced dust forecast view with real weather data',
-      'Improved weather service architecture with multiple fallbacks',
-      'Map view enhanced with professional rotation and GIS layers',
-      'Settings reorganized with separate Emergency and Maps tabs',
-      'BRC geocoding improved with GIS data intersection detection'
+      'Improved weather service architecture with secure proxy fallbacks',
+      'Development workflow now requires running Rails backend service'
     ],
     fixed: [
+      'SECURITY: No more exposed API keys in frontend JavaScript',
       'Console errors from weather API calls',
-      'CORS issues with Apple WeatherKit by creating Rails backend',
+      'CORS issues with Apple WeatherKit by implementing Rails backend proxy',
       'Doubled padding in weather UI components',
       'Template null reference errors in weather display',
-      'Airport location corrected using accurate GIS coordinates',
-      'Map rotation now maintains proper drag/zoom interactions',
-      'GIS layer loading and error handling improved'
+      'Airport location coordinates updated to accurate GIS data'
+    ],
+    security: [
+      'Removed Apple WeatherKit private key from frontend repository',
+      'Implemented secure server-side proxy for all weather API calls',
+      'Eliminated client-side API credential exposure',
+      'Added proper CORS configuration for production deployment'
+    ],
+    breaking: [
+      'SECURITY: Removed all hardcoded API credentials from frontend code',
+      'Weather API integration now requires Rails backend service',
+      'Apple WeatherKit authentication moved to secure server-side proxy'
     ]
   },
   {

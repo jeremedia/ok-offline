@@ -7,14 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2025-07-26
+
+### BREAKING CHANGES
+- **SECURITY**: Removed all hardcoded API credentials from frontend code
+- Weather API integration now requires Rails backend service
+- Apple WeatherKit authentication moved to secure server-side proxy
+
 ### Added
+- Secure Rails API proxy for weather data integration
+- Vite development proxy for local Rails backend connection
 - Real-time weather and dust forecast for Black Rock City
-- Apple WeatherKit integration with JWT authentication
+- Apple WeatherKit integration via secure JWT authentication proxy
 - Moon phase data for navigation at Burning Man
-- OpenWeatherMap primary weather service with fallback strategy
+- OpenWeatherMap primary weather service with Rails fallback strategy
 - Emergency features moved to Settings tab (cleaner navigation)
 - Rails API service (ok-offline-api) for server-side weather integration
-- CORS-compliant weather data fetching
+- CORS-compliant weather data fetching through proxy
 - Auto-refresh weather data every 15 minutes
 - Detailed weather metrics (temperature, wind, humidity, pressure, visibility)
 - 5-day dust forecast with protection recommendations
@@ -23,18 +32,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Weather data caching for offline use
 - Apple WeatherKit data source attribution
 - Robust error handling for weather services
+- Professional GIS data integration with map rotation capabilities
 
 ### Changed
+- **SECURITY**: All API credentials now handled server-side only
+- Weather services completely refactored to use Rails API endpoints
 - Emergency button moved from navigation header to Settings tab
-- Dev server port documentation updated to 8000
+- Dev server port updated to 8005 for proxy configuration
 - Enhanced dust forecast view with real weather data
-- Improved weather service architecture with multiple fallbacks
+- Improved weather service architecture with secure proxy fallbacks
+- Development workflow now requires running Rails backend service
 
 ### Fixed
+- **SECURITY**: No more exposed API keys in frontend JavaScript
 - Console errors from weather API calls
-- CORS issues with Apple WeatherKit by creating Rails backend
+- CORS issues with Apple WeatherKit by implementing Rails backend proxy
 - Doubled padding in weather UI components
 - Template null reference errors in weather display
+- Airport location coordinates updated to accurate GIS data
+
+### Security
+- Removed Apple WeatherKit private key from frontend repository
+- Implemented secure server-side proxy for all weather API calls
+- Eliminated client-side API credential exposure
+- Added proper CORS configuration for production deployment
 
 ## [1.2.5] - 2025-01-26
 
