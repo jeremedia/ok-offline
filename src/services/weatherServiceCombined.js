@@ -152,12 +152,31 @@ const mapAppleIconToStandard = (conditionCode) => {
  */
 export const getCurrentWeatherRobust = async () => {
   const errors = []
+  
+  // Always try to get moon phase data from Apple Weather for Burning Man
+  let appleWeatherData = null
+  if (shouldTryAppleWeather()) {
+    try {
+      console.log('Fetching moon phase data from Apple WeatherKit...')
+      appleWeatherData = await getCurrentWeatherFromApple()
+      console.log('✅ Apple WeatherKit moon data fetched')
+    } catch (error) {
+      console.log('⚠️ Apple WeatherKit moon data failed:', error.message)
+    }
+  }
 
-  // 1. Try OpenWeatherMap first
+  // 1. Try OpenWeatherMap first for primary weather data
   try {
     console.log('Trying OpenWeatherMap API...')
     const data = await getOpenWeatherCurrent()
     console.log('✅ OpenWeatherMap succeeded')
+    
+    // If we got moon data from Apple, merge it in
+    if (appleWeatherData && appleWeatherData.moonPhase) {
+      console.log('🌙 Adding Apple moon phase data to OpenWeatherMap response')
+      data.moonPhase = appleWeatherData.moonPhase
+    }
+    
     return data
   } catch (error) {
     // Only log non-401 errors to reduce console noise
@@ -169,10 +188,16 @@ export const getCurrentWeatherRobust = async () => {
     errors.push(`OpenWeatherMap: ${error.message}`)
   }
 
-  // 2. Try Apple Weather if available
-  if (shouldTryAppleWeather()) {
+  // 2. If OpenWeatherMap failed but we have Apple data, use it
+  if (appleWeatherData) {
+    console.log('✅ Using Apple WeatherKit as primary (includes moon data)')
+    return appleWeatherData
+  }
+
+  // 3. Try Apple Weather as last resort if we haven't already
+  if (shouldTryAppleWeather() && !appleWeatherData) {
     try {
-      console.log('Trying Apple WeatherKit API...')
+      console.log('Trying Apple WeatherKit API as final fallback...')
       const data = await getCurrentWeatherFromApple()
       console.log('✅ Apple WeatherKit succeeded')
       return data
@@ -182,7 +207,7 @@ export const getCurrentWeatherRobust = async () => {
     }
   }
 
-  // 3. All APIs failed - throw combined error
+  // 4. All APIs failed - throw combined error
   const combinedError = new Error(`All weather services failed: ${errors.join(', ')}`)
   combinedError.errors = errors
   throw combinedError

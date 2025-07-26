@@ -197,8 +197,17 @@ export const getCurrentWeatherFromApple = async () => {
     
     // Extract moon phase data if available
     let moonPhase = null
+    console.log('Apple Weather response structure:', {
+      hasForecastDaily: !!data.forecastDaily,
+      hasDays: !!(data.forecastDaily && data.forecastDaily.days),
+      daysLength: data.forecastDaily && data.forecastDaily.days ? data.forecastDaily.days.length : 0,
+      firstDay: data.forecastDaily && data.forecastDaily.days && data.forecastDaily.days[0] ? Object.keys(data.forecastDaily.days[0]) : []
+    })
+    
     if (data.forecastDaily && data.forecastDaily.days && data.forecastDaily.days[0]) {
       const today = data.forecastDaily.days[0]
+      console.log('Today forecast data:', today)
+      
       if (today.moonPhase !== undefined) {
         moonPhase = {
           phase: today.moonPhase,
@@ -207,7 +216,12 @@ export const getCurrentWeatherFromApple = async () => {
           moonrise: today.moonrise ? formatMoonTime(today.moonrise) : null,
           moonset: today.moonset ? formatMoonTime(today.moonset) : null
         }
+        console.log('🌙 Moon phase extracted:', moonPhase)
+      } else {
+        console.log('⚠️ No moonPhase field in today forecast')
       }
+    } else {
+      console.log('⚠️ No forecast daily data or days array')
     }
 
     const processedData = {

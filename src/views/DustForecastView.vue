@@ -184,7 +184,7 @@
       </div>
       
       <!-- Moon Phase Section (when available from Apple Weather) -->
-      <div v-if="currentConditions && currentConditions.moonPhase && currentConditions.source.includes('apple')" class="moon-phase-section">
+      <div v-if="currentConditions && currentConditions.moonPhase" class="moon-phase-section">
         <h3>🌙 Moon Phase for Black Rock City</h3>
         <div class="moon-phase-card">
           <div class="moon-display">
@@ -210,7 +210,7 @@
       </div>
       
       <!-- Global Apple Weather Attribution (when using Apple data) -->
-      <div v-if="currentConditions && (currentConditions.source === 'apple-api' || currentConditions.source === 'apple-cache-expired')" class="global-attribution">
+      <div v-if="currentConditions && (currentConditions.source === 'apple-api' || currentConditions.source === 'apple-cache-expired' || currentConditions.moonPhase)" class="global-attribution">
         <small>
           <a href="https://developer.apple.com/weatherkit/data-source-attribution/" target="_blank" rel="noopener">
             Weather data provided by Apple WeatherKit
