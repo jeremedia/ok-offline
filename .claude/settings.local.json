@@ -18,7 +18,12 @@
       "Bash(chmod:*)",
       "Bash(ls:*)",
       "Bash(gh issue create:*)",
-      "Bash(git worktree:*)"
+      "Bash(git worktree:*)",
+      "Bash(cat:*)",
+      "Bash(git checkout:*)",
+      "Bash(gh repo view:*)",
+      "Bash(gh api:*)",
+      "Bash(git add:*)"
     ],
     "deny": []
   }

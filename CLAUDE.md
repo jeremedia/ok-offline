@@ -8,6 +8,10 @@ OK-OFFLINE is a Progressive Web App (PWA) built with Vue 3 and Vite that serves 
 
 Created by Jeremy Roush and brought to you by Mr. OK of OKNOTOK.
 
+## Development Notes
+
+- server is always running, no need to start it for playwright mcp testing
+
 ## Current Architecture (Vue 3 + Vite)
 
 ### Tech Stack
@@ -19,6 +23,7 @@ Created by Jeremy Roush and brought to you by Mr. OK of OKNOTOK.
 - **Service Workers** - PWA functionality
 - **Berkeley Mono** - Custom monospace font
 
+<<<<<<< HEAD
 ### Project Structure
 ```
 ok-offline/
@@ -31,14 +36,16 @@ ok-offline/
 │   │   ├── ScheduleView.vue    # Personal schedule builder
 │   │   ├── SettingsView.vue    # Data sync and app settings
 │   │   ├── EmergencyView.vue   # Emergency contacts & medical info
-│   │   └── DustForecastView.vue # Weather and dust conditions
+│   │   ├── DustForecastView.vue # Weather and dust conditions
+│   │   └── MapSettingsView.vue # GIS data and map information
 │   ├── services/
 │   │   ├── storage.js          # IndexedDB operations
 │   │   ├── dataSync.js         # API sync with enrichment
 │   │   ├── events.js           # Event-specific operations
 │   │   ├── favorites.js        # Favorites management
 │   │   ├── schedule.js         # Schedule management
-│   │   └── visits.js           # Visit tracking and notes
+│   │   ├── visits.js           # Visit tracking and notes
+│   │   └── gisData.js          # GIS data loading and management
 │   ├── composables/
 │   │   ├── useGeolocation.js   # Location services
 │   │   └── useKeyboardShortcuts.js # Keyboard navigation
@@ -49,6 +56,7 @@ ok-offline/
 │   ├── config.js               # API keys and constants
 │   └── utils.js                # Shared utility functions
 ├── public/
+│   ├── data/2025/gis/          # GIS data files (GeoJSON)
 │   ├── manifest.json           # PWA manifest
 │   └── sw.js                   # Service worker
 ├── fonts/                      # Berkeley Mono font files
@@ -72,13 +80,17 @@ ok-offline/
 - Per-year data management
 - Metadata tracking (last sync time)
 
-### 3. **Interactive Map**
-- Leaflet map centered on Golden Spike
+### 3. **Interactive Map with GIS Data**
+- Leaflet map with leaflet-rotate plugin for professional rotation
 - Toggle layers for camps, art, events
+- GIS data layers: streets, trash fence, city blocks, plazas, CPNs
+- City alignment rotation (gate at bottom, temple at top)
 - Custom markers with popups
 - Favorites filter
 - Click markers to view details
 - BRC address geocoding (e.g., "7:30 & E")
+- Interactive legend and map controls
+- Base map toggle for satellite imagery
 
 ### 4. **Advanced List Views**
 - Live search/filter by name
@@ -155,6 +167,17 @@ ok-offline/
 - Offline caching with 10-minute cache duration
 - Comprehensive error handling and loading states
 - Protection recommendations based on current conditions
+
+### 14. **Professional GIS Data Integration**
+- Complete Black Rock City street network (radial and circular streets)
+- Trash fence boundary defining city limits
+- City blocks for accurate camp placement visualization
+- Plazas and Civic Plaza Network (CPN) locations
+- Professional map rotation with leaflet-rotate plugin
+- Geometric analysis of BRC layout with detailed facts
+- Map Settings view with comprehensive city information
+- Technical details about coordinate systems and data sources
+- Interactive controls for all GIS layers
 
 ## Data Flow
 

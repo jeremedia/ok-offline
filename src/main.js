@@ -7,6 +7,7 @@ import MapView from './views/MapView.vue'
 import ListView from './views/ListView.vue'
 import DetailView from './views/DetailView.vue'
 import SettingsView from './views/SettingsView.vue'
+import MapSettingsView from './views/MapSettingsView.vue'
 import SearchView from './views/SearchView.vue'
 import ScheduleView from './views/ScheduleView.vue'
 import DustForecastView from './views/DustForecastView.vue'
@@ -70,6 +71,11 @@ const routes = [
     path: '/settings',
     name: 'settings',
     component: SettingsView
+  },
+  {
+    path: '/settings/map',
+    name: 'map-settings',
+    component: MapSettingsView
   },
   {
     path: '/:year/search',
