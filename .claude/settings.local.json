@@ -16,7 +16,8 @@
       "mcp__playwright__playwright_evaluate",
       "Bash(env)",
       "Bash(chmod:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(gh issue create:*)"
     ],
     "deny": []
   }

@@ -21,6 +21,9 @@ jobs:
     - name: Install dependencies
       run: npm ci
     
+    - name: Parse changelog for release notes
+      run: node scripts/parse-changelog.js
+    
     - name: Build project
       run: npm run build
     

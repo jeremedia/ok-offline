@@ -54,7 +54,7 @@ const router = useRouter()
 
 // Toast notification ref
 const toastRef = ref(null)
-const selectedYear = ref('2025')
+const selectedYear = ref('2024')
 const isOnline = ref(navigator.onLine)
 const lastSyncTime = ref(null)
 
@@ -120,10 +120,14 @@ onMounted(async () => {
   })
 })
 
-// Load saved year from localStorage
+// Load saved year from localStorage (default to 2024)
 const savedYear = localStorage.getItem('selectedYear')
 if (savedYear && ['2023', '2024', '2025'].includes(savedYear)) {
   selectedYear.value = savedYear
+} else {
+  // Default to 2024 if no saved year
+  selectedYear.value = '2024'
+  localStorage.setItem('selectedYear', '2024')
 }
 
 // Update year from route

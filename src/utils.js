@@ -40,6 +40,9 @@ export function getItemLocation(item) {
   // Check for enriched location first (for events)
   if (item.enriched_location) return item.enriched_location
   
+  // Check for other_location (for events with custom locations)
+  if (item.other_location) return item.other_location
+  
   // Check if we have a cached location (for events)
   if (item.cached_location) return item.cached_location
   

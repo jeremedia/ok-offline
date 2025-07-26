@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Event Locations</title>
+    <style>
+        body { font-family: monospace; padding: 20px; }
+        .event { margin: 10px 0; padding: 10px; border: 1px solid #ccc; }
+        .has-location { background: #e8f5e9; }
+        .no-location { background: #ffebee; }
+        pre { margin: 5px 0; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <h1>Debug Event Locations</h1>
+    <button onclick="checkData()">Check IndexedDB Data</button>
+    <button onclick="checkStaticData()">Check Static JSON Data</button>
+    <button onclick="clearAll()">Clear All Data</button>
+    <div id="results"></div>
+
+    <script>
+        async function checkData() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<h2>Checking IndexedDB...</h2>';
+            
+            try {
+                // Open the database
+                const dbName = 'bm2024-db';
+                const db = await new Promise((resolve, reject) => {
+                    const req = indexedDB.open(dbName);
+                    req.onsuccess = () => resolve(req.result);
+                    req.onerror = () => reject(req.error);
+                });
+                
+                // Get some events
+                const tx = db.transaction(['event'], 'readonly');
+                const store = tx.objectStore('event');
+                const events = await new Promise((resolve, reject) => {
+                    const req = store.getAll();
+                    req.onsuccess = () => resolve(req.result);
+                    req.onerror = () => reject(req.error);
+                });
+                
+                // Show first 10 events
+                const sample = events.slice(0, 10);
+                let html = `<h3>Found ${events.length} events in IndexedDB</h3>`;
+                
+                sample.forEach(event => {
+                    const hasLocation = event.enriched_location || event.location_string;
+                    html += `
+                        <div class="event ${hasLocation ? 'has-location' : 'no-location'}">
+                            <strong>${event.title}</strong><br>
+                            Location: ${event.enriched_location || event.location_string || 'UNKNOWN'}<br>
+                            <details>
+                                <summary>Full event data</summary>
+                                <pre>${JSON.stringify(event, null, 2)}</pre>
+                            </details>
+                        </div>
+                    `;
+                });
+                
+                results.innerHTML += html;
+                
+            } catch (err) {
+                results.innerHTML += `<p style="color: red">Error: ${err.message}</p>`;
+            }
+        }
+        
+        async function checkStaticData() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<h2>Checking Static JSON...</h2>';
+            
+            try {
+                const response = await fetch('/data/2024/events.json');
+                const events = await response.json();
+                
+                // Count events with locations
+                const withLocation = events.filter(e => e.enriched_location).length;
+                
+                let html = `<h3>Static JSON: ${events.length} events, ${withLocation} with enriched_location</h3>`;
+                
+                // Show first 10 events with camps
+                const sample = events.filter(e => e.hosted_by_camp).slice(0, 10);
+                
+                sample.forEach(event => {
+                    const hasLocation = event.enriched_location || event.location_string;
+                    html += `
+                        <div class="event ${hasLocation ? 'has-location' : 'no-location'}">
+                            <strong>${event.title}</strong><br>
+                            enriched_location: ${event.enriched_location || 'none'}<br>
+                            camp_name: ${event.camp_name || 'none'}<br>
+                            hosted_by_camp: ${event.hosted_by_camp || 'none'}<br>
+                        </div>
+                    `;
+                });
+                
+                results.innerHTML += html;
+                
+            } catch (err) {
+                results.innerHTML += `<p style="color: red">Error: ${err.message}</p>`;
+            }
+        }
+        
+        async function clearAll() {
+            if (!confirm('Clear all local data?')) return;
+            
+            // Clear IndexedDB
+            ['bm2023-db', 'bm2024-db', 'bm2025-db'].forEach(db => {
+                indexedDB.deleteDatabase(db);
+            });
+            
+            // Clear storage
+            localStorage.clear();
+            sessionStorage.clear();
+            
+            // Clear service worker and caches
+            if ('serviceWorker' in navigator) {
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                for (const reg of registrations) {
+                    await reg.unregister();
+                }
+            }
+            
+            if ('caches' in window) {
+                const cacheNames = await caches.keys();
+                for (const name of cacheNames) {
+                    await caches.delete(name);
+                }
+            }
+            
+            alert('All data cleared! Refresh the page.');
+        }
+    </script>
+</body>
+</html>

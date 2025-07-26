@@ -470,7 +470,7 @@ Database: bm2025-db
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { syncYear as syncYearData, getSyncStatus, clearYear as clearYearData } from '../services/staticDataSync'
 import { clearCache } from '../services/storage'
 import { useToast } from '../composables/useToast'
@@ -478,7 +478,12 @@ import { getErrorMessage } from '../utils/errorHandler'
 
 // Tab management
 const tabs = ['Data Sync', 'About', 'Features', 'Implementation', 'Feedback']
-const activeTab = ref('Data Sync')
+const activeTab = ref(localStorage.getItem('settingsTab') || 'Data Sync')
+
+// Save tab selection when it changes
+watch(activeTab, (newTab) => {
+  localStorage.setItem('settingsTab', newTab)
+})
 
 // Toast notifications
 const { showSuccess, showError, showWarning } = useToast()
@@ -498,6 +503,76 @@ const showReleaseNotes = ref(false)
 
 // Release notes data
 const releaseNotes = [
+  {
+    version: '1.2.5',
+    date: '2025-01-26',
+    added: [
+      'Pre-enriched event data in static files for better performance',
+      'Environment variable support for API keys (.env file)',
+      'Scripts for data enrichment and processing',
+      'PWA icons in multiple sizes for better device support',
+      'Support for other_location field in events'
+    ],
+    changed: [
+      'Events are now pre-enriched with location data at build time',
+      'API key moved to environment variables for security',
+      'Removed runtime enrichment to save processing on mobile devices',
+      'Service worker cache version bumped to v3'
+    ],
+    fixed: [
+      'Events with custom locations now display correctly',
+      'Unknown location issues for enriched events'
+    ]
+  },
+  {
+    version: '1.2.4',
+    date: '2025-01-26',
+    added: [
+      'Static data files for offline-first architecture',
+      'Toast notification system for user feedback',
+      'User-friendly error messages for sync failures'
+    ],
+    changed: [
+      'Replaced API proxy with static JSON data files',
+      'Removed dependency on live API calls',
+      'Simplified sync process'
+    ],
+    fixed: [
+      'CORS issues with Burning Man API',
+      'Toast notification timing issues'
+    ]
+  },
+  {
+    version: '1.2.3',
+    date: '2025-01-26',
+    fixed: [
+      'Loading states and error handling improvements',
+      'Visual feedback during sync operations'
+    ]
+  },
+  {
+    version: '1.2.2',
+    date: '2025-01-26',
+    added: [
+      'Loading spinner component with animated feedback',
+      'Skeleton loader component for list views',
+      'Toast notification system for user feedback',
+      'Comprehensive error handling with user-friendly messages',
+      'Retry functionality for failed data loads',
+      'Success notifications for sync operations',
+      'Empty state messages with helpful hints',
+      'Enhanced progress bars with gradient animations'
+    ],
+    changed: [
+      'Improved sync progress visualization',
+      'Better error messages for network and API failures',
+      'Enhanced user feedback during operations'
+    ],
+    fixed: [
+      'Error states now show actionable messages',
+      'Loading states properly displayed during data fetches'
+    ]
+  },
   {
     version: '1.1.0',
     date: '2025-01-26',

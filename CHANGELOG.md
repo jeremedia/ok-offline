@@ -5,6 +5,47 @@ All notable changes to OK-OFFLINE will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.5] - 2025-01-26
+
+### Added
+- Pre-enriched event data in static files for better performance
+- Environment variable support for API keys (.env file)
+- Scripts for data enrichment and processing
+- PWA icons in multiple sizes for better device support
+- Support for `other_location` field in events
+
+### Changed
+- Events are now pre-enriched with location data at build time
+- API key moved to environment variables for security
+- Removed runtime enrichment to save processing on mobile devices
+- Service worker cache version bumped to v3
+
+### Fixed
+- Events with custom locations now display correctly
+- Unknown location issues for enriched events
+
+## [1.2.4] - 2025-01-26
+
+### Added
+- Static data files for offline-first architecture
+- Toast notification system for user feedback
+- User-friendly error messages for sync failures
+
+### Changed
+- Replaced API proxy with static JSON data files
+- Removed dependency on live API calls
+- Simplified sync process
+
+### Fixed
+- CORS issues with Burning Man API
+- Toast notification timing issues
+
+## [1.2.3] - 2025-01-26
+
+### Fixed
+- Loading states and error handling improvements
+- Visual feedback during sync operations
+
 ## [1.2.2] - 2025-01-26
 
 ### Added
