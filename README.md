@@ -70,3 +70,4 @@ MIT License - See LICENSE file for details
 
 - Data provided by the [Burning Man Public API](https://api.burningman.org)
 - Map data from Burning Man Innovate GIS
+- Brought to you by Mr. OK of OKNOTOK camp
