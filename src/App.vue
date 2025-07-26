@@ -1,5 +1,6 @@
 <template>
   <div>
+    <ToastNotification ref="toastRef" />
     <header>
       <div class="header-row">
         <nav>
@@ -45,9 +46,14 @@ import { ref, watch, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useKeyboardShortcuts } from './composables/useKeyboardShortcuts'
 import { getSyncMetadata } from './services/dataSync'
+import ToastNotification from './components/ToastNotification.vue'
+import { setToastRef } from './composables/useToast'
 
 const route = useRoute()
 const router = useRouter()
+
+// Toast notification ref
+const toastRef = ref(null)
 const selectedYear = ref('2025')
 const isOnline = ref(navigator.onLine)
 const lastSyncTime = ref(null)
@@ -96,6 +102,9 @@ const formatLastSync = computed(() => {
 })
 
 onMounted(() => {
+  // Set up toast notifications
+  setToastRef(toastRef)
+  
   window.addEventListener('online', updateOnlineStatus)
   window.addEventListener('offline', updateOnlineStatus)
   updateLastSyncTime()

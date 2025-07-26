@@ -473,10 +473,15 @@ Database: bm2025-db
 import { ref, onMounted } from 'vue'
 import { syncYear as syncYearData, getSyncStatus, clearYear as clearYearData } from '../services/dataSync'
 import { clearCache } from '../services/storage'
+import { useToast } from '../composables/useToast'
+import { getErrorMessage } from '../utils/errorHandler'
 
 // Tab management
 const tabs = ['Data Sync', 'About', 'Features', 'Implementation', 'Feedback']
 const activeTab = ref('Data Sync')
+
+// Toast notifications
+const { showSuccess, showError } = useToast()
 
 // App version
 const appVersion = __APP_VERSION__
@@ -613,9 +618,13 @@ const syncYear = async (year) => {
       progress.value[year] = 0
       progressText.value[year] = ''
     }, 2000)
+    // Show success notification
+    showSuccess(`Successfully synced ${year} data!`)
   } catch (err) {
     console.error('Sync failed:', err)
-    progressText.value[year] = `Error: ${err.message}`
+    const errorMessage = getErrorMessage(err)
+    progressText.value[year] = `Error: ${errorMessage}`
+    showError(errorMessage)
   } finally {
     syncing.value[year] = false
   }
@@ -633,6 +642,7 @@ const syncAllYears = async () => {
   }
   
   syncAllProgress.value = 'All years synced!'
+  showSuccess('Successfully synced all years!')
   setTimeout(() => {
     syncingAll.value = false
     syncAllProgress.value = ''
@@ -641,16 +651,28 @@ const syncAllYears = async () => {
 
 const clearYear = async (year) => {
   if (confirm(`Are you sure you want to clear all ${year} data? This cannot be undone.`)) {
-    await clearYearData(year)
-    await loadSyncStatus()
+    try {
+      await clearYearData(year)
+      await loadSyncStatus()
+      showSuccess(`Cleared all ${year} data`)
+    } catch (err) {
+      console.error('Failed to clear data:', err)
+      showError('Failed to clear data. Please try again.')
+    }
   }
 }
 
 const clearAllData = async () => {
   if (confirm('Are you sure you want to clear ALL cached data? This cannot be undone.')) {
-    await clearCache()
-    localStorage.clear()
-    await loadSyncStatus()
+    try {
+      await clearCache()
+      localStorage.clear()
+      await loadSyncStatus()
+      showSuccess('All cached data cleared')
+    } catch (err) {
+      console.error('Failed to clear all data:', err)
+      showError('Failed to clear data. Please try again.')
+    }
   }
 }
 

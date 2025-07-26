@@ -1,5 +1,6 @@
 import { API_KEY, API_BASE } from '../config'
 import { saveToCache, getFromCache } from './storage'
+import { AppError, handleError } from '../utils/errorHandler'
 
 /**
  * Sync all data for a given year
@@ -49,7 +50,18 @@ export async function syncType(type, year) {
     })
     
     if (!response.ok) {
-      throw new Error(`API returned ${response.status}: ${response.statusText}`)
+      if (response.status === 401 || response.status === 403) {
+        throw new AppError(
+          `API authentication failed`, 
+          'API_ERROR',
+          'Unable to access Burning Man API. Please check your connection.'
+        )
+      }
+      throw new AppError(
+        `API returned ${response.status}: ${response.statusText}`,
+        'API_ERROR',
+        'Unable to sync data. Please try again later.'
+      )
     }
     
     const data = await response.json()
@@ -79,8 +91,32 @@ export async function syncType(type, year) {
       timestamp: new Date().toISOString()
     }
   } catch (err) {
-    console.error(`Failed to sync ${type}s for ${year}:`, err)
-    throw err
+    // Re-throw AppError as-is
+    if (err instanceof AppError) {
+      throw err
+    }
+    
+    // Handle network errors
+    if (err.name === 'TypeError' && err.message.includes('fetch')) {
+      throw new AppError(
+        err.message,
+        'NETWORK_ERROR',
+        'No internet connection. Please check your network.'
+      )
+    }
+    
+    // Handle timeout
+    if (err.name === 'AbortError') {
+      throw new AppError(
+        err.message,
+        'TIMEOUT',
+        'Request timed out. Please try again.'
+      )
+    }
+    
+    // Generic error
+    const message = handleError(err, `syncType ${type} ${year}`)
+    throw new AppError(err.message, 'SYNC_FAILED', message)
   }
 }
 
