@@ -17,6 +17,23 @@
         <input type="checkbox" v-model="showFavoritesOnly" @change="updateMarkers">
         ⭐ Favorites Only
       </label>
+      <hr class="controls-divider">
+      <label class="map-control">
+        <input type="checkbox" v-model="showStreets" @change="updateGISLayers">
+        🛣️ Streets
+      </label>
+      <label class="map-control">
+        <input type="checkbox" v-model="showTrashFence" @change="updateGISLayers">
+        🚧 Trash Fence
+      </label>
+      <label class="map-control">
+        <input type="checkbox" v-model="showCityBlocks" @change="updateGISLayers">
+        🏗️ City Blocks
+      </label>
+      <label class="map-control">
+        <input type="checkbox" v-model="showPlazas" @change="updateGISLayers">
+        📍 Plazas & CPNs
+      </label>
     </div>
     <div id="map" ref="mapContainer"></div>
   </section>
@@ -31,6 +48,15 @@ import { getFromCache } from '../services/storage'
 import { isFavorite } from '../services/favorites'
 import { getItemName, getItemLocation } from '../utils'
 import { brcAddressToLatLon, getSpecialLocationCoords } from '../utils/geocoding'
+import { 
+  initializeGISData, 
+  getStreetLines, 
+  getTrashFence, 
+  getCityBlocks,
+  getPlazas,
+  getCPNs,
+  gisStyles 
+} from '../services/gisData'
 
 const route = useRoute()
 const mapContainer = ref(null)
@@ -38,17 +64,27 @@ const showCamps = ref(true)
 const showArt = ref(true)
 const showEvents = ref(true)
 const showFavoritesOnly = ref(false)
+const showStreets = ref(true)
+const showTrashFence = ref(true)
+const showCityBlocks = ref(false)
+const showPlazas = ref(true)
 const year = computed(() => route.params.year || localStorage.getItem('selectedYear') || '2025')
 
 let map = null
 let markersLayer = null
+let gisLayers = {
+  streetLines: null,
+  trashFence: null,
+  cityBlocks: null,
+  plazas: null
+}
 let items = {
   camps: [],
   art: [],
   events: []
 }
 
-onMounted(() => {
+onMounted(async () => {
   // Initialize Leaflet map
   map = L.map(mapContainer.value, {
     center: BRC_CENTER,
@@ -63,24 +99,11 @@ onMounted(() => {
   
   markersLayer = L.layerGroup().addTo(map)
   
-  // Load GeoJSON overlays
-  fetch('/example.geojson')
-    .then(resp => resp.json())
-    .then(geojson => {
-      L.geoJSON(geojson, {
-        style: {
-          color: '#FF6600',
-          weight: 2,
-          fillOpacity: 0.1
-        },
-        onEachFeature: function (feature, layer) {
-          if (feature.properties && feature.properties.name) {
-            layer.bindPopup(feature.properties.name)
-          }
-        }
-      }).addTo(map)
-    })
-    .catch(err => console.error('Error loading GeoJSON:', err))
+  // Initialize GIS data
+  await initializeGISData()
+  
+  // Add GIS layers
+  updateGISLayers()
   
   // Add special location markers
   addSpecialLocations()
@@ -200,6 +223,105 @@ const addMarker = (item, type, icon) => {
   
   markersLayer.addLayer(marker)
 }
+
+const updateGISLayers = () => {
+  // Remove existing GIS layers
+  Object.values(gisLayers).forEach(layer => {
+    if (layer && map.hasLayer(layer)) {
+      map.removeLayer(layer)
+    }
+  })
+  
+  // Add street lines
+  if (showStreets.value) {
+    const streetData = getStreetLines()
+    if (streetData) {
+      gisLayers.streetLines = L.geoJSON(streetData, {
+        style: (feature) => {
+          const type = feature.properties.type
+          return gisStyles.streetLines[type] || gisStyles.streetLines.arc
+        },
+        onEachFeature: (feature, layer) => {
+          if (feature.properties && feature.properties.name) {
+            layer.bindPopup(`<strong>${feature.properties.name}</strong><br>Type: ${feature.properties.type}`)
+          }
+        }
+      }).addTo(map)
+    }
+  }
+  
+  // Add trash fence
+  if (showTrashFence.value) {
+    const trashFenceData = getTrashFence()
+    if (trashFenceData) {
+      gisLayers.trashFence = L.geoJSON(trashFenceData, {
+        style: gisStyles.trashFence
+      }).addTo(map)
+    }
+  }
+  
+  // Add city blocks
+  if (showCityBlocks.value) {
+    const cityBlocksData = getCityBlocks()
+    if (cityBlocksData) {
+      gisLayers.cityBlocks = L.geoJSON(cityBlocksData, {
+        style: gisStyles.cityBlocks
+      }).addTo(map)
+    }
+  }
+  
+  // Add plazas and CPNs
+  if (showPlazas.value) {
+    // Clear existing plaza markers
+    markersLayer.eachLayer(layer => {
+      if (layer.options.icon?.options?.className?.includes('plaza-marker')) {
+        markersLayer.removeLayer(layer)
+      }
+    })
+    
+    // Add plaza markers
+    const plazaData = getPlazas()
+    if (plazaData && plazaData.features) {
+      plazaData.features.forEach(feature => {
+        if (feature.geometry && feature.geometry.coordinates) {
+          const coords = [feature.geometry.coordinates[1], feature.geometry.coordinates[0]]
+          const marker = L.marker(coords, {
+            icon: L.divIcon({
+              className: 'plaza-marker',
+              html: '<div class="marker-icon">📍</div>',
+              iconSize: [20, 20],
+              iconAnchor: [10, 10]
+            })
+          })
+          
+          marker.bindPopup(`<strong>${feature.properties.name || 'Plaza'}</strong>`)
+          markersLayer.addLayer(marker)
+        }
+      })
+    }
+    
+    // Add CPN markers
+    const cpnData = getCPNs()
+    if (cpnData && cpnData.features) {
+      cpnData.features.forEach(feature => {
+        if (feature.geometry && feature.geometry.coordinates) {
+          const coords = [feature.geometry.coordinates[1], feature.geometry.coordinates[0]]
+          const marker = L.marker(coords, {
+            icon: L.divIcon({
+              className: 'plaza-marker',
+              html: '<div class="marker-icon">📍</div>',
+              iconSize: [20, 20],
+              iconAnchor: [10, 10]
+            })
+          })
+          
+          marker.bindPopup(`<strong>${feature.properties.NAME || 'CPN'}</strong>`)
+          markersLayer.addLayer(marker)
+        }
+      })
+    }
+  }
+}
 </script>
 
 <style scoped>
@@ -239,6 +361,12 @@ const addMarker = (item, type, icon) => {
   color: #fff;
 }
 
+.controls-divider {
+  margin: 10px 0;
+  border: none;
+  border-top: 1px solid #444;
+}
+
 /* Marker styles */
 :deep(.marker-icon) {
   background: rgba(26, 26, 26, 0.9);
@@ -266,6 +394,12 @@ const addMarker = (item, type, icon) => {
 
 :deep(.event-marker .marker-icon) {
   background: rgba(255, 140, 0, 0.9);
+}
+
+:deep(.plaza-marker .marker-icon) {
+  background: rgba(70, 130, 180, 0.9);
+  border-color: #4682B4;
+  font-size: 14px;
 }
 
 /* Popup styles */
