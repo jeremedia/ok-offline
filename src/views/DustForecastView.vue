@@ -23,7 +23,7 @@
       </div>
       
       <!-- Current Conditions -->
-      <div v-else class="current-conditions">
+      <div v-else-if="currentConditions" class="current-conditions">
         <h3>Current Conditions</h3>
         <div class="condition-card">
           <div class="dust-level" :class="currentConditions.dustLevel">
@@ -74,6 +74,16 @@
         </div>
       </div>
       
+      <!-- No Data State -->
+      <div v-else class="no-data-state">
+        <div class="no-data-content">
+          <span class="no-data-icon">🌤️</span>
+          <h3>Weather Data Unavailable</h3>
+          <p>Waiting for weather data to load...</p>
+          <button @click="refreshWeather" class="retry-btn">Try Loading Weather</button>
+        </div>
+      </div>
+      
       <!-- 5-Day Forecast -->
       <div class="forecast-days">
         <h3>5-Day Forecast</h3>
@@ -81,7 +91,7 @@
           <div class="loading-spinner small"></div>
           <p>Loading forecast...</p>
         </div>
-        <div v-else class="forecast-grid">
+        <div v-else-if="forecastDays && forecastDays.length" class="forecast-grid">
           <div 
             v-for="day in forecastDays" 
             :key="day.dateIso" 
@@ -417,6 +427,35 @@ h2 {
 .data-source small {
   color: #999;
   font-size: 0.8rem;
+}
+
+.no-data-state {
+  background: #1a1a1a;
+  border: 1px solid #444;
+  border-radius: 8px;
+  padding: 3rem 1.5rem;
+  text-align: center;
+}
+
+.no-data-content {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.no-data-icon {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.no-data-state h3 {
+  color: #fff;
+  margin-bottom: 0.5rem;
+}
+
+.no-data-state p {
+  color: #999;
+  margin-bottom: 1.5rem;
 }
 
 .forecast-container {
