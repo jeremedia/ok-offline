@@ -42,7 +42,7 @@
 </template>
 
 <script setup>
-import { ref, watch, computed, onMounted, onUnmounted } from 'vue'
+import { ref, watch, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useKeyboardShortcuts } from './composables/useKeyboardShortcuts'
 import { getSyncMetadata } from './services/staticDataSync'
@@ -101,8 +101,9 @@ const formatLastSync = computed(() => {
   return `${days}d ago`
 })
 
-onMounted(() => {
-  // Set up toast notifications
+onMounted(async () => {
+  // Set up toast notifications after component is fully mounted
+  await nextTick()
   setToastRef(toastRef)
   
   window.addEventListener('online', updateOnlineStatus)
