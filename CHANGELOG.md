@@ -5,6 +5,27 @@ All notable changes to OK-OFFLINE will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.2] - 2025-01-26
+
+### Added
+- Loading spinner component with animated feedback
+- Skeleton loader component for list views
+- Toast notification system for user feedback
+- Comprehensive error handling with user-friendly messages
+- Retry functionality for failed data loads
+- Success notifications for sync operations
+- Empty state messages with helpful hints
+- Enhanced progress bars with gradient animations
+
+### Changed
+- Improved sync progress visualization
+- Better error messages for network and API failures
+- Enhanced user feedback during operations
+
+### Fixed
+- Error states now show actionable messages
+- Loading states properly displayed during data fetches
+
 ## [1.1.0] - 2025-01-26
 
 ### Added
