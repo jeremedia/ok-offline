@@ -5,6 +5,30 @@ All notable changes to OK-OFFLINE will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- Auto-sync functionality that automatically loads data when none is detected
+- Sync dialog component showing progress during data loading
+- useAutoSync composable for managing automatic data synchronization
+- Camp name links in event details (click to navigate to camp page)
+- Event features including:
+  - Event times displayed in list view
+  - Date/time sorting with day grouping
+  - Event type filters (workshops, parties, etc.)
+  - Quick schedule add/remove buttons in lists
+  - "Happening now" indicator for current events
+  - Toast notifications for schedule actions
+
+### Changed
+- Improved user experience by eliminating redirects to settings
+- Better onboarding for new users with automatic data loading
+- Enhanced event list view with comprehensive filtering and sorting
+
+### Fixed
+- Resolved branch management issues during development
+- Fixed lost event feature implementations
+
 ## [1.2.5] - 2025-01-26
 
 ### Added
