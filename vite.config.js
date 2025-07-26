@@ -9,7 +9,7 @@ export default defineConfig({
     __BUILD_TIME__: JSON.stringify(new Date().toISOString())
   },
   server: {
-    port: 8005,
+    port: 8000,
     proxy: {
       '/api/v1': {
         target: 'http://localhost:3020',

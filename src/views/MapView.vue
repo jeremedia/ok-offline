@@ -1,6 +1,20 @@
 <template>
   <section id="map-section" class="view">
-    <div class="map-controls">
+    <button 
+      v-if="isMobile" 
+      @click="controlsOpen = !controlsOpen"
+      class="map-controls-toggle"
+      aria-label="Toggle map controls"
+    >
+      {{ controlsOpen ? '✕' : '☰' }}
+    </button>
+    <div 
+      class="map-controls" 
+      :class="{ 
+        'mobile-controls': isMobile,
+        'controls-open': controlsOpen 
+      }"
+    >
       <label class="map-control">
         <input type="checkbox" v-model="showCamps" @change="updateMarkers">
         🏠 Camps
@@ -68,7 +82,19 @@
         <input type="checkbox" v-model="showLegend">
         📊 Show Legend
       </label>
+      <button 
+        v-if="isMobile && controlsOpen" 
+        @click="controlsOpen = false"
+        class="close-controls"
+      >
+        Close
+      </button>
     </div>
+    <div 
+      v-if="isMobile && controlsOpen" 
+      @click="controlsOpen = false"
+      class="map-controls-backdrop"
+    ></div>
     <div id="map" ref="mapContainer"></div>
     <div class="map-legend" v-if="showLegend">
       <h4>Map Legend</h4>
@@ -149,6 +175,42 @@ import {
 
 const route = useRoute()
 const mapContainer = ref(null)
+
+// Mobile detection and controls state
+const checkIfMobile = () => {
+  const isSmallScreen = window.innerWidth < 600
+  const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0
+  const mobileRegex = /Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i
+  const isMobileUA = mobileRegex.test(navigator.userAgent)
+  
+  // For development: use screen width only
+  // In production, real mobile devices will have touch + UA
+  if (isSmallScreen) return true
+  
+  // Production mobile detection
+  return isSmallScreen && (hasTouch || isMobileUA)
+}
+
+const isMobile = ref(checkIfMobile())
+const controlsOpen = ref(false)
+
+// Debug mobile detection
+console.log('MapView mobile detection:', {
+  isMobile: isMobile.value,
+  screenWidth: window.innerWidth,
+  userAgent: navigator.userAgent,
+  hasTouch: 'ontouchstart' in window || navigator.maxTouchPoints > 0
+})
+
+// Handle window resize
+const handleResize = () => {
+  isMobile.value = checkIfMobile()
+  // Close controls when switching to desktop
+  if (!isMobile.value) {
+    controlsOpen.value = false
+  }
+}
+
 const showCamps = ref(true)
 const showArt = ref(true)
 const showEvents = ref(true)
@@ -158,7 +220,7 @@ const showTrashFence = ref(true)
 const showCityBlocks = ref(false)
 const showPlazas = ref(true)
 const gisLoadingState = ref({ isLoading: false, error: null })
-const showLegend = ref(true)
+const showLegend = ref(!isMobile.value) // Off by default on mobile
 const showBasemap = ref(true)
 const cityAligned = ref(false)
 const rotationAngle = ref(0)
@@ -222,7 +284,24 @@ onMounted(async () => {
   loadData()
   
   // Fix map size after mounting
-  setTimeout(() => map.invalidateSize(), 100)
+  setTimeout(() => {
+    map.invalidateSize()
+    console.log('Map invalidated after mount')
+  }, 100)
+  
+  // Additional resize for mobile
+  setTimeout(() => {
+    map.invalidateSize()
+    console.log('Second map invalidation')
+  }, 500)
+  
+  // Add resize event listener
+  window.addEventListener('resize', handleResize)
+  
+  // Also listen for orientation changes on mobile
+  window.addEventListener('orientationchange', () => {
+    setTimeout(() => map.invalidateSize(), 200)
+  })
 })
 
 const addSpecialLocations = () => {
@@ -482,13 +561,29 @@ const applyRotation = () => {
 
 <style scoped>
 #map-section {
-  position: relative;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
   height: 100%;
 }
 
 #map {
   height: 100%;
   width: 100%;
+}
+
+/* Adjust Leaflet controls to avoid header on mobile */
+:deep(.leaflet-top.leaflet-left) {
+  top: 66px !important; /* Push below mobile header */
+  left: 10px !important;
+}
+
+/* Additional margin for zoom controls */
+:deep(.leaflet-control-zoom) {
+  margin-top: 0 !important;
 }
 
 .map-controls {
@@ -515,6 +610,84 @@ const applyRotation = () => {
 
 .map-control:hover {
   color: #fff;
+}
+
+/* Mobile controls toggle button */
+.map-controls-toggle {
+  position: fixed;
+  top: 66px; /* Account for mobile header height */
+  right: 10px;
+  z-index: 1001;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(26, 26, 26, 0.9);
+  border: 1px solid #444;
+  color: #fff;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.map-controls-toggle:active {
+  transform: scale(0.95);
+}
+
+/* Mobile controls panel */
+.map-controls.mobile-controls {
+  position: fixed;
+  top: 0;
+  right: -350px; /* Fully hide panel including padding, border and shadow */
+  width: 280px;
+  height: 100%;
+  max-width: 80vw;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  transition: right 0.3s ease;
+  z-index: 1002;
+  padding: 20px;
+  padding-bottom: 80px;
+}
+
+.map-controls.mobile-controls.controls-open {
+  right: 0;
+}
+
+/* Mobile backdrop */
+.map-controls-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1001;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Close button for mobile */
+.close-controls {
+  width: 100%;
+  padding: 12px;
+  margin-top: 20px;
+  background: #333;
+  border: 1px solid #555;
+  color: #fff;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.close-controls:active {
+  background: #444;
 }
 
 .rotation-slider {

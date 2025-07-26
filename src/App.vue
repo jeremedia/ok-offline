@@ -10,10 +10,11 @@
       @complete="handleTourComplete"
       @skip="handleTourSkip"
     />
+  <div class="app-container" v-if="!showOnboarding && !showTour">
     <ToastNotification ref="toastRef" />
-    <header>
+    <header :class="{ 'mobile-header': isMobile }">
       <div class="header-row">
-        <nav>
+        <nav v-if="!isMobile">
           <select id="year-selector" v-model="selectedYear" @change="onYearChange">
             <option value="2023">2023</option>
             <option value="2024">2024</option>
@@ -28,7 +29,15 @@
           <button @click="navigateToDust" :class="{ active: isActive('dust') }">🌪️ Dust</button>
         </nav>
         <h1 @click="navigateToSettings" class="app-title">OK-OFFLINE</h1>
-        <div class="status-indicator">
+        <div class="mobile-actions" v-if="isMobile">
+          <button @click="navigate('search')" class="mobile-action-btn" aria-label="Search">
+            🔍
+          </button>
+          <button @click="navigateToSettings" class="mobile-action-btn" aria-label="Settings">
+            ⚙️
+          </button>
+        </div>
+        <div class="status-indicator" v-if="!isMobile">
           <span :class="['online-status', { offline: !isOnline }]">
             {{ isOnline ? '🟢' : '🔴' }} {{ isOnline ? 'Online' : 'Offline' }}
           </span>
@@ -38,9 +47,13 @@
         </div>
       </div>
     </header>
-    <main>
+    <main :class="{ 
+      'has-bottom-nav': isMobile,
+      'map-view': $route.name === 'map'
+    }">
       <router-view :year="selectedYear"></router-view>
     </main>
+    <BottomNav v-if="!showOnboarding && !showTour" :year="selectedYear" />
     <footer>
       <p>
         Data provided by the Burning Man Public API and Innovate GIS data.
@@ -48,16 +61,19 @@
       </p>
     </footer>
   </div>
+  </div>
 </template>
 
 <script setup>
 import { ref, watch, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useKeyboardShortcuts } from './composables/useKeyboardShortcuts'
+import { useSwipeGestures } from './composables/useSwipeGestures'
 import { getSyncMetadata } from './services/staticDataSync'
 import ToastNotification from './components/ToastNotification.vue'
 import WelcomeScreen from './components/WelcomeScreen.vue'
 import GuidedTour from './components/GuidedTour.vue'
+import BottomNav from './components/BottomNav.vue'
 import { setToastRef } from './composables/useToast'
 
 const route = useRoute()
@@ -72,8 +88,30 @@ const showOnboarding = ref(false)
 const showTour = ref(false)
 const tourType = ref('general')
 
+// Check if device is truly mobile (phone, not tablet)
+const checkIfMobile = () => {
+  // Check viewport width AND touch capability
+  const isSmallScreen = window.innerWidth < 600
+  const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0
+  
+  // Also check user agent for mobile devices (excluding iPads)
+  const mobileRegex = /Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i
+  const isMobileUA = mobileRegex.test(navigator.userAgent)
+  
+  // For development: use screen width only
+  if (isSmallScreen) return true
+  
+  // Production mobile detection
+  return isSmallScreen && (hasTouch || isMobileUA)
+}
+
+const isMobile = ref(checkIfMobile())
+
 // Enable keyboard shortcuts
 useKeyboardShortcuts()
+
+// Enable swipe gestures on mobile
+useSwipeGestures()
 
 // Update online status
 const updateOnlineStatus = () => {
@@ -156,6 +194,12 @@ const handleTourSkip = () => {
   showTour.value = false
 }
 
+// Handle window resize
+const handleResize = () => {
+  isMobile.value = checkIfMobile()
+}
+}
+
 onMounted(async () => {
   // Set up toast notifications after component is fully mounted
   await nextTick()
@@ -166,6 +210,7 @@ onMounted(async () => {
   
   window.addEventListener('online', updateOnlineStatus)
   window.addEventListener('offline', updateOnlineStatus)
+  window.addEventListener('resize', handleResize)
   updateLastSyncTime()
   
   // Update last sync time every minute
@@ -174,6 +219,7 @@ onMounted(async () => {
   onUnmounted(() => {
     window.removeEventListener('online', updateOnlineStatus)
     window.removeEventListener('offline', updateOnlineStatus)
+    window.removeEventListener('resize', handleResize)
     clearInterval(interval)
   })
 })
@@ -288,27 +334,119 @@ button.active {
   font-size: 0.75rem;
 }
 
-@media (max-width: 768px) {
+/* Mobile-specific styles */
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+main.has-bottom-nav {
+  /* Account for bottom nav height + safe area */
+  padding-bottom: calc(60px + env(safe-area-inset-bottom, 0));
+}
+
+/* Special handling for map view */
+main.map-view {
+  overflow: hidden; /* Prevent scrolling on map view */
+}
+
+main.map-view .view {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.mobile-header {
+  position: sticky;
+  top: 0;
+  z-index: 2000;
+  background: #333;
+}
+
+.mobile-header .header-row {
+  padding: 0.5rem 1rem;
+  gap: 0.5rem;
+}
+
+.mobile-header .app-title {
+  font-size: 1.1rem;
+}
+
+.mobile-header .status-indicator {
+  display: none;
+}
+
+/* Mobile action buttons */
+.mobile-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.mobile-action-btn {
+  background: none;
+  border: 1px solid #555;
+  color: #fff;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-action-btn:active {
+  transform: scale(0.9);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+@media (max-width: 600px) {
   .header-row {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  
-  nav {
-    order: 2;
-    margin-top: 0.5rem;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
   }
   
   .app-title {
     order: 1;
-    text-align: center;
+    text-align: left;
     margin: 0;
   }
   
-  .status-indicator {
-    order: 3;
-    align-items: center;
-    margin-top: 0.5rem;
+  nav {
+    display: none; /* Hidden on mobile since we have bottom nav */
+  }
+  
+  /* Hide footer on mobile to save space */
+  footer {
+    display: none;
+  }
+}
+
+/* Landscape mode adjustments */
+@media (max-width: 600px) and (orientation: landscape) {
+  main.has-bottom-nav {
+    padding-bottom: calc(50px + env(safe-area-inset-bottom, 0));
+  }
+  
+  .bottom-nav {
+    height: 50px;
+  }
+  
+  .nav-item {
+    min-height: 40px;
   }
 }
 </style>
