@@ -62,8 +62,8 @@
             </button>
           </div>
           
-          <div v-if="progress[year]" class="progress-bar">
-            <div class="progress-fill" :style="{ width: progress[year] + '%' }"></div>
+          <div v-if="progress[year] || progressText[year]" class="progress-bar">
+            <div class="progress-fill" :style="{ width: (progress[year] || 0) + '%' }"></div>
             <span class="progress-text">{{ progressText[year] }}</span>
           </div>
         </div>
@@ -471,7 +471,7 @@ Database: bm2025-db
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { syncYear as syncYearData, getSyncStatus, clearYear as clearYearData } from '../services/dataSync'
+import { syncYear as syncYearData, getSyncStatus, clearYear as clearYearData } from '../services/staticDataSync'
 import { clearCache } from '../services/storage'
 import { useToast } from '../composables/useToast'
 import { getErrorMessage } from '../utils/errorHandler'
@@ -481,7 +481,7 @@ const tabs = ['Data Sync', 'About', 'Features', 'Implementation', 'Feedback']
 const activeTab = ref('Data Sync')
 
 // Toast notifications
-const { showSuccess, showError } = useToast()
+const { showSuccess, showError, showWarning } = useToast()
 
 // App version
 const appVersion = __APP_VERSION__
@@ -625,6 +625,12 @@ const syncYear = async (year) => {
     const errorMessage = getErrorMessage(err)
     progressText.value[year] = `Error: ${errorMessage}`
     showError(errorMessage)
+    // Clear progress after showing error
+    setTimeout(() => {
+      progress.value[year] = 0
+      progressText.value[year] = ''
+    }, 3000)
+    throw err  // Re-throw for syncAllYears to handle
   } finally {
     syncing.value[year] = false
   }
@@ -634,19 +640,46 @@ const syncAllYears = async () => {
   if (syncingAll.value) return
   
   syncingAll.value = true
+  let successCount = 0
+  let failedYears = []
   
-  for (let i = 0; i < years.length; i++) {
-    const year = years[i]
-    syncAllProgress.value = `Syncing ${year} (${i + 1} of ${years.length})...`
-    await syncYear(year)
+  try {
+    for (let i = 0; i < years.length; i++) {
+      const year = years[i]
+      syncAllProgress.value = `Syncing ${year} (${i + 1} of ${years.length})...`
+      
+      try {
+        await syncYear(year)
+        successCount++
+      } catch (err) {
+        console.error(`Failed to sync ${year}:`, err)
+        failedYears.push(year)
+        // Continue with other years even if one fails
+      }
+    }
+    
+    // Show appropriate message based on results
+    if (successCount === years.length) {
+      syncAllProgress.value = 'All years synced!'
+      showSuccess('Successfully synced all years!')
+    } else if (successCount > 0) {
+      syncAllProgress.value = `Partially synced (${successCount} of ${years.length})`
+      showWarning(`Synced ${successCount} year(s). Failed: ${failedYears.join(', ')}`)
+    } else {
+      syncAllProgress.value = 'Sync failed'
+      showError('Unable to sync any data. Please check your connection.')
+    }
+  } catch (err) {
+    console.error('Unexpected error during sync all:', err)
+    syncAllProgress.value = 'Sync failed'
+    showError('An unexpected error occurred. Please try again.')
+  } finally {
+    // Always reset the button state
+    setTimeout(() => {
+      syncingAll.value = false
+      syncAllProgress.value = ''
+    }, 3000)
   }
-  
-  syncAllProgress.value = 'All years synced!'
-  showSuccess('Successfully synced all years!')
-  setTimeout(() => {
-    syncingAll.value = false
-    syncAllProgress.value = ''
-  }, 2000)
 }
 
 const clearYear = async (year) => {

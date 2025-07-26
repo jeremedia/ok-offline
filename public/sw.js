@@ -1,8 +1,17 @@
-const CACHE_NAME = 'ok-offline-v1';
+const CACHE_NAME = 'ok-offline-v2'; // Bump version to force update
 const urlsToCache = [
   '/',
-  '/manifest.json'
-  // Other assets will be cached dynamically
+  '/manifest.json',
+  // Pre-cache all static data files
+  '/data/2023/camps.json',
+  '/data/2023/art.json',
+  '/data/2023/events.json',
+  '/data/2024/camps.json',
+  '/data/2024/art.json',
+  '/data/2024/events.json',
+  '/data/2025/camps.json',
+  '/data/2025/art.json',
+  '/data/2025/events.json'
 ];
 
 // Install event - cache static assets

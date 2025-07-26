@@ -45,7 +45,7 @@
 import { ref, watch, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useKeyboardShortcuts } from './composables/useKeyboardShortcuts'
-import { getSyncMetadata } from './services/dataSync'
+import { getSyncMetadata } from './services/staticDataSync'
 import ToastNotification from './components/ToastNotification.vue'
 import { setToastRef } from './composables/useToast'
 
