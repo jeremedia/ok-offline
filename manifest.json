@@ -1,0 +1,21 @@
+{
+  "name": "OK-OFFLINE",
+  "short_name": "OK-OFFLINE",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#333333",
+  "description": "An offline‑first guide for Black Rock City events, including camps, art installations, events and interactive mapping.",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

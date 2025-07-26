@@ -1,0 +1,307 @@
+/*
+ * Basic styling for the BurningMan 2025 Offline Guide.
+ * This file defines a responsive layout with a header, navigation
+ * buttons, a map section, and a list section.  Elements are kept
+ * intentionally simple to reduce bandwidth and improve offline
+ * usability.
+ */
+
+/* Berkeley Mono Font Definitions */
+@font-face {
+  font-family: 'Berkeley Mono';
+  src: url('/fonts/BerkeleyMono-Regular.woff2') format('woff2'),
+       url('/fonts/BerkeleyMono-Regular.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Berkeley Mono';
+  src: url('/fonts/BerkeleyMono-Bold.woff2') format('woff2'),
+       url('/fonts/BerkeleyMono-Bold.woff') format('woff');
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Berkeley Mono';
+  src: url('/fonts/BerkeleyMono-Italic.woff2') format('woff2'),
+       url('/fonts/BerkeleyMono-Italic.woff') format('woff');
+  font-weight: normal;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Berkeley Mono';
+  src: url('/fonts/BerkeleyMono-BoldItalic.woff2') format('woff2'),
+       url('/fonts/BerkeleyMono-BoldItalic.woff') format('woff');
+  font-weight: bold;
+  font-style: italic;
+  font-display: swap;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: 'Berkeley Mono', monospace;
+  background: #1a1a1a;
+  color: #ccc;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+header {
+  background-color: #333;
+  color: white;
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+}
+
+header h1 {
+  font-size: 1.25rem;
+  margin: 0;
+  font-weight: bold;
+  letter-spacing: -0.02em;
+}
+
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+nav button, nav select {
+  background: #555;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-family: 'Berkeley Mono', monospace;
+  font-weight: normal;
+  transition: background 0.2s;
+}
+
+nav button:hover, nav select:hover {
+  background: #8B0000;
+}
+
+nav select {
+  margin-right: 0.5rem;
+}
+
+main {
+  height: calc(100vh - 88px);
+  overflow-y: auto;
+}
+
+.view {
+  width: 100%;
+  height: 100%;
+}
+
+.hidden {
+  display: none;
+}
+
+#map {
+  width: 100%;
+  height: 100%;
+}
+
+#list-controls {
+  padding: 1rem;
+  background: #2a2a2a;
+  border-bottom: 1px solid #444;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+#list-controls label {
+  font-weight: bold;
+  font-size: 0.875rem;
+}
+
+#list-controls select {
+  padding: 0.25rem 0.5rem;
+  border: 1px solid #555;
+  border-radius: 4px;
+  background: #444;
+  color: #fff;
+  font-family: 'Berkeley Mono', monospace;
+  font-size: 0.875rem;
+}
+
+#items-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: calc(100% - 60px);
+  overflow-y: auto;
+}
+
+#items-list li {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #444;
+  font-size: 0.875rem;
+}
+
+#items-list li:hover {
+  background-color: #8B0000;
+  cursor: pointer;
+}
+
+#items-list li.highlighted {
+  background-color: #5a0000;
+  border-left: 4px solid #8B0000;
+  padding-left: calc(1rem - 4px);
+}
+
+#items-list li strong {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-weight: bold;
+}
+
+#items-list li small {
+  color: #999;
+  font-size: 0.75rem;
+  font-style: italic;
+}
+
+/* Detail view styles */
+#detail-section {
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+#back-to-list {
+  background: #555;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+#back-to-list:hover {
+  background: #8B0000;
+}
+
+#detail-content {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+#detail-info h2 {
+  margin-top: 0;
+  color: #ccc;
+}
+
+#detail-info .detail-field {
+  margin-bottom: 1rem;
+}
+
+#detail-info .detail-field label {
+  font-weight: bold;
+  color: #ccc;
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+}
+
+#detail-info .detail-field .value {
+  color: #fff;
+}
+
+#detail-map-container {
+  background: #2a2a2a;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+#detail-map {
+  height: 300px;
+  width: 100%;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+/* Responsive layout */
+@media (max-width: 768px) {
+  #detail-content {
+    grid-template-columns: 1fr;
+  }
+  
+  #detail-map-container {
+    order: -1;
+  }
+}
+
+/* Camp events in detail view */
+.camp-events {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0;
+}
+
+.camp-events li {
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #444;
+}
+
+.camp-events li:last-child {
+  border-bottom: none;
+}
+
+.camp-events strong {
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.event-type {
+  color: #999;
+  font-size: 0.875rem;
+  font-style: italic;
+  margin-left: 0.5rem;
+}
+
+.event-description {
+  font-size: 0.875rem;
+  margin: 0.5rem 0;
+}
+
+.event-times {
+  margin-top: 0.5rem;
+}
+
+.event-times small {
+  display: block;
+  color: #999;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+footer {
+  text-align: center;
+  padding: 0.5rem;
+  font-size: 0.75rem;
+  color: #999;
+  background: #2a2a2a;
+}

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Burning Man 2025 Offline Guide</title>
+  <!--
+    This Progressive Web App (PWA) acts as an offline-first guide for the
+    2025 Black Rock City event. It pulls data from the official Burning Man
+    Public API and geospatial datasets and stores them in the browser so
+    participants can continue to browse camps, art installations and events
+    even when the playa lacks connectivity.  The service‑worker and
+    IndexedDB logic live in the accompanying sw.js and app.js files.
+  -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
+  <!-- Leaflet library for interactive mapping -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" integrity="sha512-mD70nAW2ThLsWH0zif8JPbfraZ8hbCtjQ+5RU1m4+ztZq6/MymyZeB55pWsi4YAX+73yvcaJyk61mzfYMvtm9w==" crossorigin="">
+  <script defer src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" integrity="sha512-Dqm3h1Y4qiHUjbhxTuBGQsza0Tfppn53SHlu/uj1f+RT+xfShfe7r6czRf5r2NmllO2aKx+tYJgoxboOkn1Scg==" crossorigin=""></script>
+  <script defer src="app.js"></script>
+  <!-- Register the service worker when the page loads -->
+  <script>
+    // Temporarily disabled for testing
+    /*
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').then((registration) => {
+          console.log('Service worker registered with scope:', registration.scope);
+        }).catch((err) => {
+          console.error('Service worker registration failed:', err);
+        });
+      });
+    }
+    */
+  </script>
+</head>
+<body>
+  <header>
+    <h1>Burning Man Offline Guide</h1>
+    <nav>
+      <select id="year-selector">
+        <option value="2023">2023</option>
+        <option value="2024">2024</option>
+        <option value="2025" selected>2025</option>
+      </select>
+      <button id="view-map" type="button">Map</button>
+      <button id="view-camps" type="button">Camps</button>
+      <button id="view-art" type="button">Art</button>
+      <button id="view-events" type="button">Events</button>
+    </nav>
+  </header>
+  <main>
+    <!-- Map view.  A Leaflet instance is created and attached to this div. -->
+    <section id="map-section" class="view">
+      <div id="map"></div>
+    </section>
+    <!-- List view.  Items populate this list when camps, art or events are selected. -->
+    <section id="list-section" class="view hidden">
+      <div id="list-controls">
+        <label for="sort-selector">Sort by:</label>
+        <select id="sort-selector">
+          <option value="name">Name</option>
+          <option value="location">Location/Sector</option>
+        </select>
+      </div>
+      <ul id="items-list"></ul>
+    </section>
+    <!-- Detail view.  Shows detailed information about a selected item. -->
+    <section id="detail-section" class="view hidden">
+      <button id="back-to-list" type="button">← Back to List</button>
+      <div id="detail-content">
+        <div id="detail-info"></div>
+        <div id="detail-map-container">
+          <div id="detail-map"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <footer>
+    <p>
+      Data provided by the Burning Man Public API and Innovate GIS data.  
+      See the Burning Man Innovate website for terms of service and release
+      schedule【483168084542937†L105-L147】.
+    </p>
+  </footer>
+</body>
+</html>

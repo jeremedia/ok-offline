@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3:*)",
+      "Bash(mkdir:*)",
+      "WebFetch(domain:api.burningman.org)",
+      "Bash(curl:*)",
+      "Bash(node:*)",
+      "Bash(npm install:*)",
+      "mcp__playwright__playwright_navigate",
+      "mcp__playwright__playwright_screenshot",
+      "mcp__playwright__playwright_close",
+      "mcp__playwright__playwright_click",
+      "mcp__playwright__playwright_console_logs",
+      "mcp__playwright__playwright_select",
+      "mcp__playwright__playwright_evaluate"
+    ],
+    "deny": []
+  }
+}

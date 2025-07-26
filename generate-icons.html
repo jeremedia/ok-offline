@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate OK-OFFLINE Icons</title>
+</head>
+<body>
+    <h1>OK-OFFLINE Icon Generator</h1>
+    <canvas id="canvas192" width="192" height="192"></canvas>
+    <canvas id="canvas512" width="512" height="512"></canvas>
+    <canvas id="canvas96" width="96" height="96"></canvas>
+    <br>
+    <button onclick="downloadAll()">Download All Icons</button>
+    
+    <script>
+        function drawIcon(canvas, size) {
+            const ctx = canvas.getContext('2d');
+            
+            // Background
+            ctx.fillStyle = '#8B0000';
+            ctx.fillRect(0, 0, size, size);
+            
+            // Inner circle
+            ctx.fillStyle = '#1a1a1a';
+            ctx.beginPath();
+            ctx.arc(size/2, size/2, size/2.5, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Text
+            ctx.fillStyle = '#FFD700';
+            ctx.font = `bold ${size/4}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('OK', size/2, size/2 - size/8);
+            
+            ctx.font = `${size/6}px Arial`;
+            ctx.fillText('OFFLINE', size/2, size/2 + size/8);
+            
+            // Fire emoji at top
+            ctx.font = `${size/8}px Arial`;
+            ctx.fillText('🔥', size/2, size/6);
+        }
+        
+        // Draw icons
+        drawIcon(document.getElementById('canvas192'), 192);
+        drawIcon(document.getElementById('canvas512'), 512);
+        drawIcon(document.getElementById('canvas96'), 96);
+        
+        function downloadIcon(canvasId, filename) {
+            const canvas = document.getElementById(canvasId);
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+        
+        function downloadAll() {
+            downloadIcon('canvas192', 'icon-192.png');
+            downloadIcon('canvas512', 'icon-512.png');
+            downloadIcon('canvas96', 'icon-96.png');
+        }
+    </script>
+</body>
+</html>

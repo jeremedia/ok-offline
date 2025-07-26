@@ -1,0 +1,36 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Example Point - Center Camp"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -119.202994,
+          40.786958
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Example Area - Trash Fence"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-119.2100, 40.7915],
+            [-119.1950, 40.7915],
+            [-119.1950, 40.7825],
+            [-119.2100, 40.7825],
+            [-119.2100, 40.7915]
+          ]
+        ]
+      }
+    }
+  ]
+}
