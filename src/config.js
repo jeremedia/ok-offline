@@ -1,3 +1,6 @@
-export const API_KEY = '19b5320c7af94665aa17fa0e6daaf10b'
+// API configuration
+export const API_KEY = import.meta.env.VITE_BM_API_KEY || 'demo_key'
 export const API_BASE = '/api'
+
+// Black Rock City coordinates (Golden Spike)
 export const BRC_CENTER = [40.786958, -119.202994]

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ok-offline-v2'; // Bump version to force update
+const CACHE_NAME = 'ok-offline-v3'; // Bump version to force update
 const urlsToCache = [
   '/',
   '/manifest.json',

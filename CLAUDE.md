@@ -338,6 +338,21 @@ Database: bm2025-db
 
 The Burning Man API returns different data based on the year and proximity to the event. Camp placement data (location assignments) is typically not available until closer to the event date.
 
+## Data Management
+
+### Pre-Enriched Static Data
+The app uses pre-enriched static JSON files to improve performance:
+- Events are enriched with camp/art location data at build time
+- This saves processing time on mobile devices  
+- Run `node scripts/enrich-static-data.js` to update enrichment
+- Static data files are stored in `/public/data/[year]/`
+
+### API Key Security
+- API keys are stored in environment variables
+- Create a `.env` file based on `.env.example`
+- Never commit API keys to the repository
+- The app uses `import.meta.env.VITE_BM_API_KEY` to access the key
+
 ## Deployment & Version Management
 
 ### Automatic Deployment

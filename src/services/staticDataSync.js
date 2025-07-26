@@ -23,11 +23,8 @@ export async function syncYear(year, onProgress = () => {}) {
     }
   }
   
-  // Enrich events with location data
-  if (results.event?.success && results.camp?.success) {
-    onProgress('enriching', types.length, types.length + 1)
-    await enrichAndSaveEvents(year, results)
-  }
+  // Skip enrichment - data is pre-enriched in static files
+  // This saves processing time on mobile devices
   
   onProgress('complete', types.length + 1, types.length + 1)
   return results
