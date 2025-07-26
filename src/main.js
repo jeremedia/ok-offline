@@ -105,15 +105,15 @@ createApp(App)
   .use(router)
   .mount('#app')
 
-// Register service worker
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then(registration => {
-        console.log('ServiceWorker registration successful:', registration)
-      })
-      .catch(err => {
-        console.log('ServiceWorker registration failed:', err)
-      })
-  })
-}
+// Register service worker - DISABLED FOR TESTING
+// if ('serviceWorker' in navigator) {
+//   window.addEventListener('load', () => {
+//     navigator.serviceWorker.register('/sw.js')
+//       .then(registration => {
+//         console.log('ServiceWorker registration successful:', registration)
+//       })
+//       .catch(err => {
+//         console.log('ServiceWorker registration failed:', err)
+//       })
+//   })
+// }

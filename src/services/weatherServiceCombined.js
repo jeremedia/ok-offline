@@ -33,9 +33,9 @@ const COMBINED_CACHE_TIMESTAMP_KEY = 'combined_weather_cache_timestamp'
 const CACHE_DURATION = 10 * 60 * 1000 // 10 minutes
 
 /**
- * Apple Weather proxy endpoint (would be implemented server-side)
+ * Rails API endpoint for weather data
  */
-const APPLE_WEATHER_PROXY_URL = '/api/apple-weather'
+const RAILS_WEATHER_API_URL = '/api/v1/weather/current'
 
 /**
  * Check if we should try Apple Weather as fallback
@@ -46,7 +46,7 @@ const shouldTryAppleWeather = () => {
 }
 
 /**
- * Fetch weather data from Apple WeatherKit via server proxy
+ * Fetch weather data from Apple WeatherKit via Rails API proxy
  */
 const getAppleWeatherData = async () => {
   if (!shouldTryAppleWeather()) {
@@ -54,7 +54,7 @@ const getAppleWeatherData = async () => {
   }
 
   try {
-    const response = await fetch(`${APPLE_WEATHER_PROXY_URL}/current`, {
+    const response = await fetch(RAILS_WEATHER_API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -153,57 +153,83 @@ const mapAppleIconToStandard = (conditionCode) => {
 export const getCurrentWeatherRobust = async () => {
   const errors = []
   
-  // Always try to get moon phase data from Apple Weather for Burning Man
-  let appleWeatherData = null
-  if (shouldTryAppleWeather()) {
-    try {
-      console.log('Fetching moon phase data from Apple WeatherKit...')
-      appleWeatherData = await getCurrentWeatherFromApple()
-      console.log('✅ Apple WeatherKit moon data fetched')
-    } catch (error) {
-      console.log('⚠️ Apple WeatherKit moon data failed:', error.message)
-    }
-  }
-
-  // 1. Try OpenWeatherMap first for primary weather data
+  // 1. Try Rails API proxy first (which uses Apple WeatherKit)
   try {
-    console.log('Trying OpenWeatherMap API...')
+    console.log('Trying Rails API proxy for Apple WeatherKit...')
+    const response = await fetch(RAILS_WEATHER_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        latitude: BLACK_ROCK_CITY.lat,
+        longitude: BLACK_ROCK_CITY.lon
+      })
+    })
+
+    if (!response.ok) {
+      throw new Error(`Rails API error: ${response.status}`)
+    }
+
+    const result = await response.json()
+    const data = result.data
+    
+    // Convert Rails API response to our standard format
+    const windSpeed = Math.round(data.windSpeed || 0)
+    const dustInfo = getDustLevelInfo(data.dustLevel || 'clear')
+    
+    const weatherData = {
+      temperature: Math.round(data.temperature || 0),
+      feelsLike: Math.round(data.feelsLike || 0),
+      humidity: Math.round(data.humidity || 0),
+      pressure: Math.round(data.pressure || 0),
+      windSpeed,
+      windDirection: getWindDirection(data.windDirection || 0),
+      windDegrees: data.windDirection || 0,
+      visibility: data.visibility ? Math.round(data.visibility) : null,
+      description: data.conditionDescription || data.condition || 'Unknown',
+      icon: mapAppleIconToStandard(data.condition),
+      dustLevel: data.dustLevel || 'clear',
+      dustLabel: dustInfo.label,
+      recommendation: dustInfo.recommendation,
+      moonPhase: data.moonPhase,
+      lastUpdated: result.meta?.lastUpdated || new Date().toISOString(),
+      source: 'rails-apple-api'
+    }
+    
+    console.log('✅ Rails API (Apple WeatherKit) succeeded')
+    return weatherData
+  } catch (error) {
+    console.log('❌ Rails API failed:', error.message)
+    errors.push(`Rails API: ${error.message}`)
+  }
+  
+  // 2. Try OpenWeatherMap as fallback
+  try {
+    console.log('Trying OpenWeatherMap API as fallback...')
     const data = await getOpenWeatherCurrent()
     console.log('✅ OpenWeatherMap succeeded')
-    
-    // If we got moon data from Apple, merge it in
-    if (appleWeatherData && appleWeatherData.moonPhase) {
-      console.log('🌙 Adding Apple moon phase data to OpenWeatherMap response')
-      data.moonPhase = appleWeatherData.moonPhase
-    }
-    
     return data
   } catch (error) {
     // Only log non-401 errors to reduce console noise
     if (!error.message.includes('401')) {
       console.log('❌ OpenWeatherMap failed:', error.message)
     } else {
-      console.log('⏳ OpenWeatherMap API key still activating, trying fallback...')
+      console.log('⏳ OpenWeatherMap API key still activating...')
     }
     errors.push(`OpenWeatherMap: ${error.message}`)
   }
 
-  // 2. If OpenWeatherMap failed but we have Apple data, use it
-  if (appleWeatherData) {
-    console.log('✅ Using Apple WeatherKit as primary (includes moon data)')
-    return appleWeatherData
-  }
-
-  // 3. Try Apple Weather as last resort if we haven't already
-  if (shouldTryAppleWeather() && !appleWeatherData) {
+  // 3. Try Apple Weather directly as last resort (this will likely fail due to CORS)
+  if (shouldTryAppleWeather()) {
     try {
-      console.log('Trying Apple WeatherKit API as final fallback...')
+      console.log('Trying Apple WeatherKit API directly as final fallback...')
       const data = await getCurrentWeatherFromApple()
-      console.log('✅ Apple WeatherKit succeeded')
+      console.log('✅ Apple WeatherKit direct succeeded')
       return data
     } catch (error) {
-      console.log('❌ Apple WeatherKit failed:', error.message)
-      errors.push(`Apple Weather: ${error.message}`)
+      console.log('❌ Apple WeatherKit direct failed:', error.message)
+      errors.push(`Apple Weather direct: ${error.message}`)
     }
   }
 
@@ -217,13 +243,74 @@ export const getCurrentWeatherRobust = async () => {
  * Get weather forecast with fallback
  */
 export const getWeatherForecastRobust = async () => {
-  // For now, only try OpenWeatherMap for forecast
-  // Apple Weather forecast implementation would go here
+  const errors = []
+  
+  // 1. Try Rails API proxy first (which uses Apple WeatherKit)
   try {
+    console.log('Trying Rails API proxy for forecast...')
+    const response = await fetch(RAILS_WEATHER_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        latitude: BLACK_ROCK_CITY.lat,
+        longitude: BLACK_ROCK_CITY.lon
+      })
+    })
+
+    if (!response.ok) {
+      throw new Error(`Rails API error: ${response.status}`)
+    }
+
+    const result = await response.json()
+    const forecast = result.data.forecast || []
+    
+    // Convert Rails API forecast to our standard format
+    const dailyForecasts = forecast.map(day => {
+      const date = new Date(day.date)
+      const windSpeed = Math.round(day.windSpeed || 15) // Default for forecast
+      const dustLevel = calculateDustLevel(windSpeed, day.humidity || 30)
+      const dustInfo = getDustLevelInfo(dustLevel)
+      
+      return {
+        date: date.toDateString(),
+        dateIso: date.toISOString().split('T')[0],
+        dayName: date.toLocaleDateString('en-US', { weekday: 'short' }),
+        temperature: {
+          high: Math.round(day.temperatureMax || 0),
+          low: Math.round(day.temperatureMin || 0)
+        },
+        windSpeed,
+        windDirection: 'W', // Default as not provided in forecast
+        humidity: Math.round(day.humidity || 0),
+        description: day.conditionDescription || day.condition || 'Unknown',
+        icon: mapAppleIconToStandard(day.condition),
+        dustLevel,
+        dustLabel: dustInfo.label,
+        precipitationProbability: day.precipitationProbability || 0
+      }
+    })
+    
+    console.log('✅ Rails API forecast succeeded')
+    return dailyForecasts
+  } catch (error) {
+    console.log('❌ Rails API forecast failed:', error.message)
+    errors.push(`Rails API: ${error.message}`)
+  }
+  
+  // 2. Try OpenWeatherMap as fallback
+  try {
+    console.log('Trying OpenWeatherMap forecast as fallback...')
     return await getOpenWeatherForecast()
   } catch (error) {
-    console.error('Forecast failed:', error)
-    throw error
+    console.error('❌ OpenWeatherMap forecast failed:', error)
+    errors.push(`OpenWeatherMap: ${error.message}`)
+    
+    // Throw combined error
+    const combinedError = new Error(`All forecast services failed: ${errors.join(', ')}`)
+    combinedError.errors = errors
+    throw combinedError
   }
 }
 

@@ -9,8 +9,13 @@ export default defineConfig({
     __BUILD_TIME__: JSON.stringify(new Date().toISOString())
   },
   server: {
-    port: 8000,
+    port: 8005,
     proxy: {
+      '/api/v1': {
+        target: 'http://localhost:3020',
+        changeOrigin: true,
+        secure: false
+      },
       '/api': {
         target: 'https://api.burningman.org',
         changeOrigin: true,

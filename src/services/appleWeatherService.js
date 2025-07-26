@@ -11,21 +11,8 @@ const BLACK_ROCK_CITY = {
   name: 'Black Rock City, NV'
 }
 
-// Apple WeatherKit configuration - using Jeremy's credentials
-const APPLE_WEATHER_CONFIG = {
-  baseUrl: 'https://weatherkit.apple.com/api/v1',
-  teamId: '7SWYPA4YZ5',
-  serviceId: 'com.zinod.slackbot',
-  keyId: '9XG6YW4RKV',
-  privateKey: `-----BEGIN PRIVATE KEY-----
-MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQguV2j2ReWGNbmmpHm
-j4OJtSxFpZoLeytxZFWl8ye7KjWgCgYIKoZIzj0DAQehRANCAAS/QUicJKRG+szG
-4kpmpMTk/LcctflXUyD9HHvhTYPszHkDd+XeZRUfftduNTfrWb6CL5Ua8ee+6H/s
-wGiY+eKN
------END PRIVATE KEY-----`,
-  timezone: 'America/Los_Angeles',
-  language: 'en'
-}
+// Rails API endpoint for Apple WeatherKit proxy
+const RAILS_WEATHER_API = '/api/v1/weather/current'
 
 // Cache keys
 const APPLE_WEATHER_CACHE_KEY = 'apple_weather_data_cache'
@@ -62,46 +49,6 @@ const cacheAppleWeatherData = (data) => {
   localStorage.setItem(APPLE_WEATHER_CACHE_TIMESTAMP_KEY, Date.now().toString())
 }
 
-/**
- * Create JWT token for Apple WeatherKit authentication
- */
-const createAppleJWT = async () => {
-  const { teamId, serviceId, keyId, privateKey } = APPLE_WEATHER_CONFIG
-  
-  if (!privateKey) {
-    throw new Error('Apple WeatherKit private key not configured')
-  }
-
-  try {
-    // Import JOSE library for JWT creation
-    const { SignJWT, importPKCS8 } = await import('jose')
-    
-    const now = Math.floor(Date.now() / 1000)
-    const exp = now + 3600 // 1 hour expiration
-
-    // Import the private key
-    const privateKeyObject = await importPKCS8(privateKey, 'ES256')
-
-    // Create and sign the JWT
-    const jwt = await new SignJWT({
-      iss: teamId,
-      iat: now,
-      exp: exp,
-      sub: serviceId
-    })
-    .setProtectedHeader({
-      alg: 'ES256',
-      kid: keyId,
-      id: `${teamId}.${serviceId}`
-    })
-    .sign(privateKeyObject)
-
-    return jwt
-  } catch (error) {
-    console.error('Apple WeatherKit JWT generation failed:', error)
-    throw new Error(`Apple WeatherKit authentication failed: ${error.message}`)
-  }
-}
 
 /**
  * Convert Apple Weather condition codes to our dust levels
@@ -157,26 +104,18 @@ export const getCurrentWeatherFromApple = async () => {
   }
 
   try {
-    // Generate JWT token
-    const token = await createAppleJWT()
-    
-    const { baseUrl, language, timezone } = APPLE_WEATHER_CONFIG
-    
-    // Build URL with query parameters - include moon data
-    const params = new URLSearchParams({
-      dataSets: 'currentWeather,forecastDaily,forecastHourly',
-      timezone: timezone
-    })
-    const url = `${baseUrl}/weather/${language}/${BLACK_ROCK_CITY.lat}/${BLACK_ROCK_CITY.lon}?${params}`
-    
-    console.log('Apple WeatherKit URL:', url)
-    
-    const response = await fetch(url, {
-      method: 'GET',
+    // Call Rails API proxy for Apple Weather data
+    const response = await fetch(RAILS_WEATHER_API, {
+      method: 'POST',
       headers: {
-        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
-      }
+      },
+      body: JSON.stringify({
+        latitude: BLACK_ROCK_CITY.lat,
+        longitude: BLACK_ROCK_CITY.lon,
+        dataSets: 'currentWeather,forecastDaily,forecastHourly',
+        timezone: 'America/Los_Angeles'
+      })
     })
 
     if (!response.ok) {
@@ -345,11 +284,11 @@ export const getAppleWeatherForecast = async () => {
 }
 
 /**
- * Check if Apple WeatherKit is available
+ * Check if Apple WeatherKit is available via Rails API
  */
 export const isAppleWeatherAvailable = () => {
-  const { teamId, serviceId, keyId, privateKey } = APPLE_WEATHER_CONFIG
-  return !!(teamId && serviceId && keyId && privateKey)
+  // Apple Weather is now available through Rails API proxy
+  return true
 }
 
 /**
