@@ -162,9 +162,9 @@ export const getCurrentWeatherFromApple = async () => {
     
     const { baseUrl, language, timezone } = APPLE_WEATHER_CONFIG
     
-    // Build URL with query parameters
+    // Build URL with query parameters - include moon data
     const params = new URLSearchParams({
-      dataSets: 'currentWeather,forecastDaily',
+      dataSets: 'currentWeather,forecastDaily,forecastHourly',
       timezone: timezone
     })
     const url = `${baseUrl}/weather/${language}/${BLACK_ROCK_CITY.lat}/${BLACK_ROCK_CITY.lon}?${params}`
@@ -195,6 +195,21 @@ export const getCurrentWeatherFromApple = async () => {
     const dustLevel = convertAppleConditionToDustLevel(current.conditionCode, windSpeed)
     const dustInfo = getDustLevelInfo(dustLevel)
     
+    // Extract moon phase data if available
+    let moonPhase = null
+    if (data.forecastDaily && data.forecastDaily.days && data.forecastDaily.days[0]) {
+      const today = data.forecastDaily.days[0]
+      if (today.moonPhase !== undefined) {
+        moonPhase = {
+          phase: today.moonPhase,
+          phaseName: getMoonPhaseName(today.moonPhase),
+          phaseIcon: getMoonPhaseIcon(today.moonPhase),
+          moonrise: today.moonrise ? formatMoonTime(today.moonrise) : null,
+          moonset: today.moonset ? formatMoonTime(today.moonset) : null
+        }
+      }
+    }
+
     const processedData = {
       temperature: Math.round((current.temperature - 273.15) * 9/5 + 32), // Convert K to F
       feelsLike: Math.round((current.temperatureApparent - 273.15) * 9/5 + 32),
@@ -209,6 +224,7 @@ export const getCurrentWeatherFromApple = async () => {
       dustLevel,
       dustLabel: dustInfo.label,
       recommendation: dustInfo.recommendation,
+      moonPhase,
       lastUpdated: new Date().toISOString(),
       source: 'apple-api'
     }
@@ -258,6 +274,51 @@ const mapAppleIconToStandard = (conditionCode) => {
     'Windy': '50d'
   }
   return iconMap[conditionCode] || '01d'
+}
+
+/**
+ * Get moon phase name from Apple's phase value (0-1)
+ */
+const getMoonPhaseName = (phase) => {
+  // Apple returns moon phase as 0-1 value
+  if (phase === 0 || phase === 1) return 'New Moon'
+  if (phase < 0.25) return 'Waxing Crescent'
+  if (phase === 0.25) return 'First Quarter'
+  if (phase < 0.5) return 'Waxing Gibbous'
+  if (phase === 0.5) return 'Full Moon'
+  if (phase < 0.75) return 'Waning Gibbous'
+  if (phase === 0.75) return 'Last Quarter'
+  return 'Waning Crescent'
+}
+
+/**
+ * Get moon phase icon/emoji
+ */
+const getMoonPhaseIcon = (phase) => {
+  // Apple returns moon phase as 0-1 value
+  if (phase === 0 || phase === 1) return '🌑' // New Moon
+  if (phase < 0.25) return '🌒' // Waxing Crescent
+  if (phase === 0.25) return '🌓' // First Quarter
+  if (phase < 0.5) return '🌔' // Waxing Gibbous
+  if (phase === 0.5) return '🌕' // Full Moon
+  if (phase < 0.75) return '🌖' // Waning Gibbous
+  if (phase === 0.75) return '🌗' // Last Quarter
+  return '🌘' // Waning Crescent
+}
+
+/**
+ * Format moon rise/set times
+ */
+const formatMoonTime = (timestamp) => {
+  if (!timestamp) return null
+  
+  const date = new Date(timestamp * 1000)
+  return date.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+    timeZone: 'America/Los_Angeles'
+  })
 }
 
 /**

@@ -59,6 +59,13 @@
               <label>Sun Times</label>
               <span>{{ sunTimes.sunrise }} - {{ sunTimes.sunset }}</span>
             </div>
+            <div v-if="currentConditions.moonPhase" class="metric">
+              <label>Moon Phase</label>
+              <span>{{ currentConditions.moonPhase.phaseIcon }} {{ currentConditions.moonPhase.phaseName }}</span>
+              <small v-if="currentConditions.moonPhase.moonrise">
+                Rise: {{ currentConditions.moonPhase.moonrise }} • Set: {{ currentConditions.moonPhase.moonset }}
+              </small>
+            </div>
           </div>
           <p class="recommendation">{{ currentConditions.recommendation }}</p>
           <div class="data-source">
@@ -176,6 +183,32 @@
         </div>
       </div>
       
+      <!-- Moon Phase Section (when available from Apple Weather) -->
+      <div v-if="currentConditions && currentConditions.moonPhase && currentConditions.source.includes('apple')" class="moon-phase-section">
+        <h3>🌙 Moon Phase for Black Rock City</h3>
+        <div class="moon-phase-card">
+          <div class="moon-display">
+            <span class="moon-icon">{{ currentConditions.moonPhase.phaseIcon }}</span>
+            <h4>{{ currentConditions.moonPhase.phaseName }}</h4>
+          </div>
+          <div class="moon-times" v-if="currentConditions.moonPhase.moonrise">
+            <div class="moon-time">
+              <label>Moonrise</label>
+              <span>{{ currentConditions.moonPhase.moonrise }}</span>
+            </div>
+            <div class="moon-time">
+              <label>Moonset</label>
+              <span>{{ currentConditions.moonPhase.moonset }}</span>
+            </div>
+          </div>
+          <p class="moon-info">
+            Moon phases are crucial for navigation and activities at Burning Man. 
+            <strong>{{ currentConditions.moonPhase.phaseName }}</strong> provides 
+            {{ getMoonLightDescription(currentConditions.moonPhase.phase) }} for nighttime visibility.
+          </p>
+        </div>
+      </div>
+      
       <!-- Global Apple Weather Attribution (when using Apple data) -->
       <div v-if="currentConditions && (currentConditions.source === 'apple-api' || currentConditions.source === 'apple-cache-expired')" class="global-attribution">
         <small>
@@ -247,6 +280,20 @@ const formatCurrentDate = () => {
     timeZone: 'America/Los_Angeles' // PST/PDT for Black Rock City
   }
   return now.toLocaleDateString('en-US', options).replace(' at ', ' @ ')
+}
+
+const getMoonLightDescription = (phase) => {
+  if (!phase) return 'natural lighting'
+  
+  if (phase === 0 || phase === 1) {
+    return 'minimal light - perfect for stargazing but bring extra lighting'
+  } else if (phase > 0.4 && phase < 0.6) {
+    return 'excellent natural lighting for nighttime activities'
+  } else if (phase > 0.25 && phase < 0.75) {
+    return 'good natural lighting for navigation'
+  } else {
+    return 'moderate lighting - headlamps recommended'
+  }
 }
 
 const loadWeatherData = async (showLoadingSpinner = true) => {
@@ -506,6 +553,80 @@ h2 {
 .global-attribution a:hover {
   color: #999;
   text-decoration: underline;
+}
+
+.moon-phase-section {
+  background: #1a1a1a;
+  border: 1px solid #444;
+  border-radius: 8px;
+  padding: 0 1.5rem 1.5rem 1.5rem;
+  margin-top: 2rem;
+}
+
+.moon-phase-section h3 {
+  color: #fff;
+  margin: 1.5rem 0 1rem 0;
+}
+
+.moon-phase-card {
+  background: #2a2a2a;
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.moon-display {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.moon-icon {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.moon-display h4 {
+  color: #fff;
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.moon-times {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.moon-time {
+  text-align: center;
+  padding: 0.75rem;
+  background: #333;
+  border-radius: 4px;
+}
+
+.moon-time label {
+  display: block;
+  color: #999;
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+}
+
+.moon-time span {
+  color: #fff;
+  font-weight: bold;
+}
+
+.moon-info {
+  color: #ccc;
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.moon-info strong {
+  color: #fff;
 }
 
 .no-data-state {
