@@ -1,5 +1,11 @@
 <template>
   <section id="list-section" class="view">
+    <LoadingSpinner v-if="loading" message="Loading data..." />
+    <div v-else-if="error" class="error-state">
+      <p>{{ error }}</p>
+      <button @click="loadData" class="retry-button">Try Again</button>
+    </div>
+    <template v-else>
     <div id="list-controls">
       <input 
         type="text" 
@@ -48,9 +54,11 @@
       </div>
     </div>
     <ul id="items-list">
-      <li v-if="loading">Loading…</li>
-      <li v-else-if="error">{{ error }}</li>
-      <li v-else-if="sortedItems.length === 0">No {{ type }}s available.</li>
+      <li v-if="sortedItems.length === 0" class="empty-state">
+        <p>No {{ type }}s found</p>
+        <p class="empty-hint" v-if="searchQuery">Try adjusting your search</p>
+        <p class="empty-hint" v-else-if="showFavoritesOnly">No favorites yet</p>
+      </li>
       <template v-else-if="sortBy === 'name' || sortBy === 'sector' || sortBy === 'avenue'">
         <template v-for="(group, header) in groupedItems" :key="header">
           <li class="section-header" @click="toggleGroup(header)">
@@ -112,6 +120,7 @@
         </button>
       </li>
     </ul>
+    </template>
   </section>
 </template>
 
@@ -123,6 +132,7 @@ import { getFromCache } from '../services/storage'
 import { isFavorite, toggleFavorite, getFavorites } from '../services/favorites'
 import { useGeolocation } from '../composables/useGeolocation'
 import { getVisitInfo } from '../services/visits'
+import LoadingSpinner from '../components/LoadingSpinner.vue'
 
 const props = defineProps(['type', 'year'])
 const router = useRouter()
@@ -590,5 +600,47 @@ watch(() => [props.type, props.year], () => {
   .schedule-controls {
     justify-content: center;
   }
+}
+
+/* Error and Empty States */
+.error-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #999;
+}
+
+.error-state p {
+  margin-bottom: 1rem;
+  color: #ff6666;
+}
+
+.retry-button {
+  background: #8B0000;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s;
+}
+
+.retry-button:hover {
+  background: #a00000;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #666;
+}
+
+.empty-state p {
+  margin: 0.5rem 0;
+}
+
+.empty-hint {
+  font-size: 0.9rem;
+  color: #555;
 }
 </style>

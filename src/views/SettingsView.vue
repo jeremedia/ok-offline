@@ -830,17 +830,26 @@ h3 {
 
 .progress-bar {
   margin-top: 1rem;
-  height: 20px;
-  background: #333;
-  border-radius: 10px;
+  height: 24px;
+  background: #222;
+  border-radius: 12px;
   overflow: hidden;
   position: relative;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
 }
 
 .progress-fill {
   height: 100%;
-  background: #8B0000;
+  background: linear-gradient(90deg, #8B0000 0%, #a00000 50%, #8B0000 100%);
+  background-size: 200% 100%;
   transition: width 0.3s ease;
+  animation: shimmer 2s ease-in-out infinite;
+  box-shadow: 0 0 10px rgba(139, 0, 0, 0.5);
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
 .progress-text {
@@ -849,7 +858,10 @@ h3 {
   left: 50%;
   transform: translate(-50%, -50%);
   color: #fff;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  white-space: nowrap;
 }
 
 .global-actions {
