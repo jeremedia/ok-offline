@@ -27,7 +27,8 @@
       "Bash(git commit:*)",
       "Bash(grep:*)",
       "Bash(git fetch:*)",
-      "Bash(git pull:*)"
+      "Bash(git pull:*)",
+      "Bash(cp:*)"
     ],
     "deny": []
   }

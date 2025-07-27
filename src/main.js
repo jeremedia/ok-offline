@@ -74,6 +74,12 @@ const routes = [
     component: SettingsView
   },
   {
+    path: '/settings/:tab',
+    name: 'settings-tab',
+    component: SettingsView,
+    props: true
+  },
+  {
     path: '/settings/map',
     name: 'map-settings',
     component: MapSettingsView
