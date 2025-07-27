@@ -143,6 +143,38 @@ const showReleaseNotes = ref(false)
 // Release notes data
 const releaseNotes = [
   {
+    version: '3.2.0',
+    date: '2025-07-27',
+    added: [
+      '📱 Complete Mobile Optimization - Comprehensive mobile-first design overhaul',
+      '👆 Touch-friendly bottom navigation with haptic feedback',
+      '👈 Swipe gestures for horizontal navigation between main views',
+      '↓ Pull-to-refresh functionality on mobile devices',
+      '📲 Mobile-responsive header with streamlined actions',
+      '🎯 Touch targets sized for optimal mobile interaction (44px minimum)',
+      '✨ Advanced Mobile UX with professional interaction patterns',
+      '📑 Settings Interface Revolution - Modular tabbed architecture',
+      '🏗️ Seven specialized tabs: About, Data Sync, Features, Maps, Implementation, Feedback, Emergency',
+      '🔧 Each tab implemented as independent Vue component for maintainability'
+    ],
+    changed: [
+      '🚀 Mobile-First Navigation - Complete navigation paradigm shift',
+      '📱 Desktop retains traditional header navigation, mobile uses bottom navigation',
+      '🔍 Search and settings become prominent mobile header actions',
+      '👆 Touch Interaction Design optimized for finger navigation',
+      '📐 Increased touch target sizes throughout interface',
+      '🎨 Enhanced visual feedback for touch interactions',
+      '🏛️ Settings Architecture - From monolithic to modular design'
+    ],
+    technical: [
+      '📱 Mobile Detection Logic with smart responsive behavior',
+      '🏗️ Component Architecture improvements with shared CSS design system',
+      '📦 Modular imports reduce bundle size impact',
+      '🎯 Clear separation of concerns between mobile/desktop interfaces',
+      '🔨 Added HammerJS for professional touch gesture library'
+    ]
+  },
+  {
     version: '2.0.0',
     date: '2025-07-26',
     added: [
