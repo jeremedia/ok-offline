@@ -84,36 +84,12 @@
 // Features tab has no interactive functionality - it's purely informational
 </script>
 
+<style>
+@import './settings-shared.css';
+</style>
+
 <style scoped>
-.features-content {
-  max-width: 900px;
-}
-
-.feature-section {
-  background: #2a2a2a;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-  border-radius: 8px;
-}
-
-.feature-section h3 {
-  margin-top: 0;
-  color: #fff;
-}
-
-.feature-section ul {
-  margin: 0;
-  padding-left: 1.5rem;
-  color: #ccc;
-  line-height: 1.8;
-}
-
-.keyboard-shortcuts {
-  background: #2a2a2a;
-  padding: 1.5rem;
-  border-radius: 8px;
-}
-
+/* Component-specific styles */
 .keyboard-shortcuts table {
   width: 100%;
   border-collapse: collapse;

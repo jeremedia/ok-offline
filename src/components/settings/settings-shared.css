@@ -1,0 +1,370 @@
+/* Shared styles for all settings panels */
+
+/* Base panel structure */
+.tab-content {
+  animation: fadeIn 0.3s;
+  font-family: 'Berkeley Mono', monospace;
+  max-width: 800px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.tab-content h2 {
+  color: #fff;
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+}
+
+.tab-content h3 {
+  color: #FFD700;
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.tab-content h4 {
+  color: #fff;
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+/* Section containers */
+.settings-section,
+.feature-section,
+.about-section,
+.maps-section,
+.implementation-section,
+.feedback-section {
+  margin-bottom: 2.5rem;
+  padding: 1.5rem;
+  background: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: 8px;
+}
+
+/* Typography */
+.tab-content p {
+  line-height: 1.6;
+  color: #ccc;
+  margin-bottom: 1rem;
+}
+
+.tab-content ul,
+.tab-content ol {
+  margin-left: 1.5rem;
+  color: #ccc;
+  line-height: 1.8;
+}
+
+.tab-content li {
+  margin-bottom: 0.5rem;
+}
+
+/* Links */
+.tab-content a {
+  color: #8B0000;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.tab-content a:hover {
+  text-decoration: underline;
+}
+
+/* Primary buttons */
+.primary-button,
+.sync-button,
+.sync-all-button,
+.release-notes-button,
+.submit-button {
+  background: #8B0000;
+  color: #fff;
+  border: 1px solid #8B0000;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+  font-weight: 500;
+  font-family: 'Berkeley Mono', monospace;
+}
+
+.primary-button:hover,
+.sync-button:hover,
+.sync-all-button:hover,
+.release-notes-button:hover,
+.submit-button:hover {
+  background: #a00;
+  border-color: #a00;
+}
+
+.primary-button:disabled,
+.sync-button:disabled,
+.sync-all-button:disabled,
+.submit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Secondary buttons */
+.secondary-button,
+.clear-button,
+.edit-button,
+.cancel-button {
+  background: #444;
+  color: #ccc;
+  border: 1px solid #555;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+  font-weight: 500;
+  font-family: 'Berkeley Mono', monospace;
+}
+
+.secondary-button:hover,
+.clear-button:hover,
+.edit-button:hover,
+.cancel-button:hover {
+  background: #555;
+  color: #fff;
+  border-color: #666;
+}
+
+.secondary-button:disabled,
+.clear-button:disabled,
+.edit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Danger buttons */
+.danger-button,
+.delete-button {
+  background: #ff6b6b;
+  color: #fff;
+  border: 1px solid #ff6b6b;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+  font-weight: 500;
+  font-family: 'Berkeley Mono', monospace;
+}
+
+.danger-button:hover,
+.delete-button:hover {
+  background: #ff5252;
+  border-color: #ff5252;
+}
+
+/* Info boxes */
+.info-box,
+.version-info,
+.status-box {
+  padding: 1rem;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin: 1rem 0;
+}
+
+/* Empty states */
+.empty-state {
+  text-align: center;
+  padding: 2rem;
+  color: #999;
+}
+
+.empty-state p {
+  margin: 0.5rem 0;
+}
+
+.empty-state .hint {
+  font-size: 0.875rem;
+  color: #666;
+}
+
+/* Form elements */
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #ccc;
+  font-weight: 500;
+}
+
+.form-input,
+.form-textarea {
+  width: 100%;
+  padding: 0.75rem;
+  background: #333;
+  border: 1px solid #555;
+  border-radius: 4px;
+  color: #fff;
+  font-family: 'Berkeley Mono', monospace;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: #8B0000;
+  background: #3a3a3a;
+}
+
+.form-textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+/* Status indicators */
+.status-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #333;
+}
+
+.status-row:last-child {
+  border-bottom: none;
+}
+
+.type-label {
+  font-weight: 500;
+  color: #ccc;
+}
+
+.count {
+  color: #8B0000;
+  font-weight: 600;
+}
+
+.last-sync {
+  color: #999;
+  font-size: 0.875rem;
+}
+
+.never-synced {
+  color: #666;
+  font-size: 0.875rem;
+  font-style: italic;
+}
+
+/* Progress indicators */
+.progress-container {
+  margin: 1rem 0;
+}
+
+.progress-bar {
+  height: 4px;
+  background: #333;
+  border-radius: 2px;
+  overflow: hidden;
+  margin: 0.5rem 0;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #8B0000;
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  font-size: 0.875rem;
+  color: #999;
+  text-align: center;
+}
+
+/* Grids */
+.features-grid,
+.gis-features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.feature-card,
+.gis-feature {
+  padding: 1.25rem;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.feature-card:hover,
+.gis-feature:hover {
+  border-color: #8B0000;
+  transform: translateY(-2px);
+}
+
+/* Animation */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .tab-content {
+    padding: 0;
+  }
+  
+  .settings-section,
+  .feature-section,
+  .about-section,
+  .maps-section,
+  .implementation-section,
+  .feedback-section {
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .primary-button,
+  .secondary-button,
+  .danger-button {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+  }
+  
+  .features-grid,
+  .gis-features-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .tab-content h2 {
+    font-size: 1.25rem;
+  }
+  
+  .tab-content h3 {
+    font-size: 1rem;
+  }
+  
+  .status-row {
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+  
+  .last-sync,
+  .never-synced {
+    width: 100%;
+    margin-top: 0.25rem;
+  }
+}

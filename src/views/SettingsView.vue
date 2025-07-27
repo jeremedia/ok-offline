@@ -106,6 +106,10 @@ const setActiveTab = (tab) => {
   padding: 1rem;
   max-width: 1000px;
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: calc(100vh - 120px); /* Account for header and tab nav */
 }
 
 .settings-tabs {

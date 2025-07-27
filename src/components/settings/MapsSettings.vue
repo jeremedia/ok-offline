@@ -67,36 +67,12 @@
 // Maps tab has no interactive functionality - it's purely informational
 </script>
 
+<style>
+@import './settings-shared.css';
+</style>
+
 <style scoped>
-.maps-content {
-  max-width: 900px;
-}
-
-.maps-section {
-  background: #2a2a2a;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-  border-radius: 8px;
-}
-
-.maps-section h3 {
-  margin-top: 0;
-  color: #fff;
-}
-
-.maps-section p {
-  color: #ccc;
-  line-height: 1.6;
-  margin-bottom: 1rem;
-}
-
-.maps-section ul {
-  margin: 1rem 0;
-  padding-left: 1.5rem;
-  color: #ccc;
-  line-height: 1.8;
-}
-
+/* Component-specific styles */
 .maps-link {
   display: inline-block;
   background: #8B0000;
@@ -118,37 +94,5 @@
   margin-top: 1.5rem;
   padding-top: 1.5rem;
   border-top: 1px solid #444;
-}
-
-.maps-info h4 {
-  color: #fff;
-  margin: 0 0 0.75rem 0;
-}
-
-.gis-features-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1rem;
-  margin-top: 1rem;
-}
-
-.gis-feature {
-  background: #1a1a1a;
-  padding: 1rem;
-  border-radius: 6px;
-  border: 1px solid #444;
-}
-
-.gis-feature h4 {
-  color: #FFD700;
-  margin: 0 0 0.5rem 0;
-  font-size: 1rem;
-}
-
-.gis-feature p {
-  margin: 0;
-  font-size: 0.9rem;
-  color: #aaa;
-  line-height: 1.5;
 }
 </style>

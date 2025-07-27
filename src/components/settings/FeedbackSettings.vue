@@ -107,35 +107,13 @@
 // Feedback tab has no interactive functionality - it's purely informational
 </script>
 
+<style>
+@import './settings-shared.css';
+</style>
+
 <style scoped>
-.feedback-content {
-  max-width: 800px;
-}
 
-.feedback-section {
-  background: #2a2a2a;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-  border-radius: 8px;
-}
-
-.feedback-section h3 {
-  margin-top: 0;
-  color: #fff;
-}
-
-.feedback-section p {
-  color: #ccc;
-  line-height: 1.6;
-  margin-bottom: 1rem;
-}
-
-.feedback-section ul {
-  margin: 1rem 0 1rem 1.5rem;
-  color: #ccc;
-  line-height: 1.8;
-}
-
+/* Component-specific styles */
 .feedback-link {
   display: inline-block;
   background: #8B0000;
