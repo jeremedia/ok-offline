@@ -6,7 +6,7 @@
 // API configuration
 const API_BASE_URL = import.meta.env.DEV 
   ? 'http://localhost:3555/api/v1' 
-  : 'https://api.offline.oknotok.com/api/v1'
+  : 'https://offline.oknotok.com/api/v1'
 
 // Cache configuration
 const CACHE_DURATION = 24 * 60 * 60 * 1000 // 24 hours
