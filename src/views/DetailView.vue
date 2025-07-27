@@ -459,9 +459,9 @@ h2 {
 }
 
 .detail-field label {
-  color: #8B0000;
+  color: #ccc;
   font-weight: 600;
-  font-size: 0.75rem;
+  font-size: 1rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -516,7 +516,7 @@ h2 {
 .favorite-btn-detail {
   background: none;
   border: none;
-  font-size: 1.5rem;
+  font-size: 3rem;
   cursor: pointer;
   padding: 0.2rem 0.5rem;
   color: #666;
@@ -540,9 +540,9 @@ h2 {
 }
 
 .visit-tracking h3 {
-  color: #8B0000;
+  color: #ccc;
   margin-bottom: 1rem;
-  font-size: 0.875rem;
+  font-size: 1rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-weight: 600;
@@ -586,9 +586,9 @@ h2 {
 }
 
 .notes-section h4 {
-  color: #8B0000;
+  color: #ccc;
   margin-bottom: 0.75rem;
-  font-size: 0.875rem;
+  font-size: 1rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-weight: 600;

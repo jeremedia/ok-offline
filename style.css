@@ -245,10 +245,10 @@ main {
 
 #detail-info .detail-field label {
   font-weight: 600;
-  color: #8B0000;
+  color: #ccc;
   display: block;
   margin-bottom: 0.5rem;
-  font-size: 0.75rem;
+  font-size: 1rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
