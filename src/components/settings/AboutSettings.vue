@@ -9,7 +9,7 @@
       </p>
       
       <p>
-        Created by <strong>Jeremy Roush</strong> and brought to you by <strong>Mr. OK of OKNOTOK</strong>.
+        Brought to you by <strong><a href="/2025/camps/a1XVI000009ssUT2AY" class="camp-link">Mr. OK of OKNOTOK</a></strong>.
       </p>
       
       <p class="version-info">
@@ -380,5 +380,17 @@ const releaseNotes = [
 
 .release-group li {
   margin-bottom: 0.25rem;
+}
+
+/* Camp link styling */
+.camp-link {
+  color: #8B0000;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.camp-link:hover {
+  color: #FF4444;
+  text-decoration: underline;
 }
 </style>

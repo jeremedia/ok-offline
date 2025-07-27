@@ -25,10 +25,10 @@
           </div>
           <nav class="main-nav">
             <button @click="navigate('map')" :class="['nav-btn', { active: isActive('map') }]">MAP</button>
+            <button @click="navigate('search')" :class="['nav-btn', { active: isActive('search') }]">SEARCH</button>
             <button @click="navigate('camps')" :class="['nav-btn', { active: isActive('camps') }]">CAMPS</button>
             <button @click="navigate('art')" :class="['nav-btn', { active: isActive('art') }]">ART</button>
             <button @click="navigate('events')" :class="['nav-btn', { active: isActive('events') }]">EVENTS</button>
-            <button @click="navigate('search')" :class="['nav-btn', { active: isActive('search') }]">SEARCH</button>
             <button @click="navigate('schedule')" :class="['nav-btn', { active: isActive('schedule') }]">SCHEDULE</button>
             <button @click="navigateToDust" :class="['nav-btn', { active: isActive('dust') }]">DUST</button>
           </nav>
@@ -120,10 +120,11 @@
           </div>
           
           <div class="footer-section footer-creator-section">
-            <h4 class="footer-section-title">Created by</h4>
+            <h4 class="footer-section-title">Brought to you by</h4>
             <p class="footer-creator">
-              Jeremy Roush<br>
-              <span class="footer-brand-tag">Mr. OK of OKNOTOK</span>
+              <a href="/2025/camps/a1XVI000009ssUT2AY" class="footer-camp-link">
+                <span class="footer-brand-tag">Mr. OK of OKNOTOK</span>
+              </a>
             </p>
           </div>
         </div>
@@ -776,6 +777,19 @@ footer {
 .footer-brand-tag {
   color: #8B0000;
   font-weight: bold;
+}
+
+.footer-camp-link {
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+
+.footer-camp-link:hover {
+  opacity: 0.8;
+}
+
+.footer-camp-link:hover .footer-brand-tag {
+  color: #FF4444;
 }
 
 /* Utility class for hiding elements */
