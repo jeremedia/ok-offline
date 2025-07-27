@@ -28,7 +28,11 @@
       "Bash(grep:*)",
       "Bash(git fetch:*)",
       "Bash(git pull:*)",
-      "Bash(cp:*)"
+      "Bash(cp:*)",
+      "Bash(git push:*)",
+      "Bash(gh issue list:*)",
+      "Bash(gh issue:*)",
+      "mcp__playwright__playwright_get_visible_html"
     ],
     "deny": []
   }

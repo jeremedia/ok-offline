@@ -206,28 +206,38 @@ main {
 
 #detail-content {
   display: grid;
-  grid-template-columns: 1fr 300px;
+  grid-template-columns: 1fr 400px;
   gap: 2rem;
   max-width: 1200px;
   margin: 0 auto;
+  padding: 1.5rem;
+  overflow-x: hidden; /* Fix horizontal scrolling */
 }
 
 #detail-info h2 {
   margin-top: 0;
-  color: #ccc;
+  margin-bottom: 2rem;
+  color: #fff;
+  font-size: 2rem; /* Bigger heading for better hierarchy */
+  font-weight: 600;
 }
 
 #detail-info .detail-field {
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: #2a2a2a;
+  border-radius: 8px;
+  border: 1px solid #333;
 }
 
 #detail-info .detail-field label {
-  font-weight: bold;
-  color: #ccc;
+  font-weight: 600;
+  color: #8B0000;
   display: block;
-  margin-bottom: 0.25rem;
-  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.75rem;
   text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 #detail-info .detail-field .value {
@@ -238,23 +248,44 @@ main {
   background: #2a2a2a;
   border-radius: 8px;
   padding: 1rem;
+  border: 1px solid #333;
+  position: sticky;
+  top: 1rem;
+  max-height: calc(100vh - 100px);
 }
 
 #detail-map {
-  height: 300px;
+  height: 400px;
   width: 100%;
   border-radius: 4px;
   overflow: hidden;
+  border: 1px solid #444;
 }
 
 /* Responsive layout */
 @media (max-width: 768px) {
   #detail-content {
     grid-template-columns: 1fr;
+    padding: 1rem;
+    gap: 1rem;
   }
   
   #detail-map-container {
     order: -1;
+    position: static;
+    margin-bottom: 1rem;
+  }
+  
+  #detail-map {
+    height: 250px;
+  }
+  
+  #detail-info h2 {
+    font-size: 1.5rem;
+  }
+  
+  #detail-info .detail-field {
+    padding: 0.75rem;
   }
 }
 
@@ -262,22 +293,27 @@ main {
 .camp-events {
   list-style: none;
   padding: 0;
-  margin: 0.5rem 0;
+  margin: 0;
 }
 
 .camp-events li {
   margin-bottom: 1rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #444;
+  padding: 1rem;
+  background: #1a1a1a;
+  border: 1px solid #444;
+  border-radius: 8px;
+  transition: all 0.2s ease;
 }
 
 .camp-events li:last-child {
-  border-bottom: none;
+  margin-bottom: 0;
 }
 
 .camp-events strong {
   display: block;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+  color: #fff;
 }
 
 .event-type {
@@ -289,18 +325,52 @@ main {
 
 .event-description {
   font-size: 0.875rem;
-  margin: 0.5rem 0;
+  margin: 0.75rem 0;
+  line-height: 1.5;
+  color: #ccc;
 }
 
 .event-times {
-  margin-top: 0.5rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #333;
 }
 
 .event-times small {
-  display: block;
+  display: inline-block;
   color: #999;
   font-size: 0.75rem;
-  margin-top: 0.25rem;
+  margin-right: 0.5rem;
+}
+
+/* Back button styling */
+#back-to-list {
+  margin-top: 2rem;
+}
+
+/* Ensure no horizontal scrolling */
+body {
+  overflow-x: hidden;
+}
+
+main {
+  overflow-x: hidden;
+}
+
+/* Improve occurrence items */
+.occurrence-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+}
+
+/* Visit tracking section */
+.visit-tracking {
+  background: #2a2a2a;
+  border-radius: 8px;
+  padding: 1.5rem;
+  border: 1px solid #333;
 }
 
 footer {

@@ -459,8 +459,11 @@ h2 {
 }
 
 .detail-field label {
-  color: #ccc;
-  font-weight: bold;
+  color: #8B0000;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .detail-field .value {
@@ -487,8 +490,8 @@ h2 {
 
 .event-item {
   cursor: pointer;
-  padding: 0.5rem;
-  margin: 0.5rem 0;
+  padding: 0;
+  margin: 0;
   border-radius: 4px;
   transition: background-color 0.2s;
 }
@@ -529,13 +532,19 @@ h2 {
 
 .visit-tracking {
   margin-top: 2rem;
-  padding-top: 2rem;
-  border-top: 1px solid #444;
+  padding: 1.5rem;
+  background: #2a2a2a;
+  border-radius: 8px;
+  border: 1px solid #333;
 }
 
 .visit-tracking h3 {
-  color: #ccc;
+  color: #8B0000;
   margin-bottom: 1rem;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
 }
 
 .visit-info {
@@ -576,8 +585,12 @@ h2 {
 }
 
 .notes-section h4 {
-  color: #ccc;
-  margin-bottom: 0.5rem;
+  color: #8B0000;
+  margin-bottom: 0.75rem;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
 }
 
 .notes-textarea {
