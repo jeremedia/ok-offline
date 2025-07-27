@@ -124,7 +124,15 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+
+// Props
+const props = defineProps({
+  showReleaseNotes: {
+    type: Boolean,
+    default: false
+  }
+})
 
 // Version info
 const appVersion = __APP_VERSION__
@@ -140,8 +148,53 @@ const buildTime = new Date(__BUILD_TIME__).toLocaleDateString('en-US', {
 // Modal state
 const showReleaseNotes = ref(false)
 
+// Auto-show release notes if prop is true
+onMounted(() => {
+  if (props.showReleaseNotes) {
+    showReleaseNotes.value = true
+  }
+})
+
 // Release notes data
 const releaseNotes = [
+  {
+    version: '3.8.1',
+    date: '2025-07-27',
+    fixed: [
+      '🔧 Corrected production API URL for vector search service integration',
+      '🌐 Improved vector search connectivity and error handling'
+    ],
+    technical: [
+      '🔗 Vector search service now properly configured for production deployment',
+      '📡 Enhanced API endpoint configuration for semantic search features'
+    ]
+  },
+  {
+    version: '3.8.0',
+    date: '2025-07-27',
+    added: [
+      '🧠 Vector Search Integration - AI-powered semantic search capabilities',
+      '🔍 Three intelligent search modes: Keyword (offline), Semantic (online), and Smart hybrid',
+      '🎯 SearchModeSelector component for intuitive search type switching',
+      '📊 Enhanced SearchResultItem with similarity scores and improved visual layout',
+      '💡 SearchSuggestions component with entity-based autocomplete functionality',
+      '🚀 Vector search service with intelligent caching and offline fallback support',
+      '🔄 Progressive enhancement that maintains OK-OFFLINE\'s offline-first architecture'
+    ],
+    changed: [
+      '🔍 SearchView completely enhanced with intelligent search mode selection',
+      '🏗️ Search architecture now supports multiple backends with graceful fallbacks',
+      '🎨 Improved search UI with better visual hierarchy and user experience',
+      '⚡ Search performance optimized with debouncing and request cancellation'
+    ],
+    technical: [
+      '🧩 New vectorSearchService.js for semantic search API integration',
+      '🎨 Three new search components: SearchModeSelector, SearchResultItem, SearchSuggestions',
+      '💾 IndexedDB caching strategy for vector search results with 24-hour TTL',
+      '🔗 Rails API integration with PostgreSQL + pgvector backend',
+      '🤖 OpenAI embeddings for intelligent semantic similarity matching'
+    ]
+  },
   {
     version: '3.7.0',
     date: '2025-07-27',

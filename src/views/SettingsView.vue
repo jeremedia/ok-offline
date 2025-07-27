@@ -12,7 +12,7 @@
     </div>
 
     <!-- Tab Components -->
-    <AboutSettings v-if="activeTab === 'ABOUT'" />
+    <AboutSettings v-if="activeTab === 'ABOUT'" :showReleaseNotes="showReleaseNotes" />
     <DataSyncSettings v-if="activeTab === 'DATA SYNC'" />
     <FeaturesSettings v-if="activeTab === 'FEATURES'" />
     <MapsSettings v-if="activeTab === 'MAPS'" />
@@ -37,7 +37,8 @@ import EmergencySettings from '../components/settings/EmergencySettings.vue'
 
 // Props
 const props = defineProps({
-  tab: String
+  tab: String,
+  showReleaseNotes: Boolean
 })
 
 // Router

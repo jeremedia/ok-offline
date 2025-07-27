@@ -80,6 +80,16 @@ const routes = [
     props: true
   },
   {
+    path: '/settings/about/release-notes',
+    name: 'release-notes',
+    component: SettingsView,
+    props: { tab: 'about', showReleaseNotes: true }
+  },
+  {
+    path: '/release-notes',
+    redirect: '/settings/about/release-notes'
+  },
+  {
     path: '/settings/map',
     name: 'map-settings',
     component: MapSettingsView

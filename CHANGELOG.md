@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Vector Search Integration** - AI-powered semantic search capabilities
+  - Intelligent semantic search using OpenAI embeddings and pgvector database
+  - Three search modes: Keyword (offline), Semantic (online), and Smart hybrid search
+  - SearchModeSelector component for intuitive search type switching
+  - Enhanced SearchResultItem with similarity scores and improved layout
+  - SearchSuggestions component with entity-based autocomplete
+  - Vector search service with caching and offline fallback support
+  - Progressive enhancement maintains offline-first architecture
 - **Precise Camp Location Accuracy** - Complete geocoding system overhaul for navigation-ready positioning
   - Dynamic avenue mapping system handles year-specific naming themes (2024: wonder theme, 2025: sci-fi authors)
   - GIS intersection finding algorithm places camps at exact street corners
@@ -24,11 +32,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Visual feedback for disabled controls with explanatory text
 
 ### Fixed
+- Production API URL for vector search service integration
 - Camp locations now appear at exact street intersections instead of approximate positions
 - Eliminated confusion from basemap showing wrong year's street names
 - Corrected hardcoded avenue distances with accurate GIS measurements
 
 ### Changed
+- SearchView enhanced with intelligent search mode selection and improved UI
+- Search architecture now supports multiple search backends with graceful fallbacks
 - Geocoding system now prioritizes GIS intersection finding over calculated positions
 - Map styling dynamically adapts based on year and basemap availability
 - DetailView includes GIS street layer initialization for accurate positioning
