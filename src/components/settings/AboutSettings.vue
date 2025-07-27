@@ -143,6 +143,34 @@ const showReleaseNotes = ref(false)
 // Release notes data
 const releaseNotes = [
   {
+    version: '3.1.0',
+    date: '2025-07-27',
+    added: [
+      '🎯 Comprehensive Onboarding Experience - Beautiful welcome flow for first-time users',
+      '📥 Progressive Multi-Year Sync - Downloads all years (2023-2025) automatically',
+      '🎓 Guided Tour System - Interactive tutorials for key features',
+      '✨ Enhanced Loading States - Professional progress feedback during operations',
+      '⚡ Service Worker Optimization - Faster initial loads and better caching',
+      '🔧 Developer Reset Tool - /reset path for testing onboarding experience',
+      '🏠 Smart Prioritization - Current year camps load first for immediate use',
+      '📚 Complete Historical Access - Reference past years and future plans',
+      '💾 Intelligent Caching - ~10-15MB total for all three years of data'
+    ],
+    changed: [
+      'Onboarding flow reduced from 4 to 3 steps for better UX',
+      'Data sync now downloads all years automatically',
+      'Service worker re-enabled with enhanced strategies',
+      'Welcome screen has unified sync UI without jarring transitions',
+      'First-time detection uses smart cached data checks'
+    ],
+    fixed: [
+      'Service worker registration properly enabled',
+      'Safari caching issues with version bumping',
+      'Jarring panel transitions during sync',
+      'Import errors in ResetView component'
+    ]
+  },
+  {
     version: '2.0.0',
     date: '2025-07-26',
     added: [

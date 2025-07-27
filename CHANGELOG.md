@@ -7,6 +7,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.1.0] - 2025-07-27
+
+### Added
+- **Comprehensive Onboarding Experience** - Beautiful multi-step welcome flow for first-time users
+  - Step 1: Feature showcase explaining offline-first nature
+  - Step 2: Automatic data sync with real-time progress visualization
+  - Step 3: Quick start guide with action cards
+- **Progressive Data Sync** - Intelligent multi-year download strategy
+  - Downloads all years (2023, 2024, 2025) automatically for complete access
+  - Prioritizes current year camps first for immediate use
+  - Background downloads historical data while users can start exploring
+  - Smart caching optimizes ~10-15MB total download
+- **Guided Tour System** - Interactive interface tutorials
+  - Contextual tooltips and highlights for key features
+  - Keyboard navigation support (arrow keys, spacebar, escape)
+  - Different tours for map, list, and search views
+  - Progressive disclosure without overwhelming new users
+- **Enhanced Loading States** - Professional progress feedback
+  - ProgressiveLoader component with multiple animation modes
+  - Step-by-step progress tracking with real-time updates
+  - Rotating tips during long operations
+  - Visual progress bars and status indicators
+- **Service Worker Optimization** - Faster initial loads
+  - Enhanced caching strategies for different resource types
+  - Intelligent cache management with automatic cleanup
+  - Background updates without blocking UI
+  - Persistent storage support for reliability
+- **Developer Reset Tool** - `/reset` path for testing onboarding
+  - Quick reset options for different test scenarios
+  - Status dashboard showing current state
+  - Reset log for tracking actions
+  - Full reset option for complete fresh start
+
+### Changed
+- **Onboarding Flow** - Reduced from 4 steps to 3 for better UX
+- **Data Sync** - Now downloads all years automatically instead of just selected year
+- **Service Worker** - Re-enabled with enhanced caching strategies
+- **Welcome Screen** - Unified sync UI eliminates jarring transitions
+- **First-Time Detection** - Smart logic checks for cached data or completion flag
+
+### Fixed
+- Service worker registration properly enabled in production
+- Safari aggressive caching issues with version bumping
+- Jarring panel transitions during onboarding sync
+- Import errors in ResetView component
+
 ## [2.0.0] - 2025-07-26
 
 ### BREAKING CHANGES

@@ -11,6 +11,7 @@ import MapSettingsView from './views/MapSettingsView.vue'
 import SearchView from './views/SearchView.vue'
 import ScheduleView from './views/ScheduleView.vue'
 import DustForecastView from './views/DustForecastView.vue'
+import ResetView from './views/ResetView.vue'
 
 // Import CSS
 import '/style.css'
@@ -99,6 +100,11 @@ const routes = [
     path: '/dust',
     name: 'dust',
     component: DustForecastView
+  },
+  {
+    path: '/reset',
+    name: 'reset',
+    component: ResetView
   }
 ]
 
@@ -111,18 +117,44 @@ createApp(App)
   .use(router)
   .mount('#app')
 
-// Service worker disabled for development
-// TODO: Re-enable for production
-/*
+// Register enhanced service worker for better onboarding experience
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
+    // Add cache-busting parameter to force service worker update
+    navigator.serviceWorker.register('/sw-enhanced.js?v=3.1.0')
       .then(registration => {
-        console.log('ServiceWorker registration successful:', registration)
+        console.log('Enhanced ServiceWorker registration successful:', registration)
+        
+        // Listen for service worker updates
+        registration.addEventListener('updatefound', () => {
+          const newWorker = registration.installing
+          if (newWorker) {
+            newWorker.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                // New version available
+                console.log('New app version available')
+                
+                // Optionally notify user about update
+                if (window.showToast) {
+                  window.showToast('App update available - refresh to get the latest version', 'info')
+                }
+              }
+            })
+          }
+        })
+        
+        // Listen for service worker messages
+        navigator.serviceWorker.addEventListener('message', event => {
+          const { type, data } = event.data
+          
+          if (type === 'SYNC_AVAILABLE') {
+            console.log('Background sync available for:', data)
+            // Could trigger UI update or data refresh
+          }
+        })
       })
       .catch(err => {
         console.log('ServiceWorker registration failed:', err)
       })
   })
 }
-*/

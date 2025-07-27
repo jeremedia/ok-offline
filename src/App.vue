@@ -1,5 +1,15 @@
 <template>
   <div class="app-container">
+    <WelcomeScreen 
+      v-if="showOnboarding" 
+      @complete="handleOnboardingComplete"
+    />
+    <GuidedTour 
+      v-if="showTour"
+      :tour-type="tourType"
+      @complete="handleTourComplete"
+      @skip="handleTourSkip"
+    />
     <ToastNotification ref="toastRef" />
     <header :class="{ 'mobile-header': isMobile }">
       <div class="header-row">
@@ -129,6 +139,8 @@ import { useSwipeGestures } from './composables/useSwipeGestures'
 import { getSyncMetadata } from './services/staticDataSync'
 import ToastNotification from './components/ToastNotification.vue'
 import BottomNav from './components/BottomNav.vue'
+import WelcomeScreen from './components/WelcomeScreen.vue'
+import GuidedTour from './components/GuidedTour.vue'
 import { setToastRef } from './composables/useToast'
 
 const route = useRoute()
@@ -139,6 +151,10 @@ const toastRef = ref(null)
 const selectedYear = ref('2024')
 const isOnline = ref(navigator.onLine)
 const lastSyncTime = ref(null)
+const showOnboarding = ref(false)
+const showTour = ref(false)
+const tourType = ref('general')
+
 // Check if device is truly mobile (phone, not tablet)
 const checkIfMobile = () => {
   // Simple width-based detection for all environments
@@ -198,10 +214,54 @@ const handleResize = () => {
   isMobile.value = checkIfMobile()
 }
 
+// Check if user needs onboarding
+const checkOnboardingStatus = () => {
+  const onboardingCompleted = localStorage.getItem('onboarding_completed')
+  const hasAnyCachedData = ['camp', 'art', 'event'].some(type => {
+    return getSyncMetadata(type, selectedYear.value)?.lastSync
+  })
+  
+  // Show onboarding if never completed AND no cached data exists
+  showOnboarding.value = !onboardingCompleted && !hasAnyCachedData
+}
+
+// Handle onboarding completion
+const handleOnboardingComplete = (data) => {
+  showOnboarding.value = false
+  
+  if (data.selectedYear) {
+    selectedYear.value = data.selectedYear
+    localStorage.setItem('selectedYear', data.selectedYear)
+  }
+  
+  if (data.showTour) {
+    // Start guided tour after a brief delay
+    setTimeout(() => {
+      tourType.value = 'general'
+      showTour.value = true
+    }, 500)
+  }
+  
+  // Navigate to map view
+  router.push(`/${selectedYear.value}/map`)
+}
+
+// Handle guided tour completion
+const handleTourComplete = () => {
+  showTour.value = false
+}
+
+const handleTourSkip = () => {
+  showTour.value = false
+}
+
 onMounted(async () => {
   // Set up toast notifications after component is fully mounted
   await nextTick()
   setToastRef(toastRef)
+  
+  // Check if user needs onboarding before setting up the rest
+  checkOnboardingStatus()
   
   window.addEventListener('online', updateOnlineStatus)
   window.addEventListener('offline', updateOnlineStatus)
