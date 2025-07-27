@@ -1,6 +1,6 @@
 <template>
   <div class="tab-content about-content">
-    <h2>About OK-OFFLINE</h2>
+    <h2>About OK-OFFLINE!</h2>
     
     <div class="about-section">
       <p>

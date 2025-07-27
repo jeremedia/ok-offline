@@ -66,7 +66,7 @@
     <footer :class="{ 'mobile-footer': isMobile }" v-if="!isMobile || (isMobile && $route.name !== 'map')">
       <div class="footer-content">
         <!-- Mobile Footer: Compact Single Row -->
-        <div class="footer-mobile" v-if="isMobile">
+        <div class="footer-mobile d-none" v-if="isMobile">
           <div class="footer-brand">
             <span class="footer-title">OK-OFFLINE</span>
             <span class="footer-version">v{{ $route.meta?.version || '3.0.0' }}</span>

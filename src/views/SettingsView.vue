@@ -2,12 +2,12 @@
   <section id="settings-section" class="view">
     <div class="settings-tabs">
       <button 
-        v-for="tab in tabs" 
+        v-for="tab in getVisibleTabs()" 
         :key="tab"
         @click="setActiveTab(tab)"
         :class="['tab-button', { active: activeTab === tab }]"
       >
-        {{ tab }}
+        {{ getTabLabel(tab) }}
       </button>
     </div>
 
@@ -23,7 +23,7 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 // Import all settings components
@@ -46,6 +46,17 @@ const router = useRouter()
 
 // Tab management
 const tabs = ['ABOUT', 'DATA SYNC', 'FEATURES', 'MAPS', 'IMPLEMENTATION', 'FEEDBACK', 'EMERGENCY']
+
+// Mobile-friendly tab labels
+const mobileTabLabels = {
+  'ABOUT': 'ABOUT',
+  'DATA SYNC': 'SYNC',
+  'FEATURES': 'FEATURES', 
+  'MAPS': 'MAPS',
+  'IMPLEMENTATION': 'TOOLS',
+  'FEEDBACK': 'FEEDBACK',
+  'EMERGENCY': 'EMERGENCY'
+}
 
 // Tab name mapping for URLs (kebab-case)
 const tabUrlMap = {
@@ -88,6 +99,34 @@ watch(activeTab, (newTab) => {
   }
 })
 
+// Mobile detection
+const isMobile = ref(window.innerWidth < 600)
+const handleResize = () => {
+  isMobile.value = window.innerWidth < 600
+}
+
+onMounted(() => {
+  window.addEventListener('resize', handleResize)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize)
+})
+
+// Get filtered tabs for current viewport
+const getVisibleTabs = () => {
+  if (isMobile.value) {
+    // Hide IMPLEMENTATION on mobile - not useful for mobile users
+    return tabs.filter(tab => tab !== 'IMPLEMENTATION')
+  }
+  return tabs
+}
+
+// Get appropriate tab label for current viewport
+const getTabLabel = (tab) => {
+  return isMobile.value ? mobileTabLabels[tab] : tab
+}
+
 // Set active tab
 const setActiveTab = (tab) => {
   activeTab.value = tab
@@ -119,6 +158,10 @@ const setActiveTab = (tab) => {
   border-bottom: 2px solid #444;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  /* Safari fixes - force container height */
+  min-height: 44px;
+  height: auto;
+  flex-shrink: 0;
 }
 
 .tab-button {
@@ -126,14 +169,22 @@ const setActiveTab = (tab) => {
   border: none;
   color: #999;
   cursor: pointer;
-  padding: 1rem 1.5rem;
+  padding: 0.75rem 1.5rem;
   font-size: 1rem;
-  font-family: 'Berkeley Mono', monospace;
+  font-family: 'Berkeley Mono', 'SF Mono', 'Monaco', 'Consolas', monospace;
   white-space: nowrap;
   transition: all 0.2s;
   position: relative;
+  /* Safari fixes - force explicit height and layout */
+  height: auto;
+  min-height: 44px;
+  line-height: 1.2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  /* Remove all negative positioning for Safari */
   border-bottom: 3px solid transparent;
-  margin-bottom: -2px;
 }
 
 .tab-button:hover {
@@ -153,7 +204,7 @@ const setActiveTab = (tab) => {
 
 :deep(.tab-content h2) {
   color: #fff;
-  margin-bottom: 1.5rem;
+  margin: 0 0 1.5rem 0;
 }
 
 :deep(.tab-content h3) {
@@ -171,25 +222,66 @@ const setActiveTab = (tab) => {
   #settings-section {
     padding: 0.5rem;
   }
+}
+
+/* Mobile optimized horizontal tabs */
+@media (max-width: 600px) {
+  #settings-section {
+    padding: 0 1rem; /* Content padding only */
+    max-width: 100vw; /* Ensure container doesn't exceed viewport */
+    overflow-x: hidden; /* Prevent horizontal scroll */
+    box-sizing: border-box;
+  }
   
   .settings-tabs {
-    gap: 0.5rem;
+    gap: 0.25rem;
+    margin-bottom: 1.5rem;
+    padding: 0 1rem;
+    min-height: 44px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    /* Hide scrollbar but keep functionality */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    /* Ensure tabs align left and scroll properly */
+    justify-content: flex-start;
+    width: 100%;
+  }
+  
+  /* Ensure all tab content respects mobile boundaries */
+  :deep(.tab-content) {
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
+  }
+  
+  /* Hide h2 headers on mobile - tab context is sufficient */
+  :deep(.tab-content h2) {
+    display: none;
+  }
+  
+  /* Remove top margin from first paragraph in about section */
+  :deep(.about-section p:first-child) {
+    margin-top: 0;
+  }
+  
+  /* Remove bottom margin from last ul in about section */
+  :deep(.about-section ul:last-child) {
+    margin-bottom: 0;
+  }
+  
+  .settings-tabs::-webkit-scrollbar {
+    display: none;
   }
   
   .tab-button {
     padding: 0.75rem 1rem;
-    font-size: 0.9rem;
-  }
-}
-
-@media (max-width: 600px) {
-  .settings-tabs {
-    gap: 0.25rem;
-  }
-  
-  .tab-button {
-    padding: 0.75rem 0.75rem;
     font-size: 0.8rem;
+    min-height: 44px;
+    min-width: max-content; /* Ensure buttons don't shrink */
+    white-space: nowrap;
+    flex-shrink: 0; /* Prevent shrinking */
+    flex-grow: 0; /* Prevent growing */
   }
 }
 </style>
