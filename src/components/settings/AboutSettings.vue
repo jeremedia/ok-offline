@@ -143,6 +143,38 @@ const showReleaseNotes = ref(false)
 // Release notes data
 const releaseNotes = [
   {
+    version: '3.7.0',
+    date: '2025-07-27',
+    added: [
+      '🎯 Precise Camp Location Accuracy - Navigation-ready positioning system',
+      '📍 GIS intersection finding algorithm places camps at exact street corners',
+      '🗺️ Dynamic avenue mapping for year-specific naming themes (2024: wonder theme, 2025: sci-fi authors)',
+      '📏 Accurate avenue distances extracted from GIS data (corrected errors up to 536 feet!)',
+      '🎨 Custom Map Visualization with distinctive red streets on black background',
+      '🏷️ Street name labels for easy orientation and navigation',
+      '🧭 Smart Basemap Management - Year-specific map handling prevents confusion',
+      '🔇 Conditional debug logging system for clean production console output'
+    ],
+    changed: [
+      '🎯 Geocoding system now prioritizes GIS intersection finding over calculated positions',
+      '🗺️ Map styling dynamically adapts based on year and basemap availability',
+      '📍 DetailView includes GIS street layer initialization for accurate positioning',
+      '🔧 Debug logging only enabled in development mode or with VITE_DEBUG=true'
+    ],
+    fixed: [
+      '📍 Camp locations now appear at exact street intersections instead of approximate positions',
+      '🗺️ Eliminated confusion from basemap showing wrong year\'s street names',
+      '📏 Corrected hardcoded avenue distances with accurate GIS measurements from official data',
+      '🔇 Reduced console noise in production while preserving detailed debugging information'
+    ],
+    technical: [
+      '🧩 New avenueMapping.js utility for year-specific street name translation',
+      '🔍 Enhanced geocoding.js with GIS intersection finding and distance validation',
+      '🎨 Custom street rendering system for year-appropriate visualization',
+      '🔧 APP_DEBUG configuration system for conditional logging'
+    ]
+  },
+  {
     version: '3.6.0',
     date: '2025-07-27',
     added: [
