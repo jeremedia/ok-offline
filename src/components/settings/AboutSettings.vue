@@ -438,7 +438,9 @@ const releaseNotes = [
 
 .modal-header h2 {
   margin: 0;
+  padding: 0;
   color: #fff;
+  line-height: 1.2;
 }
 
 .close-button {
