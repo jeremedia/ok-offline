@@ -124,6 +124,7 @@ const setActiveTab = (tab) => {
   cursor: pointer;
   padding: 1rem 1.5rem;
   font-size: 1rem;
+  font-family: 'Berkeley Mono', monospace;
   white-space: nowrap;
   transition: all 0.2s;
   position: relative;

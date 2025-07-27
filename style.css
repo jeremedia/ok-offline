@@ -54,6 +54,11 @@ html, body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Ensure all buttons inherit the font */
+button {
+  font-family: inherit;
+}
+
 header {
   background-color: #333;
   color: white;
