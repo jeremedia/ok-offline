@@ -32,7 +32,8 @@
       "Bash(git push:*)",
       "Bash(gh issue list:*)",
       "Bash(gh issue:*)",
-      "mcp__playwright__playwright_get_visible_html"
+      "mcp__playwright__playwright_get_visible_html",
+      "Bash(git merge:*)"
     ],
     "deny": []
   }
