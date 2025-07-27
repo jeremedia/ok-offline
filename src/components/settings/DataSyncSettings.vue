@@ -296,31 +296,6 @@ onMounted(() => {
   transition: background 0.2s;
 }
 
-.sync-button:hover:not(:disabled) {
-  background: #555;
-}
-
-.sync-button:disabled {
-  background: #333;
-  color: #666;
-  cursor: not-allowed;
-}
-
-.clear-button {
-  background: transparent;
-  color: #ff6666;
-  border: 1px solid #ff6666;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.clear-button:hover:not(:disabled) {
-  background: #ff6666;
-  color: #fff;
-}
-
 .progress-bar {
   margin-top: 1rem;
   height: 24px;
@@ -363,27 +338,8 @@ onMounted(() => {
   border-top: 1px solid #444;
 }
 
-.danger-button {
-  background: #ff4444;
-  color: #fff;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.danger-button:hover {
-  background: #ff6666;
-}
-
 /* Mobile responsive */
 @media (max-width: 600px) {
-  .status-row {
-    grid-template-columns: 80px 80px 1fr;
-    font-size: 0.9rem;
-  }
-  
   .sync-actions {
     flex-direction: column;
   }

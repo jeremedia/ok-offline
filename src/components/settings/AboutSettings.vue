@@ -266,65 +266,15 @@ const releaseNotes = [
 ]
 </script>
 
+<style>
+@import './settings-shared.css';
+</style>
+
 <style scoped>
-.about-content {
-  max-width: 800px;
-}
-
-.about-section {
-  margin-bottom: 2rem;
-}
-
-.about-section p {
-  line-height: 1.6;
-  color: #ccc;
-  margin-bottom: 1rem;
-}
-
-.about-section ul,
-.about-section ol {
-  margin-left: 1.5rem;
-  color: #ccc;
-  line-height: 1.8;
-}
-
-.about-section a {
-  color: #8B0000;
-  text-decoration: none;
-}
-
-.about-section a:hover {
-  text-decoration: underline;
-}
-
-.version-info {
-  margin-top: 1rem;
-  padding: 0.75rem;
-  background: #1a1a1a;
-  border-radius: 4px;
-  font-size: 0.9rem;
-}
-
+/* Component-specific styles */
 .build-time {
   font-size: 0.8rem;
   color: #666;
-}
-
-/* Release Notes Button */
-.release-notes-button {
-  background: #444;
-  color: #fff;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background 0.2s;
-  margin-top: 1rem;
-  font-size: 0.9rem;
-}
-
-.release-notes-button:hover {
-  background: #555;
 }
 
 /* Modal Styles */

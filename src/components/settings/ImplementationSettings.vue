@@ -2,7 +2,7 @@
   <div class="tab-content implementation-content">
     <h2>Technical Implementation</h2>
     
-    <div class="impl-section">
+    <div class="implementation-section">
       <h3>Architecture</h3>
       <p>
         OK-OFFLINE follows a strict offline-first architecture:
@@ -15,7 +15,7 @@
       </ul>
     </div>
 
-    <div class="impl-section">
+    <div class="implementation-section">
       <h3>Tech Stack</h3>
       <ul>
         <li><strong>Vue 3</strong> - Composition API for reactive UI</li>
@@ -27,7 +27,7 @@
       </ul>
     </div>
 
-    <div class="impl-section">
+    <div class="implementation-section">
       <h3>Data Storage</h3>
       <code>
 Database: bm2025-db
@@ -43,7 +43,7 @@ Database: bm2025-db
       </code>
     </div>
 
-    <div class="impl-section">
+    <div class="implementation-section">
       <h3>BRC Geocoding</h3>
       <p>
         Converts addresses like "7:30 & E" to coordinates:
@@ -56,7 +56,7 @@ Database: bm2025-db
       </ol>
     </div>
 
-    <div class="impl-section">
+    <div class="implementation-section">
       <h3>Event Enrichment</h3>
       <p>
         During sync, events are enriched with location data:
@@ -69,7 +69,7 @@ Database: bm2025-db
       </ol>
     </div>
 
-    <div class="impl-section">
+    <div class="implementation-section">
       <h3>Performance</h3>
       <ul>
         <li>Lazy loaded views with code splitting</li>
@@ -79,7 +79,7 @@ Database: bm2025-db
       </ul>
     </div>
 
-    <div class="impl-section">
+    <div class="implementation-section">
       <h3>Contributing</h3>
       <p>
         View the full source code and contribute on GitHub:<br>
@@ -95,29 +95,20 @@ Database: bm2025-db
 // Implementation tab has no interactive functionality - it's purely informational
 </script>
 
-<style scoped>
-.implementation-content {
-  max-width: 900px;
-}
+<style>
+@import './settings-shared.css';
+</style>
 
-.impl-section {
+<style scoped>
+
+/* Component-specific styles */
+
+/* Use shared implementation-section styles */
+.implementation-section {
   margin-bottom: 2rem;
 }
 
-.impl-section p {
-  color: #ccc;
-  line-height: 1.6;
-  margin-bottom: 1rem;
-}
-
-.impl-section ul,
-.impl-section ol {
-  margin-left: 1.5rem;
-  color: #ccc;
-  line-height: 1.8;
-}
-
-.impl-section code {
+.implementation-section code {
   display: block;
   background: #1a1a1a;
   padding: 1rem;
@@ -127,14 +118,5 @@ Database: bm2025-db
   white-space: pre-wrap;
   color: #aaa;
   overflow-x: auto;
-}
-
-.impl-section a {
-  color: #8B0000;
-  text-decoration: none;
-}
-
-.impl-section a:hover {
-  text-decoration: underline;
 }
 </style>
