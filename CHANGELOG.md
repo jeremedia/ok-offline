@@ -7,6 +7,85 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.2.0] - 2025-07-27
+
+### Added
+- **Complete Mobile Optimization** - Comprehensive mobile-first design overhaul
+  - Touch-friendly bottom navigation with haptic feedback
+  - Swipe gestures for horizontal navigation between main views (Map → Camps → Art → Events → Schedule)
+  - Pull-to-refresh functionality on mobile devices
+  - Mobile-responsive header with streamlined actions
+  - Touch targets sized for optimal mobile interaction (44px minimum)
+- **Advanced Mobile UX** - Professional mobile interaction patterns
+  - Swipe navigation powered by HammerJS with configurable velocity and threshold
+  - Mobile-specific layouts that adapt to screen size and orientation
+  - Enhanced mobile typography and spacing optimizations
+  - Gesture-based interface reducing need for button taps
+- **Settings Interface Revolution** - Modular tabbed settings architecture
+  - Seven specialized tabs: About, Data Sync, Features, Maps, Implementation, Feedback, Emergency
+  - Each tab implemented as independent Vue component for maintainability
+  - Unified design system with shared CSS for consistent styling
+  - Mobile-responsive tab navigation with horizontal scrolling
+- **Enhanced Mobile Components** - Purpose-built mobile interface elements
+  - `BottomNav.vue` - Fixed bottom navigation with active state indicators
+  - `PullToRefresh.vue` - Native-feeling pull-to-refresh with visual feedback
+  - Mobile action buttons with proper touch feedback and accessibility
+  - Responsive grid layouts that adapt to mobile constraints
+
+### Changed
+- **Mobile-First Navigation** - Complete navigation paradigm shift
+  - Desktop retains traditional header navigation
+  - Mobile uses bottom navigation for primary actions
+  - Year selector moved to desktop-only interface
+  - Search and settings become prominent mobile header actions
+- **Touch Interaction Design** - Optimized for finger navigation
+  - Increased touch target sizes throughout interface
+  - Improved button spacing and grouping for thumb accessibility
+  - Enhanced visual feedback for touch interactions
+  - Reduced cognitive load with simplified mobile layouts
+- **Settings Architecture** - From monolithic to modular design
+  - Split massive SettingsView into focused component modules
+  - Emergency functionality extracted to dedicated component with tabs
+  - Data sync operations isolated for better maintainability
+  - About section enhanced with comprehensive version history
+
+### Technical
+- **Mobile Detection Logic** - Smart responsive behavior
+  - Width-based detection for development environments
+  - Enhanced touch and user agent detection for production
+  - Graceful degradation for non-mobile devices
+  - Consistent mobile experience across platforms
+- **Component Architecture** - Improved code organization
+  - Settings components follow shared CSS design system
+  - Modular imports reduce bundle size impact
+  - Clear separation of concerns between mobile/desktop interfaces
+  - Maintainable codebase with focused component responsibilities
+
+### Dependencies
+- **Added HammerJS** - Professional touch gesture library for swipe navigation
+
+## [3.1.1] - 2025-07-27
+
+### Added
+- **Auto-Reset Route** - `/reset-now` instantly clears all data and redirects to home
+  - Useful for development and testing
+  - No confirmation dialog for immediate reset
+  - Automatically triggers onboarding flow
+
+### Changed
+- **Onboarding Year Selection** - Removed confusing year selector from sync step
+  - Sync messaging now clearly states "all Burning Man data (2023-2025)"
+  - Progress steps show individual years being downloaded
+  - Default navigation year set to 2025 after onboarding
+  - Clearer understanding that all data is downloaded regardless
+
+### Fixed
+- **Service Worker Cache Busting** - Added version parameter to force updates
+- **CLAUDE.md Merge Conflict** - Fixed incomplete merge conflict marker
+
+### Developer
+- **Screenshot Handling Directive** - Added mandatory rule for analyzing screenshots in CLAUDE.md
+
 ## [3.1.0] - 2025-07-27
 
 ### Added

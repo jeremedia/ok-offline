@@ -1,6 +1,6 @@
 <template>
   <div class="tab-content about-content">
-    <h2>About OK-OFFLINE</h2>
+    <h2>About OK-OFFLINE!</h2>
     
     <div class="about-section">
       <p>
@@ -9,7 +9,7 @@
       </p>
       
       <p>
-        Created by <strong>Jeremy Roush</strong> and brought to you by <strong>Mr. OK of OKNOTOK</strong>.
+        Brought to you by <strong><a href="/2025/camps/a1XVI000009ssUT2AY" class="camp-link">Mr. OK of OKNOTOK</a></strong>.
       </p>
       
       <p class="version-info">
@@ -143,31 +143,35 @@ const showReleaseNotes = ref(false)
 // Release notes data
 const releaseNotes = [
   {
-    version: '3.1.0',
+    version: '3.2.0',
     date: '2025-07-27',
     added: [
-      '🎯 Comprehensive Onboarding Experience - Beautiful welcome flow for first-time users',
-      '📥 Progressive Multi-Year Sync - Downloads all years (2023-2025) automatically',
-      '🎓 Guided Tour System - Interactive tutorials for key features',
-      '✨ Enhanced Loading States - Professional progress feedback during operations',
-      '⚡ Service Worker Optimization - Faster initial loads and better caching',
-      '🔧 Developer Reset Tool - /reset path for testing onboarding experience',
-      '🏠 Smart Prioritization - Current year camps load first for immediate use',
-      '📚 Complete Historical Access - Reference past years and future plans',
-      '💾 Intelligent Caching - ~10-15MB total for all three years of data'
+      '📱 Complete Mobile Optimization - Comprehensive mobile-first design overhaul',
+      '👆 Touch-friendly bottom navigation with haptic feedback',
+      '👈 Swipe gestures for horizontal navigation between main views',
+      '↓ Pull-to-refresh functionality on mobile devices',
+      '📲 Mobile-responsive header with streamlined actions',
+      '🎯 Touch targets sized for optimal mobile interaction (44px minimum)',
+      '✨ Advanced Mobile UX with professional interaction patterns',
+      '📑 Settings Interface Revolution - Modular tabbed architecture',
+      '🏗️ Seven specialized tabs: About, Data Sync, Features, Maps, Implementation, Feedback, Emergency',
+      '🔧 Each tab implemented as independent Vue component for maintainability'
     ],
     changed: [
-      'Onboarding flow reduced from 4 to 3 steps for better UX',
-      'Data sync now downloads all years automatically',
-      'Service worker re-enabled with enhanced strategies',
-      'Welcome screen has unified sync UI without jarring transitions',
-      'First-time detection uses smart cached data checks'
+      '🚀 Mobile-First Navigation - Complete navigation paradigm shift',
+      '📱 Desktop retains traditional header navigation, mobile uses bottom navigation',
+      '🔍 Search and settings become prominent mobile header actions',
+      '👆 Touch Interaction Design optimized for finger navigation',
+      '📐 Increased touch target sizes throughout interface',
+      '🎨 Enhanced visual feedback for touch interactions',
+      '🏛️ Settings Architecture - From monolithic to modular design'
     ],
-    fixed: [
-      'Service worker registration properly enabled',
-      'Safari caching issues with version bumping',
-      'Jarring panel transitions during sync',
-      'Import errors in ResetView component'
+    technical: [
+      '📱 Mobile Detection Logic with smart responsive behavior',
+      '🏗️ Component Architecture improvements with shared CSS design system',
+      '📦 Modular imports reduce bundle size impact',
+      '🎯 Clear separation of concerns between mobile/desktop interfaces',
+      '🔨 Added HammerJS for professional touch gesture library'
     ]
   },
   {
@@ -376,5 +380,17 @@ const releaseNotes = [
 
 .release-group li {
   margin-bottom: 0.25rem;
+}
+
+/* Camp link styling */
+.camp-link {
+  color: #8B0000;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.camp-link:hover {
+  color: #FF4444;
+  text-decoration: underline;
 }
 </style>

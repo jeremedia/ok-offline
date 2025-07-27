@@ -1,7 +1,7 @@
 // Enhanced Service Worker for OK-OFFLINE
 // Optimized for fast initial load and better onboarding experience
 
-const CACHE_VERSION = 'v6'; // Increment for v3.1.0 release
+const CACHE_VERSION = 'v7'; // Increment for v3.2.0 mobile-enhanced release
 const CACHE_NAMES = {
   static: `ok-offline-static-${CACHE_VERSION}`,
   data: `ok-offline-data-${CACHE_VERSION}`,

@@ -1,5 +1,5 @@
 <template>
-  <div class="app-container">
+  <div>
     <WelcomeScreen 
       v-if="showOnboarding" 
       @complete="handleOnboardingComplete"
@@ -10,6 +10,7 @@
       @complete="handleTourComplete"
       @skip="handleTourSkip"
     />
+  <div class="app-container" v-if="!showOnboarding && !showTour">
     <ToastNotification ref="toastRef" />
     <header :class="{ 'mobile-header': isMobile }">
       <div class="header-row">
@@ -24,10 +25,10 @@
           </div>
           <nav class="main-nav">
             <button @click="navigate('map')" :class="['nav-btn', { active: isActive('map') }]">MAP</button>
+            <button @click="navigate('search')" :class="['nav-btn', { active: isActive('search') }]">SEARCH</button>
             <button @click="navigate('camps')" :class="['nav-btn', { active: isActive('camps') }]">CAMPS</button>
             <button @click="navigate('art')" :class="['nav-btn', { active: isActive('art') }]">ART</button>
             <button @click="navigate('events')" :class="['nav-btn', { active: isActive('events') }]">EVENTS</button>
-            <button @click="navigate('search')" :class="['nav-btn', { active: isActive('search') }]">SEARCH</button>
             <button @click="navigate('schedule')" :class="['nav-btn', { active: isActive('schedule') }]">SCHEDULE</button>
             <button @click="navigateToDust" :class="['nav-btn', { active: isActive('dust') }]">DUST</button>
           </nav>
@@ -61,11 +62,11 @@
     }">
       <router-view :year="selectedYear"></router-view>
     </main>
-    <BottomNav :year="selectedYear" />
+    <BottomNav v-if="!showOnboarding && !showTour" :year="selectedYear" />
     <footer :class="{ 'mobile-footer': isMobile }" v-if="!isMobile || (isMobile && $route.name !== 'map')">
       <div class="footer-content">
         <!-- Mobile Footer: Compact Single Row -->
-        <div class="footer-mobile" v-if="isMobile">
+        <div class="footer-mobile d-none" v-if="isMobile">
           <div class="footer-brand">
             <span class="footer-title">OK-OFFLINE</span>
             <span class="footer-version">v{{ $route.meta?.version || '3.0.0' }}</span>
@@ -119,15 +120,17 @@
           </div>
           
           <div class="footer-section footer-creator-section">
-            <h4 class="footer-section-title">Created by</h4>
+            <h4 class="footer-section-title">Brought to you by</h4>
             <p class="footer-creator">
-              Jeremy Roush<br>
-              <span class="footer-brand-tag">Mr. OK of OKNOTOK</span>
+              <a href="/2025/camps/a1XVI000009ssUT2AY" class="footer-camp-link">
+                <span class="footer-brand-tag">Mr. OK of OKNOTOK</span>
+              </a>
             </p>
           </div>
         </div>
       </div>
     </footer>
+  </div>
   </div>
 </template>
 
@@ -138,9 +141,9 @@ import { useKeyboardShortcuts } from './composables/useKeyboardShortcuts'
 import { useSwipeGestures } from './composables/useSwipeGestures'
 import { getSyncMetadata } from './services/staticDataSync'
 import ToastNotification from './components/ToastNotification.vue'
-import BottomNav from './components/BottomNav.vue'
 import WelcomeScreen from './components/WelcomeScreen.vue'
 import GuidedTour from './components/GuidedTour.vue'
+import BottomNav from './components/BottomNav.vue'
 import { setToastRef } from './composables/useToast'
 
 const route = useRoute()
@@ -209,11 +212,6 @@ const formatLastSync = computed(() => {
   return `${days}d ago`
 })
 
-// Handle window resize
-const handleResize = () => {
-  isMobile.value = checkIfMobile()
-}
-
 // Check if user needs onboarding
 const checkOnboardingStatus = () => {
   const onboardingCompleted = localStorage.getItem('onboarding_completed')
@@ -253,6 +251,11 @@ const handleTourComplete = () => {
 
 const handleTourSkip = () => {
   showTour.value = false
+}
+
+// Handle window resize
+const handleResize = () => {
+  isMobile.value = checkIfMobile()
 }
 
 onMounted(async () => {
@@ -774,6 +777,19 @@ footer {
 .footer-brand-tag {
   color: #8B0000;
   font-weight: bold;
+}
+
+.footer-camp-link {
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+
+.footer-camp-link:hover {
+  opacity: 0.8;
+}
+
+.footer-camp-link:hover .footer-brand-tag {
+  color: #FF4444;
 }
 
 /* Utility class for hiding elements */

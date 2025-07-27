@@ -1,6 +1,6 @@
 <template>
   <PullToRefresh @refresh="handleRefresh">
-  <section id="list-section" class="view">
+  <section id="list-section" class="view list-view-container">
     <SyncDialog 
       :show="showSyncDialog"
       :title="`Syncing ${props.type}s`"
@@ -13,109 +13,36 @@
       <button @click="loadData" class="retry-button">Try Again</button>
     </div>
     <template v-else>
-    <div id="list-controls">
-      <input 
-        type="text" 
-        v-model="searchQuery"
-        placeholder="Filter by name..."
-        class="search-input"
-      />
-      <label for="sort-selector">Sort by:</label>
-      <select id="sort-selector" v-model="sortBy">
-        <option value="name">Name</option>
-        <option value="location">Location/Sector</option>
-        <option value="sector">Sector (Clock Position)</option>
-        <option value="avenue">Avenue (A-L)</option>
-        <option value="distance" v-if="userLocation">Distance</option>
-        <option value="date" v-if="props.type === 'event'">Date/Time</option>
-      </select>
-      <span v-if="!loading && !error && items.length > 0" class="items-count">
-        {{ sortedItems.length }} of {{ items.length }}
-      </span>
-      <button 
-        @click="showFavoritesOnly = !showFavoritesOnly"
-        :class="['favorites-toggle', { active: showFavoritesOnly }]"
-      >
-        ⭐ {{ showFavoritesOnly ? 'Show All' : 'Favorites' }} {{ favoriteCount > 0 ? `(${favoriteCount})` : '' }}
-      </button>
-      <button 
-        v-if="!userLocation"
-        @click="enableLocation"
-        class="location-toggle"
-        :disabled="locationLoading"
-      >
-        📍 {{ locationLoading ? 'Getting location...' : 'Enable Location' }}
-      </button>
-    </div>
-    <!-- Sector Filters for Camps/Art -->
-    <div id="sector-filters" v-if="type === 'camp' || type === 'art'">
-      <div class="filter-header" @click="toggleFiltersCollapsed('sectors')">
-        <span class="collapse-icon">{{ filtersCollapsed.sectors ? '▶' : '▼' }}</span>
-        <span class="filter-label">Filter by sector</span>
-        <span class="active-filters-count" v-if="selectedSectors.length < availableSectors.length">
-          ({{ selectedSectors.length }}/{{ availableSectors.length }})
-        </span>
-      </div>
-      <div class="filter-content" v-if="!filtersCollapsed.sectors">
-        <div class="sector-checkboxes">
-          <label v-for="sector in availableSectors" :key="sector" class="sector-checkbox">
-            <input 
-              type="checkbox" 
-              :value="sector"
-              :checked="selectedSectors.includes(sector)"
-              @change="toggleSector(sector)"
-            />
-            {{ sector }}
-          </label>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Event Type Filters -->
-    <div id="event-type-filters" v-if="type === 'event'">
-      <div class="filter-header" @click="toggleFiltersCollapsed('eventTypes')">
-        <span class="collapse-icon">{{ filtersCollapsed.eventTypes ? '▶' : '▼' }}</span>
-        <span class="filter-label">Filter by type</span>
-        <span class="active-filters-count" v-if="selectedEventTypes.length < availableEventTypes.length">
-          ({{ selectedEventTypes.length }}/{{ availableEventTypes.length }})
-        </span>
-      </div>
-      <div class="filter-content" v-if="!filtersCollapsed.eventTypes">
-        <div class="filter-controls">
-          <div class="button-group">
-            <button 
-              @click="selectAllEventTypes" 
-              class="filter-btn filter-btn-left"
-              :disabled="allEventTypesSelected"
-            >
-              All
-            </button>
-            <button 
-              @click="clearAllEventTypes" 
-              class="filter-btn filter-btn-right"
-              :disabled="noEventTypesSelected"
-            >
-              None
-            </button>
-          </div>
-          <div class="items-count">
-            {{ filteredItemsCount }} items
-          </div>
-        </div>
-        <div class="event-type-checkboxes">
-          <label v-for="eventType in availableEventTypes" :key="eventType.value" class="event-type-checkbox">
-            <input 
-              type="checkbox" 
-              :value="eventType.value"
-              :checked="selectedEventTypes.includes(eventType.value)"
-              @change="toggleEventType(eventType.value)"
-            />
-            <span class="type-label">{{ eventType.label }}</span>
-            <span class="type-count">({{ eventType.count }})</span>
-          </label>
-        </div>
-      </div>
-    </div>
+    <ListControls
+      :type="props.type"
+      :search-query="searchQuery"
+      @update:search-query="searchQuery = $event"
+      :sort-by="sortBy"
+      @update:sort-by="sortBy = $event"
+      :selected-sectors="selectedSectors"
+      :available-sectors="availableSectors"
+      @toggle-sector="toggleSector"
+      @select-all-sectors="selectAllSectors"
+      @clear-all-sectors="clearAllSectors"
+      :selected-event-types="selectedEventTypes"
+      :available-event-types="availableEventTypes"
+      @toggle-event-type="toggleEventType"
+      @select-all-event-types="selectAllEventTypes"
+      @clear-all-event-types="clearAllEventTypes"
+      :show-favorites-only="showFavoritesOnly"
+      @toggle-favorites="showFavoritesOnly = !showFavoritesOnly"
+      :favorite-count="favoriteCount"
+      :user-location="userLocation"
+      :location-loading="locationLoading"
+      @enable-location="enableLocation"
+      :filters-collapsed="globalFiltersCollapsed"
+      @update:filters-collapsed="globalFiltersCollapsed = $event"
+      :loading="loading"
+      :error="error"
+      :visible-items="sortedItems.length"
+      :total-items="items.length"
+      @clear-all-filters="handleClearAllFilters"
+    />
     <ul id="items-list">
       <li v-if="sortedItems.length === 0" class="empty-state">
         <p>No {{ type }}s found</p>
@@ -124,10 +51,10 @@
       </li>
       <template v-else-if="sortBy === 'name' || sortBy === 'sector' || sortBy === 'avenue' || sortBy === 'date'">
         <template v-for="(group, header) in groupedItems" :key="header">
-          <li class="section-header" @click="toggleGroup(header)">
+          <li class="section-header" @click="toggleGroup(header, $event)">
             <span class="collapse-icon">{{ collapsedGroups[header] ? '▶' : '▼' }}</span>
             <span class="group-label">{{ header }}</span>
-            <span class="group-count">({{ group.length }})</span>
+            <span class="group-count">{{ group.length }}</span>
           </li>
           <template v-if="!collapsedGroups[header]">
             <li 
@@ -234,6 +161,7 @@ import { useAutoSync } from '../composables/useAutoSync'
 import LoadingSpinner from '../components/LoadingSpinner.vue'
 import SyncDialog from '../components/SyncDialog.vue'
 import PullToRefresh from '../components/PullToRefresh.vue'
+import ListControls from '../components/ListControls.vue'
 
 const props = defineProps(['type', 'year'])
 const router = useRouter()
@@ -268,10 +196,7 @@ const availableEventTypes = ref([
 const selectedEventTypes = ref([]) // Will be populated with all types after data loads
 
 const collapsedGroups = ref({})
-const filtersCollapsed = ref({
-  sectors: true,     // Start collapsed on mobile
-  eventTypes: true   // Start collapsed on mobile
-})
+const globalFiltersCollapsed = ref(true) // Unified filters collapsed state
 const showFavoritesOnly = ref(false)
 const favoriteItems = ref(new Set())
 
@@ -317,7 +242,7 @@ if (savedCollapsed) {
 const savedFiltersCollapsed = localStorage.getItem(`filtersCollapsed_${props.type}`)
 if (savedFiltersCollapsed) {
   try {
-    filtersCollapsed.value = { ...filtersCollapsed.value, ...JSON.parse(savedFiltersCollapsed) }
+    globalFiltersCollapsed.value = JSON.parse(savedFiltersCollapsed)
   } catch (e) {
     console.error('Failed to load filters collapsed state:', e)
   }
@@ -353,14 +278,50 @@ const clearAllEventTypes = () => {
   localStorage.setItem('selectedEventTypes', JSON.stringify(selectedEventTypes.value))
 }
 
-const toggleGroup = (groupName) => {
-  collapsedGroups.value[groupName] = !collapsedGroups.value[groupName]
+const toggleGroup = (groupName, event) => {
+  // Command+click (or Ctrl+click on Windows) toggles all groups
+  if (event?.metaKey || event?.ctrlKey) {
+    const allCollapsed = Object.values(collapsedGroups.value).every(collapsed => collapsed)
+    
+    // If all are collapsed, expand all. If any are expanded, collapse all
+    const newState = allCollapsed
+    
+    // Set all groups to the new state
+    Object.keys(groupedItems.value).forEach(key => {
+      collapsedGroups.value[key] = newState
+    })
+  } else {
+    // Normal click - just toggle this group
+    collapsedGroups.value[groupName] = !collapsedGroups.value[groupName]
+  }
+  
   localStorage.setItem(`collapsedGroups_${props.type}_${sortBy.value}`, JSON.stringify(collapsedGroups.value))
 }
 
-const toggleFiltersCollapsed = (filterType) => {
-  filtersCollapsed.value[filterType] = !filtersCollapsed.value[filterType]
-  localStorage.setItem(`filtersCollapsed_${props.type}`, JSON.stringify(filtersCollapsed.value))
+const selectAllSectors = () => {
+  selectedSectors.value = [...availableSectors]
+  localStorage.setItem(`selectedSectors_${props.type}`, JSON.stringify(selectedSectors.value))
+}
+
+const clearAllSectors = () => {
+  selectedSectors.value = []
+  localStorage.setItem(`selectedSectors_${props.type}`, JSON.stringify(selectedSectors.value))
+}
+
+const handleClearAllFilters = () => {
+  // Clear search
+  searchQuery.value = ''
+  
+  // Clear sector filters
+  selectedSectors.value = [...availableSectors]
+  localStorage.setItem(`selectedSectors_${props.type}`, JSON.stringify(selectedSectors.value))
+  
+  // Clear event type filters
+  selectedEventTypes.value = availableEventTypes.value.map(t => t.value)
+  localStorage.setItem('selectedEventTypes', JSON.stringify(selectedEventTypes.value))
+  
+  // Clear favorites filter
+  showFavoritesOnly.value = false
 }
 
 // Watch for sort changes to load appropriate collapsed state
@@ -375,6 +336,14 @@ watch(sortBy, (newSort) => {
   } else {
     collapsedGroups.value = {}
   }
+  
+  // After setting collapsed state, ensure new groups default to collapsed
+  // This will be handled in the groupedItems computed property
+})
+
+// Watch for filters collapsed changes to save to localStorage
+watch(globalFiltersCollapsed, (newValue) => {
+  localStorage.setItem(`filtersCollapsed_${props.type}`, JSON.stringify(newValue))
 })
 
 const sortedItems = computed(() => {
@@ -519,6 +488,13 @@ const groupedItems = computed(() => {
       groups[header].push(item)
     })
   }
+  
+  // Ensure all groups default to collapsed (true)
+  Object.keys(groups).forEach(groupName => {
+    if (!(groupName in collapsedGroups.value)) {
+      collapsedGroups.value[groupName] = true // Default to collapsed
+    }
+  })
   
   return groups
 })
@@ -696,203 +672,6 @@ watch(() => [props.type, props.year], () => {
 </script>
 
 <style scoped>
-.search-input {
-  padding: 0.5rem;
-  background-color: #333;
-  border: 1px solid #555;
-  color: #fff;
-  border-radius: 4px;
-  font-size: 1rem;
-  margin-right: 1rem;
-  width: 200px;
-}
-
-.search-input:focus {
-  outline: none;
-  border-color: #888;
-}
-
-#sector-filters, #event-type-filters {
-  background-color: #2a2a2a;
-  border-bottom: 1px solid #444;
-  color: #ccc;
-}
-
-.filter-header {
-  display: flex;
-  align-items: center;
-  padding: 0.75rem 1rem;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  user-select: none;
-}
-
-.filter-header:hover {
-  background-color: #333;
-}
-
-.filter-header .collapse-icon {
-  margin-right: 0.5rem;
-  font-size: 0.8rem;
-  color: #888;
-  transition: transform 0.2s, color 0.2s;
-}
-
-.filter-header:hover .collapse-icon {
-  color: #ccc;
-}
-
-.filter-label {
-  font-weight: bold;
-  flex: 1;
-}
-
-.active-filters-count {
-  font-size: 0.85rem;
-  color: #888;
-  margin-left: 0.5rem;
-}
-
-.filter-content {
-  padding: 0 1rem 0.75rem 2rem; /* Indent to align with arrow end */
-}
-
-.sector-checkboxes {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.sector-checkbox {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  font-size: 0.9rem;
-}
-
-.sector-checkbox input {
-  margin-right: 0.25rem;
-}
-
-.sector-checkbox:hover {
-  background-color: #8B0000;
-  color: #fff;
-  border-radius: 4px;
-  padding: 0.25rem 0.5rem;
-  margin: 0 -0.5rem;
-}
-
-
-.filter-controls {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.5rem;
-}
-
-.button-group {
-  display: flex;
-}
-
-.filter-btn {
-  background: #444;
-  color: #ccc;
-  border: 1px solid #555;
-  padding: 0.25rem 0.75rem;
-  cursor: pointer;
-  font-size: 0.85rem;
-  transition: all 0.2s;
-}
-
-.filter-btn-left {
-  border-radius: 4px 0 0 4px;
-  border-right: none;
-}
-
-.filter-btn-right {
-  border-radius: 0 4px 4px 0;
-}
-
-.filter-btn:hover:not(:disabled) {
-  background: #555;
-  color: #fff;
-}
-
-.filter-btn:disabled {
-  background: #333;
-  color: #666;
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-.items-count {
-  font-size: 0.85rem;
-  color: #888;
-  font-weight: 500;
-}
-
-.event-type-checkboxes {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 0.5rem;
-}
-
-.event-type-checkbox {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  font-size: 0.9rem;
-  padding: 0.25rem 0;
-}
-
-.event-type-checkbox input {
-  margin-right: 0.5rem;
-}
-
-.event-type-checkbox:hover {
-  background-color: #8B0000;
-  color: #fff;
-  border-radius: 4px;
-  padding: 0.25rem 0.5rem;
-  margin: 0 -0.5rem;
-}
-
-.type-label {
-  flex: 1;
-}
-
-.type-count {
-  color: #888;
-  font-size: 0.85rem;
-  margin-left: 0.5rem;
-}
-
-#list-controls {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  background-color: #333;
-  border-bottom: 1px solid #555;
-}
-
-#list-controls label {
-  color: #ccc;
-}
-
-#list-controls select {
-  background-color: #444;
-  color: #fff;
-  border: 1px solid #555;
-  padding: 0.25rem;
-}
-
-.items-count {
-  margin-left: auto;
-  font-size: 0.9rem;
-  color: #999;
-  white-space: nowrap;
-}
 
 .section-header {
   background-color: #2a2a2a;
@@ -929,31 +708,11 @@ watch(() => [props.type, props.year], () => {
 
 .group-count {
   margin-left: auto; /* Push to right side for clean layout */
-  font-size: 1rem; /* Smaller, secondary text */
+  font-size: 0.85rem; /* Match results count text size */
   color: #999;
   font-weight: normal; /* Secondary element should be lighter */
 }
 
-.favorites-toggle {
-  background: #2a2a2a;
-  color: #ccc;
-  border: 1px solid #444;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: all 0.2s;
-}
-
-.favorites-toggle:hover {
-  background: #8B0000;
-  color: #fff;
-}
-
-.favorites-toggle.active {
-  background: #8B0000;
-  color: #fff;
-}
 
 #items-list li {
   position: relative;
@@ -1012,26 +771,6 @@ watch(() => [props.type, props.year], () => {
   background-color: rgba(255, 215, 0, 0.1);
 }
 
-.location-toggle {
-  background: #2a2a2a;
-  color: #ccc;
-  border: 1px solid #444;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: all 0.2s;
-}
-
-.location-toggle:hover:not(:disabled) {
-  background: #8B0000;
-  color: #fff;
-}
-
-.location-toggle:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
 
 .distance {
   color: #8B0000;
@@ -1113,5 +852,12 @@ watch(() => [props.type, props.year], () => {
   0% { opacity: 1; }
   50% { opacity: 0.6; }
   100% { opacity: 1; }
+}
+
+.list-view-container {
+  /* Container for sticky positioning within main scroll area */
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 </style>
