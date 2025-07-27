@@ -1,5 +1,15 @@
 <template>
   <div>
+    <WelcomeScreen 
+      v-if="showOnboarding" 
+      @complete="handleOnboardingComplete"
+    />
+    <GuidedTour 
+      v-if="showTour"
+      :tour-type="tourType"
+      @complete="handleTourComplete"
+      @skip="handleTourSkip"
+    />
     <ToastNotification ref="toastRef" />
     <header>
       <div class="header-row">
@@ -9,12 +19,12 @@
             <option value="2024">2024</option>
             <option value="2025">2025</option>
           </select>
-          <button @click="navigate('map')" :class="{ active: isActive('map') }">Map</button>
-          <button @click="navigate('camps')" :class="{ active: isActive('camps') }">Camps</button>
-          <button @click="navigate('art')" :class="{ active: isActive('art') }">Art</button>
-          <button @click="navigate('events')" :class="{ active: isActive('events') }">Events</button>
-          <button @click="navigate('search')" :class="{ active: isActive('search') }">🔍 Search</button>
-          <button @click="navigate('schedule')" :class="{ active: isActive('schedule') }">📅 Schedule</button>
+          <button @click="navigate('map')" :class="{ active: isActive('map') }" data-view="map">Map</button>
+          <button @click="navigate('camps')" :class="{ active: isActive('camps') }" data-view="camps">Camps</button>
+          <button @click="navigate('art')" :class="{ active: isActive('art') }" data-view="art">Art</button>
+          <button @click="navigate('events')" :class="{ active: isActive('events') }" data-view="events">Events</button>
+          <button @click="navigate('search')" :class="{ active: isActive('search') }" data-view="search">🔍 Search</button>
+          <button @click="navigate('schedule')" :class="{ active: isActive('schedule') }" data-view="schedule">📅 Schedule</button>
           <button @click="navigateToDust" :class="{ active: isActive('dust') }">🌪️ Dust</button>
         </nav>
         <h1 @click="navigateToSettings" class="app-title">OK-OFFLINE</h1>
@@ -46,6 +56,8 @@ import { useRoute, useRouter } from 'vue-router'
 import { useKeyboardShortcuts } from './composables/useKeyboardShortcuts'
 import { getSyncMetadata } from './services/staticDataSync'
 import ToastNotification from './components/ToastNotification.vue'
+import WelcomeScreen from './components/WelcomeScreen.vue'
+import GuidedTour from './components/GuidedTour.vue'
 import { setToastRef } from './composables/useToast'
 
 const route = useRoute()
@@ -56,6 +68,9 @@ const toastRef = ref(null)
 const selectedYear = ref('2024')
 const isOnline = ref(navigator.onLine)
 const lastSyncTime = ref(null)
+const showOnboarding = ref(false)
+const showTour = ref(false)
+const tourType = ref('general')
 
 // Enable keyboard shortcuts
 useKeyboardShortcuts()
@@ -100,10 +115,54 @@ const formatLastSync = computed(() => {
   return `${days}d ago`
 })
 
+// Check if user needs onboarding
+const checkOnboardingStatus = () => {
+  const onboardingCompleted = localStorage.getItem('onboarding_completed')
+  const hasAnyCachedData = ['camp', 'art', 'event'].some(type => {
+    return getSyncMetadata(type, selectedYear.value)?.lastSync
+  })
+  
+  // Show onboarding if never completed AND no cached data exists
+  showOnboarding.value = !onboardingCompleted && !hasAnyCachedData
+}
+
+// Handle onboarding completion
+const handleOnboardingComplete = (data) => {
+  showOnboarding.value = false
+  
+  if (data.selectedYear) {
+    selectedYear.value = data.selectedYear
+    localStorage.setItem('selectedYear', data.selectedYear)
+  }
+  
+  if (data.showTour) {
+    // Start guided tour after a brief delay
+    setTimeout(() => {
+      tourType.value = 'general'
+      showTour.value = true
+    }, 500)
+  }
+  
+  // Navigate to map view
+  router.push(`/${selectedYear.value}/map`)
+}
+
+// Handle guided tour completion
+const handleTourComplete = () => {
+  showTour.value = false
+}
+
+const handleTourSkip = () => {
+  showTour.value = false
+}
+
 onMounted(async () => {
   // Set up toast notifications after component is fully mounted
   await nextTick()
   setToastRef(toastRef)
+  
+  // Check if user needs onboarding before setting up the rest
+  checkOnboardingStatus()
   
   window.addEventListener('online', updateOnlineStatus)
   window.addEventListener('offline', updateOnlineStatus)
