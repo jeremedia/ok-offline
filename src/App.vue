@@ -3,21 +3,38 @@
     <ToastNotification ref="toastRef" />
     <header :class="{ 'mobile-header': isMobile }">
       <div class="header-row">
-        <nav v-if="!isMobile">
-          <select id="year-selector" v-model="selectedYear" @change="onYearChange">
-            <option value="2023">2023</option>
-            <option value="2024">2024</option>
-            <option value="2025">2025</option>
-          </select>
-          <button @click="navigate('map')" :class="{ active: isActive('map') }">Map</button>
-          <button @click="navigate('camps')" :class="{ active: isActive('camps') }">Camps</button>
-          <button @click="navigate('art')" :class="{ active: isActive('art') }">Art</button>
-          <button @click="navigate('events')" :class="{ active: isActive('events') }">Events</button>
-          <button @click="navigate('search')" :class="{ active: isActive('search') }">🔍 Search</button>
-          <button @click="navigate('schedule')" :class="{ active: isActive('schedule') }">📅 Schedule</button>
-          <button @click="navigateToDust" :class="{ active: isActive('dust') }">🌪️ Dust</button>
-        </nav>
-        <h1 @click="navigateToSettings" class="app-title">OK-OFFLINE</h1>
+        <!-- Desktop Navigation -->
+        <div class="nav-section" v-if="!isMobile">
+          <div class="year-selector-group">
+            <select id="year-selector" v-model="selectedYear" @change="onYearChange" class="unified-select">
+              <option value="2023">2023</option>
+              <option value="2024">2024</option>
+              <option value="2025">2025</option>
+            </select>
+          </div>
+          <nav class="main-nav">
+            <button @click="navigate('map')" :class="['nav-btn', { active: isActive('map') }]">MAP</button>
+            <button @click="navigate('camps')" :class="['nav-btn', { active: isActive('camps') }]">CAMPS</button>
+            <button @click="navigate('art')" :class="['nav-btn', { active: isActive('art') }]">ART</button>
+            <button @click="navigate('events')" :class="['nav-btn', { active: isActive('events') }]">EVENTS</button>
+            <button @click="navigate('search')" :class="['nav-btn', { active: isActive('search') }]">SEARCH</button>
+            <button @click="navigate('schedule')" :class="['nav-btn', { active: isActive('schedule') }]">SCHEDULE</button>
+            <button @click="navigateToDust" :class="['nav-btn', { active: isActive('dust') }]">DUST</button>
+          </nav>
+        </div>
+        
+        <!-- App Title -->
+        <div class="app-title-section">
+          <h1 @click="navigateToSettings" class="app-title">OK-OFFLINE</h1>
+          <button 
+            @click="navigateToDataSync" 
+            :class="['status-dot', { offline: !isOnline }]"
+            :title="isOnline ? 'Online - Click for data sync' : 'Offline - Click for data sync'"
+            aria-label="Connection status and data sync">
+          </button>
+        </div>
+        
+        <!-- Mobile Actions -->
         <div class="mobile-actions" v-if="isMobile">
           <button @click="navigate('search')" class="mobile-action-btn" aria-label="Search">
             🔍
@@ -25,14 +42,6 @@
           <button @click="navigateToSettings" class="mobile-action-btn" aria-label="Settings">
             ⚙️
           </button>
-        </div>
-        <div class="status-indicator" v-if="!isMobile">
-          <span :class="['online-status', { offline: !isOnline }]">
-            {{ isOnline ? '🟢' : '🔴' }} {{ isOnline ? 'Online' : 'Offline' }}
-          </span>
-          <span v-if="lastSyncTime" class="last-sync">
-            Last sync: {{ formatLastSync }}
-          </span>
         </div>
       </div>
     </header>
@@ -43,11 +52,71 @@
       <router-view :year="selectedYear"></router-view>
     </main>
     <BottomNav :year="selectedYear" />
-    <footer>
-      <p>
-        Data provided by the Burning Man Public API and Innovate GIS data.
-        See the Burning Man Innovate website for terms of service.
-      </p>
+    <footer :class="{ 'mobile-footer': isMobile }" v-if="!isMobile || (isMobile && $route.name !== 'map')">
+      <div class="footer-content">
+        <!-- Mobile Footer: Compact Single Row -->
+        <div class="footer-mobile" v-if="isMobile">
+          <div class="footer-brand">
+            <span class="footer-title">OK-OFFLINE</span>
+            <span class="footer-version">v{{ $route.meta?.version || '3.0.0' }}</span>
+          </div>
+          <div class="footer-links">
+            <button @click="navigateToSettings" class="footer-link-btn">
+              ⚙️ Settings
+            </button>
+          </div>
+        </div>
+        
+        <!-- Desktop Footer: Multi-Column Professional Layout -->
+        <!-- Disabled for evaluation of need -->
+        <div class="footer-desktop d-none" v-else>
+          <div class="footer-section footer-brand-section">
+            <h3 class="footer-brand-title">OK-OFFLINE</h3>
+            <p class="footer-description">
+              Offline-first guide for Burning Man participants
+            </p>
+            <div class="footer-version-info">
+              <span>Version {{ $route.meta?.version || '3.0.0' }}</span>
+              <span class="footer-sync-status" v-if="lastSyncTime">
+                Last sync: {{ formatLastSync }}
+              </span>
+            </div>
+          </div>
+          
+          <div class="footer-section footer-data-section">
+            <h4 class="footer-section-title">Data Sources</h4>
+            <ul class="footer-links-list">
+              <li>Burning Man Public API</li>
+              <li>Innovate GIS Data</li>
+              <li>Apple WeatherKit</li>
+            </ul>
+          </div>
+          
+          <div class="footer-section footer-legal-section">
+            <h4 class="footer-section-title">Information</h4>
+            <ul class="footer-links-list">
+              <li>
+                <button @click="navigateToSettings" class="footer-link-btn">
+                  Settings & Sync
+                </button>
+              </li>
+              <li>
+                <a href="https://innovate.burningman.org" target="_blank" class="footer-external-link">
+                  Terms of Service
+                </a>
+              </li>
+            </ul>
+          </div>
+          
+          <div class="footer-section footer-creator-section">
+            <h4 class="footer-section-title">Created by</h4>
+            <p class="footer-creator">
+              Jeremy Roush<br>
+              <span class="footer-brand-tag">Mr. OK of OKNOTOK</span>
+            </p>
+          </div>
+        </div>
+      </div>
     </footer>
   </div>
 </template>
@@ -72,19 +141,8 @@ const isOnline = ref(navigator.onLine)
 const lastSyncTime = ref(null)
 // Check if device is truly mobile (phone, not tablet)
 const checkIfMobile = () => {
-  // Check viewport width AND touch capability
-  const isSmallScreen = window.innerWidth < 600
-  const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0
-  
-  // Also check user agent for mobile devices (excluding iPads)
-  const mobileRegex = /Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i
-  const isMobileUA = mobileRegex.test(navigator.userAgent)
-  
-  // For development: use screen width only
-  if (isSmallScreen) return true
-  
-  // Production mobile detection
-  return isSmallScreen && (hasTouch || isMobileUA)
+  // Simple width-based detection for all environments
+  return window.innerWidth < 600
 }
 
 const isMobile = ref(checkIfMobile())
@@ -201,11 +259,28 @@ const navigateToSettings = () => {
 const navigateToDust = () => {
   router.push('/dust')
 }
+
+const navigateToDataSync = () => {
+  router.push('/settings/data_sync')
+}
 </script>
 
+<style>
+/* Global styles for map view header/footer spacing */
+@media (min-width: 600px) {
+  main.map-view .view {
+    top: 67px !important;
+    bottom: 222px !important;
+  }
+}
+</style>
+
 <style scoped>
+/* ===== HEADER BASE STYLES ===== */
 header {
   padding: 0;
+  background: #333;
+  border-bottom: 1px solid #444;
 }
 
 .header-row {
@@ -215,35 +290,128 @@ header {
   width: 100%;
   padding: 0.75rem 1rem;
   gap: 1rem;
-  flex-wrap: wrap;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-nav {
+/* ===== DESKTOP NAVIGATION SECTION ===== */
+.nav-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
   flex: 1;
-  min-width: 0;
+}
+
+.year-selector-group {
+  display: flex;
+  align-items: center;
+}
+
+.unified-select {
+  background: #444;
+  color: #ccc;
+  border: 1px solid #555;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.unified-select:hover {
+  background: #555;
+  color: #fff;
+  border-color: #8B0000;
+}
+
+.unified-select:focus {
+  outline: none;
+  border-color: #8B0000;
+  box-shadow: 0 0 0 2px rgba(139, 0, 0, 0.2);
+}
+
+.main-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* ===== UNIFIED BUTTON SYSTEM ===== */
+.nav-btn {
+  background: transparent;
+  color: #ccc;
+  border: 1px solid transparent;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.nav-btn:hover {
+  background: #8B0000;
+  color: #fff;
+  border-color: #8B0000;
+}
+
+.nav-btn.active {
+  background: #8B0000;
+  color: #fff;
+  border-color: #8B0000;
+}
+
+/* ===== APP TITLE ===== */
+.app-title-section {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
 }
 
 .app-title {
   cursor: pointer;
   transition: color 0.2s;
-  margin: 0 1rem;
+  margin: 0;
   flex-shrink: 0;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #fff;
 }
 
 .app-title:hover {
   color: #8B0000;
 }
 
-button.active {
-  background-color: #8B0000;
-  color: #fff;
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4CAF50;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
 }
 
-@media (prefers-color-scheme: dark) {
-  button.active {
-    background-color: #8B0000;
-    color: #fff;
-  }
+.status-dot.offline {
+  background: #f44336;
+}
+
+.status-dot:hover {
+  transform: scale(1.2);
+  box-shadow: 0 0 8px rgba(76, 175, 80, 0.5);
+}
+
+.status-dot.offline:hover {
+  box-shadow: 0 0 8px rgba(244, 67, 54, 0.5);
+}
+
+/* ===== STATUS SECTION ===== */
+.status-section {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
 }
 
 .status-indicator {
@@ -251,8 +419,20 @@ button.active {
   flex-direction: column;
   align-items: flex-end;
   gap: 0.25rem;
-  font-size: 0.8rem;
-  flex-shrink: 0;
+  padding: 0.5rem;
+  background: rgba(68, 68, 68, 0.5);
+  border-radius: 4px;
+  border: 1px solid #555;
+}
+
+.status-primary {
+  display: flex;
+  align-items: center;
+}
+
+.status-secondary {
+  display: flex;
+  align-items: center;
 }
 
 .online-status {
@@ -260,6 +440,8 @@ button.active {
   align-items: center;
   gap: 0.25rem;
   color: #4CAF50;
+  font-size: 0.85rem;
+  font-weight: 500;
 }
 
 .online-status.offline {
@@ -302,38 +484,67 @@ main.map-view .view {
   bottom: 0;
 }
 
+/* Desktop map view should account for header/footer */
+@media (min-width: 600px) {
+  main.map-view .view {
+    top: 67px; /* Account for header height */
+    left: 0;
+    right: 0;
+    bottom: 222px; /* Account for footer height */
+  }
+}
+
+/* Ensure header and footer are above map */
+header {
+  position: relative;
+  z-index: 10;
+}
+
+footer {
+  position: relative;
+  z-index: 10;
+}
+
+/* ===== MOBILE HEADER ENHANCEMENTS ===== */
 .mobile-header {
   position: sticky;
   top: 0;
   z-index: 2000;
   background: #333;
+  border-bottom: 1px solid #444;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .mobile-header .header-row {
-  padding: 0.5rem 1rem;
-  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  gap: 0.75rem;
+  max-width: none; /* Full width on mobile */
 }
 
 .mobile-header .app-title {
-  font-size: 1.1rem;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #fff;
+  flex: 1;
+  text-align: center;
 }
 
 .mobile-header .status-indicator {
   display: none;
 }
 
-/* Mobile action buttons */
+/* ===== MOBILE ACTION BUTTONS (UNIFIED SYSTEM) ===== */
 .mobile-actions {
   display: flex;
   gap: 0.5rem;
 }
 
 .mobile-action-btn {
-  background: none;
+  background: #444;
   border: 1px solid #555;
-  color: #fff;
-  width: 40px;
-  height: 40px;
+  color: #ccc;
+  width: 44px;  /* Touch-friendly minimum */
+  height: 44px; /* Touch-friendly minimum */
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -344,9 +555,170 @@ main.map-view .view {
   -webkit-tap-highlight-color: transparent;
 }
 
+.mobile-action-btn:hover {
+  background: #8B0000;
+  color: #fff;
+  border-color: #8B0000;
+}
+
 .mobile-action-btn:active {
-  transform: scale(0.9);
-  background: rgba(255, 255, 255, 0.1);
+  transform: scale(0.95);
+  background: #8B0000;
+  color: #fff;
+}
+
+/* ===== FOOTER UNIFIED DESIGN ===== */
+footer {
+  background: #333;
+  border-top: 1px solid #444;
+  margin-top: auto;
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+/* ===== MOBILE FOOTER ===== */
+.footer-mobile {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0;
+  gap: 1rem;
+}
+
+.footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.footer-title {
+  font-weight: bold;
+  color: #fff;
+  font-size: 0.9rem;
+}
+
+.footer-version {
+  font-size: 0.75rem;
+  color: #999;
+  background: #444;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+}
+
+.footer-links {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.footer-link-btn {
+  background: #444;
+  color: #ccc;
+  border: 1px solid #555;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.footer-link-btn:hover,
+.footer-link-btn:active {
+  background: #8B0000;
+  color: #fff;
+  border-color: #8B0000;
+}
+
+/* ===== DESKTOP FOOTER ===== */
+.footer-desktop {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 2rem;
+  padding: 2rem 0;
+}
+
+.footer-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.footer-brand-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #fff;
+  margin: 0;
+}
+
+.footer-description {
+  color: #ccc;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.footer-version-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  color: #999;
+}
+
+.footer-sync-status {
+  color: #888;
+}
+
+.footer-section-title {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #fff;
+  margin: 0 0 0.5rem 0;
+}
+
+.footer-links-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.footer-links-list li {
+  font-size: 0.9rem;
+  color: #ccc;
+}
+
+.footer-external-link {
+  color: #ccc;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.footer-external-link:hover {
+  color: #8B0000;
+}
+
+.footer-creator {
+  font-size: 0.9rem;
+  color: #ccc;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.footer-brand-tag {
+  color: #8B0000;
+  font-weight: bold;
+}
+
+/* Utility class for hiding elements */
+.d-none {
+  display: none !important;
 }
 
 @media (max-width: 600px) {
@@ -366,9 +738,9 @@ main.map-view .view {
     display: none; /* Hidden on mobile since we have bottom nav */
   }
   
-  /* Hide footer on mobile to save space */
-  footer {
-    display: none;
+  /* Mobile footer: compact and accessible */
+  .mobile-footer {
+    display: block;
   }
 }
 

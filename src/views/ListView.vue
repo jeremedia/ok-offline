@@ -47,37 +47,73 @@
         📍 {{ locationLoading ? 'Getting location...' : 'Enable Location' }}
       </button>
     </div>
+    <!-- Sector Filters for Camps/Art -->
     <div id="sector-filters" v-if="type === 'camp' || type === 'art'">
-      <div class="filter-label">Filter by sector:</div>
-      <div class="sector-checkboxes">
-        <label v-for="sector in availableSectors" :key="sector" class="sector-checkbox">
-          <input 
-            type="checkbox" 
-            :value="sector"
-            :checked="selectedSectors.includes(sector)"
-            @change="toggleSector(sector)"
-          />
-          {{ sector }}
-        </label>
+      <div class="filter-header" @click="toggleFiltersCollapsed('sectors')">
+        <span class="collapse-icon">{{ filtersCollapsed.sectors ? '▶' : '▼' }}</span>
+        <span class="filter-label">Filter by sector</span>
+        <span class="active-filters-count" v-if="selectedSectors.length < availableSectors.length">
+          ({{ selectedSectors.length }}/{{ availableSectors.length }})
+        </span>
+      </div>
+      <div class="filter-content" v-if="!filtersCollapsed.sectors">
+        <div class="sector-checkboxes">
+          <label v-for="sector in availableSectors" :key="sector" class="sector-checkbox">
+            <input 
+              type="checkbox" 
+              :value="sector"
+              :checked="selectedSectors.includes(sector)"
+              @change="toggleSector(sector)"
+            />
+            {{ sector }}
+          </label>
+        </div>
       </div>
     </div>
+    
+    <!-- Event Type Filters -->
     <div id="event-type-filters" v-if="type === 'event'">
-      <div class="filter-label">Filter by type:</div>
-      <div class="filter-controls">
-        <button @click="selectAllEventTypes" class="filter-btn">All</button>
-        <button @click="clearAllEventTypes" class="filter-btn">None</button>
+      <div class="filter-header" @click="toggleFiltersCollapsed('eventTypes')">
+        <span class="collapse-icon">{{ filtersCollapsed.eventTypes ? '▶' : '▼' }}</span>
+        <span class="filter-label">Filter by type</span>
+        <span class="active-filters-count" v-if="selectedEventTypes.length < availableEventTypes.length">
+          ({{ selectedEventTypes.length }}/{{ availableEventTypes.length }})
+        </span>
       </div>
-      <div class="event-type-checkboxes">
-        <label v-for="eventType in availableEventTypes" :key="eventType.value" class="event-type-checkbox">
-          <input 
-            type="checkbox" 
-            :value="eventType.value"
-            :checked="selectedEventTypes.includes(eventType.value)"
-            @change="toggleEventType(eventType.value)"
-          />
-          <span class="type-label">{{ eventType.label }}</span>
-          <span class="type-count">({{ eventType.count }})</span>
-        </label>
+      <div class="filter-content" v-if="!filtersCollapsed.eventTypes">
+        <div class="filter-controls">
+          <div class="button-group">
+            <button 
+              @click="selectAllEventTypes" 
+              class="filter-btn filter-btn-left"
+              :disabled="allEventTypesSelected"
+            >
+              All
+            </button>
+            <button 
+              @click="clearAllEventTypes" 
+              class="filter-btn filter-btn-right"
+              :disabled="noEventTypesSelected"
+            >
+              None
+            </button>
+          </div>
+          <div class="items-count">
+            {{ filteredItemsCount }} items
+          </div>
+        </div>
+        <div class="event-type-checkboxes">
+          <label v-for="eventType in availableEventTypes" :key="eventType.value" class="event-type-checkbox">
+            <input 
+              type="checkbox" 
+              :value="eventType.value"
+              :checked="selectedEventTypes.includes(eventType.value)"
+              @change="toggleEventType(eventType.value)"
+            />
+            <span class="type-label">{{ eventType.label }}</span>
+            <span class="type-count">({{ eventType.count }})</span>
+          </label>
+        </div>
       </div>
     </div>
     <ul id="items-list">
@@ -90,7 +126,7 @@
         <template v-for="(group, header) in groupedItems" :key="header">
           <li class="section-header" @click="toggleGroup(header)">
             <span class="collapse-icon">{{ collapsedGroups[header] ? '▶' : '▼' }}</span>
-            {{ header }}
+            <span class="group-label">{{ header }}</span>
             <span class="group-count">({{ group.length }})</span>
           </li>
           <template v-if="!collapsedGroups[header]">
@@ -232,6 +268,10 @@ const availableEventTypes = ref([
 const selectedEventTypes = ref([]) // Will be populated with all types after data loads
 
 const collapsedGroups = ref({})
+const filtersCollapsed = ref({
+  sectors: true,     // Start collapsed on mobile
+  eventTypes: true   // Start collapsed on mobile
+})
 const showFavoritesOnly = ref(false)
 const favoriteItems = ref(new Set())
 
@@ -273,6 +313,16 @@ if (savedCollapsed) {
   }
 }
 
+// Load saved filter collapsed state from localStorage
+const savedFiltersCollapsed = localStorage.getItem(`filtersCollapsed_${props.type}`)
+if (savedFiltersCollapsed) {
+  try {
+    filtersCollapsed.value = { ...filtersCollapsed.value, ...JSON.parse(savedFiltersCollapsed) }
+  } catch (e) {
+    console.error('Failed to load filters collapsed state:', e)
+  }
+}
+
 const toggleSector = (sector) => {
   const index = selectedSectors.value.indexOf(sector)
   if (index > -1) {
@@ -306,6 +356,11 @@ const clearAllEventTypes = () => {
 const toggleGroup = (groupName) => {
   collapsedGroups.value[groupName] = !collapsedGroups.value[groupName]
   localStorage.setItem(`collapsedGroups_${props.type}_${sortBy.value}`, JSON.stringify(collapsedGroups.value))
+}
+
+const toggleFiltersCollapsed = (filterType) => {
+  filtersCollapsed.value[filterType] = !filtersCollapsed.value[filterType]
+  localStorage.setItem(`filtersCollapsed_${props.type}`, JSON.stringify(filtersCollapsed.value))
 }
 
 // Watch for sort changes to load appropriate collapsed state
@@ -521,6 +576,20 @@ const favoriteCount = computed(() => {
   return items.value.filter(item => favoriteItems.value.has(item.uid)).length
 })
 
+// Smart button states for event type filters
+const allEventTypesSelected = computed(() => {
+  return selectedEventTypes.value.length === availableEventTypes.value.length
+})
+
+const noEventTypesSelected = computed(() => {
+  return selectedEventTypes.value.length === 0
+})
+
+// Filtered items count for display
+const filteredItemsCount = computed(() => {
+  return sortedItems.value.length
+})
+
 const updateEventTypeCounts = () => {
   // Reset counts
   availableEventTypes.value.forEach(type => {
@@ -643,16 +712,49 @@ watch(() => [props.type, props.year], () => {
   border-color: #888;
 }
 
-#sector-filters {
-  padding: 0.75rem 1rem;
+#sector-filters, #event-type-filters {
   background-color: #2a2a2a;
   border-bottom: 1px solid #444;
   color: #ccc;
 }
 
+.filter-header {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  user-select: none;
+}
+
+.filter-header:hover {
+  background-color: #333;
+}
+
+.filter-header .collapse-icon {
+  margin-right: 0.5rem;
+  font-size: 0.8rem;
+  color: #888;
+  transition: transform 0.2s, color 0.2s;
+}
+
+.filter-header:hover .collapse-icon {
+  color: #ccc;
+}
+
 .filter-label {
   font-weight: bold;
-  margin-bottom: 0.5rem;
+  flex: 1;
+}
+
+.active-filters-count {
+  font-size: 0.85rem;
+  color: #888;
+  margin-left: 0.5rem;
+}
+
+.filter-content {
+  padding: 0 1rem 0.75rem 2rem; /* Indent to align with arrow end */
 }
 
 .sector-checkboxes {
@@ -672,17 +774,24 @@ watch(() => [props.type, props.year], () => {
   margin-right: 0.25rem;
 }
 
-#event-type-filters {
-  padding: 0.75rem 1rem;
-  background-color: #2a2a2a;
-  border-bottom: 1px solid #444;
-  color: #ccc;
+.sector-checkbox:hover {
+  background-color: #8B0000;
+  color: #fff;
+  border-radius: 4px;
+  padding: 0.25rem 0.5rem;
+  margin: 0 -0.5rem;
 }
+
 
 .filter-controls {
   display: flex;
-  gap: 0.5rem;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 0.5rem;
+}
+
+.button-group {
+  display: flex;
 }
 
 .filter-btn {
@@ -690,15 +799,36 @@ watch(() => [props.type, props.year], () => {
   color: #ccc;
   border: 1px solid #555;
   padding: 0.25rem 0.75rem;
-  border-radius: 4px;
   cursor: pointer;
   font-size: 0.85rem;
   transition: all 0.2s;
 }
 
-.filter-btn:hover {
+.filter-btn-left {
+  border-radius: 4px 0 0 4px;
+  border-right: none;
+}
+
+.filter-btn-right {
+  border-radius: 0 4px 4px 0;
+}
+
+.filter-btn:hover:not(:disabled) {
   background: #555;
   color: #fff;
+}
+
+.filter-btn:disabled {
+  background: #333;
+  color: #666;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.items-count {
+  font-size: 0.85rem;
+  color: #888;
+  font-weight: 500;
 }
 
 .event-type-checkboxes {
@@ -717,6 +847,14 @@ watch(() => [props.type, props.year], () => {
 
 .event-type-checkbox input {
   margin-right: 0.5rem;
+}
+
+.event-type-checkbox:hover {
+  background-color: #8B0000;
+  color: #fff;
+  border-radius: 4px;
+  padding: 0.25rem 0.5rem;
+  margin: 0 -0.5rem;
 }
 
 .type-label {
@@ -758,14 +896,15 @@ watch(() => [props.type, props.year], () => {
 
 .section-header {
   background-color: #2a2a2a;
-  font-weight: bold;
+  font-weight: normal; /* Label will be bold, count will be normal */
   padding: 0.75rem 1rem;
   cursor: pointer;
   border-bottom: 1px solid #444;
   color: #999;
-  font-size: 2.2rem;
+  font-size: 1.4rem; /* Larger for prominent label */
   display: flex;
   align-items: center;
+  justify-content: flex-start; /* Ensure left alignment */
   user-select: none;
 }
 
@@ -780,13 +919,19 @@ watch(() => [props.type, props.year], () => {
 
 .collapse-icon {
   margin-right: 0.5rem;
-  font-size: 1.5rem;
+  font-size: 1rem; /* Proportional to header text */
+}
+
+.group-label {
+  font-weight: bold; /* Prominent primary element */
+  flex: 1; /* Take up available space */
 }
 
 .group-count {
-  margin-left: 0.5rem;
-  font-size: 1.5rem;
+  margin-left: auto; /* Push to right side for clean layout */
+  font-size: 1rem; /* Smaller, secondary text */
   color: #999;
+  font-weight: normal; /* Secondary element should be lighter */
 }
 
 .favorites-toggle {
