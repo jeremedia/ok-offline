@@ -135,7 +135,7 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted, watch, nextTick } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { getFromCache } from '../services/storage.js'
 import { isFavorite, toggleFavorite as toggleFav } from '../services/favorites.js'
 import { getItemName, getItemLocation } from '../utils.js'
@@ -151,6 +151,7 @@ import {
 } from '../services/vectorSearchService.js'
 
 const router = useRouter()
+const route = useRoute()
 
 // Reactive state
 const searchQuery = ref('')
@@ -160,7 +161,7 @@ const loadingMessage = ref('Searching...')
 const results = ref([])
 const currentPage = ref(1)
 const pageSize = 20
-const year = ref(2024) // Using 2024 since that's what we imported
+const year = ref(route.params.year || localStorage.getItem('selectedYear') || '2025')
 const isOnline = ref(navigator.onLine)
 const searchStatus = ref('')
 const searchExecutionTime = ref(null)
@@ -225,12 +226,42 @@ watch(() => navigator.onLine, (online) => {
   }
 })
 
+// Update URL with search parameters
+function updateURL() {
+  const query = {}
+  
+  if (searchQuery.value) {
+    query.q = searchQuery.value
+  }
+  
+  if (searchMode.value && searchMode.value !== 'keyword') {
+    query.mode = searchMode.value
+  }
+  
+  // Update URL without triggering navigation
+  router.replace({
+    name: 'search',
+    params: { year: year.value },
+    query
+  })
+}
+
 // Initialize component
 onMounted(async () => {
-  // Load user preferences
-  const prefs = searchPreferences.get()
-  searchMode.value = prefs.defaultMode || 'keyword'
-  showSuggestions.value = prefs.enableSemanticSearch !== false
+  // Check for URL parameters first
+  if (route.query.q) {
+    searchQuery.value = route.query.q
+  }
+  
+  if (route.query.mode && ['keyword', 'semantic', 'smart'].includes(route.query.mode)) {
+    searchMode.value = route.query.mode
+  } else {
+    // Load user preferences if no mode in URL
+    const prefs = searchPreferences.get()
+    searchMode.value = prefs.defaultMode || 'keyword'
+  }
+  
+  showSuggestions.value = searchPreferences.get().enableSemanticSearch !== false
   
   // Check if vector search is available
   if (isOnline.value) {
@@ -240,9 +271,14 @@ onMounted(async () => {
     }
   }
   
+  // If we have a query from URL, perform search
+  if (searchQuery.value) {
+    await performSearch()
+  }
+  
   // Focus search input
   nextTick(() => {
-    if (searchInput.value) {
+    if (searchInput.value && !searchQuery.value) {
       searchInput.value.focus()
     }
   })
@@ -271,6 +307,9 @@ const onModeChanged = (data) => {
   prefs.defaultMode = mode
   searchPreferences.set(prefs)
   
+  // Update URL to reflect mode change
+  updateURL()
+  
   // Don't auto-search on mode change anymore
   // User must press Enter to search
   
@@ -293,6 +332,7 @@ const performSearch = async () => {
   if (!searchQuery.value.trim()) {
     results.value = []
     searchStatus.value = ''
+    updateURL() // Clear URL when search is cleared
     return
   }
   
@@ -301,6 +341,9 @@ const performSearch = async () => {
   currentPage.value = 1
   searchExecutionTime.value = null
   fromCache.value = false
+  
+  // Update URL with current search state
+  updateURL()
   
   try {
     let searchResults = []
@@ -351,7 +394,7 @@ const performKeywordSearch = async () => {
   
   // Search camps
   if (includeTypes.camps) {
-    const camps = await getFromCache('camp', year.value)
+    const camps = await getFromCache('camp', parseInt(year.value) || 2024)
     if (camps) {
       camps.forEach(camp => {
         if (matchesSearch(camp, query)) {
@@ -367,7 +410,7 @@ const performKeywordSearch = async () => {
   
   // Search art
   if (includeTypes.art) {
-    const art = await getFromCache('art', year.value)
+    const art = await getFromCache('art', parseInt(year.value) || 2024)
     if (art) {
       art.forEach(artPiece => {
         if (matchesSearch(artPiece, query)) {
@@ -383,7 +426,7 @@ const performKeywordSearch = async () => {
   
   // Search events
   if (includeTypes.events) {
-    const events = await getFromCache('event', year.value)
+    const events = await getFromCache('event', parseInt(year.value) || 2024)
     if (events) {
       events.forEach(event => {
         if (matchesSearch(event, query)) {
@@ -416,7 +459,7 @@ const performKeywordSearch = async () => {
 // Vector search implementation
 const performVectorSearch = async () => {
   const searchOptions = {
-    year: year.value,
+    year: parseInt(year.value) || 2024,
     types: selectedTypes.value,
     limit: 50 // Get more results for better ranking
   }
