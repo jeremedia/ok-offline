@@ -11,6 +11,17 @@
           <h2>Built for the Playa</h2>
           <p>OK-OFFLINE works completely offline once your data is synced. Perfect for Black Rock City's limited connectivity.</p>
           
+          <div class="privacy-callout">
+            <h3>🔒 Privacy First</h3>
+            <p>OK-OFFLINE respects your privacy:</p>
+            <ul>
+              <li>✅ No account or login required</li>
+              <li>✅ <strong>No personal data uploaded</strong></li>
+              <li>✅ No tracking or analytics</li>
+              <li>✅ Emergency info stays local only</li>
+            </ul>
+          </div>
+          
           <div class="features-grid">
             <div class="feature-card">
               <span class="feature-icon">🏠</span>
@@ -434,6 +445,45 @@ const completeOnboarding = () => {
   margin: 0;
 }
 
+.privacy-callout {
+  background: rgba(34, 139, 34, 0.1);
+  border: 1px solid rgba(34, 139, 34, 0.3);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 2rem 0;
+  text-align: center;
+}
+
+.privacy-callout h3 {
+  color: #32CD32;
+  margin: 0 0 1rem 0;
+  font-size: 1.2rem;
+}
+
+.privacy-callout p {
+  color: #ccc;
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+}
+
+.privacy-callout ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.5rem;
+}
+
+.privacy-callout li {
+  color: #fff;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
 
 .sync-details {
   margin: 1.5rem 0;
@@ -728,6 +778,16 @@ const completeOnboarding = () => {
   
   .features-grid {
     grid-template-columns: 1fr;
+  }
+  
+  .privacy-callout ul {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  
+  .privacy-callout {
+    margin: 1.5rem 0;
+    padding: 1rem;
   }
   
   .preview-grid {
