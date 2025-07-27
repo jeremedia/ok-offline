@@ -596,6 +596,7 @@ h2 {
 .notes-textarea {
   width: 100%;
   min-height: 100px;
+  max-width: 100%;
   background: #2a2a2a;
   color: #fff;
   border: 1px solid #444;
@@ -604,6 +605,7 @@ h2 {
   font-family: inherit;
   font-size: 0.9rem;
   resize: vertical;
+  box-sizing: border-box;
 }
 
 .notes-textarea:focus {
