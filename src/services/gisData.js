@@ -1,14 +1,24 @@
 // GIS data service for loading and managing Burning Man geospatial data
 
-const GIS_DATA_PATH = '/data/2025/gis/';
+// Default to 2025 but allow year override
+let currentYear = 2025;
 
-// Cache for loaded GIS data
+// Cache for loaded GIS data (per year)
 const gisDataCache = {
-  streetLines: null,
-  trashFence: null,
-  cpns: null,
-  plazas: null,
-  cityBlocks: null,
+  2024: {
+    streetLines: null,
+    trashFence: null,
+    cpns: null,
+    plazas: null,
+    cityBlocks: null,
+  },
+  2025: {
+    streetLines: null,
+    trashFence: null,
+    cpns: null,
+    plazas: null,
+    cityBlocks: null,
+  }
 };
 
 // Loading state
@@ -18,54 +28,97 @@ const loadingState = {
   loadedLayers: new Set()
 };
 
+// Set the current year for GIS data loading
+export function setGISYear(year) {
+  if (gisDataCache[year]) {
+    currentYear = year;
+    return true;
+  }
+  console.warn(`GIS data not available for year ${year}`);
+  return false;
+}
+
+// Get the current GIS year
+export function getGISYear() {
+  return currentYear;
+}
+
 // Load GeoJSON data from file
-async function loadGeoJSON(filename) {
+async function loadGeoJSON(filename, year = currentYear) {
   try {
-    const response = await fetch(`${GIS_DATA_PATH}${filename}`);
+    const gisDataPath = `/data/${year}/gis/`;
+    const response = await fetch(`${gisDataPath}${filename}`);
     if (!response.ok) {
       throw new Error(`Failed to load ${filename}: ${response.statusText}`);
     }
     return await response.json();
   } catch (error) {
-    console.error(`Error loading GIS data ${filename}:`, error);
+    console.error(`Error loading GIS data ${filename} for year ${year}:`, error);
     return null;
   }
 }
 
 // Load all GIS data
-export async function loadAllGISData() {
+export async function loadAllGISData(year = currentYear) {
   if (loadingState.isLoading) {
     console.log('GIS data is already loading...');
-    return gisDataCache;
+    return gisDataCache[year];
+  }
+  
+  // Check if data already loaded for this year
+  const yearCache = gisDataCache[year];
+  if (!yearCache) {
+    console.error(`No cache structure for year ${year}`);
+    return null;
+  }
+  
+  if (yearCache.streetLines && loadingState.loadedLayers.has(`${year}-streetLines`)) {
+    console.log(`GIS data already loaded for year ${year}`);
+    return yearCache;
   }
 
   loadingState.isLoading = true;
   loadingState.error = null;
   loadingState.loadedLayers.clear();
 
-  console.log('Loading GIS data...');
+  console.log(`Loading GIS data for year ${year}...`);
   
   try {
+    // Load files with different naming conventions
+    const fileNames = year === 2024 ? {
+      streetLines: 'Street_Lines.geojson',
+      trashFence: 'Trash_Fence.geojson',
+      cpns: 'CPNs.geojson',
+      plazas: 'Plazas.geojson',
+      cityBlocks: 'City_Blocks.geojson'
+    } : {
+      streetLines: 'street_lines.geojson',
+      trashFence: 'trash_fence.geojson',
+      cpns: 'cpns.geojson',
+      plazas: 'plazas.geojson',
+      cityBlocks: 'city_blocks.geojson'
+    };
+    
     const [streetLines, trashFence, cpns, plazas, cityBlocks] = await Promise.all([
-      loadGeoJSON('street_lines.geojson'),
-      loadGeoJSON('trash_fence.geojson'),
-      loadGeoJSON('cpns.geojson'),
-      loadGeoJSON('plazas.geojson'),
-      loadGeoJSON('city_blocks.geojson')
+      loadGeoJSON(fileNames.streetLines, year),
+      loadGeoJSON(fileNames.trashFence, year),
+      loadGeoJSON(fileNames.cpns, year),
+      loadGeoJSON(fileNames.plazas, year),
+      loadGeoJSON(fileNames.cityBlocks, year)
     ]);
 
-    gisDataCache.streetLines = streetLines;
-    gisDataCache.trashFence = trashFence;
-    gisDataCache.cpns = cpns;
-    gisDataCache.plazas = plazas;
-    gisDataCache.cityBlocks = cityBlocks;
+    yearCache.streetLines = streetLines;
+    yearCache.trashFence = trashFence;
+    yearCache.cpns = cpns;
+    yearCache.plazas = plazas;
+    yearCache.cityBlocks = cityBlocks;
 
-    // Track loaded layers
-    if (streetLines) loadingState.loadedLayers.add('streetLines');
-    if (trashFence) loadingState.loadedLayers.add('trashFence');
-    if (cpns) loadingState.loadedLayers.add('cpns');
-    if (plazas) loadingState.loadedLayers.add('plazas');
-    if (cityBlocks) loadingState.loadedLayers.add('cityBlocks');
+    // Track loaded layers with year prefix
+    if (streetLines) loadingState.loadedLayers.add(`${year}-streetLines`);
+    if (trashFence) loadingState.loadedLayers.add(`${year}-trashFence`);
+    if (cpns) loadingState.loadedLayers.add(`${year}-cpns`);
+    if (plazas) loadingState.loadedLayers.add(`${year}-plazas`);
+    if (cityBlocks) loadingState.loadedLayers.add(`${year}-cityBlocks`);
 
     console.log('GIS data loaded:', {
       streetLines: streetLines?.features?.length || 0,
@@ -75,7 +128,7 @@ export async function loadAllGISData() {
       cityBlocks: cityBlocks?.features?.length || 0
     });
 
-    return gisDataCache;
+    return yearCache;
   } catch (error) {
     loadingState.error = error;
     console.error('Failed to load GIS data:', error);
@@ -86,28 +139,28 @@ export async function loadAllGISData() {
 }
 
 // Get street lines data
-export function getStreetLines() {
-  return gisDataCache.streetLines;
+export function getStreetLines(year = currentYear) {
+  return gisDataCache[year]?.streetLines || null;
 }
 
 // Get trash fence boundary
-export function getTrashFence() {
-  return gisDataCache.trashFence;
+export function getTrashFence(year = currentYear) {
+  return gisDataCache[year]?.trashFence || null;
 }
 
 // Get CPNs (Civic Plaza Network points)
-export function getCPNs() {
-  return gisDataCache.cpns;
+export function getCPNs(year = currentYear) {
+  return gisDataCache[year]?.cpns || null;
 }
 
 // Get plaza data
-export function getPlazas() {
-  return gisDataCache.plazas;
+export function getPlazas(year = currentYear) {
+  return gisDataCache[year]?.plazas || null;
 }
 
 // Get city blocks data
-export function getCityBlocks() {
-  return gisDataCache.cityBlocks;
+export function getCityBlocks(year = currentYear) {
+  return gisDataCache[year]?.cityBlocks || null;
 }
 
 

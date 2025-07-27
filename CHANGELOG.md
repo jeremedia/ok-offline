@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Precise Camp Location Accuracy** - Complete geocoding system overhaul for navigation-ready positioning
+  - Dynamic avenue mapping system handles year-specific naming themes (2024: wonder theme, 2025: sci-fi authors)
+  - GIS intersection finding algorithm places camps at exact street corners
+  - Accurate avenue distances extracted from GIS data (corrected errors up to 536 feet!)
+  - Year-aware geocoding adapts to each year's unique street naming
+- **Custom Map Visualization** - Distinctive visual style for better navigation
+  - DetailView shows custom red streets on black background with white labels
+  - MapView automatically manages basemap based on selected year
+  - 2024 GIS data integration for accurate street visualization
+  - Street name labels for easy orientation and navigation
+- **Smart Basemap Management** - Year-specific map handling prevents confusion
+  - 2025: Toggle between OpenStreetMap basemap and custom red/black style
+  - 2024 & earlier: Custom style only (basemap disabled to prevent mismatched street names)
+  - Visual feedback for disabled controls with explanatory text
+
+### Fixed
+- Camp locations now appear at exact street intersections instead of approximate positions
+- Eliminated confusion from basemap showing wrong year's street names
+- Corrected hardcoded avenue distances with accurate GIS measurements
+
+### Changed
+- Geocoding system now prioritizes GIS intersection finding over calculated positions
+- Map styling dynamically adapts based on year and basemap availability
+- DetailView includes GIS street layer initialization for accurate positioning
+
 ## [3.2.0] - 2025-07-27
 
 ### Added

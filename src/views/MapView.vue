@@ -55,9 +55,14 @@
         Error loading GIS data
       </div>
       <hr class="controls-divider">
-      <label class="map-control">
-        <input type="checkbox" v-model="showBasemap" @change="toggleBasemap">
-        🗺️ Base Map
+      <label class="map-control" :class="{ disabled: year !== '2025' }">
+        <input 
+          type="checkbox" 
+          v-model="showBasemap" 
+          @change="toggleBasemap"
+          :disabled="year !== '2025'"
+        >
+        🗺️ Base Map {{ year !== '2025' ? '(2025 only)' : '' }}
       </label>
       <label class="map-control">
         <input type="checkbox" v-model="cityAligned" @change="toggleRotation">
@@ -170,7 +175,8 @@ import {
   getPlazas,
   getCPNs,
   getLoadingState,
-  gisStyles 
+  gisStyles,
+  setGISYear 
 } from '../services/gisData'
 
 const route = useRoute()
@@ -221,7 +227,7 @@ const showCityBlocks = ref(false)
 const showPlazas = ref(true)
 const gisLoadingState = ref({ isLoading: false, error: null })
 const showLegend = ref(!isMobile.value) // Off by default on mobile
-const showBasemap = ref(true)
+const showBasemap = ref(false) // Default to off, will be enabled for 2025
 const cityAligned = ref(false)
 const rotationAngle = ref(0)
 const year = computed(() => route.params.year || localStorage.getItem('selectedYear') || '2025')
@@ -242,6 +248,11 @@ let items = {
 }
 
 onMounted(async () => {
+  // Enable basemap only for 2025
+  if (year.value === '2025') {
+    showBasemap.value = true
+  }
+  
   // Initialize Leaflet map with rotation support
   map = L.map(mapContainer.value, {
     center: BRC_CENTER,
@@ -251,14 +262,19 @@ onMounted(async () => {
     bearing: 0
   })
   
+  // Set black background when basemap is off
+  if (!showBasemap.value) {
+    mapContainer.value.style.backgroundColor = '#000000'
+  }
+  
   // Create basemap layer (but don't add it yet)
   basemapLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap contributors',
     maxZoom: 19
   })
   
-  // Add basemap if enabled
-  if (showBasemap.value) {
+  // Add basemap if enabled and year is 2025
+  if (showBasemap.value && year.value === '2025') {
     basemapLayer.addTo(map)
   }
   
@@ -331,6 +347,9 @@ const addSpecialLocations = () => {
 
 const loadData = async () => {
   try {
+    // Set the correct year for GIS data
+    setGISYear(parseInt(year.value))
+    
     // Load all data types
     const [camps, art, events] = await Promise.all([
       getFromCache('camp', year.value),
@@ -427,6 +446,15 @@ const updateGISLayers = () => {
     if (streetData) {
       gisLayers.streetLines = L.geoJSON(streetData, {
         style: (feature) => {
+          // Use custom red styling when basemap is off
+          if (!showBasemap.value) {
+            return {
+              color: '#FF0000',
+              weight: 4,
+              opacity: 1
+            }
+          }
+          // Use default styling when basemap is on
           const type = feature.properties.type
           return gisStyles.streetLines[type] || gisStyles.streetLines.arc
         },
@@ -511,11 +539,18 @@ const updateGISLayers = () => {
 }
 
 const toggleBasemap = () => {
+  if (year.value !== '2025') return // Don't allow toggle for non-2025 years
+  
   if (showBasemap.value) {
     basemapLayer.addTo(map)
+    mapContainer.value.style.backgroundColor = ''
   } else {
     map.removeLayer(basemapLayer)
+    mapContainer.value.style.backgroundColor = '#000000'
   }
+  
+  // Update GIS layers to apply correct styling
+  updateGISLayers()
 }
 
 const toggleRotation = () => {
@@ -918,5 +953,24 @@ const applyRotation = () => {
 
 :deep(.leaflet-popup-close-button:hover) {
   color: #fff;
+}
+
+/* Map background styling */
+#map {
+  background-color: #1a1a1a; /* Default dark background */
+}
+
+:deep(.leaflet-container) {
+  background-color: inherit;
+}
+
+/* Disabled control styling */
+.map-control.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.map-control.disabled input {
+  cursor: not-allowed;
 }
 </style>

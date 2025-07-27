@@ -1,10 +1,21 @@
 <template>
   <section id="detail-section" class="view">
     <div id="detail-content" v-if="item">
+      <!-- Mobile title - shown above map on mobile -->
+      <h2 class="detail-title mobile-title">
+        {{ getItemName(item) }}
+        <button 
+          @click="handleToggleFavorite"
+          class="favorite-btn-detail"
+          :class="{ active: isFavorited }"
+        >
+          {{ isFavorited ? '★' : '☆' }}
+        </button>
+      </h2>
 
       <div id="detail-info">
-
-        <h2>
+        <!-- Desktop title - hidden on mobile -->
+        <h2 class="detail-title desktop-title">
           {{ getItemName(item) }}
           <button 
             @click="handleToggleFavorite"
@@ -58,9 +69,17 @@
           <label>Camp Events</label>
           <div class="value">
             <ul class="camp-events">
-              <li v-for="event in campEvents" :key="event.uid" @click="logEventData(event)" class="event-item">
-                <strong>{{ event.title }}</strong>
-                <span v-if="event.event_type" class="event-type">({{ event.event_type.label }})</span>
+              <li v-for="event in campEvents" :key="event.uid" class="event-item">
+                <strong>
+                  <router-link 
+                    :to="`/${props.year}/events/${event.uid}`" 
+                    class="event-title-link"
+                    @click.stop
+                  >
+                    {{ event.title }}
+                  </router-link>
+                </strong>
+                <span v-if="event.event_type" class="event-type">{{ event.event_type.label }}</span>
                 <div v-if="event.description" class="event-description">{{ event.description }}</div>
                 <div v-if="event.occurrence_set && event.occurrence_set.length > 0" class="event-times">
                   <div v-for="(occ, idx) in event.occurrence_set" :key="idx" class="occurrence-item">
@@ -153,6 +172,12 @@
       
       <div id="detail-map-container">
         <div id="detail-map" ref="mapContainer"></div>
+        <router-link 
+          :to="`/${props.year}/map?focus=${props.type}_${props.id}`" 
+          class="open-in-map-link"
+        >
+          Open in map →
+        </router-link>
       </div>
     </div>
     <div v-else-if="loading">Loading...</div>
@@ -176,6 +201,12 @@ import { getFromCache } from '../services/storage'
 import { getCampEvents } from '../services/events'
 import { isFavorite, toggleFavorite } from '../services/favorites'
 import { brcAddressToLatLon } from '../utils/geocoding'
+import { 
+  setGISYear, 
+  initializeGISData, 
+  getStreetLines, 
+  gisStyles 
+} from '../services/gisData'
 import { recordVisit, getVisitInfo, saveItemNotes, getItemNotes } from '../services/visits'
 import { addEventToSchedule, removeEventFromSchedule, isEventScheduled } from '../services/schedule'
 import { useAutoSync } from '../composables/useAutoSync'
@@ -197,28 +228,14 @@ const scheduledOccurrences = ref(new Map()) // Track which occurrences are sched
 const syncStatus = ref('Checking for data...')
 let detailMap = null
 let detailMarker = null
+let streetLayer = null
+let streetLabels = []
 
 const goBack = () => {
   router.push(`/${props.year}/${props.type}s`)
 }
 
-const logEventData = (event) => {
-  console.log('Event clicked:', event)
-  console.log('Event details:')
-  console.log('- Title:', event.title)
-  console.log('- UID:', event.uid)
-  console.log('- Event ID:', event.event_id)
-  console.log('- Type:', event.event_type?.label)
-  console.log('- Description:', event.description)
-  console.log('- Hosted by camp:', event.hosted_by_camp)
-  console.log('- Occurrences:', event.occurrence_set?.length || 0)
-  if (event.occurrence_set) {
-    event.occurrence_set.forEach((occ, idx) => {
-      console.log(`  - Occurrence ${idx + 1}: ${occ.start_time} to ${occ.end_time}`)
-    })
-  }
-  console.log('- Full event object:', JSON.stringify(event, null, 2))
-}
+// Event navigation now handled by router-link
 
 const handleToggleFavorite = () => {
   const wasAdded = toggleFavorite(props.type, props.id)
@@ -325,20 +342,29 @@ const loadItem = async () => {
 }
 
 
-const initMap = () => {
+const initMap = async () => {
   if (!mapContainer.value || !item.value) return
   
   if (!detailMap) {
     detailMap = L.map(mapContainer.value, {
       center: BRC_CENTER,
-      zoom: 14,
-      zoomControl: true
+      zoom: 17, // Perfect zoom level for camp detail
+      zoomControl: true, // Keep zoom controls enabled
+      dragging: false, // Disable dragging
+      touchZoom: false, // Disable touch zoom
+      scrollWheelZoom: false, // Disable scroll zoom
+      doubleClickZoom: false, // Disable double-click zoom
+      boxZoom: false, // Disable box zoom
+      keyboard: false, // Disable keyboard navigation
+      tap: false // Disable tap interactions
     })
     
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors',
-      maxZoom: 19
-    }).addTo(detailMap)
+    // Log zoom changes
+    detailMap.on('zoomend', () => {
+      console.log('Current zoom level:', detailMap.getZoom())
+    })
+    
+    // No basemap - we'll use a solid background color instead
   }
   
   // Clear existing marker
@@ -351,12 +377,67 @@ const initMap = () => {
   let coords = null
   
   if (locationString && locationString !== 'Unknown location') {
+    // Set the correct year for GIS data and initialize it
+    setGISYear(parseInt(props.year))
+    
+    // Initialize GIS data to enable intersection finding
+    try {
+      await initializeGISData()
+      console.log('GIS data initialized for year:', props.year)
+      
+      // Add street layer to show correct year's streets
+      if (streetLayer) {
+        detailMap.removeLayer(streetLayer)
+      }
+      
+      // Remove existing street labels
+      streetLabels.forEach(label => detailMap.removeLayer(label))
+      streetLabels = []
+      
+      const streetData = getStreetLines()
+      if (streetData) {
+        streetLayer = L.geoJSON(streetData, {
+          style: (feature) => {
+            // Custom red styling for all streets
+            return {
+              color: '#FF0000',  // Red color
+              weight: 4,         // Thicker lines
+              opacity: 1
+            }
+          },
+          onEachFeature: (feature, layer) => {
+            // Add street name labels
+            if (feature.properties && feature.properties.name) {
+              const streetName = feature.properties.name
+              const center = layer.getBounds().getCenter()
+              
+              // Create a divIcon for the label
+              const label = L.divIcon({
+                className: 'street-label',
+                html: `<div>${streetName}</div>`,
+                iconSize: [100, 20],
+                iconAnchor: [50, 10]
+              })
+              
+              // Add label marker at the center of the street segment
+              const labelMarker = L.marker(center, { icon: label }).addTo(detailMap)
+              streetLabels.push(labelMarker)
+            }
+          }
+        }).addTo(detailMap)
+        console.log('Added street layer for year:', props.year)
+      }
+    } catch (err) {
+      console.warn('Failed to initialize GIS data:', err)
+    }
+    
     coords = brcAddressToLatLon(locationString)
   }
   
   if (coords) {
     // Show actual location
-    detailMap.setView(coords, 15)
+    console.log('Setting view to coords:', coords, 'with zoom 17')
+    detailMap.setView(coords, 17)
     detailMarker = L.marker(coords).addTo(detailMap)
     detailMarker.bindPopup(`
       <strong>${getItemName(item.value)}</strong><br>
@@ -364,7 +445,8 @@ const initMap = () => {
     `).openPopup()
   } else {
     // Show center with note if no location
-    detailMap.setView(BRC_CENTER, 13)
+    console.log('No coords, setting view to BRC_CENTER with zoom 17')
+    detailMap.setView(BRC_CENTER, 17)
     detailMarker = L.marker(BRC_CENTER).addTo(detailMap)
     detailMarker.bindPopup('Black Rock City Center<br><em>Camp location not available</em>').openPopup()
   }
@@ -432,7 +514,7 @@ const loadCampEvents = async () => {
 onMounted(async () => {
   await loadItem()
   if (item.value) {
-    setTimeout(initMap, 100)
+    setTimeout(() => initMap(), 100)
     // Load events if it's a camp
     if (props.type === 'camp') {
       loadCampEvents()
@@ -443,7 +525,7 @@ onMounted(async () => {
 watch(() => props.id, async () => {
   await loadItem()
   if (item.value) {
-    setTimeout(initMap, 100)
+    setTimeout(() => initMap(), 100)
   }
 })
 </script>
@@ -486,17 +568,82 @@ h2 {
 
 .event-type {
   color: #ccc;
+  font-style: normal !important; /* Remove italics */
+  font-weight: bold;
+  margin-left: 0;
+  text-transform: uppercase;
 }
 
-.event-item {
+/* Event title link styling */
+.event-title-link {
+  color: #fff;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.event-title-link:hover {
+  color: #ff6666;
+  text-decoration: underline;
+}
+
+/* Open in map link styling */
+.open-in-map-link {
+  display: block;
+  text-align: right;
+  margin-top: 8px;
+  color: #8B0000;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  transition: color 0.2s ease;
+}
+
+.open-in-map-link:hover {
+  color: #FF4444;
+  text-decoration: underline;
+}
+
+/* Override global camp-events li styles with higher specificity */
+.camp-events .event-item {
   cursor: pointer;
-  padding: 0;
-  margin: 0;
-  border-radius: 4px;
+  padding: 16px; /* 2x 8px rhythm */
+  margin: 0 !important; /* Override global margin */
+  margin-bottom: 0 !important; /* Remove gap between items */
+  border: none !important; /* Remove all borders first */
+  border-left: 1px solid #444 !important;
+  border-right: 1px solid #444 !important;
+  border-radius: 0 !important; /* Remove radius from all items */
+  background: #1a1a1a;
   transition: background-color 0.2s;
 }
 
-.event-item:hover {
+/* Alternate background colors */
+.camp-events .event-item:nth-child(even) {
+  background: rgb(54, 10, 10); /* color(srgb 0.21 0.0388 0.0388) converted to RGB */
+}
+
+/* First item gets top border and radius */
+.camp-events .event-item:first-child {
+  border-top: 1px solid #444 !important;
+  border-top-left-radius: 8px !important;
+  border-top-right-radius: 8px !important;
+}
+
+/* Last item gets bottom border and radius */
+.camp-events .event-item:last-child {
+  border-bottom: 1px solid #444 !important;
+  border-bottom-left-radius: 8px !important;
+  border-bottom-right-radius: 8px !important;
+  margin-bottom: 0 !important;
+}
+
+/* Add separator between items */
+.camp-events .event-item:not(:last-child) {
+  border-bottom: 1px solid #333;
+}
+
+.camp-events .event-item:hover {
   background-color: #8B0000;
 }
 
@@ -506,11 +653,42 @@ h2 {
   margin: 0;
 }
 
+/* Also override any li elements that might not have event-item class */
+.camp-events li {
+  margin-bottom: 0 !important;
+  border-radius: 0 !important;
+}
+
 h2 {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+}
+
+/* Hide mobile title on desktop */
+.mobile-title {
+  display: none;
+}
+
+/* Show desktop title */
+.desktop-title {
+  display: flex;
+}
+
+@media (max-width: 768px) {
+  /* Show mobile title */
+  .mobile-title {
+    display: flex;
+    order: -2; /* Ensure it's before the map */
+    margin: 0;
+    font-size: 1.5rem;
+  }
+  
+  /* Hide desktop title */
+  .desktop-title {
+    display: none;
+  }
 }
 
 .favorite-btn-detail {
@@ -533,7 +711,7 @@ h2 {
 
 .visit-tracking {
   margin-top: 2rem;
-  padding: 1.5rem;
+  padding: 16px; /* 2x 8px rhythm */
   background: #2a2a2a;
   border-radius: 8px;
   border: 1px solid #333;
@@ -541,6 +719,7 @@ h2 {
 
 .visit-tracking h3 {
   color: #ccc;
+  margin-top: 0;
   margin-bottom: 1rem;
   font-size: 1rem;
   text-transform: uppercase;
@@ -619,7 +798,9 @@ h2 {
 }
 
 .event-times {
-  margin-top: 0.5rem;
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none; /* Remove top border */
 }
 
 .occurrence-item {
@@ -627,6 +808,13 @@ h2 {
   align-items: center;
   gap: 0.5rem;
   margin: 0.25rem 0;
+}
+
+/* Make date/time in occurrence items more prominent */
+.occurrence-item small {
+  font-size: 1rem !important; /* Same size as description */
+  font-weight: normal !important; /* Same weight as description */
+  color: #fff !important; /* Make it stand out */
 }
 
 .schedule-btn {
@@ -663,5 +851,42 @@ h2 {
 .camp-link:hover {
   color: #64B5F6;
   text-decoration: underline;
+}
+
+/* Custom map styling */
+#detail-map-container {
+  background-color: #000000;
+}
+
+#detail-map {
+  background-color: #000000;
+}
+
+/* Style the Leaflet container background */
+:deep(.leaflet-container) {
+  background-color: #000000;
+}
+
+/* Hide attribution since we're not using basemap */
+:deep(.leaflet-control-attribution) {
+  display: none;
+}
+
+/* Street label styling */
+:deep(.street-label) {
+  background: none;
+  border: none;
+  color: #FFFFFF;
+  font-weight: bold;
+  font-size: 12px;
+  text-shadow: 1px 1px 2px #000000, -1px -1px 2px #000000;
+  white-space: nowrap;
+  pointer-events: none;
+  text-align: center;
+}
+
+:deep(.street-label div) {
+  text-align: center;
+  width: 100%;
 }
 </style>

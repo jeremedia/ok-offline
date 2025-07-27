@@ -5,14 +5,16 @@ An offline-first Progressive Web App for Burning Man that lets you browse camps,
 ## Features
 
 - 📱 **Offline-First PWA** - Works without internet once data is synced
-- 🗺️ **Interactive Map** - View camps, art, and events on a map with BRC coordinates
+- 🗺️ **Interactive Map** - View camps, art, and events with precise street-corner accuracy
+- 📍 **Navigation-Ready Positioning** - Camps placed at exact intersections using GIS data
 - 📅 **Personal Schedule Builder** - Plan your burn with conflict detection
 - ⭐ **Favorites & Visit Tracking** - Mark favorites and track where you've been
 - 🚨 **Emergency Contacts** - Store important medical info and contacts offline
 - 🌪️ **Dust Forecast** - Check playa weather conditions
 - 🔍 **Smart Search** - Search across all camps, art, and events
 - 📍 **Location Services** - Find distances to camps from your current location
-- 🎨 **Dark Theme** - Easy on the eyes at night with Berkeley Mono font
+- 🎨 **Custom Map Styling** - Year-specific street visualization with distinctive red/black theme
+- 🧭 **Year-Aware Geocoding** - Handles changing avenue names across different years
 
 ## Getting Started
 

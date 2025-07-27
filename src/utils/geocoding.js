@@ -4,7 +4,8 @@
  */
 
 import { BRC_CENTER } from '../config'
-import { getStreetLines } from '../services/gisData'
+import { getStreetLines, getGISYear } from '../services/gisData'
+import { getAvenueNameFromLetter, getAvenueLetterFromName, getAvenueDistance } from './avenueMapping'
 
 // BRC dimensions and layout constants
 const BRC_CONFIG = {
@@ -12,20 +13,21 @@ const BRC_CONFIG = {
   center: BRC_CENTER, // [40.786958, -119.202994]
   
   // Distance from center to each avenue in feet
+  // NOTE: These are fallback values - use getAvenueDistance() for accurate distances
   avenueDistances: {
-    'Esplanade': 2500,
-    'A': 2940,
-    'B': 3180,
-    'C': 3420,
-    'D': 3660,
-    'E': 3900,
-    'F': 4140,
-    'G': 4380,
-    'H': 4620,
-    'I': 4860,
-    'J': 5100,
-    'K': 5340,
-    'L': 5580
+    'Esplanade': 2600,
+    'A': 3037,
+    'B': 3316,
+    'C': 3596,
+    'D': 3876,
+    'E': 4156,
+    'F': 4436,
+    'G': 4716,
+    'H': 4996,
+    'I': 5276,
+    'J': 5556,
+    'K': 5836,
+    'L': 6116
   },
   
   // Clock angles (where 12:00 is north)
@@ -91,35 +93,41 @@ function feetToDegreesLon(feet, latitude) {
 }
 
 /**
+ * Check if a string is an avenue letter (A-L)
+ */
+function isAvenueLetter(str) {
+  return /^[A-L]$/.test(str.toUpperCase())
+}
+
+/**
  * Parse a BRC address string into components
- * @param {string} address - e.g., "7:30 & E", "Esplanade & 3:00"
+ * @param {string} address - e.g., "7:30 & E", "Esplanade & 3:00", "3:30 & Atwood"
  * @returns {object} { clock: '7:30', avenue: 'E' }
  */
 export function parseBRCAddress(address) {
   if (!address || typeof address !== 'string') return null
   
-  // Normalize the address
-  const normalized = address.trim().toUpperCase()
+  // Split by common separators
+  const parts = address.split(/\s*[&,]\s*/).map(p => p.trim())
   
-  // Match patterns like "7:30 & E" or "E & 7:30" or "Esplanade & 3:00"
-  const patterns = [
-    /(\d{1,2}:\d{2})\s*&\s*([A-L]|ESPLANADE)/i,
-    /([A-L]|ESPLANADE)\s*&\s*(\d{1,2}:\d{2})/i
-  ]
+  if (parts.length !== 2) return null
   
-  for (const pattern of patterns) {
-    const match = normalized.match(pattern)
-    if (match) {
-      // Determine which capture group has the clock time
-      const isClockFirst = /^\d/.test(match[1])
-      return {
-        clock: isClockFirst ? match[1] : match[2],
-        avenue: isClockFirst ? match[2] : match[1]
-      }
+  // Identify which part is clock and which is avenue
+  let clock = null
+  let avenue = null
+  
+  for (const part of parts) {
+    if (/^\d{1,2}:\d{2}$/.test(part)) {
+      clock = part
+    } else {
+      // Could be avenue letter, theme name, or "Esplanade"
+      avenue = part
     }
   }
   
-  return null
+  if (!clock || !avenue) return null
+  
+  return { clock, avenue }
 }
 
 /**
@@ -129,8 +137,19 @@ export function parseBRCAddress(address) {
  * @returns {array|null} [latitude, longitude] or null if not found
  */
 function findStreetIntersectionFromGIS(street1, street2) {
-  const streetData = getStreetLines()
-  if (!streetData || !streetData.features) return null
+  console.log('🔍 Looking for GIS intersection:', street1, '&', street2)
+  const year = getGISYear()
+  const streetData = getStreetLines(year)
+  if (!streetData || !streetData.features) {
+    console.log('🔍 No street data available for year:', year)
+    return null
+  }
+  
+  // Convert avenue letters to theme names for the current year
+  const street1Name = isAvenueLetter(street1) ? getAvenueNameFromLetter(street1, year) : street1
+  const street2Name = isAvenueLetter(street2) ? getAvenueNameFromLetter(street2, year) : street2
+  
+  console.log('🔍 Converted names:', street1, '->', street1Name, ',', street2, '->', street2Name)
   
   // Find features for both streets
   const features1 = []
@@ -142,8 +161,8 @@ function findStreetIntersectionFromGIS(street1, street2) {
     
     // Normalize names for comparison
     const normalizedName = name.toUpperCase()
-    const normalizedStreet1 = street1.toUpperCase()
-    const normalizedStreet2 = street2.toUpperCase()
+    const normalizedStreet1 = street1Name.toUpperCase()
+    const normalizedStreet2 = street2Name.toUpperCase()
     
     if (normalizedName === normalizedStreet1) {
       features1.push(feature)
@@ -152,16 +171,24 @@ function findStreetIntersectionFromGIS(street1, street2) {
     }
   })
   
-  if (features1.length === 0 || features2.length === 0) return null
+  console.log('🔍 Found features:', features1.length, 'for', street1Name, ',', features2.length, 'for', street2Name)
+  
+  if (features1.length === 0 || features2.length === 0) {
+    console.debug(`Street intersection not found: ${street1Name} (${street1}) & ${street2Name} (${street2})`)
+    return null
+  }
+  
+  console.log('🔍 Looking for intersection between', features1.length, 'segments of', street1Name, 'and', features2.length, 'segments of', street2Name)
   
   // Find intersection points
   let closestIntersection = null
   let minDistance = Infinity
+  let allIntersections = []
   
-  features1.forEach(f1 => {
+  features1.forEach((f1, f1Index) => {
     const coords1 = f1.geometry.coordinates
     
-    features2.forEach(f2 => {
+    features2.forEach((f2, f2Index) => {
       const coords2 = f2.geometry.coordinates
       
       // Check each line segment combination
@@ -179,15 +206,59 @@ function findStreetIntersectionFromGIS(street1, street2) {
               [intersection[1], intersection[0]]
             )
             
+            const intersectionLatLon = [intersection[1], intersection[0]]
+            allIntersections.push({coords: intersectionLatLon, distance: dist})
+            console.log('🔍 Found intersection at:', intersectionLatLon, 'Distance from center:', dist)
+            
             if (dist < minDistance) {
               minDistance = dist
-              closestIntersection = [intersection[1], intersection[0]] // Convert to [lat, lon]
+              closestIntersection = intersectionLatLon // Convert to [lat, lon]
             }
           }
         }
       }
     })
   })
+  
+  console.log('🔍 All intersections found:', allIntersections.length)
+  allIntersections.forEach((int, i) => {
+    console.log(`  ${i}: ${int.coords} - ${int.distance}ft from center`)
+  })
+  
+  // For radial & avenue intersections, we should validate the distance
+  // The intersection should be approximately at the avenue's distance from center
+  const isRadialAvenue = /^\d{1,2}:\d{2}$/.test(street1) && isAvenueLetter(street2)
+  const isAvenueRadial = isAvenueLetter(street1) && /^\d{1,2}:\d{2}$/.test(street2)
+  
+  if (isRadialAvenue || isAvenueRadial) {
+    const avenueLetter = isRadialAvenue ? street2 : street1
+    const expectedDistance = getAvenueDistance(avenueLetter, getGISYear())
+    
+    if (expectedDistance) {
+      console.log('🔍 Looking for intersection at expected distance:', expectedDistance, 'feet for avenue', avenueLetter)
+      
+      // Find intersection closest to expected distance
+      let bestIntersection = null
+      let minDistanceError = Infinity
+      
+      allIntersections.forEach(int => {
+        const distanceError = Math.abs(int.distance - expectedDistance)
+        if (distanceError < minDistanceError) {
+          minDistanceError = distanceError
+          bestIntersection = int.coords
+        }
+      })
+      
+      if (bestIntersection && minDistanceError < 300) { // Allow 300ft tolerance
+        console.log('🔍 Selected intersection at expected distance:', bestIntersection, 'Error:', minDistanceError, 'ft')
+        return bestIntersection
+      } else if (bestIntersection) {
+        console.log('🔍 Best intersection found but outside tolerance:', bestIntersection, 'Error:', minDistanceError, 'ft')
+      }
+    }
+  }
+  
+  console.log('🔍 Selected closest intersection:', closestIntersection)
   
   return closestIntersection
 }
@@ -223,28 +294,54 @@ function lineSegmentIntersection(p1, p2, p3, p4) {
  * @returns {array|null} [latitude, longitude] or null if invalid
  */
 export function brcAddressToLatLon(address) {
-  const parsed = parseBRCAddress(address)
-  if (!parsed) return null
+  console.log('🎯 brcAddressToLatLon called with:', address)
   
+  const parsed = parseBRCAddress(address)
+  if (!parsed) {
+    console.log('🎯 Failed to parse address')
+    return null
+  }
+  
+  console.log('🎯 Parsed address:', parsed)
   const { clock, avenue } = parsed
   
   // First try to find intersection using GIS data
   const gisIntersection = findStreetIntersectionFromGIS(clock, avenue)
   if (gisIntersection) {
+    console.log('🎯 Found GIS intersection:', gisIntersection)
     return gisIntersection
   }
+  
+  console.log('🎯 No GIS intersection found, falling back to calculation')
   
   // Fall back to calculated method
   // Get the angle from center (in degrees from north)
   const clockAngle = BRC_CONFIG.clockAngles[clock]
-  if (clockAngle === undefined) return null
+  if (clockAngle === undefined) {
+    console.log('🎯 Invalid clock angle for:', clock)
+    return null
+  }
   
   // Get the distance from center (in feet)
-  const distance = BRC_CONFIG.avenueDistances[avenue]
-  if (distance === undefined) return null
+  const year = getGISYear()
+  console.log('🎯 Using year:', year)
+  let distance = getAvenueDistance(avenue, year)
+  console.log('🎯 Avenue distance from mapping:', distance, 'for avenue:', avenue)
+  
+  // Fall back to hardcoded values if avenue mapping not available
+  if (distance === null) {
+    distance = BRC_CONFIG.avenueDistances[avenue]
+    console.log('🎯 Falling back to hardcoded distance:', distance)
+  }
+  
+  if (distance === undefined || distance === null) {
+    console.log('🎯 No distance found for avenue:', avenue)
+    return null
+  }
   
   // Calculate the actual bearing including city orientation
   const bearing = (clockAngle + BRC_CONFIG.cityBearing) % 360
+  console.log('🎯 Clock angle:', clockAngle, 'City bearing:', BRC_CONFIG.cityBearing, 'Final bearing:', bearing)
   
   // Convert bearing to radians
   const bearingRad = bearing * Math.PI / 180
@@ -260,6 +357,8 @@ export function brcAddressToLatLon(address) {
   // Calculate final coordinates
   const lat = BRC_CONFIG.center[0] + latOffset
   const lon = BRC_CONFIG.center[1] + lonOffset
+  
+  console.log('🎯 Final coordinates:', [lat, lon])
   
   return [lat, lon]
 }
@@ -340,8 +439,10 @@ export function calculateCityAlignmentAngle() {
  */
 export function analyzeCityGeometry(trashFenceData = null) {
   try {
+    const year = getGISYear()
     const manCoords = BRC_CONFIG.center
-    const templeCoords = calculateCoordinatesFromManCenter(0, BRC_CONFIG.avenueDistances.K)
+    const templeDistance = getAvenueDistance('K', year) || BRC_CONFIG.avenueDistances.K
+    const templeCoords = calculateCoordinatesFromManCenter(0, templeDistance)
     const templeBearing = calculateBearing(manCoords, templeCoords)
     
     // Calculate basic geometric facts
@@ -352,15 +453,15 @@ export function analyzeCityGeometry(trashFenceData = null) {
         manCoordinates: manCoords,
         templeCoordinates: templeCoords,
         templeBearing: Math.round(templeBearing * 10) / 10,
-        manToTempleDistance: Math.round(BRC_CONFIG.avenueDistances.K * 0.3048), // convert feet to meters
-        cityRadius: Math.round(BRC_CONFIG.avenueDistances.L * 0.3048), // L Avenue as outer radius
+        manToTempleDistance: Math.round(templeDistance * 0.3048), // convert feet to meters
+        cityRadius: Math.round((getAvenueDistance('L', year) || BRC_CONFIG.avenueDistances.L) * 0.3048), // L Avenue as outer radius
       },
       facts: {
         templeDirection: `Temple is ${bearingToCompass(templeBearing)} of The Man`,
         rotationExplanation: 'Rotating -45° aligns gate to bottom, temple to top of screen',
         cityShape: 'Partial circle (arc) opening toward default world',
         coordinateSystem: 'WGS84 (standard GPS coordinates)',
-        cityDiameter: `${Math.round(BRC_CONFIG.avenueDistances.L * 2 * 0.3048 / 1000 * 10) / 10} km`,
+        cityDiameter: `${Math.round((getAvenueDistance('L', year) || BRC_CONFIG.avenueDistances.L) * 2 * 0.3048 / 1000 * 10) / 10} km`,
         streetLayout: 'Radial streets from 2:00 to 10:00, concentric avenues Esplanade to L',
         manLocation: 'Golden Spike at the center of the partial circle',
         gateOrientation: 'Southwest opening for participant entry/exit'
