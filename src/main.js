@@ -137,7 +137,7 @@ createApp(App)
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     // Add cache-busting parameter to force service worker update
-    navigator.serviceWorker.register('/sw-enhanced.js?v=3.2.0')
+    navigator.serviceWorker.register('/sw-enhanced.js?v=3.9.0')
       .then(registration => {
         console.log('Enhanced ServiceWorker registration successful:', registration)
         
