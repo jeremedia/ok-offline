@@ -106,6 +106,13 @@ import { clearCache } from '../services/storage'
 import { serviceWorkerManager, getCacheInfo } from '../services/serviceWorkerManager'
 import { useToast } from '../composables/useToast'
 
+const props = defineProps({
+  autoReset: {
+    type: Boolean,
+    default: false
+  }
+})
+
 const router = useRouter()
 const { showSuccess, showInfo, showError } = useToast()
 
@@ -206,8 +213,8 @@ const clearServiceWorkerCache = async () => {
   }
 }
 
-const fullReset = async () => {
-  if (!confirm('Are you sure you want to reset everything? This will clear all data and preferences.')) {
+const fullReset = async (skipConfirm = false) => {
+  if (!skipConfirm && !confirm('Are you sure you want to reset everything? This will clear all data and preferences.')) {
     return
   }
   
@@ -310,9 +317,20 @@ const goHome = () => {
   router.push('/')
 }
 
-onMounted(() => {
-  refreshStatus()
-  addLogEntry('Reset page loaded', 'info')
+onMounted(async () => {
+  if (props.autoReset) {
+    // Perform immediate full reset and redirect
+    addLogEntry('Auto-reset initiated', 'info')
+    await fullReset(true) // Skip confirmation
+    
+    // Redirect to home after a brief delay
+    setTimeout(() => {
+      router.push('/')
+    }, 1000)
+  } else {
+    refreshStatus()
+    addLogEntry('Reset page loaded', 'info')
+  }
 })
 </script>
 

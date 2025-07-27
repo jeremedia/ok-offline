@@ -792,6 +792,24 @@ const showReleaseNotes = ref(false)
 // Release notes data
 const releaseNotes = [
   {
+    version: '3.1.1',
+    date: '2025-07-27',
+    added: [
+      '🚀 Auto-Reset Route - /reset-now instantly clears all data and redirects to home',
+      '📋 Screenshot Handling Rules - Mandatory analysis directive in CLAUDE.md'
+    ],
+    changed: [
+      '🎯 Onboarding Year Selection - Removed confusing year selector from sync step',
+      '📝 Clearer Sync Messaging - Now states "all Burning Man data (2023-2025)"',
+      '📊 Progress Steps Clarity - Shows individual years being downloaded',
+      '🗓️ Default Year - Navigation defaults to 2025 after onboarding'
+    ],
+    fixed: [
+      '🔄 Service Worker Cache Busting - Added version parameter to force updates',
+      '📄 CLAUDE.md Merge Conflict - Fixed incomplete merge conflict marker'
+    ]
+  },
+  {
     version: '3.1.0',
     date: '2025-07-27',
     added: [

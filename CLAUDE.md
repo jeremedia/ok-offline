@@ -23,7 +23,18 @@ Created by Jeremy Roush and brought to you by Mr. OK of OKNOTOK.
 - **Service Workers** - PWA functionality
 - **Berkeley Mono** - Custom monospace font
 
-<<<<<<< HEAD
+## CRITICAL: Screenshot Handling
+
+**MANDATORY RULE FOR ALL CLAUDE CODE SESSIONS:**
+
+When you take a screenshot using Playwright or any other tool, you MUST:
+1. **ALWAYS load the screenshot immediately** using the Read tool
+2. **Analyze the screenshot carefully** - look at every detail
+3. **Think about what the screenshot shows** and how it relates to the task
+4. **Never take screenshots without examining them** - this defeats the entire purpose
+
+Taking screenshots without loading and analyzing them is pointless and wastes time. This is a critical requirement for all future sessions.
+
 ### Project Structure
 ```
 ok-offline/

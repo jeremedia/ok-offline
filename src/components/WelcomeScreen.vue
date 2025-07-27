@@ -45,7 +45,7 @@
       <div v-if="currentStep === 2" class="step-content">
         <ProgressiveLoader
           :title="syncStarted ? '📥 Downloading Burning Man Data' : '🌐 Sync Your Burning Man Data'"
-          :message="syncStarted ? syncStatusText : `We'll download the latest ${selectedYear} data for offline use. This happens once, then you're set for your entire burn!`"
+          :message="syncStarted ? syncStatusText : `We'll download all Burning Man data (2023-2025) for offline use. This happens once, then you're set for your entire burn!`"
           loading-type="sync"
           :show-progress="syncStarted"
           :progress="syncProgress"
@@ -56,17 +56,6 @@
           :allow-skip="false"
           full-screen="false"
         >
-          <!-- Custom content slot for year selector and preview when not syncing -->
-          <template v-if="!syncStarted">
-            <div class="year-selector-container">
-              <label for="year">Choose your year:</label>
-              <select id="year" v-model="selectedYear" :disabled="syncStarted">
-                <option value="2023">2023</option>
-                <option value="2024">2024</option>
-                <option value="2025">2025</option>
-              </select>
-            </div>
-          </template>
         </ProgressiveLoader>
 
         <div class="step-actions">
@@ -148,7 +137,7 @@ const router = useRouter()
 const { showSuccess, showError } = useToast()
 
 const currentStep = ref(1)
-const selectedYear = ref('2024')
+const selectedYear = ref('2025') // Default year for navigation after onboarding
 const syncing = ref(false)
 const syncProgress = ref(0)
 const syncStatusText = ref('')
@@ -168,18 +157,20 @@ const syncTips = [
 ]
 
 const previewSteps = ref([
-  { title: 'Current Year Data', description: `${selectedYear.value} camps, art, and events`, status: 'pending', count: '~2800+', countLabel: 'items' },
-  { title: 'Historical Data', description: 'Previous years for reference', status: 'pending', count: '~5600+', countLabel: 'items' },
+  { title: '2025 Data', description: 'Latest camps, art, and events', status: 'pending', count: '~2800+', countLabel: 'items' },
+  { title: '2024 Data', description: 'Complete previous year', status: 'pending', count: '~2800+', countLabel: 'items' },
+  { title: '2023 Data', description: 'Historical reference', status: 'pending', count: '~2800+', countLabel: 'items' },
   { title: 'Data Enhancement', description: 'Processing relationships and locations', status: 'pending' },
   { title: 'Optimization', description: 'Preparing for offline use', status: 'pending' },
 ])
 
 const previewTips = [
-  'Downloads all years (2023, 2024, 2025) for complete access',
+  'Downloads complete data from all years (2023, 2024, 2025)',
   'All data works without internet connectivity',
   'Only ~10-15MB total - includes everything!',
   'Reference past years and plan for future events',  
-  'Creates your comprehensive offline Burning Man guide'
+  'Creates your comprehensive offline Burning Man guide',
+  'Over 8,400 camps, art pieces, and events total'
 ]
 
 const syncResultMessage = computed(() => {
@@ -189,7 +180,7 @@ const syncResultMessage = computed(() => {
     .filter(r => r.success)
     .reduce((sum, r) => sum + r.count, 0)
   
-  return `Downloaded ${totalCount} items and cached for offline use. You're ready to explore Burning Man ${selectedYear.value}!`
+  return `Downloaded ${totalCount} items from all years (2023-2025) and cached for offline use. You're ready to explore Burning Man with complete historical data!`
 })
 
 // Watch for step changes to auto-start sync
@@ -210,10 +201,10 @@ const startDataSync = async () => {
   
   // Initialize sync steps
   syncSteps.value = [
-    { title: `${selectedYear.value} Camps`, description: 'Essential for navigation', status: 'pending', count: 0, countLabel: 'camps' },
-    { title: `${selectedYear.value} Art`, description: 'Current year installations', status: 'pending', count: 0, countLabel: 'pieces' },
-    { title: `${selectedYear.value} Events`, description: 'Current year activities', status: 'pending', count: 0, countLabel: 'events' },
-    { title: 'Historical Data', description: 'Previous and future years', status: 'pending', count: 0, countLabel: 'items' },
+    { title: `2025 Camps`, description: 'Latest year camps', status: 'pending', count: 0, countLabel: 'camps' },
+    { title: `2025 Art & Events`, description: 'Latest installations and activities', status: 'pending', count: 0, countLabel: 'items' },
+    { title: `2024 Data`, description: 'Complete previous year', status: 'pending', count: 0, countLabel: 'items' },
+    { title: `2023 Data`, description: 'Historical reference', status: 'pending', count: 0, countLabel: 'items' },
     { title: 'Enhancement', description: 'Processing relationships', status: 'pending' },
     { title: 'Optimization', description: 'Preparing for offline use', status: 'pending' }
   ]
@@ -230,15 +221,15 @@ const startDataSync = async () => {
         if (stage === 'camps_ready') {
           syncStatusText.value = '🏠 ' + message
           syncSteps.value[0].status = 'completed'
+          syncSteps.value[1].status = 'active'
         } else if (stage === 'art_complete') {
-          syncSteps.value[1].status = 'completed'
-          syncStatusText.value = '🎨 Current year art installations ready'
+          syncStatusText.value = '🎨 2025 art installations ready'
         } else if (stage === 'event_complete') {
-          syncSteps.value[2].status = 'completed'
-          syncStatusText.value = '🎉 Current year events ready'
+          syncSteps.value[1].status = 'completed'
+          syncStatusText.value = '🎉 2025 data complete'
           // Start working on historical data
-          syncSteps.value[3].status = 'active'
-          syncStatusText.value = '📚 Downloading historical data...'
+          syncSteps.value[2].status = 'active'
+          syncStatusText.value = '📚 Downloading 2024 data...'
         }
       },
       
@@ -253,26 +244,27 @@ const startDataSync = async () => {
         })
         
         // Calculate total counts from all years
-        let totalCamps = 0, totalArt = 0, totalEvents = 0, totalHistorical = 0
+        let total2025Camps = 0, total2025Other = 0, total2024 = 0, total2023 = 0
         
         Object.entries(results).forEach(([key, result]) => {
           if (result.success && result.count) {
-            if (key.includes('camp')) totalCamps += result.count
-            else if (key.includes('art')) totalArt += result.count  
-            else if (key.includes('event')) totalEvents += result.count
-        
-            // Count historical data (non-current year)
-            if (!key.includes(selectedYear.value)) {
-              totalHistorical += result.count || 0
+            if (key.includes('camp_2025')) {
+              total2025Camps += result.count
+            } else if (key.includes('2025')) {
+              total2025Other += result.count
+            } else if (key.includes('2024')) {
+              total2024 += result.count
+            } else if (key.includes('2023')) {
+              total2023 += result.count
             }
           }
         })
         
         // Update step counts
-        if (syncSteps.value[0]) syncSteps.value[0].count = totalCamps
-        if (syncSteps.value[1]) syncSteps.value[1].count = totalArt
-        if (syncSteps.value[2]) syncSteps.value[2].count = totalEvents
-        if (syncSteps.value[3]) syncSteps.value[3].count = totalHistorical
+        if (syncSteps.value[0]) syncSteps.value[0].count = total2025Camps
+        if (syncSteps.value[1]) syncSteps.value[1].count = total2025Other
+        if (syncSteps.value[2]) syncSteps.value[2].count = total2024
+        if (syncSteps.value[3]) syncSteps.value[3].count = total2023
         
         // Optimize service worker caches for better performance
         try {
@@ -314,8 +306,8 @@ const startDataSync = async () => {
     // Mark first step as active
     syncSteps.value[0].status = 'active'
     
-    // Start progressive sync
-    await progressiveSync.syncWithPriority(selectedYear.value)
+    // Start progressive sync with 2025 as priority year
+    await progressiveSync.syncWithPriority('2025')
     
   } catch (error) {
     showError(`Sync failed: ${error.message}`)
@@ -442,25 +434,6 @@ const completeOnboarding = () => {
   margin: 0;
 }
 
-.year-selector {
-  margin: 1.5rem 0;
-  text-align: center;
-}
-
-.year-selector label {
-  display: block;
-  margin-bottom: 0.5rem;
-  color: #ccc;
-}
-
-.year-selector select {
-  background: #2a2a2a;
-  border: 1px solid #444;
-  color: #fff;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  font-size: 1rem;
-}
 
 .sync-details {
   margin: 1.5rem 0;
@@ -610,38 +583,6 @@ const completeOnboarding = () => {
   min-height: 300px;
 }
 
-.year-selector-container {
-  margin: 1.5rem 0;
-  text-align: center;
-}
-
-.year-selector-container label {
-  display: block;
-  margin-bottom: 0.5rem;
-  color: #ccc;
-  font-weight: 500;
-}
-
-.year-selector-container select {
-  background: #2a2a2a;
-  border: 1px solid #444;
-  color: #fff;
-  padding: 0.75rem 1rem;
-  border-radius: 4px;
-  font-size: 1rem;
-  min-width: 120px;
-  transition: border-color 0.2s;
-}
-
-.year-selector-container select:focus {
-  outline: none;
-  border-color: #8B0000;
-}
-
-.year-selector-container select:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
 
 .completion {
   text-align: center;

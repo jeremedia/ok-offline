@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.1.1] - 2025-07-27
+
+### Added
+- **Auto-Reset Route** - `/reset-now` instantly clears all data and redirects to home
+  - Useful for development and testing
+  - No confirmation dialog for immediate reset
+  - Automatically triggers onboarding flow
+
+### Changed
+- **Onboarding Year Selection** - Removed confusing year selector from sync step
+  - Sync messaging now clearly states "all Burning Man data (2023-2025)"
+  - Progress steps show individual years being downloaded
+  - Default navigation year set to 2025 after onboarding
+  - Clearer understanding that all data is downloaded regardless
+
+### Fixed
+- **Service Worker Cache Busting** - Added version parameter to force updates
+- **CLAUDE.md Merge Conflict** - Fixed incomplete merge conflict marker
+
+### Developer
+- **Screenshot Handling Directive** - Added mandatory rule for analyzing screenshots in CLAUDE.md
+
 ## [3.1.0] - 2025-07-27
 
 ### Added

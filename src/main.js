@@ -99,6 +99,12 @@ const routes = [
     path: '/reset',
     name: 'reset',
     component: ResetView
+  },
+  {
+    path: '/reset-now',
+    name: 'reset-now',
+    component: ResetView,
+    props: { autoReset: true }
   }
 ]
 
@@ -115,7 +121,7 @@ createApp(App)
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     // Add cache-busting parameter to force service worker update
-    navigator.serviceWorker.register('/sw-enhanced.js?v=3.1.0')
+    navigator.serviceWorker.register('/sw-enhanced.js?v=3.1.1')
       .then(registration => {
         console.log('Enhanced ServiceWorker registration successful:', registration)
         
