@@ -3,9 +3,18 @@
  * Converts BRC addresses (e.g., "7:30 & E") to lat/lon coordinates
  */
 
-import { BRC_CENTER } from '../config'
+import { BRC_CENTER, APP_DEBUG } from '../config'
 import { getStreetLines, getGISYear } from '../services/gisData'
 import { getAvenueNameFromLetter, getAvenueLetterFromName, getAvenueDistance } from './avenueMapping'
+
+/**
+ * Conditional console logging - only logs in development or when debug is enabled
+ */
+function debugLog(...args) {
+  if (APP_DEBUG) {
+    console.log(...args)
+  }
+}
 
 // BRC dimensions and layout constants
 const BRC_CONFIG = {
@@ -137,11 +146,11 @@ export function parseBRCAddress(address) {
  * @returns {array|null} [latitude, longitude] or null if not found
  */
 function findStreetIntersectionFromGIS(street1, street2) {
-  console.log('🔍 Looking for GIS intersection:', street1, '&', street2)
+  debugLog('🔍 Looking for GIS intersection:', street1, '&', street2)
   const year = getGISYear()
   const streetData = getStreetLines(year)
   if (!streetData || !streetData.features) {
-    console.log('🔍 No street data available for year:', year)
+    debugLog('🔍 No street data available for year:', year)
     return null
   }
   
@@ -149,7 +158,7 @@ function findStreetIntersectionFromGIS(street1, street2) {
   const street1Name = isAvenueLetter(street1) ? getAvenueNameFromLetter(street1, year) : street1
   const street2Name = isAvenueLetter(street2) ? getAvenueNameFromLetter(street2, year) : street2
   
-  console.log('🔍 Converted names:', street1, '->', street1Name, ',', street2, '->', street2Name)
+  debugLog('🔍 Converted names:', street1, '->', street1Name, ',', street2, '->', street2Name)
   
   // Find features for both streets
   const features1 = []
@@ -171,14 +180,14 @@ function findStreetIntersectionFromGIS(street1, street2) {
     }
   })
   
-  console.log('🔍 Found features:', features1.length, 'for', street1Name, ',', features2.length, 'for', street2Name)
+  debugLog('🔍 Found features:', features1.length, 'for', street1Name, ',', features2.length, 'for', street2Name)
   
   if (features1.length === 0 || features2.length === 0) {
-    console.debug(`Street intersection not found: ${street1Name} (${street1}) & ${street2Name} (${street2})`)
+    debugLog(`Street intersection not found: ${street1Name} (${street1}) & ${street2Name} (${street2})`)
     return null
   }
   
-  console.log('🔍 Looking for intersection between', features1.length, 'segments of', street1Name, 'and', features2.length, 'segments of', street2Name)
+  debugLog('🔍 Looking for intersection between', features1.length, 'segments of', street1Name, 'and', features2.length, 'segments of', street2Name)
   
   // Find intersection points
   let closestIntersection = null
@@ -208,7 +217,7 @@ function findStreetIntersectionFromGIS(street1, street2) {
             
             const intersectionLatLon = [intersection[1], intersection[0]]
             allIntersections.push({coords: intersectionLatLon, distance: dist})
-            console.log('🔍 Found intersection at:', intersectionLatLon, 'Distance from center:', dist)
+            debugLog('🔍 Found intersection at:', intersectionLatLon, 'Distance from center:', dist)
             
             if (dist < minDistance) {
               minDistance = dist
@@ -220,9 +229,9 @@ function findStreetIntersectionFromGIS(street1, street2) {
     })
   })
   
-  console.log('🔍 All intersections found:', allIntersections.length)
+  debugLog('🔍 All intersections found:', allIntersections.length)
   allIntersections.forEach((int, i) => {
-    console.log(`  ${i}: ${int.coords} - ${int.distance}ft from center`)
+    debugLog(`  ${i}: ${int.coords} - ${int.distance}ft from center`)
   })
   
   // For radial & avenue intersections, we should validate the distance
@@ -235,7 +244,7 @@ function findStreetIntersectionFromGIS(street1, street2) {
     const expectedDistance = getAvenueDistance(avenueLetter, getGISYear())
     
     if (expectedDistance) {
-      console.log('🔍 Looking for intersection at expected distance:', expectedDistance, 'feet for avenue', avenueLetter)
+      debugLog('🔍 Looking for intersection at expected distance:', expectedDistance, 'feet for avenue', avenueLetter)
       
       // Find intersection closest to expected distance
       let bestIntersection = null
@@ -250,15 +259,15 @@ function findStreetIntersectionFromGIS(street1, street2) {
       })
       
       if (bestIntersection && minDistanceError < 300) { // Allow 300ft tolerance
-        console.log('🔍 Selected intersection at expected distance:', bestIntersection, 'Error:', minDistanceError, 'ft')
+        debugLog('🔍 Selected intersection at expected distance:', bestIntersection, 'Error:', minDistanceError, 'ft')
         return bestIntersection
       } else if (bestIntersection) {
-        console.log('🔍 Best intersection found but outside tolerance:', bestIntersection, 'Error:', minDistanceError, 'ft')
+        debugLog('🔍 Best intersection found but outside tolerance:', bestIntersection, 'Error:', minDistanceError, 'ft')
       }
     }
   }
   
-  console.log('🔍 Selected closest intersection:', closestIntersection)
+  debugLog('🔍 Selected closest intersection:', closestIntersection)
   
   return closestIntersection
 }
@@ -294,54 +303,54 @@ function lineSegmentIntersection(p1, p2, p3, p4) {
  * @returns {array|null} [latitude, longitude] or null if invalid
  */
 export function brcAddressToLatLon(address) {
-  console.log('🎯 brcAddressToLatLon called with:', address)
+  debugLog('🎯 brcAddressToLatLon called with:', address)
   
   const parsed = parseBRCAddress(address)
   if (!parsed) {
-    console.log('🎯 Failed to parse address')
+    debugLog('🎯 Failed to parse address')
     return null
   }
   
-  console.log('🎯 Parsed address:', parsed)
+  debugLog('🎯 Parsed address:', parsed)
   const { clock, avenue } = parsed
   
   // First try to find intersection using GIS data
   const gisIntersection = findStreetIntersectionFromGIS(clock, avenue)
   if (gisIntersection) {
-    console.log('🎯 Found GIS intersection:', gisIntersection)
+    debugLog('🎯 Found GIS intersection:', gisIntersection)
     return gisIntersection
   }
   
-  console.log('🎯 No GIS intersection found, falling back to calculation')
+  debugLog('🎯 No GIS intersection found, falling back to calculation')
   
   // Fall back to calculated method
   // Get the angle from center (in degrees from north)
   const clockAngle = BRC_CONFIG.clockAngles[clock]
   if (clockAngle === undefined) {
-    console.log('🎯 Invalid clock angle for:', clock)
+    debugLog('🎯 Invalid clock angle for:', clock)
     return null
   }
   
   // Get the distance from center (in feet)
   const year = getGISYear()
-  console.log('🎯 Using year:', year)
+  debugLog('🎯 Using year:', year)
   let distance = getAvenueDistance(avenue, year)
-  console.log('🎯 Avenue distance from mapping:', distance, 'for avenue:', avenue)
+  debugLog('🎯 Avenue distance from mapping:', distance, 'for avenue:', avenue)
   
   // Fall back to hardcoded values if avenue mapping not available
   if (distance === null) {
     distance = BRC_CONFIG.avenueDistances[avenue]
-    console.log('🎯 Falling back to hardcoded distance:', distance)
+    debugLog('🎯 Falling back to hardcoded distance:', distance)
   }
   
   if (distance === undefined || distance === null) {
-    console.log('🎯 No distance found for avenue:', avenue)
+    debugLog('🎯 No distance found for avenue:', avenue)
     return null
   }
   
   // Calculate the actual bearing including city orientation
   const bearing = (clockAngle + BRC_CONFIG.cityBearing) % 360
-  console.log('🎯 Clock angle:', clockAngle, 'City bearing:', BRC_CONFIG.cityBearing, 'Final bearing:', bearing)
+  debugLog('🎯 Clock angle:', clockAngle, 'City bearing:', BRC_CONFIG.cityBearing, 'Final bearing:', bearing)
   
   // Convert bearing to radians
   const bearingRad = bearing * Math.PI / 180
@@ -358,7 +367,7 @@ export function brcAddressToLatLon(address) {
   const lat = BRC_CONFIG.center[0] + latOffset
   const lon = BRC_CONFIG.center[1] + lonOffset
   
-  console.log('🎯 Final coordinates:', [lat, lon])
+  debugLog('🎯 Final coordinates:', [lat, lon])
   
   return [lat, lon]
 }
@@ -428,7 +437,7 @@ export function calculateCityAlignmentAngle() {
   
   const rotationAngle = -45
   
-  console.log('🔥 BRC Alignment: -45° rotation aligns gate to bottom, temple to top')
+  debugLog('🔥 BRC Alignment: -45° rotation aligns gate to bottom, temple to top')
   
   return rotationAngle
 }
