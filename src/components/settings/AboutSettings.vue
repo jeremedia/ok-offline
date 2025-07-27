@@ -143,6 +143,42 @@ const showReleaseNotes = ref(false)
 // Release notes data
 const releaseNotes = [
   {
+    version: '3.6.0',
+    date: '2025-07-27',
+    added: [
+      '🎨 Unified List Controls - Professional gestalt-coherent control system',
+      '🔍 Integrated search, sort, and filter controls with real-time result counting',
+      '📱 Mobile-optimized detail pages with consistent 8px spacing rhythm',
+      '⭐ Enlarged favorite star (3rem) for better touch interaction',
+      '🎯 Command+click to toggle all groups (like Finder)',
+      '📊 Dynamic result counts in list headers and filter summary',
+      '🔄 Smart clear button that appears only when filters are active'
+    ],
+    changed: [
+      '🏗️ Complete redesign of list control interface for camps, art, and events',
+      '📐 Detail view layout with improved visual hierarchy and gestalt principles',
+      '🎨 Safari-specific fixes for settings tab rendering',
+      '📱 Groups now collapsed by default for better mobile performance',
+      '🔧 Global box-sizing: border-box for consistent layout calculations',
+      '💫 Favorite star moved to right side of detail headers',
+      '📏 Consistent spacing using 8px rhythm throughout detail views'
+    ],
+    fixed: [
+      '🦁 Safari zero-height tab buttons with negative margin removal',
+      '📱 Horizontal scrolling issues in settings and content areas',
+      '🎯 Tab bar centering and cropping on mobile devices',
+      '📐 Detail page overflow and layout issues',
+      '🔍 Search and filter controls alignment and spacing',
+      '📱 Mobile footer redundancy removed'
+    ],
+    technical: [
+      '🧩 New ListControls.vue component for unified control interface',
+      '🎨 CSS architecture improvements with consistent spacing system',
+      '📦 Reduced component coupling through props/emits pattern',
+      '🔧 Safari flexbox compatibility improvements'
+    ]
+  },
+  {
     version: '3.2.0',
     date: '2025-07-27',
     added: [
