@@ -169,22 +169,15 @@ const setActiveTab = (tab) => {
   border: none;
   color: #999;
   cursor: pointer;
-  padding: 0.75rem 1.5rem;
+  padding: 1rem 1.5rem;
   font-size: 1rem;
-  font-family: 'Berkeley Mono', 'SF Mono', 'Monaco', 'Consolas', monospace;
+  font-family: 'Berkeley Mono', monospace;
   white-space: nowrap;
   transition: all 0.2s;
   position: relative;
-  /* Safari fixes - force explicit height and layout */
-  height: auto;
-  min-height: 44px;
-  line-height: 1.2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  /* Remove all negative positioning for Safari */
   border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  text-transform: uppercase;
 }
 
 .tab-button:hover {
@@ -275,7 +268,7 @@ const setActiveTab = (tab) => {
   }
   
   .tab-button {
-    padding: 0.75rem 1rem;
+    padding: 0.75rem 0.75rem;
     font-size: 0.8rem;
     min-height: 44px;
     min-width: max-content; /* Ensure buttons don't shrink */

@@ -143,6 +143,74 @@ const showReleaseNotes = ref(false)
 // Release notes data
 const releaseNotes = [
   {
+    version: '3.7.0',
+    date: '2025-07-27',
+    added: [
+      '🎯 Precise Camp Location Accuracy - Navigation-ready positioning system',
+      '📍 GIS intersection finding algorithm places camps at exact street corners',
+      '🗺️ Dynamic avenue mapping for year-specific naming themes (2024: wonder theme, 2025: sci-fi authors)',
+      '📏 Accurate avenue distances extracted from GIS data (corrected errors up to 536 feet!)',
+      '🎨 Custom Map Visualization with distinctive red streets on black background',
+      '🏷️ Street name labels for easy orientation and navigation',
+      '🧭 Smart Basemap Management - Year-specific map handling prevents confusion',
+      '🔇 Conditional debug logging system for clean production console output'
+    ],
+    changed: [
+      '🎯 Geocoding system now prioritizes GIS intersection finding over calculated positions',
+      '🗺️ Map styling dynamically adapts based on year and basemap availability',
+      '📍 DetailView includes GIS street layer initialization for accurate positioning',
+      '🔧 Debug logging only enabled in development mode or with VITE_DEBUG=true'
+    ],
+    fixed: [
+      '📍 Camp locations now appear at exact street intersections instead of approximate positions',
+      '🗺️ Eliminated confusion from basemap showing wrong year\'s street names',
+      '📏 Corrected hardcoded avenue distances with accurate GIS measurements from official data',
+      '🔇 Reduced console noise in production while preserving detailed debugging information'
+    ],
+    technical: [
+      '🧩 New avenueMapping.js utility for year-specific street name translation',
+      '🔍 Enhanced geocoding.js with GIS intersection finding and distance validation',
+      '🎨 Custom street rendering system for year-appropriate visualization',
+      '🔧 APP_DEBUG configuration system for conditional logging'
+    ]
+  },
+  {
+    version: '3.6.0',
+    date: '2025-07-27',
+    added: [
+      '🎨 Unified List Controls - Professional gestalt-coherent control system',
+      '🔍 Integrated search, sort, and filter controls with real-time result counting',
+      '📱 Mobile-optimized detail pages with consistent 8px spacing rhythm',
+      '⭐ Enlarged favorite star (3rem) for better touch interaction',
+      '🎯 Command+click to toggle all groups (like Finder)',
+      '📊 Dynamic result counts in list headers and filter summary',
+      '🔄 Smart clear button that appears only when filters are active'
+    ],
+    changed: [
+      '🏗️ Complete redesign of list control interface for camps, art, and events',
+      '📐 Detail view layout with improved visual hierarchy and gestalt principles',
+      '🎨 Safari-specific fixes for settings tab rendering',
+      '📱 Groups now collapsed by default for better mobile performance',
+      '🔧 Global box-sizing: border-box for consistent layout calculations',
+      '💫 Favorite star moved to right side of detail headers',
+      '📏 Consistent spacing using 8px rhythm throughout detail views'
+    ],
+    fixed: [
+      '🦁 Safari zero-height tab buttons with negative margin removal',
+      '📱 Horizontal scrolling issues in settings and content areas',
+      '🎯 Tab bar centering and cropping on mobile devices',
+      '📐 Detail page overflow and layout issues',
+      '🔍 Search and filter controls alignment and spacing',
+      '📱 Mobile footer redundancy removed'
+    ],
+    technical: [
+      '🧩 New ListControls.vue component for unified control interface',
+      '🎨 CSS architecture improvements with consistent spacing system',
+      '📦 Reduced component coupling through props/emits pattern',
+      '🔧 Safari flexbox compatibility improvements'
+    ]
+  },
+  {
     version: '3.2.0',
     date: '2025-07-27',
     added: [
