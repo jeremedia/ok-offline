@@ -114,7 +114,8 @@ createApp(App)
 // Register enhanced service worker for better onboarding experience
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw-enhanced.js')
+    // Add cache-busting parameter to force service worker update
+    navigator.serviceWorker.register('/sw-enhanced.js?v=3.1.0')
       .then(registration => {
         console.log('Enhanced ServiceWorker registration successful:', registration)
         
