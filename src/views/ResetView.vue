@@ -38,6 +38,14 @@
             {{ resetting ? 'Resetting...' : 'Full Reset' }}
           </button>
         </div>
+
+        <div class="reset-card danger">
+          <h3>🏗️ PWA Test Reset</h3>
+          <p>Complete wipe for testing fresh PWA installation (unregisters service workers)</p>
+          <button @click="pwaTestReset" class="reset-btn danger" :disabled="resetting">
+            {{ resetting ? 'Resetting...' : 'PWA Test Reset' }}
+          </button>
+        </div>
       </div>
 
       <div class="current-status">
@@ -213,6 +221,15 @@ const clearServiceWorkerCache = async () => {
   }
 }
 
+const pwaTestReset = async () => {
+  if (!confirm('This will completely wipe the app for PWA testing. Continue?')) {
+    return
+  }
+  
+  // Use the enhanced fullReset function
+  await fullReset(true)
+}
+
 const fullReset = async (skipConfirm = false) => {
   if (!skipConfirm && !confirm('Are you sure you want to reset everything? This will clear all data and preferences.')) {
     return
@@ -221,44 +238,102 @@ const fullReset = async (skipConfirm = false) => {
   resetting.value = true
   
   try {
-    // Clear onboarding
-    localStorage.removeItem('onboarding_completed')
+    addLogEntry('Starting full reset...', 'info')
     
-    // Clear tour flags
-    const tourKeys = ['general', 'map', 'list', 'search']
-    tourKeys.forEach(tour => {
-      localStorage.removeItem(`tour_completed_${tour}`)
+    // 1. Clear ALL localStorage items
+    addLogEntry('Clearing localStorage...', 'info')
+    localStorage.clear()
+    
+    // 2. Clear ALL sessionStorage items
+    addLogEntry('Clearing sessionStorage...', 'info')
+    sessionStorage.clear()
+    
+    // 3. Clear ALL IndexedDB databases
+    addLogEntry('Clearing IndexedDB...', 'info')
+    if ('indexedDB' in window) {
+      // Get all databases (this is non-standard but works in most browsers)
+      const databases = await indexedDB.databases?.() || []
+      for (const db of databases) {
+        await indexedDB.deleteDatabase(db.name)
+        addLogEntry(`Deleted database: ${db.name}`, 'info')
+      }
+      
+      // Also try to delete known database names as fallback
+      const knownDatabases = ['bm2025-db', 'bm2024-db', 'bm2023-db']
+      for (const dbName of knownDatabases) {
+        try {
+          await indexedDB.deleteDatabase(dbName)
+        } catch (e) {
+          // Database might not exist, that's ok
+        }
+      }
+    }
+    
+    // 4. Clear ALL cookies
+    addLogEntry('Clearing cookies...', 'info')
+    document.cookie.split(";").forEach(cookie => {
+      const eqPos = cookie.indexOf("=")
+      const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim()
+      // Clear cookie for current path and domain variations
+      document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`
+      document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=${window.location.hostname}`
+      document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=.${window.location.hostname}`
     })
     
-    // Clear cached data
-    await clearCache()
-    
-    // Clear sync metadata for all years
-    const years = ['2023', '2024', '2025']
-    await Promise.all(years.map(year => clearYear(year)))
-    
-    // Clear user preferences
-    localStorage.removeItem('selectedYear')
-    localStorage.removeItem('favorites_camp')
-    localStorage.removeItem('favorites_art')
-    localStorage.removeItem('favorites_event')
-    localStorage.removeItem('schedule')
-    localStorage.removeItem('emergency_contacts')
-    localStorage.removeItem('visits_camp')
-    localStorage.removeItem('visits_art')
-    localStorage.removeItem('visits_event')
-    
-    // Clear service worker caches
+    // 5. Clear ALL service worker caches
+    addLogEntry('Clearing service worker caches...', 'info')
     const cacheNames = await caches.keys()
-    await Promise.all(cacheNames.map(name => caches.delete(name)))
+    await Promise.all(cacheNames.map(name => {
+      addLogEntry(`Deleting cache: ${name}`, 'info')
+      return caches.delete(name)
+    }))
     
-    addLogEntry('Full reset completed', 'success')
-    showSuccess('Full reset complete - refresh to start fresh')
+    // 6. Unregister ALL service workers
+    addLogEntry('Unregistering service workers...', 'info')
+    if ('serviceWorker' in navigator) {
+      const registrations = await navigator.serviceWorker.getRegistrations()
+      for (const registration of registrations) {
+        await registration.unregister()
+        addLogEntry('Service worker unregistered', 'success')
+      }
+    }
     
-    await refreshStatus()
+    // 7. Clear WebSQL (legacy, but just in case)
+    if (window.openDatabase) {
+      try {
+        const db = window.openDatabase('', '', '', '')
+        db.transaction(tx => {
+          tx.executeSql('DROP TABLE IF EXISTS data')
+        })
+      } catch (e) {
+        // WebSQL might not be available or accessible
+      }
+    }
+    
+    // 8. Request persistent storage to be cleared (if granted)
+    if ('storage' in navigator && 'persist' in navigator.storage) {
+      try {
+        const isPersisted = await navigator.storage.persisted()
+        if (isPersisted) {
+          addLogEntry('Requesting storage persistence removal...', 'info')
+          // Note: We can't force unpersist, but we've cleared the data
+        }
+      } catch (e) {
+        // Storage persistence API might not be available
+      }
+    }
+    
+    addLogEntry('Full reset completed successfully!', 'success')
+    showSuccess('Complete reset done! The page will reload to apply all changes.')
+    
+    // Force reload after a short delay to ensure everything is cleared
+    setTimeout(() => {
+      window.location.reload(true) // Hard reload
+    }, 2000)
+    
   } catch (error) {
     addLogEntry(`Full reset failed: ${error.message}`, 'error')
-    showError('Full reset failed')
+    showError('Full reset failed - please try again')
   } finally {
     resetting.value = false
   }
@@ -376,12 +451,12 @@ onMounted(async () => {
 }
 
 .reset-card.danger {
-  border-color: #ff6b6b;
+  border-color: #8B0000;
 }
 
 .reset-card.danger:hover {
-  border-color: #ff5252;
-  background: rgba(255, 107, 107, 0.1);
+  border-color: #a00;
+  background: rgba(139, 0, 0, 0.1);
 }
 
 .reset-card h3 {
@@ -433,12 +508,12 @@ onMounted(async () => {
 }
 
 .reset-btn.danger {
-  background: #ff6b6b;
+  background: #8B0000;
   color: #fff;
 }
 
 .reset-btn.danger:hover:not(:disabled) {
-  background: #ff5252;
+  background: #a00;
 }
 
 .current-status {
