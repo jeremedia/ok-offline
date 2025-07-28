@@ -129,9 +129,17 @@ const router = createRouter({
   routes
 })
 
-createApp(App)
-  .use(router)
-  .mount('#app')
+const app = createApp(App)
+app.use(router)
+app.mount('#app')
+
+// Hide the initial loader once Vue app is mounted
+app.config.globalProperties.$nextTick(() => {
+  window.updateLoadingStatus('App ready!', 100)
+  setTimeout(() => {
+    window.hideInitialLoader()
+  }, 500)
+})
 
 // Register enhanced service worker for better onboarding experience
 if ('serviceWorker' in navigator) {
