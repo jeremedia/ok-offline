@@ -1,4 +1,4 @@
-import { createApp } from 'vue'
+import { createApp, nextTick } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import App from './App.vue'
 
@@ -134,7 +134,7 @@ app.use(router)
 app.mount('#app')
 
 // Hide the initial loader once Vue app is mounted
-app.config.globalProperties.$nextTick(() => {
+nextTick(() => {
   window.updateLoadingStatus('App ready!', 100)
   setTimeout(() => {
     window.hideInitialLoader()
