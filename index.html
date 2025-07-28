@@ -127,6 +127,16 @@
       transition: width 0.3s ease;
       border-radius: 2px;
     }
+    
+    .loader-version {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 11px;
+      color: #555;
+      font-family: 'Berkeley Mono', 'SF Mono', Monaco, monospace;
+    }
   </style>
 </head>
 <body>
@@ -142,6 +152,7 @@
         <div class="loader-progress-bar" id="progress-bar"></div>
       </div>
     </div>
+    <div class="loader-version" id="version-display">v{{APP_VERSION}}</div>
   </div>
   
   <div id="app"></div>

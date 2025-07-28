@@ -8,6 +8,12 @@ export default defineConfig({
   plugins: [
     vue(),
     {
+      name: 'html-transform',
+      transformIndexHtml(html) {
+        return html.replace('{{APP_VERSION}}', version)
+      }
+    },
+    {
       name: 'copy-leaflet-images',
       writeBundle() {
         // Copy Leaflet images to dist
