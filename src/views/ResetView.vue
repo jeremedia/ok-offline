@@ -222,12 +222,20 @@ const clearServiceWorkerCache = async () => {
 }
 
 const pwaTestReset = async () => {
+  console.log('PWA Test Reset clicked')
   if (!confirm('This will completely wipe the app for PWA testing. Continue?')) {
+    console.log('Reset cancelled by user')
     return
   }
   
-  // Use the enhanced fullReset function
-  await fullReset(true)
+  console.log('Starting PWA test reset...')
+  try {
+    // Use the enhanced fullReset function
+    await fullReset(true)
+  } catch (error) {
+    console.error('PWA test reset error:', error)
+    resetting.value = false
+  }
 }
 
 const fullReset = async (skipConfirm = false) => {
@@ -250,9 +258,10 @@ const fullReset = async (skipConfirm = false) => {
     
     // 3. Clear ALL IndexedDB databases
     addLogEntry('Clearing IndexedDB...', 'info')
-    if ('indexedDB' in window) {
-      // The databases() method is not widely supported, so we'll use known names
-      const knownDatabases = ['bm2025-db', 'bm2024-db', 'bm2023-db']
+    try {
+      if ('indexedDB' in window) {
+        // The databases() method is not widely supported, so we'll use known names
+        const knownDatabases = ['bm2025-db', 'bm2024-db', 'bm2023-db']
       
       // If databases() is available, use it
       if (indexedDB.databases) {
@@ -279,15 +288,32 @@ const fullReset = async (skipConfirm = false) => {
             }
             deleteReq.onerror = () => {
               // Database might not exist, that's ok
+              addLogEntry(`Database ${dbName} not found or already deleted`, 'info')
               resolve()
             }
+            deleteReq.onblocked = () => {
+              // Database is blocked, but we'll continue anyway
+              addLogEntry(`Database ${dbName} blocked, continuing...`, 'info')
+              resolve()
+            }
+            // Add timeout to prevent hanging
+            setTimeout(() => {
+              addLogEntry(`Database ${dbName} deletion timed out, continuing...`, 'info')
+              resolve()
+            }, 2000)
           })
         } catch (e) {
           console.error(`Error deleting database ${dbName}:`, e)
+          addLogEntry(`Error with ${dbName}: ${e.message}`, 'error')
           // Continue with other databases
         }
       }
+    } catch (e) {
+      console.error('IndexedDB clearing error:', e)
+      addLogEntry(`IndexedDB error: ${e.message}, continuing...`, 'error')
     }
+    
+    addLogEntry('IndexedDB clearing completed', 'success')
     
     // 4. Clear ALL cookies
     addLogEntry('Clearing cookies...', 'info')
