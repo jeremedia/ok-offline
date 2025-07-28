@@ -308,6 +308,7 @@ const fullReset = async (skipConfirm = false) => {
           // Continue with other databases
         }
       }
+      }
     } catch (e) {
       console.error('IndexedDB clearing error:', e)
       addLogEntry(`IndexedDB error: ${e.message}, continuing...`, 'error')
