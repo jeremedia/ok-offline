@@ -43,12 +43,16 @@ ok-offline/
 │   │   ├── MapView.vue         # Interactive map with camps/art/events
 │   │   ├── ListView.vue        # Sortable/filterable lists
 │   │   ├── DetailView.vue      # Item details with map and events
-│   │   ├── SearchView.vue      # Global search across all types
+│   │   ├── SearchView.vue      # AI-powered search with 3 modes
 │   │   ├── ScheduleView.vue    # Personal schedule builder
 │   │   ├── SettingsView.vue    # Data sync and app settings
 │   │   ├── EmergencyView.vue   # Emergency contacts & medical info
 │   │   ├── DustForecastView.vue # Weather and dust conditions
 │   │   └── MapSettingsView.vue # GIS data and map information
+│   ├── components/search/      # Search UI components
+│   │   ├── SearchModeSelector.vue  # Keyword/Semantic/Smart modes
+│   │   ├── SearchResultItem.vue    # Result display with scores
+│   │   └── SearchSuggestions.vue   # Autocomplete suggestions
 │   ├── services/
 │   │   ├── storage.js          # IndexedDB operations
 │   │   ├── dataSync.js         # API sync with enrichment
@@ -56,7 +60,9 @@ ok-offline/
 │   │   ├── favorites.js        # Favorites management
 │   │   ├── schedule.js         # Schedule management
 │   │   ├── visits.js           # Visit tracking and notes
-│   │   └── gisData.js          # GIS data loading and management
+│   │   ├── gisData.js          # GIS data loading and management
+│   │   ├── vectorSearchService.js  # AI search API integration
+│   │   └── weatherServiceCombined.js # Weather API integration
 │   ├── composables/
 │   │   ├── useGeolocation.js   # Location services
 │   │   └── useKeyboardShortcuts.js # Keyboard navigation
@@ -190,6 +196,19 @@ ok-offline/
 - Technical details about coordinate systems and data sources
 - Interactive controls for all GIS layers
 
+### 15. **AI-Powered Vector Search (Live in Production ✅)**
+- Three search modes available at https://offline.oknotok.com:
+  - **Keyword Mode**: Traditional text search (works offline)
+  - **Semantic Mode**: AI understands meaning and context
+  - **Smart Mode**: Hybrid approach combining both
+- OpenAI embeddings with 750+ indexed items
+- Similarity scores show match quality
+- 24-hour result caching for performance
+- URL parameters for shareable searches (?q=query&mode=semantic)
+- Autocomplete suggestions while typing
+- Graceful offline fallback to keyword search
+- Production response time: 200-400ms
+
 ## Data Flow
 
 ### 1. **API Integration**
@@ -257,8 +276,8 @@ ok-offline/
 # Install dependencies
 npm install
 
-# Start dev server on port 8000
-npm run dev
+# Start dev server on port 8005 with Tailscale IP
+npm run dev -- --host 0.0.0.0 --port 8005
 
 # Build for production
 npm run build
@@ -306,11 +325,11 @@ Database: bm2025-db
 
 ## Development Server
 
-**IMPORTANT**: The development server is always running on port 8000.
-- **URL**: http://localhost:8000
+**IMPORTANT**: The development server runs on port 8005 with Tailscale IP.
+- **URL**: http://100.104.170.10:8005
 - **Status**: Always available during development
 - **No need to start**: The server is persistent and ready to use
-- If you need to restart: `npm run dev` (will use port 8000 or find next available)
+- If you need to restart: `npm run dev -- --host 0.0.0.0 --port 8005`
 
 ## Common Development Tasks
 
@@ -547,3 +566,31 @@ import { logScreenshotReminder, documentVisualTest } from './utils/screenshotHel
 ```
 
 **IMPORTANT**: Never claim to "see" a screenshot without reading the file first. Be explicit when visual verification is needed.
+
+## Current Project Status (July 2025)
+
+### ✅ Completed Features
+- **Core PWA**: v3.9.1 in production at https://offline.oknotok.com
+- **Offline Functionality**: Full offline support with IndexedDB
+- **Map & GIS**: Interactive maps with complete BRC data layers
+- **Weather Integration**: Apple WeatherKit + OpenWeatherMap fallback
+- **Vector Search**: AI-powered search with 3 modes (live in production)
+- **Data Management**: Favorites, visits, personal schedule
+- **Emergency Features**: Local storage for critical info
+- **Mobile UX**: Touch-optimized with recent improvements
+
+### 🔧 Development Environment
+- **Frontend Dev**: http://100.104.170.10:8005 (Tailscale IP)
+- **API Dev**: http://100.104.170.10:3555/api/v1/ (Tailscale IP)
+- **Production**: https://offline.oknotok.com
+
+### 📋 Known Issues
+- Double-scrolling on some mobile devices (fix in progress)
+- API currently proxied through frontend (dedicated hosting planned)
+- Safari requires manual SW version bump for updates
+
+### 🚀 Next Priorities
+1. **API Production Deployment** - Move from proxy to dedicated hosting
+2. **Mobile UX Fixes** - Resolve double-scrolling issue
+3. **Play Wisdom Feature** - Community content sharing (design phase)
+4. **Performance Monitoring** - Track vector search usage and metrics
