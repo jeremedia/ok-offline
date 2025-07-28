@@ -142,7 +142,7 @@ export async function getFromCache(type, year) {
         request.onsuccess = () => {
           const results = request.result
           if (results.length > 0) {
-            console.log(`Retrieved ${results.length} cached ${type}s for year ${year}`)
+            // console.log(`Retrieved ${results.length} cached ${type}s for year ${year}`)
           }
           resolve(results)
         }
