@@ -134,11 +134,17 @@ app.use(router)
 app.mount('#app')
 
 // Hide the initial loader once Vue app is mounted
+// But delay slightly more to ensure smooth transition
 nextTick(() => {
   window.updateLoadingStatus('App ready!', 100)
+  // Check if we need to show onboarding
+  const onboardingCompleted = localStorage.getItem('onboarding_completed')
+  const message = onboardingCompleted ? 'Loading app...' : 'Preparing first-time setup...'
+  window.updateLoadingStatus(message, 100)
+  
   setTimeout(() => {
     window.hideInitialLoader()
-  }, 500)
+  }, 1000) // Increased delay for smoother transition
 })
 
 // Register enhanced service worker for better onboarding experience

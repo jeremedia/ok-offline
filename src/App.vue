@@ -263,8 +263,10 @@ onMounted(async () => {
   await nextTick()
   setToastRef(toastRef)
   
-  // Check if user needs onboarding before setting up the rest
-  checkOnboardingStatus()
+  // Delay onboarding check slightly to ensure loading screen shows first
+  setTimeout(() => {
+    checkOnboardingStatus()
+  }, 100)
   
   window.addEventListener('online', updateOnlineStatus)
   window.addEventListener('offline', updateOnlineStatus)
