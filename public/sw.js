@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ok-offline-v12'; // Enhanced tile caching for BRC
+const CACHE_NAME = 'ok-offline-v13'; // Global location state management
 const urlsToCache = [
   // Core app files
   '/',

@@ -158,6 +158,37 @@ onMounted(() => {
 // Release notes data
 const releaseNotes = [
   {
+    version: '3.10.0',
+    date: '2025-07-28',
+    added: [
+      '🌍 Global Location Data State Management - Smart handling of Burning Man\'s location data policy',
+      '📍 Per-year location data availability tracking with automatic detection during sync',
+      '🔒 Policy enforcement for 2025 data (hidden until 3 weeks before event)',
+      '✨ Enhanced Progressive Sync UI with live count updates per year',
+      '📊 Consolidated sync steps from 7 to 6 for clearer progress visualization',
+      '📅 Conditional "locations TBA 3 weeks before event" messages throughout UI',
+      '🎯 Location policy compliance respecting Burning Man API data release schedule'
+    ],
+    changed: [
+      '🔄 Fixed year loading order to prioritize 2025 → 2024 → 2023',
+      '🏗️ Sync architecture now integrates with global state during data processing',
+      '📝 Better stage management with clear start/complete events for each year'
+    ],
+    fixed: [
+      '🎨 ProgressiveLoader visual hierarchy with proper step number sizing',
+      '🎯 Step numbers now fill full height with borders touching top/bottom',
+      '🎨 Corrected count label colors from gold to secondary text (#ccc)',
+      '⚡ Improved transition timing from 0.3s to 0.2s for snappier feel',
+      '🔇 Silenced all tile download console logs for cleaner development'
+    ],
+    technical: [
+      '🏗️ Created globalState.js with Vue 3 reactive state management',
+      '📚 Added comprehensive documentation for state management patterns',
+      '🔧 Enhanced architecture documentation with state layer details',
+      '💾 Persistent state storage across sessions with localStorage'
+    ]
+  },
+  {
     version: '3.8.1',
     date: '2025-07-27',
     fixed: [

@@ -7,6 +7,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.10.0] - 2025-07-28
+
+### Added
+- **Global Location Data State Management** - Smart handling of Burning Man's location data policy
+  - Per-year location data availability tracking
+  - Automatic detection of location data during sync process
+  - Policy enforcement for 2025 data (hidden until 3 weeks before event)
+  - Development environment always shows locations if available
+  - Helper functions for easy component integration
+  - Persistent state storage across sessions
+- **Enhanced Progressive Sync UI** - Improved visual feedback during data synchronization
+  - Consolidated sync steps from 7 to 6 for clearer progress
+  - Live count updates showing items downloaded per year
+  - Fixed year loading order (2025 → 2024 → 2023)
+  - Conditional "locations TBA 3 weeks before event" messages
+  - Improved visual hierarchy with better step indicators
+- **Location Policy Compliance** - Respects Burning Man API data release schedule
+  - Shows location TBA message on sync screen when data unavailable
+  - Displays notice on completion screen about upcoming location release
+  - Consistent messaging throughout the application
+  - Smart date-based visibility rules for production
+
+### Fixed
+- **ProgressiveLoader Visual Issues** - Professional UI polish
+  - Step numbers now fill full height with borders touching top/bottom
+  - Corrected visual weight between step numbers and item counts
+  - Fixed count label colors from gold (#FFD700) to secondary text (#ccc)
+  - Improved transition timing from 0.3s to 0.2s for snappier feel
+  - Better spacing and alignment of progress indicators
+- **Console Noise** - Cleaner development experience
+  - Silenced all tile download console logs
+  - Reduced verbose logging during sync process
+
+### Changed
+- **Sync Architecture** - More intelligent data loading
+  - Year-aware sync callbacks with proper event emission
+  - Integration with global state during data processing
+  - Better stage management with clear start/complete events
+
+### Technical
+- Created `globalState.js` with Vue 3 reactive state management
+- Added comprehensive documentation for state management patterns
+- Enhanced architecture documentation with state layer details
+- Updated implementation guides for all major components
+
 ### Added
 - **Vector Search Integration** - AI-powered semantic search capabilities
   - Intelligent semantic search using OpenAI embeddings and pgvector database
