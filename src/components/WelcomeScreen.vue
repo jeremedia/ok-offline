@@ -65,7 +65,7 @@
           :show-actions="true"
           :allow-cancel="false"
           :allow-skip="false"
-          full-screen="false"
+          :full-screen="false"
         >
         </ProgressiveLoader>
 
