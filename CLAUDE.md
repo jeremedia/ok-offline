@@ -257,8 +257,8 @@ ok-offline/
 # Install dependencies
 npm install
 
-# Start dev server on port 8000
-npm run dev
+# Start dev server on port 8005 with Tailscale IP
+npm run dev -- --host 0.0.0.0 --port 8005
 
 # Build for production
 npm run build
@@ -306,11 +306,11 @@ Database: bm2025-db
 
 ## Development Server
 
-**IMPORTANT**: The development server is always running on port 8000.
-- **URL**: http://localhost:8000
+**IMPORTANT**: The development server runs on port 8005 with Tailscale IP.
+- **URL**: http://100.104.170.10:8005
 - **Status**: Always available during development
 - **No need to start**: The server is persistent and ready to use
-- If you need to restart: `npm run dev` (will use port 8000 or find next available)
+- If you need to restart: `npm run dev -- --host 0.0.0.0 --port 8005`
 
 ## Common Development Tasks
 
