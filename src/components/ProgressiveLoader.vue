@@ -61,6 +61,7 @@
                 }
               ]"
             >
+              <div class="step-number">{{ index + 1 }}</div>
               <div class="step-icon">
                 <span v-if="step.status === 'completed'">✅</span>
                 <span v-else-if="step.status === 'error'">❌</span>
@@ -234,7 +235,6 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
 }
 
 .progressive-loader.full-screen {
@@ -258,15 +258,21 @@ onUnmounted(() => {
 }
 
 .loader-content {
-  background: #1a1a1a;
-  border: 2px solid #444;
-  border-radius: 8px;
-  padding: 2rem;
+  background: transparent;
+  padding: 0;
   max-width: 500px;
   width: 100%;
   text-align: center;
   position: relative;
   z-index: 1;
+}
+
+/* Only add styling when in full-screen mode */
+.progressive-loader.full-screen .loader-content {
+  background: #1a1a1a;
+  border: 2px solid #444;
+  border-radius: 8px;
+  padding: 2rem;
 }
 
 /* Loading animations */
@@ -393,8 +399,9 @@ onUnmounted(() => {
 
 .loader-title {
   color: #FFD700;
-  margin: 0 0 0.5rem 0;
-  font-size: 1.2rem;
+  margin: 0 0 0.75rem 0;
+  font-size: 1.4rem;
+  font-weight: 600;
   text-align: center;
 }
 
@@ -450,13 +457,15 @@ onUnmounted(() => {
 
 .step-item {
   display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem;
+  align-items: stretch;
+  gap: 0;
+  padding: 0;
   background: #2a2a2a;
   border-radius: 6px;
   border-left: 3px solid #444;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
+  overflow: hidden;
+  min-height: 3rem;
 }
 
 .step-item.step-completed {
@@ -474,32 +483,78 @@ onUnmounted(() => {
   background: rgba(244, 67, 54, 0.1);
 }
 
-.step-icon {
+.step-number {
+  width: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.3);
+  border-right: 1px solid #444;
+  color: #666;
+  font-weight: bold;
   font-size: 1.1rem;
   flex-shrink: 0;
+}
+
+.step-item.step-active .step-number {
+  color: #FFD700;
+  background: rgba(255, 215, 0, 0.1);
+  border-right-color: #FFD700;
+}
+
+.step-item.step-completed .step-number {
+  color: #4CAF50;
+  background: rgba(76, 175, 80, 0.1);
+  border-right-color: #4CAF50;
+}
+
+.step-item.step-error .step-number {
+  color: #f44336;
+  background: rgba(244, 67, 54, 0.1);
+  border-right-color: #f44336;
+}
+
+.step-icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+  padding: 0 1rem;
+  min-width: 2.5rem;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .step-content {
   flex: 1;
   text-align: left;
+  padding: 0.75rem 1rem 0.75rem 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .step-title {
   color: #fff;
-  font-weight: 500;
+  font-weight: 600;
   margin-bottom: 0.25rem;
+  font-size: 1rem;
 }
 
 .step-description {
   color: #999;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
+  line-height: 1.4;
 }
 
 .step-count {
-  color: #FFD700;
+  color: #ccc;
   font-size: 0.9rem;
-  font-weight: bold;
+  font-weight: normal;
   flex-shrink: 0;
+  padding-right: 1rem;
+  display: flex;
+  align-items: center;
 }
 
 /* Tips */
@@ -513,19 +568,20 @@ onUnmounted(() => {
 
 .current-tip {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  align-items: flex-start;
+  gap: 0.75rem;
   color: #ccc;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
 }
 
 .tip-icon {
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   flex-shrink: 0;
+  margin-top: -2px;
 }
 
 .tip-text {
-  line-height: 1.4;
+  line-height: 1.5;
 }
 
 /* Actions */
@@ -573,7 +629,8 @@ onUnmounted(() => {
 
 /* Responsive */
 @media (max-width: 768px) {
-  .loader-content {
+  /* Only add padding/margin in full-screen mode */
+  .progressive-loader.full-screen .loader-content {
     padding: 1.5rem;
     margin: 1rem;
   }

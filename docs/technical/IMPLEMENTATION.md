@@ -274,7 +274,27 @@ Previously, views would refresh data in background. This has been removed to ens
 
 ## State Management
 
-### Global State (App.vue)
+### Global State Store (globalState.js)
+The application uses a centralized store for location data visibility:
+
+```javascript
+import { shouldShowLocation, canShowLocations } from '@/stores/globalState'
+
+// Component implementation
+const showLocation = computed(() => shouldShowLocation(item.value))
+
+// Template usage
+<div v-if="showLocation">{{ item.location_string }}</div>
+<div v-else>Location will be revealed closer to the event</div>
+```
+
+#### Implementation Guidelines
+1. **Never check location_string directly** - Always use `shouldShowLocation()`
+2. **Provide feedback** - Show clear messages when locations are hidden
+3. **Filter properly** - Remove items without viewable locations from maps
+4. **Test both states** - Verify UI works with locations shown and hidden
+
+### Application State (App.vue)
 - Selected year
 - Online/offline status
 - Last sync time
@@ -287,7 +307,7 @@ Previously, views would refresh data in background. This has been removed to ens
 - Loading states
 
 ### Persistent State
-- LocalStorage: Preferences, favorites, schedule, visits
+- LocalStorage: Preferences, favorites, schedule, visits, location visibility
 - IndexedDB: All API data
 - URL: Current route and year
 
@@ -357,6 +377,81 @@ items = Array.isArray(data) ? data :
 - 404 handling for invalid IDs
 - Graceful degradation
 
+## Location Visibility Implementation
+
+### Common Patterns
+
+#### List View Implementation
+```javascript
+// Import global state helpers
+import { shouldShowLocation } from '@/stores/globalState'
+import { getItemLocation } from '@/utils'
+
+// In setup()
+const getDisplayLocation = (item) => {
+  if (!shouldShowLocation(item)) {
+    return 'Location TBD'
+  }
+  return getItemLocation(item) || 'Location TBD'
+}
+
+// In template
+<span class="location">{{ getDisplayLocation(item) }}</span>
+```
+
+#### Map View Implementation
+```javascript
+// Filter markers before display
+const visibleMarkers = computed(() => {
+  return items.value.filter(item => {
+    // Only show items with viewable locations
+    return shouldShowLocation(item) && item.location_string
+  })
+})
+
+// Create markers only for visible items
+visibleMarkers.value.forEach(item => {
+  const coords = geocodeLocation(item.location_string)
+  if (coords) {
+    L.marker(coords).addTo(map)
+  }
+})
+```
+
+#### Detail View Implementation
+```vue
+<template>
+  <div class="location-section">
+    <h3>Location</h3>
+    <template v-if="shouldShowLocation(item)">
+      <p>{{ item.location_string }}</p>
+      <button @click="showOnMap">View on Map</button>
+    </template>
+    <template v-else>
+      <p class="location-notice">
+        <Icon name="clock" />
+        Location information will be available starting 
+        {{ item.year === 2025 ? 'August 17, 2025' : 'closer to the event' }}
+      </p>
+    </template>
+  </div>
+</template>
+```
+
+#### Search Results Implementation
+```javascript
+// Modify search results to respect visibility
+const processSearchResults = (results) => {
+  return results.map(result => ({
+    ...result,
+    displayLocation: shouldShowLocation(result.item) 
+      ? result.item.location_string 
+      : 'Location TBD',
+    canShowOnMap: shouldShowLocation(result.item) && !!result.item.location_string
+  }))
+}
+```
+
 ## Testing Strategies
 
 ### Manual Testing Checklist
@@ -368,6 +463,7 @@ items = Array.isArray(data) ? data :
 □ Check favorites persistence
 □ Verify schedule conflicts
 □ Test map markers
+□ Test location visibility (before/after Aug 17, 2025)
 □ Check responsive layouts
 □ Install as PWA
 ```

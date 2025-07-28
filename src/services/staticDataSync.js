@@ -11,6 +11,9 @@ export async function syncYear(year, onProgress = () => {}) {
   const types = ['camp', 'art', 'event']
   const results = {}
   
+  console.log('[StaticDataSync] Starting sync for year:', year)
+  
+  // First sync all data types
   for (let i = 0; i < types.length; i++) {
     const type = types[i]
     onProgress(type, i, types.length)
@@ -26,7 +29,10 @@ export async function syncYear(year, onProgress = () => {}) {
   // Skip enrichment - data is pre-enriched in static files
   // This saves processing time on mobile devices
   
-  onProgress('complete', types.length + 1, types.length + 1)
+  // Note: Tile downloading has been moved to progressiveSync service
+  // for better integration with the ProgressiveLoader component
+  
+  onProgress('complete', types.length, types.length)
   return results
 }
 
@@ -199,6 +205,7 @@ export async function getSyncStatus(year) {
   
   return status
 }
+
 
 /**
  * Clear data for a specific year

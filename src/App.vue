@@ -166,8 +166,8 @@ const checkIfMobile = () => {
 
 const isMobile = ref(checkIfMobile())
 
-// Enable keyboard shortcuts
-useKeyboardShortcuts()
+// Enable keyboard shortcuts - disabled for now
+// useKeyboardShortcuts()
 
 // Enable swipe gestures on mobile
 useSwipeGestures()

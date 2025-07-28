@@ -1,6 +1,7 @@
 import { API_KEY, API_BASE } from '../config'
 import { saveToCache, getFromCache } from './storage'
 import { AppError, handleError } from '../utils/errorHandler'
+import tileDownloader from './tileDownloader'
 
 /**
  * Sync all data for a given year
@@ -11,6 +12,9 @@ import { AppError, handleError } from '../utils/errorHandler'
 export async function syncYear(year, onProgress = () => {}) {
   const types = ['camp', 'art', 'event']
   const results = {}
+  
+  // Check if this is the first sync (no existing data)
+  const isFirstSync = await checkIsFirstSync()
   
   for (let i = 0; i < types.length; i++) {
     const type = types[i]
@@ -30,7 +34,32 @@ export async function syncYear(year, onProgress = () => {}) {
     await enrichAndSaveEvents(year, results)
   }
   
-  onProgress('complete', types.length + 1, types.length + 1)
+  // Download map tiles automatically on first sync or if tiles are missing
+  if (isFirstSync || !(await tileDownloader.areTilesDownloaded())) {
+    onProgress('tiles', types.length + 1, types.length + 2)
+    
+    try {
+      const tileResult = await tileDownloader.downloadAllTiles((downloaded, total, percentage) => {
+        // Update progress with tile download info
+        onProgress('tiles', types.length + 1, types.length + 2, {
+          tilesDownloaded: downloaded,
+          tilesTotal: total,
+          tilesPercentage: percentage
+        })
+      })
+      
+      results.tiles = tileResult
+      console.log('Map tiles downloaded:', tileResult)
+    } catch (err) {
+      console.error('Failed to download map tiles:', err)
+      results.tiles = { success: false, error: err.message }
+    }
+  } else {
+    console.log('Map tiles already downloaded, skipping')
+    results.tiles = { success: true, skipped: true }
+  }
+  
+  onProgress('complete', types.length + 2, types.length + 2)
   return results
 }
 
@@ -234,6 +263,25 @@ export async function getSyncStatus(year) {
   }
   
   return status
+}
+
+/**
+ * Check if this is the first sync (no data exists)
+ */
+async function checkIsFirstSync() {
+  const types = ['camp', 'art', 'event']
+  const years = ['2023', '2024', '2025']
+  
+  for (const year of years) {
+    for (const type of types) {
+      const data = await getFromCache(type, year)
+      if (data && data.length > 0) {
+        return false // Found some data, not first sync
+      }
+    }
+  }
+  
+  return true // No data found, this is first sync
 }
 
 /**

@@ -24,6 +24,11 @@ OK-OFFLINE is an offline-first Progressive Web App built with Vue 3 and Vite. Th
 │  - SearchView   │  - MapControls  │  - useAutoSync      │
 │  - ScheduleView │  - FavoriteBtn  │                     │
 ├─────────────────────────────────────────────────────────┤
+│                    State Management                      │
+│  - globalState.js    - Centralized location visibility  │
+│  - Reactive state    - Year-based policy enforcement    │
+│  - LocalStorage      - Persistent state across sessions │
+├─────────────────────────────────────────────────────────┤
 │                    Services Layer                        │
 │  - storage.js        - Weather & dust data              │
 │  - dataSync.js       - Sync with BM API                 │
@@ -116,15 +121,49 @@ Search Input → Debounce → Filter Logic → IndexedDB Query
 - Props/events for parent-child communication
 - Provide/inject for deeply nested components
 
-### Global State
+### Global State Store
+The application uses a centralized global state store (`/src/stores/globalState.js`) for managing location data visibility:
+
+#### Location State Management
+- **Purpose**: Enforce Burning Man API location visibility policies
+- **Architecture**: Reactive state with computed properties
+- **Persistence**: LocalStorage for cross-session consistency
+- **Policy Enforcement**: Automatic date-based visibility rules
+
+#### State Structure
+```javascript
+{
+  location_data_available: {
+    '2023': true,   // Historical data always available
+    '2024': true,   // Historical data always available
+    '2025': false   // Detected during sync
+  },
+  show_location_data: {
+    '2023': true,   // Always visible (historical)
+    '2024': true,   // Always visible (historical)
+    '2025': false   // Policy-based visibility
+  },
+  lastLocationCheck: '2025-07-28T10:30:00Z'
+}
+```
+
+#### Key Functions
+- `shouldShowLocation(item)` - Check if location should be displayed
+- `canShowLocations(year)` - Check visibility by year
+- `updateLocationDataAvailability(year, hasLocations)` - Update detection
+- `updateShowLocationFlag(year)` - Recalculate visibility rules
+
+### Application State
 - **Selected Year**: Stored in localStorage
 - **User Preferences**: localStorage persistence
 - **Cached Data**: IndexedDB with metadata
+- **Location Visibility**: Global state with policy enforcement
 
 ### Reactive Data
 - Vue 3 reactivity for UI updates
 - Computed properties for derived state
 - Watchers for side effects
+- Reactive global state for cross-component updates
 
 ## Performance Optimizations
 

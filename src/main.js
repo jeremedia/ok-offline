@@ -12,6 +12,7 @@ import SearchView from './views/SearchView.vue'
 import ScheduleView from './views/ScheduleView.vue'
 import DustForecastView from './views/DustForecastView.vue'
 import ResetView from './views/ResetView.vue'
+import NotFound from './views/NotFound.vue'
 
 // Import CSS
 import '/style.css'
@@ -121,6 +122,20 @@ const routes = [
     name: 'reset-now',
     component: ResetView,
     props: { autoReset: true }
+  },
+  {
+    path: '/reload',
+    beforeEnter: () => {
+      // Force a full page reload
+      window.location.reload()
+      // Return false to prevent navigation
+      return false
+    }
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'not-found',
+    component: NotFound
   }
 ]
 

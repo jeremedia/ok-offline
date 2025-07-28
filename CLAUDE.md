@@ -10,7 +10,11 @@ Created by Jeremy Roush and brought to you by Mr. OK of OKNOTOK.
 
 ## Development Notes
 
-- server is always running, no need to start it for playwright mcp testing
+- **Dev server is ALWAYS running** - The Vite development server is persistent and automatically hot-reloads all code changes
+- **Never attempt to start the dev server** - It's already running and trying to start it wastes time
+- **Code updates are instant** - Vite ensures browser code is updated immediately with every file save
+- **Access the app at**: http://100.104.170.10:8005
+- No need to restart server for testing or development
 
 ## Current Architecture (Vue 3 + Vite)
 
@@ -209,6 +213,21 @@ ok-offline/
 - Graceful offline fallback to keyword search
 - Production response time: 200-400ms
 
+### 16. **Global Location State System**
+- Centralized management of location data visibility across the entire app
+- Smart policy enforcement for 2025 Burning Man API data:
+  - Historical years (2023-2024): Always show location data
+  - Current year (2025): Apply official API visibility policy
+  - Development mode: Always show locations if available (for testing)
+- Automatic detection of location data availability during sync
+- Persistent state in localStorage for consistency across sessions
+- Policy timing for 2025:
+  - API data available 3 weeks before event (developers only)
+  - Camp locations visible first Sunday of build week (12:01am)
+  - Art locations visible when gates open
+- Components automatically respect visibility rules
+- Graceful degradation when locations are hidden
+
 ## Data Flow
 
 ### 1. **API Integration**
@@ -324,6 +343,7 @@ Database: bm2025-db (version: 2)
 - `visits_[type]` - Visit records
 - `emergency_contacts` - Emergency info
 - `sync_[type]_[year]` - Sync metadata
+- `location_data_state` - Global location visibility state
 
 ## Development Server
 
@@ -333,6 +353,219 @@ Database: bm2025-db (version: 2)
 - **No need to start**: The server is persistent and ready to use
 - If you need to restart: `npm run dev -- --host 0.0.0.0 --port 8005`
 
+## Global Location State System
+
+### Overview
+The global location state system (`/src/stores/globalState.js`) provides centralized management of location data visibility across the entire application. This system ensures compliance with Burning Man API policies while providing a seamless user experience.
+
+### Core Components
+
+#### 1. Global State Store
+```javascript
+import { globalState, canShowLocations, shouldShowLocation } from '@/stores/globalState'
+
+// State structure
+globalState = {
+  location_data_available: {
+    '2023': true,   // Historical data
+    '2024': true,   // Historical data
+    '2025': false   // Detected from sync
+  },
+  show_location_data: {
+    '2023': true,   // Always visible
+    '2024': true,   // Always visible  
+    '2025': false   // Policy-based
+  },
+  lastLocationCheck: '2025-07-28T10:30:00Z'
+}
+```
+
+#### 2. Location Detection During Sync
+The system automatically detects if location data exists when syncing:
+```javascript
+// In progressiveSync.js during camp sync
+if (type === 'camp' && year === '2025') {
+  const camps = await getFromCache('camp', '2025')
+  const hasLocations = camps.some(camp => 
+    camp.location_string && 
+    camp.location_string !== '' && 
+    camp.location_string !== 'TBD' && 
+    camp.location_string !== 'Unknown'
+  )
+  updateLocationDataAvailability('2025', hasLocations)
+}
+```
+
+#### 3. Policy Enforcement
+The 2025 visibility policy is automatically enforced:
+```javascript
+// Development mode: Always show if available
+if (import.meta.env.DEV) {
+  return true
+}
+
+// Production mode: Apply timing policy
+const now = new Date()
+const buildWeekSunday = new Date(2025, 7, 17) // Aug 17, 2025
+if (now >= buildWeekSunday && hasLocationData) {
+  // Show camp locations after build week starts
+  return true
+}
+return false
+```
+
+### Using the Global State in Components
+
+#### Basic Usage
+```javascript
+// In a component's script setup
+import { shouldShowLocation } from '@/stores/globalState'
+
+// Check if location should be shown for an item
+const showLocation = computed(() => shouldShowLocation(item.value))
+
+// In template
+<div v-if="showLocation" class="location">
+  {{ item.location_string }}
+</div>
+<div v-else class="location-hidden">
+  Location will be revealed closer to the event
+</div>
+```
+
+#### Advanced Usage with Year-Specific Checks
+```javascript
+import { canShowLocations, globalState } from '@/stores/globalState'
+
+// Check for specific year
+const can2025Locations = computed(() => canShowLocations('2025'))
+
+// Access raw state for debugging
+console.log('Location availability:', globalState.location_data_available)
+console.log('Location visibility:', globalState.show_location_data)
+```
+
+### Component Implementation Examples
+
+#### List View Pattern
+```javascript
+// ListView.vue example
+const displayLocation = computed(() => {
+  if (!sortBy.value.includes('location')) return false
+  // Let global state determine visibility
+  return true // Component always tries to show, state controls actual visibility
+})
+
+// In item rendering
+const itemLocation = computed(() => {
+  if (!shouldShowLocation(item)) {
+    return 'Location TBD'
+  }
+  return getItemLocation(item)
+})
+```
+
+#### Detail View Pattern
+```javascript
+// DetailView.vue example
+<div class="detail-section">
+  <h3>Location</h3>
+  <p v-if="shouldShowLocation(item)">
+    {{ item.location_string }}
+  </p>
+  <p v-else class="location-notice">
+    <Icon name="clock" />
+    Location information will be available closer to the event
+  </p>
+</div>
+```
+
+#### Map View Pattern
+```javascript
+// MapView.vue example
+const getMarkerPosition = (item) => {
+  if (!shouldShowLocation(item)) {
+    // Return null or center of city for hidden locations
+    return null
+  }
+  return geocodeLocation(item.location_string)
+}
+
+// Filter out items without viewable locations
+const visibleMarkers = computed(() => 
+  items.value.filter(item => shouldShowLocation(item) && item.location_string)
+)
+```
+
+### Policy Logic Details
+
+#### 2025 Event Timeline
+```javascript
+// Key dates for location visibility (2025)
+const eventDates = {
+  apiAvailable: new Date(2025, 7, 3),    // Aug 3: Data available to devs
+  buildWeekStart: new Date(2025, 7, 17), // Aug 17: Sunday 12:01am - camps visible
+  gatesOpen: new Date(2025, 7, 24),      // Aug 24: Art locations visible
+  eventStart: new Date(2025, 7, 25)      // Aug 25: Event officially begins
+}
+```
+
+#### Visibility Rules
+1. **Historical Years (2023-2024)**: Always show all location data
+2. **Current Year (2025)**:
+   - Before Aug 3: No location data available
+   - Aug 3-16: Data cached but hidden from users
+   - Aug 17+: Camp locations visible
+   - Aug 24+: Art locations visible (when implemented)
+3. **Development Mode**: Always show locations if available (for testing)
+
+### Debugging and Testing
+
+#### Debug Helper Function
+```javascript
+import { debugLocationState } from '@/stores/globalState'
+
+// In development, log current state
+debugLocationState()
+// Output:
+// 🌍 Location Data State: {
+//   available: { 2023: true, 2024: true, 2025: true },
+//   showable: { 2023: true, 2024: true, 2025: false },
+//   lastCheck: '2025-07-28T10:30:00Z'
+// }
+```
+
+#### Manual State Updates (Dev Only)
+```javascript
+// Force update for testing
+import { updateLocationDataAvailability, updateShowLocationFlag } from '@/stores/globalState'
+
+// Simulate location data becoming available
+updateLocationDataAvailability('2025', true)
+
+// Force recalculation of visibility
+updateShowLocationFlag('2025')
+```
+
+### Best Practices
+
+1. **Always use the helper functions** - Don't check location_string directly
+2. **Provide user feedback** - Show clear messages when locations are hidden
+3. **Graceful degradation** - Features should work without location data
+4. **Consistent messaging** - Use standard text for hidden locations
+5. **Test both states** - Verify UI works with locations shown and hidden
+
+### Standard Messages
+```javascript
+// When locations are hidden
+const LOCATION_MESSAGES = {
+  tbd: 'Location TBD',
+  policy: 'Location will be revealed closer to the event',
+  buildWeek: 'Locations available starting Sunday of build week',
+  loading: 'Checking location availability...'
+}
+```
+
 ## Common Development Tasks
 
 ### Add New View/Route
@@ -340,6 +573,52 @@ Database: bm2025-db (version: 2)
 2. Add route in `/src/main.js`
 3. Add navigation in `App.vue`
 4. Update keyboard shortcuts if needed
+
+### Migrating Components to Global Location State
+
+When updating existing components to use the global location state system:
+
+1. **Remove Direct Location Checks**
+   ```javascript
+   // OLD - Don't do this
+   if (item.location_string) {
+     // show location
+   }
+   
+   // NEW - Use global state
+   import { shouldShowLocation } from '@/stores/globalState'
+   if (shouldShowLocation(item)) {
+     // show location
+   }
+   ```
+
+2. **Update Template Logic**
+   ```vue
+   <!-- OLD -->
+   <span v-if="item.location_string">{{ item.location_string }}</span>
+   <span v-else>Location TBD</span>
+   
+   <!-- NEW -->
+   <span v-if="shouldShowLocation(item)">{{ item.location_string }}</span>
+   <span v-else>Location will be revealed closer to the event</span>
+   ```
+
+3. **Handle Year-Specific Logic**
+   ```javascript
+   // For components that need year awareness
+   import { canShowLocations } from '@/stores/globalState'
+   
+   const selectedYear = ref('2025')
+   const locationsAvailable = computed(() => canShowLocations(selectedYear.value))
+   ```
+
+4. **Update Map/Distance Features**
+   ```javascript
+   // Filter items before processing
+   const itemsWithLocations = computed(() => 
+     items.value.filter(item => shouldShowLocation(item) && item.location_string)
+   )
+   ```
 
 ### Add New Data Field
 1. Check API response structure
@@ -386,10 +665,11 @@ Database: bm2025-db (version: 2)
 
 ## Known Issues & Limitations
 
-1. **2025 Data**: Camp locations not yet assigned (normal pre-event)
+1. **2025 Data**: Camp locations automatically hidden until August 17, 2025 (per API policy)
 2. **Geolocation**: Requires HTTPS in production
 3. **Large datasets**: Consider pagination for better performance
 4. **Service Worker**: Must be served over HTTPS for PWA features
+5. **Location Visibility**: 2025 locations follow strict API timing policies
 
 ## Future Enhancements (from todo list)
 
@@ -495,8 +775,50 @@ When making changes:
 4. Update this documentation
 5. Add comments for complex logic
 6. Use conventional commits for automatic versioning
+7. Respect location visibility policies
 
 Remember: This app is designed to work in the harsh conditions of Black Rock City where connectivity is limited or non-existent. Every feature should work offline once data is synced.
+
+## Quick Reference: Global Location State
+
+### Import What You Need
+```javascript
+import { 
+  shouldShowLocation,              // Check single item
+  canShowLocations,               // Check by year
+  globalState,                    // Raw state access
+  updateLocationDataAvailability, // Update detection
+  debugLocationState             // Dev debugging
+} from '@/stores/globalState'
+```
+
+### Common Patterns
+```javascript
+// Check if location should be shown
+if (shouldShowLocation(item)) { /* show */ }
+
+// Get display text
+const locationText = shouldShowLocation(item) 
+  ? item.location_string 
+  : 'Location will be revealed closer to the event'
+
+// Filter items with visible locations
+items.filter(item => shouldShowLocation(item))
+
+// Check year availability
+if (canShowLocations('2025')) { /* enable feature */ }
+```
+
+### Key Dates (2025)
+- **Aug 3**: API data available (hidden from users)
+- **Aug 17**: Camp locations visible (12:01am Sunday)
+- **Aug 24**: Art locations visible (gates open)
+- **Aug 25**: Event begins
+
+### Testing
+- Dev mode always shows locations if available
+- Use `debugLocationState()` to inspect state
+- Test with both hidden and visible states
 
 ## Weather API Configuration
 

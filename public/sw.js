@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ok-offline-v11'; // Bump version for Leaflet assets
+const CACHE_NAME = 'ok-offline-v12'; // Enhanced tile caching for BRC
 const urlsToCache = [
   // Core app files
   '/',
@@ -46,8 +46,93 @@ const urlsToCache = [
 ];
 
 // Map tile cache name (separate to manage size)
-const TILE_CACHE_NAME = 'ok-offline-tiles-v1';
-const MAX_TILE_CACHE_SIZE = 50; // Maximum number of tiles to cache
+const TILE_CACHE_NAME = 'ok-offline-tiles-v2';
+const MAX_TILE_CACHE_SIZE = 500; // Increased for full BRC coverage
+
+// Black Rock City bounding box
+const BRC_BOUNDS = {
+  north: 40.807,
+  south: 40.764,
+  east: -119.176,
+  west: -119.233
+}
+
+// Check IndexedDB for pre-downloaded tiles
+async function checkIndexedDBForTile(url) {
+  try {
+    // Extract z/x/y from URL
+    const match = url.pathname.match(/\/(\d+)\/(\d+)\/(\d+)\.png/);
+    if (!match) return null;
+    
+    const [, z, x, y] = match;
+    const key = `${z}-${x}-${y}`;
+    
+    return new Promise((resolve) => {
+      const request = indexedDB.open('leaflet.offline', 2);
+      
+      request.onsuccess = (event) => {
+        const db = event.target.result;
+        
+        if (!db.objectStoreNames.contains('tileStore')) {
+          resolve(null);
+          return;
+        }
+        
+        const transaction = db.transaction(['tileStore'], 'readonly');
+        const objectStore = transaction.objectStore('tileStore');
+        const getRequest = objectStore.get(key);
+        
+        getRequest.onsuccess = () => {
+          const result = getRequest.result;
+          if (result && result.blob) {
+            // Return the blob as a Response
+            resolve(new Response(result.blob, {
+              status: 200,
+              statusText: 'OK',
+              headers: {
+                'Content-Type': 'image/png',
+                'X-Tile-Source': 'IndexedDB'
+              }
+            }));
+          } else {
+            resolve(null);
+          }
+        };
+        
+        getRequest.onerror = () => {
+          resolve(null);
+        };
+      };
+      
+      request.onerror = () => {
+        resolve(null);
+      };
+    });
+  } catch (error) {
+    console.error('[SW] Error checking IndexedDB for tile:', error);
+    return null;
+  }
+}
+
+// Check if a tile is within BRC bounds
+function isTileInBRC(url) {
+  // Extract z/x/y from tile URL
+  const match = url.match(/\/(\d+)\/(\d+)\/(\d+)\.png/);
+  if (!match) return false;
+  
+  const [, z, x, y] = match.map(Number);
+  
+  // Convert tile coordinates to lat/lon bounds
+  const n = Math.pow(2, z);
+  const lon_min = (x / n) * 360 - 180;
+  const lon_max = ((x + 1) / n) * 360 - 180;
+  const lat_max = Math.atan(Math.sinh(Math.PI * (1 - 2 * y / n))) * 180 / Math.PI;
+  const lat_min = Math.atan(Math.sinh(Math.PI * (1 - 2 * (y + 1) / n))) * 180 / Math.PI;
+  
+  // Check if tile overlaps with BRC bounds
+  return !(lon_max < BRC_BOUNDS.west || lon_min > BRC_BOUNDS.east ||
+           lat_max < BRC_BOUNDS.south || lat_min > BRC_BOUNDS.north);
+}
 
 // Install event - cache static assets
 self.addEventListener('install', event => {
@@ -85,8 +170,14 @@ self.addEventListener('activate', event => {
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
-          if (cacheName !== CACHE_NAME) {
+          // Keep tile cache separate from main cache
+          if (cacheName !== CACHE_NAME && cacheName !== TILE_CACHE_NAME) {
             console.log('Deleting old cache:', cacheName);
+            return caches.delete(cacheName);
+          }
+          // Clean up old tile caches
+          if (cacheName.startsWith('ok-offline-tiles-') && cacheName !== TILE_CACHE_NAME) {
+            console.log('Deleting old tile cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
@@ -108,33 +199,53 @@ self.addEventListener('fetch', event => {
   // Handle OpenStreetMap tiles for Black Rock City area
   if (url.hostname.includes('tile.openstreetmap.org')) {
     event.respondWith(
-      caches.open(TILE_CACHE_NAME).then(cache => {
-        return cache.match(request).then(response => {
-          if (response) {
-            return response;
+      // First check IndexedDB for pre-downloaded tiles
+      checkIndexedDBForTile(url).then(idbResponse => {
+        if (idbResponse) {
+          return idbResponse;
+        }
+        
+        // Then check service worker cache
+        return caches.open(TILE_CACHE_NAME).then(cache => {
+          return cache.match(request).then(response => {
+            if (response) {
+              // console.log('[SW] Tile served from cache:', url.pathname);
+              return response;
+            }
+          
+          // Only cache tiles within BRC bounds
+          if (!isTileInBRC(url.href)) {
+            // Fetch but don't cache tiles outside BRC
+            return fetch(request).catch(() => {
+              return new Response('', { status: 503, statusText: 'Offline' });
+            });
           }
           
-          // Fetch and cache the tile
+          // Fetch and cache BRC tiles
           return fetch(request).then(response => {
             if (response.status === 200) {
               // Clone response before caching
               const responseToCache = response.clone();
               
-              // Limit cache size by removing old tiles if needed
+              // Implement LRU cache eviction
               cache.keys().then(keys => {
                 if (keys.length >= MAX_TILE_CACHE_SIZE) {
-                  // Remove oldest tile (FIFO)
-                  cache.delete(keys[0]);
+                  // Remove least recently used tiles
+                  const toDelete = keys.slice(0, Math.max(1, keys.length - MAX_TILE_CACHE_SIZE + 1));
+                  toDelete.forEach(key => cache.delete(key));
                 }
                 cache.put(request, responseToCache);
+                // console.log('[SW] Tile cached:', url.pathname);
               });
             }
             return response;
           }).catch(() => {
             // Return a fallback tile or empty response when offline
+            console.log('[SW] Tile offline, no cache:', url.pathname);
             return new Response('', { status: 503, statusText: 'Offline' });
           });
         });
+      });
       })
     );
     return;

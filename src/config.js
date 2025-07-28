@@ -6,4 +6,6 @@ export const API_BASE = '/api'
 export const BRC_CENTER = [40.786958, -119.202994]
 
 // Debug configuration
-export const APP_DEBUG = import.meta.env.DEV || import.meta.env.VITE_DEBUG === 'true'
+// export const APP_DEBUG = import.meta.env.DEV || import.meta.env.VITE_DEBUG === 'true' && false
+
+export const APP_DEBUG = false;

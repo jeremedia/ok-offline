@@ -267,10 +267,12 @@ onMounted(async () => {
     mapContainer.value.style.backgroundColor = '#000000'
   }
   
-  // Create basemap layer (but don't add it yet)
+  // Create basemap layer (tiles will be cached by service worker and leaflet.offline)
   basemapLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap contributors',
-    maxZoom: 19
+    maxZoom: 19,
+    subdomains: 'abc',
+    crossOrigin: true
   })
   
   // Add basemap if enabled and year is 2025

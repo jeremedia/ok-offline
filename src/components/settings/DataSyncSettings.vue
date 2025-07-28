@@ -56,6 +56,52 @@
       </div>
     </div>
     
+    <!-- Map Tiles Section -->
+    <div class="map-tiles-section">
+      <h3>🗺️ Offline Map Tiles</h3>
+      <div v-if="tileStats" class="tile-stats">
+        <div class="stat-row">
+          <span class="stat-label">Cached tiles:</span>
+          <span class="stat-value">{{ tileStats.storedTiles }} / {{ tileStats.requiredTiles }}</span>
+          <span class="stat-percentage">({{ tileStats.percentage }}%)</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Storage used:</span>
+          <span class="stat-value">~{{ tileStats.estimatedSize }}MB</span>
+        </div>
+      </div>
+      <div v-else class="tile-stats">
+        <p class="loading-tiles">Loading tile statistics...</p>
+      </div>
+      <div v-if="tileProgress" class="tile-download-status">
+        <div class="download-message">
+          📥 Downloading map tiles for offline use...
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" :style="{ width: tileProgress.percentage + '%' }"></div>
+          <span class="progress-text">{{ tileProgress.downloaded }}/{{ tileProgress.total }} tiles ({{ tileProgress.percentage }}%)</span>
+        </div>
+      </div>
+      
+      <div class="tile-actions">
+        <button 
+          @click="downloadTiles" 
+          :disabled="downloadingTiles || (tileStats && tileStats.percentage >= 90)"
+          class="sync-button"
+        >
+          {{ downloadingTiles ? 'Downloading...' : 'Cache Map Tiles' }}
+        </button>
+        
+        <button 
+          @click="clearTiles"
+          :disabled="downloadingTiles || !tileStats || tileStats.storedTiles === 0"
+          class="clear-button"
+        >
+          Clear Tile Cache
+        </button>
+      </div>
+    </div>
+    
     <div class="global-actions">
       <button @click="clearAllData" class="danger-button">
         Clear All Cached Data
@@ -70,9 +116,10 @@ import { syncYear as syncYearData, getSyncStatus, clearYear as clearYearData } f
 import { clearCache } from '../../services/storage'
 import { useToast } from '../../composables/useToast'
 import { getErrorMessage } from '../../utils/errorHandler'
+import tileDownloader from '../../services/tileDownloader'
 
 // Toast notifications
-const { showToast } = useToast()
+const { showSuccess, showError, showWarning, showInfo } = useToast()
 
 // Data configuration
 const years = ['2023', '2024', '2025']
@@ -85,6 +132,9 @@ const progress = ref({})
 const progressText = ref({})
 const syncingAll = ref(false)
 const syncAllProgress = ref('')
+const tileProgress = ref(null)
+const tileStats = ref(null)
+const downloadingTiles = ref(false)
 
 // Utility functions
 const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1)
@@ -116,6 +166,9 @@ const loadSyncStatus = async () => {
   years.forEach(year => {
     syncStatus.value[year] = getSyncStatus(year)
   })
+  
+  // Also load tile stats
+  tileStats.value = await tileDownloader.getStorageStats()
 }
 
 // Sync data for a specific year
@@ -125,27 +178,44 @@ const syncYear = async (year) => {
   progressText.value[year] = ''
   
   try {
-    showToast(`Starting sync for ${year} data...`, 'info')
+    showInfo(`Starting sync for ${year} data...`)
     
-    await syncYearData(year, (type, current, total) => {
+    await syncYearData(year, (type, current, total, extra) => {
       // Progress callback
-      const percentage = Math.round((current / total) * 100)
-      progress.value[year] = percentage
-      progressText.value[year] = `${capitalize(type)}s: ${current}/${total}`
+      console.log('[DataSyncSettings] Progress:', type, current, total, extra)
+      
+      if (type === 'tiles' && extra) {
+        // Tile download progress
+        tileProgress.value = {
+          downloaded: extra.tilesDownloaded,
+          total: extra.tilesTotal,
+          percentage: extra.tilesPercentage
+        }
+        progress.value[year] = extra.tilesPercentage
+        progressText.value[year] = `Downloading map tiles: ${extra.tilesDownloaded}/${extra.tilesTotal}`
+      } else if (type === 'complete') {
+        progress.value[year] = 100
+        progressText.value[year] = 'Complete!'
+      } else {
+        // Regular data sync progress
+        const percentage = Math.round((current / total) * 100)
+        progress.value[year] = percentage
+        progressText.value[year] = `${capitalize(type)}s: ${current}/${total}`
+      }
     })
     
-    showToast(`Successfully synced ${year} data!`, 'success')
+    showSuccess(`Successfully synced ${year} data!`)
     await loadSyncStatus()
   } catch (error) {
     console.error('Sync error:', error)
     const errorMsg = getErrorMessage(error)
     
     if (errorMsg.includes('Failed to fetch')) {
-      showToast('Unable to connect to server. Please check your internet connection.', 'error')
+      showError('Unable to connect to server. Please check your internet connection.')
     } else if (errorMsg.includes('API key')) {
-      showToast('API key issue. Please check configuration.', 'error')
+      showError('API key issue. Please check configuration.')
     } else {
-      showToast(`Failed to sync ${year} data: ${errorMsg}`, 'error')
+      showError(`Failed to sync ${year} data: ${errorMsg}`)
     }
     
     throw error  // Re-throw for syncAllYears to handle
@@ -153,6 +223,7 @@ const syncYear = async (year) => {
     syncing.value[year] = false
     progress.value[year] = 0
     progressText.value[year] = ''
+    tileProgress.value = null
   }
 }
 
@@ -161,6 +232,7 @@ const syncAllYears = async () => {
   syncingAll.value = true
   syncAllProgress.value = ''
   
+  // First sync all years' data
   for (let i = 0; i < years.length; i++) {
     const year = years[i]
     syncAllProgress.value = `Syncing ${year} (${i + 1}/${years.length})...`
@@ -169,12 +241,39 @@ const syncAllYears = async () => {
       await syncYear(year)
     } catch (error) {
       // Error already shown by syncYear, just stop the process
-      break
+      syncingAll.value = false
+      syncAllProgress.value = ''
+      return
     }
+  }
+  
+  // Then download map tiles if needed
+  const alreadyDownloaded = await tileDownloader.areTilesDownloaded()
+  if (!alreadyDownloaded) {
+    syncAllProgress.value = 'Downloading map tiles for offline use...'
+    tileProgress.value = { downloaded: 0, total: 0, percentage: 0 }
+    
+    try {
+      await tileDownloader.downloadAllTiles((downloaded, total, percentage) => {
+        tileProgress.value = { downloaded, total, percentage }
+        syncAllProgress.value = `Downloading map tiles: ${downloaded}/${total} (${percentage}%)`
+        console.log('[DataSyncSettings] Tile progress in syncAllYears:', downloaded, total, percentage)
+      })
+      
+      showSuccess('Map tiles downloaded successfully!')
+    } catch (error) {
+      console.error('Failed to download tiles:', error)
+      showWarning('Failed to download map tiles. Maps may not work offline.')
+    }
+    
+    tileProgress.value = null
   }
   
   syncingAll.value = false
   syncAllProgress.value = ''
+  
+  // Reload stats
+  await loadSyncStatus()
 }
 
 // Clear data for a specific year
@@ -183,9 +282,9 @@ const clearYear = async (year) => {
     try {
       await clearYearData(year)
       await loadSyncStatus()
-      showToast(`${year} data cleared successfully`, 'success')
+      showSuccess(`${year} data cleared successfully`)
     } catch (error) {
-      showToast(`Failed to clear ${year} data: ${error.message}`, 'error')
+      showError(`Failed to clear ${year} data: ${error.message}`)
     }
   }
 }
@@ -196,16 +295,64 @@ const clearAllData = async () => {
     try {
       await clearCache()
       await loadSyncStatus()
-      showToast('All cached data cleared successfully', 'success')
+      showSuccess('All cached data cleared successfully')
     } catch (error) {
-      showToast(`Failed to clear data: ${error.message}`, 'error')
+      showError(`Failed to clear data: ${error.message}`)
+    }
+  }
+}
+
+// Download tiles manually
+const downloadTiles = async () => {
+  console.log('[DataSyncSettings] Manual tile download requested')
+  downloadingTiles.value = true
+  tileProgress.value = { downloaded: 0, total: 0, percentage: 0 }
+  
+  try {
+    const result = await tileDownloader.downloadAllTiles((downloaded, total, percentage) => {
+      console.log('[DataSyncSettings] Tile progress:', downloaded, total, percentage)
+      tileProgress.value = { downloaded, total, percentage }
+    })
+    
+    console.log('[DataSyncSettings] Tile download result:', result)
+    
+    if (result.success) {
+      showSuccess(`Downloaded ${result.downloaded} map tiles successfully!`)
+    } else {
+      showWarning('Failed to download some tiles. Maps may not work fully offline.')
+    }
+  } catch (error) {
+    console.error('[DataSyncSettings] Tile download error:', error)
+    showError(`Failed to download map tiles: ${error.message}`)
+  } finally {
+    downloadingTiles.value = false
+    tileProgress.value = null
+    await loadSyncStatus() // Refresh stats
+  }
+}
+
+// Clear tile cache
+const clearTiles = async () => {
+  if (confirm('Are you sure you want to clear all cached map tiles? You will need to download them again for offline use.')) {
+    try {
+      const success = await tileDownloader.clearTiles()
+      if (success) {
+        showSuccess('Map tile cache cleared successfully')
+        await loadSyncStatus() // Refresh stats
+      } else {
+        showError('Failed to clear map tile cache')
+      }
+    } catch (error) {
+      console.error('[DataSyncSettings] Clear tiles error:', error)
+      showError(`Failed to clear tiles: ${error.message}`)
     }
   }
 }
 
 // Load initial status
-onMounted(() => {
-  loadSyncStatus()
+onMounted(async () => {
+  await loadSyncStatus()
+  console.log('[DataSyncSettings] Initial tile stats:', tileStats.value)
 })
 </script>
 
@@ -330,6 +477,79 @@ onMounted(() => {
   font-weight: 500;
   text-shadow: 0 1px 2px rgba(0,0,0,0.5);
   white-space: nowrap;
+}
+
+.map-tiles-section {
+  background: #2a2a2a;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-radius: 8px;
+  margin-top: 1.5rem;
+}
+
+.map-tiles-section h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #fff;
+}
+
+.tile-stats {
+  margin-bottom: 1rem;
+}
+
+.stat-row {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 0;
+  gap: 1rem;
+}
+
+.stat-label {
+  color: #ccc;
+  min-width: 120px;
+}
+
+.stat-value {
+  color: #fff;
+  font-weight: bold;
+}
+
+.stat-percentage {
+  color: #999;
+}
+
+.loading-tiles {
+  color: #999;
+  font-style: italic;
+  margin: 0;
+}
+
+.tile-download-status {
+  margin-top: 1rem;
+}
+
+.download-message {
+  color: #FFD700;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.6; }
+  100% { opacity: 1; }
+}
+
+.tile-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.tile-actions .sync-button,
+.tile-actions .clear-button {
+  flex: 1;
 }
 
 .global-actions {
