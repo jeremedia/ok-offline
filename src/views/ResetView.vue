@@ -251,34 +251,65 @@ const fullReset = async (skipConfirm = false) => {
     // 3. Clear ALL IndexedDB databases
     addLogEntry('Clearing IndexedDB...', 'info')
     if ('indexedDB' in window) {
-      // Get all databases (this is non-standard but works in most browsers)
-      const databases = await indexedDB.databases?.() || []
-      for (const db of databases) {
-        await indexedDB.deleteDatabase(db.name)
-        addLogEntry(`Deleted database: ${db.name}`, 'info')
+      // The databases() method is not widely supported, so we'll use known names
+      const knownDatabases = ['bm2025-db', 'bm2024-db', 'bm2023-db']
+      
+      // If databases() is available, use it
+      if (indexedDB.databases) {
+        try {
+          const databases = await indexedDB.databases()
+          for (const db of databases) {
+            await indexedDB.deleteDatabase(db.name)
+            addLogEntry(`Deleted database: ${db.name}`, 'info')
+          }
+        } catch (e) {
+          console.error('indexedDB.databases() error:', e)
+          addLogEntry('Note: indexedDB.databases() not supported, using known names', 'info')
+        }
       }
       
-      // Also try to delete known database names as fallback
-      const knownDatabases = ['bm2025-db', 'bm2024-db', 'bm2023-db']
+      // Always try to delete known database names
       for (const dbName of knownDatabases) {
         try {
-          await indexedDB.deleteDatabase(dbName)
+          const deleteReq = indexedDB.deleteDatabase(dbName)
+          await new Promise((resolve, reject) => {
+            deleteReq.onsuccess = () => {
+              addLogEntry(`Deleted database: ${dbName}`, 'success')
+              resolve()
+            }
+            deleteReq.onerror = () => {
+              // Database might not exist, that's ok
+              resolve()
+            }
+          })
         } catch (e) {
-          // Database might not exist, that's ok
+          console.error(`Error deleting database ${dbName}:`, e)
+          // Continue with other databases
         }
       }
     }
     
     // 4. Clear ALL cookies
     addLogEntry('Clearing cookies...', 'info')
-    document.cookie.split(";").forEach(cookie => {
-      const eqPos = cookie.indexOf("=")
-      const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim()
-      // Clear cookie for current path and domain variations
-      document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`
-      document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=${window.location.hostname}`
-      document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=.${window.location.hostname}`
-    })
+    try {
+      const cookies = document.cookie.split(";")
+      cookies.forEach(cookie => {
+        if (cookie) {
+          const eqPos = cookie.indexOf("=")
+          const name = eqPos > -1 ? cookie.substring(0, eqPos).trim() : cookie.trim()
+          if (name) {
+            // Clear cookie for current path and domain variations
+            document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`
+            document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=${window.location.hostname}`
+            document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=.${window.location.hostname}`
+          }
+        }
+      })
+      addLogEntry('Cookies cleared', 'success')
+    } catch (e) {
+      console.error('Cookie clearing error:', e)
+      addLogEntry('Note: Some cookies may not be clearable', 'info')
+    }
     
     // 5. Clear ALL service worker caches
     addLogEntry('Clearing service worker caches...', 'info')
@@ -306,6 +337,7 @@ const fullReset = async (skipConfirm = false) => {
           tx.executeSql('DROP TABLE IF EXISTS data')
         })
       } catch (e) {
+        console.error('WebSQL clearing error:', e)
         // WebSQL might not be available or accessible
       }
     }
@@ -319,6 +351,7 @@ const fullReset = async (skipConfirm = false) => {
           // Note: We can't force unpersist, but we've cleared the data
         }
       } catch (e) {
+        console.error('Storage persistence error:', e)
         // Storage persistence API might not be available
       }
     }
@@ -332,8 +365,9 @@ const fullReset = async (skipConfirm = false) => {
     }, 2000)
     
   } catch (error) {
-    addLogEntry(`Full reset failed: ${error.message}`, 'error')
-    showError('Full reset failed - please try again')
+    console.error('Full reset error:', error)
+    addLogEntry(`Full reset failed: ${error.message || error}`, 'error')
+    showError(`Reset failed: ${error.message || 'Unknown error'}`)
   } finally {
     resetting.value = false
   }
