@@ -163,6 +163,7 @@ const setActiveTab = (tab) => {
   min-height: 44px;
   height: auto;
   flex-shrink: 0;
+  overflow-y: hidden;
 }
 
 .tab-button {
