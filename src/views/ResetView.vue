@@ -90,7 +90,12 @@
       </div>
 
       <div v-if="resetLog.length > 0" class="reset-log">
-        <h3>📝 Reset Log</h3>
+        <div class="log-header">
+          <h3>📝 Reset Log</h3>
+          <button @click="copyLogs" class="copy-logs-btn" title="Copy logs to clipboard">
+            📋 Copy Logs
+          </button>
+        </div>
         <div class="log-entries">
           <div 
             v-for="(entry, index) in resetLog" 
@@ -340,11 +345,21 @@ const fullReset = async (skipConfirm = false) => {
     
     // 5. Clear ALL service worker caches
     addLogEntry('Clearing service worker caches...', 'info')
-    const cacheNames = await caches.keys()
-    await Promise.all(cacheNames.map(name => {
-      addLogEntry(`Deleting cache: ${name}`, 'info')
-      return caches.delete(name)
-    }))
+    try {
+      if ('caches' in window) {
+        const cacheNames = await caches.keys()
+        await Promise.all(cacheNames.map(name => {
+          addLogEntry(`Deleting cache: ${name}`, 'info')
+          return caches.delete(name)
+        }))
+        addLogEntry('Service worker caches cleared', 'success')
+      } else {
+        addLogEntry('Cache API not available in this context', 'info')
+      }
+    } catch (e) {
+      console.error('Cache clearing error:', e)
+      addLogEntry(`Cache clearing error: ${e.message}`, 'error')
+    }
     
     // 6. Unregister ALL service workers
     addLogEntry('Unregistering service workers...', 'info')
@@ -447,6 +462,26 @@ const formatBytes = (bytes) => {
   const sizes = ['B', 'KB', 'MB', 'GB']
   const i = Math.floor(Math.log(bytes) / Math.log(k))
   return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i]
+}
+
+const copyLogs = async () => {
+  try {
+    // Format logs as text
+    const logText = resetLog.value
+      .map(entry => `${entry.time} - ${entry.message}`)
+      .join('\n')
+    
+    // Add header with current status
+    const header = `Reset Log - ${new Date().toLocaleString()}\n${'='.repeat(50)}\n`
+    const fullText = header + logText
+    
+    // Copy to clipboard
+    await navigator.clipboard.writeText(fullText)
+    showSuccess('Logs copied to clipboard!')
+  } catch (error) {
+    console.error('Failed to copy logs:', error)
+    showError('Failed to copy logs - please try selecting and copying manually')
+  }
 }
 
 const goHome = () => {
@@ -660,9 +695,32 @@ onMounted(async () => {
   padding: 1.5rem;
 }
 
-.reset-log h3 {
+.log-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.log-header h3 {
   color: #FFD700;
-  margin: 0 0 1rem 0;
+  margin: 0;
+}
+
+.copy-logs-btn {
+  padding: 0.5rem 1rem;
+  background: #444;
+  color: #ccc;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+
+.copy-logs-btn:hover {
+  background: #555;
+  color: #fff;
 }
 
 .log-entries {
