@@ -258,6 +258,9 @@ const handleResize = () => {
   isMobile.value = checkIfMobile()
 }
 
+// Store interval reference outside
+let syncInterval = null
+
 onMounted(async () => {
   // Set up toast notifications after component is fully mounted
   await nextTick()
@@ -274,14 +277,17 @@ onMounted(async () => {
   updateLastSyncTime()
   
   // Update last sync time every minute
-  const interval = setInterval(updateLastSyncTime, 60000)
-  
-  onUnmounted(() => {
-    window.removeEventListener('online', updateOnlineStatus)
-    window.removeEventListener('offline', updateOnlineStatus)
-    window.removeEventListener('resize', handleResize)
-    clearInterval(interval)
-  })
+  syncInterval = setInterval(updateLastSyncTime, 60000)
+})
+
+// Register cleanup separately at top level
+onUnmounted(() => {
+  window.removeEventListener('online', updateOnlineStatus)
+  window.removeEventListener('offline', updateOnlineStatus)
+  window.removeEventListener('resize', handleResize)
+  if (syncInterval) {
+    clearInterval(syncInterval)
+  }
 })
 
 // Load saved year from localStorage (default to 2024)
