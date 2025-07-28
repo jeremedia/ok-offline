@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.11.0] - 2025-07-28
+
+### Fixed
+- **Map Tile Offline Loading** - Resolved issue where tiles weren't loading when offline
+  - Fixed leaflet.offline integration to properly store and retrieve tiles from IndexedDB
+  - Tiles now stored with all subdomain variations (a.tile.openstreetmap.org, b.tile.openstreetmap.org, c.tile.openstreetmap.org)
+  - Eliminated network requests when offline - all tiles served from local storage
+  - Fixed coordinate calculation bug in tile range generation
+  - Added complete tile coverage verification (641 tiles for zoom levels 12-17)
+
+### Added
+- **API-Hosted Tile Distribution** - Self-hosted map tiles to avoid OpenStreetMap throttling
+  - Rails rake task to download and package all BRC tiles into ZIP file
+  - API endpoint at `/api/v1/tiles/package.zip` serves 2.24MB tile package
+  - Frontend downloads single ZIP instead of 641 individual tile requests
+  - Automatic extraction and storage in IndexedDB with proper key formatting
+  - Fallback to individual tile downloads if ZIP method fails
+- **Enhanced Reset Options** - Added map tile management to development reset page
+  - "Clear Map Tiles" option to reset offline tile storage
+  - Integrated into "PWA Test Reset" for complete app reset
+  - Proper database cleanup with user feedback
+
 ## [3.10.0] - 2025-07-28
 
 ### Added

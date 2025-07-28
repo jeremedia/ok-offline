@@ -158,6 +158,31 @@ onMounted(() => {
 // Release notes data
 const releaseNotes = [
   {
+    version: '3.11.0',
+    date: '2025-07-28',
+    added: [
+      '🗺️ API-Hosted Tile Distribution - Self-hosted map tiles to eliminate OpenStreetMap throttling',
+      '📦 Single ZIP download (2.24MB) instead of 641 individual tile requests',
+      '⚡ Complete tile coverage for Black Rock City area (zoom levels 12-17)',
+      '🔧 Enhanced Reset Options - Added map tile management to development reset page',
+      '🗃️ "Clear Map Tiles" option for testing tile re-download functionality'
+    ],
+    fixed: [
+      '🗺️ Map Tile Offline Loading - Resolved critical issue where tiles weren\'t loading when offline',
+      '📱 Eliminated all network requests when offline - tiles now served from local IndexedDB storage',
+      '🔗 Fixed leaflet.offline integration with proper subdomain handling (a/b/c.tile.openstreetmap.org)',
+      '📐 Corrected coordinate calculation bug that caused incomplete tile coverage',
+      '✅ Added complete tile coverage verification for all zoom levels'
+    ],
+    technical: [
+      '🏗️ Rails rake task downloads and packages all BRC tiles into optimized ZIP file',
+      '🌐 API endpoint `/api/v1/tiles/package.zip` serves tile packages to frontend',
+      '💾 Tiles stored with all subdomain variations to match leaflet.offline expectations',
+      '🔄 Automatic fallback to individual tile downloads if ZIP method fails',
+      '🧪 Enhanced PWA Test Reset includes map tile database cleanup'
+    ]
+  },
+  {
     version: '3.10.0',
     date: '2025-07-28',
     added: [

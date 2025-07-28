@@ -31,6 +31,14 @@
           </button>
         </div>
 
+        <div class="reset-card">
+          <h3>🗺️ Clear Map Tiles</h3>
+          <p>Remove offline map tiles to test re-downloading</p>
+          <button @click="clearMapTiles" class="reset-btn secondary" :disabled="resetting">
+            {{ resetting ? 'Clearing...' : 'Clear Map Tiles' }}
+          </button>
+        </div>
+
         <div class="reset-card danger">
           <h3>🚨 Full Reset</h3>
           <p>Clear everything: onboarding, data, caches, and user preferences</p>
@@ -226,6 +234,42 @@ const clearServiceWorkerCache = async () => {
   }
 }
 
+const clearMapTiles = async () => {
+  resetting.value = true
+  
+  try {
+    // Clear the leaflet.offline database
+    addLogEntry('Clearing map tiles database...', 'info')
+    
+    const deleteReq = indexedDB.deleteDatabase('leaflet.offline')
+    
+    await new Promise((resolve, reject) => {
+      deleteReq.onsuccess = () => {
+        addLogEntry('Map tiles database cleared', 'success')
+        resolve()
+      }
+      
+      deleteReq.onerror = () => {
+        addLogEntry('Failed to clear map tiles database', 'error')
+        reject(new Error('Failed to delete database'))
+      }
+      
+      deleteReq.onblocked = () => {
+        addLogEntry('Map tiles database blocked - close map view and try again', 'warning')
+        resolve() // Still resolve to complete the operation
+      }
+    })
+    
+    showSuccess('Map tiles cleared - re-download through Settings')
+    await refreshStatus()
+  } catch (error) {
+    addLogEntry(`Failed to clear map tiles: ${error.message}`, 'error')
+    showError('Failed to clear map tiles')
+  } finally {
+    resetting.value = false
+  }
+}
+
 const pwaTestReset = async () => {
   console.log('PWA Test Reset clicked')
   if (!confirm('This will completely wipe the app for PWA testing. Continue?')) {
@@ -281,6 +325,9 @@ const fullReset = async (skipConfirm = false) => {
           addLogEntry('Note: indexedDB.databases() not supported, using known names', 'info')
         }
       }
+      
+      // Add leaflet.offline to known databases
+      knownDatabases.push('leaflet.offline')
       
       // Always try to delete known database names
       for (const dbName of knownDatabases) {
@@ -752,6 +799,11 @@ onMounted(async () => {
 .log-error {
   background: rgba(244, 67, 54, 0.1);
   border-left: 3px solid #f44336;
+}
+
+.log-warning {
+  background: rgba(255, 152, 0, 0.1);
+  border-left: 3px solid #ff9800;
 }
 
 .log-time {

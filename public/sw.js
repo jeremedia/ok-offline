@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ok-offline-v13'; // Global location state management
+const CACHE_NAME = 'ok-offline-v14'; // API tile hosting implementation
 const urlsToCache = [
   // Core app files
   '/',
@@ -85,6 +85,7 @@ async function checkIndexedDBForTile(url) {
         getRequest.onsuccess = () => {
           const result = getRequest.result;
           if (result && result.blob) {
+            // console.log(`[SW] Found tile in IndexedDB: ${key}`);
             // Return the blob as a Response
             resolve(new Response(result.blob, {
               status: 200,
@@ -95,6 +96,7 @@ async function checkIndexedDBForTile(url) {
               }
             }));
           } else {
+            // console.log(`[SW] Tile NOT found in IndexedDB: ${key}`);
             resolve(null);
           }
         };
@@ -198,6 +200,7 @@ self.addEventListener('fetch', event => {
 
   // Handle OpenStreetMap tiles for Black Rock City area
   if (url.hostname.includes('tile.openstreetmap.org')) {
+    // console.log(`[SW] Tile request: ${url.href}`);
     event.respondWith(
       // First check IndexedDB for pre-downloaded tiles
       checkIndexedDBForTile(url).then(idbResponse => {

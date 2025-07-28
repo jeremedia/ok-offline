@@ -258,8 +258,13 @@ class TileDownloader {
         const [_, z, x, y] = match
         const tileData = await zip.files[filename].async('blob')
         
-        // Store in IndexedDB with same key format as individual downloads
-        await this.storeTileBlob(`${z}-${x}-${y}`, tileData)
+        // Store tile with all possible subdomain variations to match leaflet.offline expectations
+        const subdomains = ['a', 'b', 'c']
+        for (const subdomain of subdomains) {
+          const urlKey = `https://${subdomain}.tile.openstreetmap.org/${z}/${x}/${y}.png`
+          // console.log(`[TileDownloader] Storing tile with key: ${urlKey}`)
+          await this.storeTileBlob(urlKey, tileData)
+        }
         
         extractedCount++
         this.downloadedTiles = extractedCount
@@ -307,11 +312,22 @@ class TileDownloader {
         const transaction = db.transaction(['tileStore'], 'readwrite')
         const objectStore = transaction.objectStore('tileStore')
         
+        // Extract z, x, y from the URL key
+        const urlMatch = key.match(/\/(\d+)\/(\d+)\/(\d+)\.png$/)
+        const z = urlMatch ? parseInt(urlMatch[1]) : 0
+        const x = urlMatch ? parseInt(urlMatch[2]) : 0
+        const y = urlMatch ? parseInt(urlMatch[3]) : 0
+        
         const tileData = {
-          key: key,
-          url: `tile://${key}`, // Placeholder URL for extracted tiles
+          key: key,  // This should now be a full URL
+          url: key,  // Use the same URL
+          urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+          x: x,
+          y: y,
+          z: z,
           blob: blob,
-          timestamp: Date.now()
+          timestamp: Date.now(),
+          createdAt: Date.now()
         }
         
         const putRequest = objectStore.put(tileData)
@@ -470,29 +486,40 @@ class TileDownloader {
         const transaction = db.transaction(['tileStore'], 'readwrite')
         const objectStore = transaction.objectStore('tileStore')
         
-        const tileData = {
-          key: tileInfo.key,
-          url: tileInfo.url,
-          blob: blob,
-          timestamp: Date.now()
-        }
+        // Store tile with all possible subdomain variations to match leaflet.offline expectations
+        const subdomains = ['a', 'b', 'c']
+        let completedStores = 0
         
-        const putRequest = objectStore.put(tileData)
-        
-        putRequest.onsuccess = () => {
-          db.close()
-          resolve()
-        }
-        
-        putRequest.onerror = () => {
-          db.close()
-          reject(new Error('Failed to store tile'))
-        }
-        
-        transaction.onerror = () => {
-          db.close()
-          reject(new Error('Transaction failed'))
-        }
+        subdomains.forEach(subdomain => {
+          const urlKey = `https://${subdomain}.tile.openstreetmap.org/${tileInfo.z}/${tileInfo.x}/${tileInfo.y}.png`
+          
+          const tileData = {
+            key: urlKey,  // Use full URL as key for leaflet.offline compatibility
+            url: urlKey,
+            urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            x: tileInfo.x,
+            y: tileInfo.y,
+            z: tileInfo.z,
+            blob: blob,
+            timestamp: Date.now(),
+            createdAt: Date.now()
+          }
+          
+          const putRequest = objectStore.put(tileData)
+          
+          putRequest.onsuccess = () => {
+            completedStores++
+            if (completedStores === subdomains.length) {
+              db.close()
+              resolve()
+            }
+          }
+          
+          putRequest.onerror = () => {
+            db.close()
+            reject(new Error('Failed to store tile'))
+          }
+        })
       }
       
       request.onerror = () => {
