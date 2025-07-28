@@ -1,164 +1,62 @@
 <template>
   <section id="map-section" class="view">
+    <!-- Mobile Controls -->
     <button 
       v-if="isMobile" 
-      @click="controlsOpen = !controlsOpen"
+      @click="openBottomSheet"
       class="map-controls-toggle"
-      aria-label="Toggle map controls"
+      aria-label="Open map controls"
     >
-      {{ controlsOpen ? '✕' : '☰' }}
+      ☰
     </button>
-    <div 
-      class="map-controls" 
-      :class="{ 
-        'mobile-controls': isMobile,
-        'controls-open': controlsOpen 
-      }"
-    >
-      <label class="map-control">
-        <input type="checkbox" v-model="showCamps" @change="updateMarkers">
-        🏠 Camps
-      </label>
-      <label class="map-control">
-        <input type="checkbox" v-model="showArt" @change="updateMarkers">
-        🎨 Art
-      </label>
-      <label class="map-control">
-        <input type="checkbox" v-model="showEvents" @change="updateMarkers">
-        🎉 Events
-      </label>
-      <label class="map-control">
-        <input type="checkbox" v-model="showFavoritesOnly" @change="updateMarkers">
-        ⭐ Favorites Only
-      </label>
-      <hr class="controls-divider">
-      <label class="map-control">
-        <input type="checkbox" v-model="showStreets" @change="updateGISLayers">
-        🛣️ Streets
-      </label>
-      <label class="map-control">
-        <input type="checkbox" v-model="showTrashFence" @change="updateGISLayers">
-        🚧 Trash Fence
-      </label>
-      <label class="map-control">
-        <input type="checkbox" v-model="showCityBlocks" @change="updateGISLayers">
-        🏗️ City Blocks
-      </label>
-      <label class="map-control">
-        <input type="checkbox" v-model="showPlazas" @change="updateGISLayers">
-        📍 Plazas & CPNs
-      </label>
-      <div v-if="gisLoadingState.isLoading" class="loading-indicator">
-        Loading GIS data...
-      </div>
-      <div v-if="gisLoadingState.error" class="error-indicator">
-        Error loading GIS data
-      </div>
-      <hr class="controls-divider">
-      <label class="map-control" :class="{ disabled: year !== '2025' }">
-        <input 
-          type="checkbox" 
-          v-model="showBasemap" 
-          @change="toggleBasemap"
-          :disabled="year !== '2025'"
-        >
-        🗺️ Base Map {{ year !== '2025' ? '(2025 only)' : '' }}
-      </label>
-      <label class="map-control">
-        <input type="checkbox" v-model="cityAligned" @change="toggleRotation">
-        🧭 City Aligned
-      </label>
-      <div v-if="cityAligned" class="map-control rotation-slider">
-        <label>🔄 Rotation: {{ rotationAngle }}°</label>
-        <input 
-          type="range" 
-          v-model="rotationAngle" 
-          @input="applyRotation"
-          min="-180" 
-          max="180" 
-          step="1"
-          class="slider"
-        >
-        <div class="rotation-note">
-          🔄 Drag/zoom work with rotation
-        </div>
-      </div>
-      <label class="map-control">
-        <input type="checkbox" v-model="showLegend">
-        📊 Show Legend
-      </label>
-      <button 
-        v-if="isMobile && controlsOpen" 
-        @click="controlsOpen = false"
-        class="close-controls"
-      >
-        Close
-      </button>
+    
+    <!-- Desktop Controls -->
+    <div v-if="!isMobile" class="map-controls-desktop">
+      <MapControlTabs
+        :isMobile="false"
+        :year="year"
+        :gisLoadingState="gisLoadingState"
+        :initialControls="mapControls"
+        :showResetView="showResetView"
+        @update:controls="handleControlUpdate"
+        @reset-view="resetMapView"
+      />
     </div>
-    <div 
-      v-if="isMobile && controlsOpen" 
-      @click="controlsOpen = false"
-      class="map-controls-backdrop"
-    ></div>
+    
+    <!-- Mobile Bottom Sheet -->
+    <MapBottomSheet
+      v-if="isMobile"
+      ref="bottomSheet"
+      :year="year"
+      :gisLoadingState="gisLoadingState"
+      :controls="mapControls"
+      :showResetView="showResetView"
+      @update:controls="handleControlUpdate"
+      @reset-view="resetMapView"
+    />
+    
+    <!-- Map Container -->
     <div id="map" ref="mapContainer"></div>
-    <div class="map-legend" v-if="showLegend">
-      <h4>Map Legend</h4>
-      <div class="legend-item">
-        <span class="legend-icon special-location">🔥</span>
-        <span>The Man</span>
-      </div>
-      <div class="legend-item">
-        <span class="legend-icon special-location">⛺</span>
-        <span>Center Camp</span>
-      </div>
-      <div class="legend-item">
-        <span class="legend-icon special-location">🏛</span>
-        <span>Temple</span>
-      </div>
-      <div class="legend-item">
-        <span class="legend-icon special-location">✈️</span>
-        <span>Airport</span>
-      </div>
-      <hr class="legend-divider">
-      <div class="legend-item">
-        <span class="legend-icon camp">🏠</span>
-        <span>Camps</span>
-      </div>
-      <div class="legend-item">
-        <span class="legend-icon art">🎨</span>
-        <span>Art</span>
-      </div>
-      <div class="legend-item">
-        <span class="legend-icon event">🎉</span>
-        <span>Events</span>
-      </div>
-      <hr class="legend-divider">
-      <div class="legend-item">
-        <span class="legend-line street"></span>
-        <span>Streets</span>
-      </div>
-      <div class="legend-item">
-        <span class="legend-line trash-fence"></span>
-        <span>Trash Fence</span>
-      </div>
-      <div class="legend-item">
-        <span class="legend-area city-block"></span>
-        <span>City Blocks</span>
-      </div>
-      <div class="legend-item">
-        <span class="legend-area plaza"></span>
-        <span>Plazas</span>
-      </div>
-      <div class="legend-item">
-        <span class="legend-icon cpn">📍</span>
-        <span>CPN Locations</span>
-      </div>
-    </div>
+    
+    <!-- Legend (Desktop draggable, Mobile fixed) -->
+    <MapLegend 
+      v-if="mapControls.showLegend"
+      :isMobile="isMobile"
+    />
+    
+    <!-- Map Info Inspector -->
+    <MapInfo
+      v-if="mapControls.showMapInfo"
+      :isMobile="isMobile"
+      :mapState="mapInfoState"
+      :markerStats="markerStats"
+      :layerStatus="layerStatus"
+    />
   </section>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, reactive, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import L from 'leaflet'
 import 'leaflet-rotate'
@@ -179,9 +77,14 @@ import {
   gisStyles,
   setGISYear 
 } from '../services/gisData'
+import MapControlTabs from '../components/map/MapControlTabs.vue'
+import MapBottomSheet from '../components/map/MapBottomSheet.vue'
+import MapLegend from '../components/map/MapLegend.vue'
+import MapInfo from '../components/map/MapInfo.vue'
 
 const route = useRoute()
 const mapContainer = ref(null)
+const bottomSheet = ref(null)
 
 // Mobile detection and controls state
 const checkIfMobile = () => {
@@ -199,7 +102,68 @@ const checkIfMobile = () => {
 }
 
 const isMobile = ref(checkIfMobile())
-const controlsOpen = ref(false)
+const year = computed(() => route.params.year || localStorage.getItem('selectedYear') || '2025')
+
+// Consolidated map controls
+const mapControls = reactive({
+  // Content controls
+  showCamps: true,
+  showArt: true,
+  showEvents: true,
+  showFavoritesOnly: false,
+  // Layer controls
+  showStreets: true,
+  showTrashFence: true,
+  showCityBlocks: false,
+  showPlazas: true,
+  // Display controls
+  showBasemap: false,
+  cityAligned: false,
+  rotationAngle: 0,
+  showLegend: !isMobile.value,
+  showMapInfo: false
+})
+
+const gisLoadingState = ref({ isLoading: false, error: null })
+
+// Track if we're at default view
+const isDefaultView = ref(true)
+const defaultZoom = 15  // Zoom level that shows city streets on base map
+const defaultCenter = BRC_CENTER
+const defaultBearing = 0
+
+// Computed property to show reset view button
+const showResetView = computed(() => !isDefaultView.value)
+
+// Map info state
+const mapInfoState = reactive({
+  zoom: defaultZoom,
+  center: { lat: defaultCenter[0], lng: defaultCenter[1] },
+  bearing: 0,
+  bounds: null,
+  size: { width: 0, height: 0 }
+})
+
+// Marker statistics
+const markerStats = reactive({
+  camps: 0,
+  campsFiltered: 0,
+  art: 0,
+  artFiltered: 0,
+  events: 0,
+  eventsFiltered: 0,
+  totalVisible: 0
+})
+
+// Layer status for info panel
+const layerStatus = computed(() => ({
+  basemap: mapControls.showBasemap,
+  streets: mapControls.showStreets,
+  trashFence: mapControls.showTrashFence,
+  cityBlocks: mapControls.showCityBlocks,
+  plazas: mapControls.showPlazas,
+  favoritesOnly: mapControls.showFavoritesOnly
+}))
 
 // Debug mobile detection
 console.log('MapView mobile detection:', {
@@ -212,26 +176,49 @@ console.log('MapView mobile detection:', {
 // Handle window resize
 const handleResize = () => {
   isMobile.value = checkIfMobile()
-  // Close controls when switching to desktop
-  if (!isMobile.value) {
-    controlsOpen.value = false
+}
+
+// Open bottom sheet on mobile
+const openBottomSheet = () => {
+  if (bottomSheet.value) {
+    bottomSheet.value.open()
   }
 }
 
-const showCamps = ref(true)
-const showArt = ref(true)
-const showEvents = ref(true)
-const showFavoritesOnly = ref(false)
-const showStreets = ref(true)
-const showTrashFence = ref(true)
-const showCityBlocks = ref(false)
-const showPlazas = ref(true)
-const gisLoadingState = ref({ isLoading: false, error: null })
-const showLegend = ref(!isMobile.value) // Off by default on mobile
-const showBasemap = ref(false) // Default to off, will be enabled for 2025
-const cityAligned = ref(false)
-const rotationAngle = ref(0)
-const year = computed(() => route.params.year || localStorage.getItem('selectedYear') || '2025')
+// Handle control updates from child components
+const handleControlUpdate = (newControls) => {
+  Object.assign(mapControls, newControls)
+  
+  // Don't process updates if map isn't initialized yet
+  if (!map || !markersLayer) {
+    console.log('Map not initialized yet, skipping control update')
+    return
+  }
+  
+  // Update markers based on content controls
+  if ('showCamps' in newControls || 'showArt' in newControls || 
+      'showEvents' in newControls || 'showFavoritesOnly' in newControls) {
+    updateMarkers()
+  }
+  
+  // Update GIS layers
+  if ('showStreets' in newControls || 'showTrashFence' in newControls || 
+      'showCityBlocks' in newControls || 'showPlazas' in newControls) {
+    updateGISLayers()
+  }
+  
+  // Handle basemap toggle
+  if ('showBasemap' in newControls) {
+    toggleBasemap()
+  }
+  
+  // Handle rotation
+  if ('cityAligned' in newControls) {
+    toggleRotation()
+  } else if ('rotationAngle' in newControls && mapControls.cityAligned) {
+    applyRotation()
+  }
+}
 
 let map = null
 let markersLayer = null
@@ -248,23 +235,120 @@ let items = {
   events: []
 }
 
+// Function to check if we're at default view
+const checkDefaultView = () => {
+  if (!map) return
+  
+  const currentZoom = map.getZoom()
+  const currentCenter = map.getCenter()
+  const currentBearing = map.getBearing() || 0
+  
+  const isAtDefaultZoom = Math.abs(currentZoom - defaultZoom) < 0.5
+  const isAtDefaultCenter = currentCenter.distanceTo(defaultCenter) < 100 // within 100 meters
+  const isAtDefaultBearing = Math.abs(currentBearing - defaultBearing) < 5 // within 5 degrees
+  
+  isDefaultView.value = isAtDefaultZoom && isAtDefaultCenter && isAtDefaultBearing && !mapControls.cityAligned
+}
+
+// Update map info state
+const updateMapInfoState = () => {
+  if (!map) return
+  
+  const center = map.getCenter()
+  const size = map.getSize()
+  
+  mapInfoState.zoom = map.getZoom()
+  mapInfoState.center = { lat: center.lat, lng: center.lng }
+  mapInfoState.bearing = map.getBearing() || 0
+  mapInfoState.bounds = map.getBounds()
+  mapInfoState.size = { width: size.x, height: size.y }
+}
+
+// Reset map to default view
+const resetMapView = () => {
+  if (!map) return
+  
+  // Reset rotation if needed
+  if (mapControls.cityAligned) {
+    mapControls.cityAligned = false
+    mapControls.rotationAngle = 0
+  }
+  
+  // Animate to default view
+  map.flyTo(defaultCenter, defaultZoom, {
+    bearing: defaultBearing,
+    duration: 1.5
+  })
+  
+  // Update default view state after animation
+  setTimeout(() => {
+    checkDefaultView()
+  }, 1600)
+}
+
+// Watch for year changes and reload data
+watch(year, async (newYear, oldYear) => {
+  if (!map || newYear === oldYear) return
+  
+  console.log(`Year changed from ${oldYear} to ${newYear}, reloading map data...`)
+  
+  // Update basemap availability (only 2025 has basemap)
+  if (newYear !== '2025' && mapControls.showBasemap) {
+    mapControls.showBasemap = false
+    toggleBasemap()
+  } else if (newYear === '2025' && !mapControls.showBasemap) {
+    // Optionally enable basemap for 2025
+    mapControls.showBasemap = true
+    toggleBasemap()
+  }
+  
+  // Clear existing markers
+  markersLayer.clearLayers()
+  
+  // Update GIS data year
+  setGISYear(parseInt(newYear))
+  
+  // Reload GIS layers with new year's data
+  updateGISLayers()
+  
+  // Re-add special locations
+  addSpecialLocations()
+  
+  // Reload camps/art/events data
+  await loadData()
+  
+  // Update map info state
+  updateMapInfoState()
+})
+
 onMounted(async () => {
-  // Enable basemap only for 2025
-  if (year.value === '2025') {
-    showBasemap.value = true
+  // Load saved control state from localStorage
+  const savedState = localStorage.getItem('mapControlState')
+  if (savedState) {
+    try {
+      const parsed = JSON.parse(savedState)
+      Object.assign(mapControls, parsed)
+    } catch (e) {
+      console.error('Failed to load map control state:', e)
+    }
+  }
+  
+  // Enable basemap only for 2025 (if not already set by saved state)
+  if (year.value === '2025' && savedState && !JSON.parse(savedState).hasOwnProperty('showBasemap')) {
+    mapControls.showBasemap = true
   }
   
   // Initialize Leaflet map with rotation support
   map = L.map(mapContainer.value, {
     center: BRC_CENTER,
-    zoom: 13,
+    zoom: defaultZoom,
     zoomControl: true,
     rotate: true,
     bearing: 0
   })
   
   // Set black background when basemap is off
-  if (!showBasemap.value) {
+  if (!mapControls.showBasemap) {
     mapContainer.value.style.backgroundColor = '#000000'
   }
   
@@ -277,11 +361,28 @@ onMounted(async () => {
   })
   
   // Add basemap if enabled and year is 2025
-  if (showBasemap.value && year.value === '2025') {
+  if (mapControls.showBasemap && year.value === '2025') {
     basemapLayer.addTo(map)
   }
   
   markersLayer = L.layerGroup().addTo(map)
+  
+  // Track map view changes
+  map.on('moveend zoomend rotate', () => {
+    checkDefaultView()
+    updateMapInfoState()
+  })
+  
+  // Track map size changes
+  map.on('resize', () => {
+    mapInfoState.size = {
+      width: map.getSize().x,
+      height: map.getSize().y
+    }
+  })
+  
+  // Initial map info update
+  updateMapInfoState()
   
   // Initialize GIS data
   gisLoadingState.value.isLoading = true
@@ -301,6 +402,16 @@ onMounted(async () => {
   
   // Load data and add markers
   loadData()
+  
+  // Apply rotation if city aligned was saved
+  if (mapControls.cityAligned) {
+    // If no rotation angle is saved, calculate it
+    if (!mapControls.rotationAngle) {
+      mapControls.rotationAngle = calculateCityAlignmentAngle()
+    }
+    map.setBearing(mapControls.rotationAngle)
+    console.log(`Applied saved rotation: ${mapControls.rotationAngle}°`)
+  }
   
   // Fix map size after mounting
   setTimeout(() => {
@@ -378,29 +489,58 @@ const updateMarkers = () => {
     }
   })
   
+  // Reset marker statistics
+  let visibleCamps = 0
+  let filteredCamps = 0
+  let visibleArt = 0
+  let filteredArt = 0
+  let visibleEvents = 0
+  let filteredEvents = 0
+  
   // Add camp markers
-  if (showCamps.value) {
+  if (mapControls.showCamps) {
     items.camps.forEach(camp => {
-      if (showFavoritesOnly.value && !isFavorite('camp', camp.uid)) return
+      if (mapControls.showFavoritesOnly && !isFavorite('camp', camp.uid)) {
+        filteredCamps++
+        return
+      }
       addMarker(camp, 'camp', '🏠')
+      visibleCamps++
     })
   }
   
   // Add art markers
-  if (showArt.value) {
+  if (mapControls.showArt) {
     items.art.forEach(art => {
-      if (showFavoritesOnly.value && !isFavorite('art', art.uid)) return
+      if (mapControls.showFavoritesOnly && !isFavorite('art', art.uid)) {
+        filteredArt++
+        return
+      }
       addMarker(art, 'art', '🎨')
+      visibleArt++
     })
   }
   
   // Add event markers
-  if (showEvents.value) {
+  if (mapControls.showEvents) {
     items.events.forEach(event => {
-      if (showFavoritesOnly.value && !isFavorite('event', event.uid)) return
+      if (mapControls.showFavoritesOnly && !isFavorite('event', event.uid)) {
+        filteredEvents++
+        return
+      }
       addMarker(event, 'event', '🎉')
+      visibleEvents++
     })
   }
+  
+  // Update marker statistics
+  markerStats.camps = mapControls.showCamps ? visibleCamps : 0
+  markerStats.campsFiltered = mapControls.showCamps ? filteredCamps : 0
+  markerStats.art = mapControls.showArt ? visibleArt : 0
+  markerStats.artFiltered = mapControls.showArt ? filteredArt : 0
+  markerStats.events = mapControls.showEvents ? visibleEvents : 0
+  markerStats.eventsFiltered = mapControls.showEvents ? filteredEvents : 0
+  markerStats.totalVisible = visibleCamps + visibleArt + visibleEvents
 }
 
 const addMarker = (item, type, icon) => {
@@ -444,13 +584,13 @@ const updateGISLayers = () => {
   })
   
   // Add street lines
-  if (showStreets.value) {
+  if (mapControls.showStreets) {
     const streetData = getStreetLines()
     if (streetData) {
       gisLayers.streetLines = L.geoJSON(streetData, {
         style: (feature) => {
           // Use custom red styling when basemap is off
-          if (!showBasemap.value) {
+          if (!mapControls.showBasemap) {
             return {
               color: '#FF0000',
               weight: 4,
@@ -471,7 +611,7 @@ const updateGISLayers = () => {
   }
   
   // Add trash fence
-  if (showTrashFence.value) {
+  if (mapControls.showTrashFence) {
     const trashFenceData = getTrashFence()
     if (trashFenceData) {
       gisLayers.trashFence = L.geoJSON(trashFenceData, {
@@ -481,7 +621,7 @@ const updateGISLayers = () => {
   }
   
   // Add city blocks
-  if (showCityBlocks.value) {
+  if (mapControls.showCityBlocks) {
     const cityBlocksData = getCityBlocks()
     if (cityBlocksData) {
       gisLayers.cityBlocks = L.geoJSON(cityBlocksData, {
@@ -491,7 +631,7 @@ const updateGISLayers = () => {
   }
   
   // Add plazas and CPNs
-  if (showPlazas.value) {
+  if (mapControls.showPlazas) {
     // Clear existing plaza markers
     markersLayer.eachLayer(layer => {
       if (layer.options.icon?.options?.className?.includes('plaza-marker')) {
@@ -544,7 +684,7 @@ const updateGISLayers = () => {
 const toggleBasemap = () => {
   if (year.value !== '2025') return // Don't allow toggle for non-2025 years
   
-  if (showBasemap.value) {
+  if (mapControls.showBasemap) {
     basemapLayer.addTo(map)
     mapContainer.value.style.backgroundColor = ''
   } else {
@@ -557,24 +697,26 @@ const toggleBasemap = () => {
 }
 
 const toggleRotation = () => {
-  if (cityAligned.value) {
-    // Start with calculated angle, but allow manual adjustment
-    const calculatedAngle = calculateCityAlignmentAngle()
-    rotationAngle.value = calculatedAngle
-    console.log(`Initial calculated angle: ${calculatedAngle}°`)
-    
-    // Show detailed geometric analysis
-    const analysis = analyzeCityGeometry(getTrashFence())
-    if (analysis.success) {
-      console.log('🔥 Black Rock City Geometric Analysis:', analysis)
+  if (mapControls.cityAligned) {
+    // Only calculate angle if we don't have one saved
+    if (!mapControls.rotationAngle) {
+      const calculatedAngle = calculateCityAlignmentAngle()
+      mapControls.rotationAngle = calculatedAngle
+      console.log(`Initial calculated angle: ${calculatedAngle}°`)
+      
+      // Show detailed geometric analysis
+      const analysis = analyzeCityGeometry(getTrashFence())
+      if (analysis.success) {
+        console.log('🔥 Black Rock City Geometric Analysis:', analysis)
+      }
     }
     
     // Use leaflet-rotate API for proper rotation
-    map.setBearing(calculatedAngle)
+    map.setBearing(mapControls.rotationAngle)
     console.log('🔄 Applied rotation using leaflet-rotate plugin')
   } else {
     // Reset to true north orientation
-    rotationAngle.value = 0
+    mapControls.rotationAngle = 0
     map.setBearing(0)
     console.log('🧭 Reset to true north orientation')
   }
@@ -584,12 +726,12 @@ const toggleRotation = () => {
 }
 
 const applyRotation = () => {
-  if (!cityAligned.value) return
+  if (!mapControls.cityAligned) return
   
-  console.log(`Applying rotation: ${rotationAngle.value}°`)
+  console.log(`Applying rotation: ${mapControls.rotationAngle}°`)
   
   // Use leaflet-rotate API for proper rotation with maintained interactions
-  map.setBearing(rotationAngle.value)
+  map.setBearing(mapControls.rotationAngle)
   console.log('🔄 Applied rotation using leaflet-rotate plugin - interactions maintained!')
   
   // Force map to recalculate size after rotation
@@ -624,30 +766,12 @@ const applyRotation = () => {
   margin-top: 0 !important;
 }
 
-.map-controls {
+/* Desktop controls container */
+.map-controls-desktop {
   position: absolute;
   top: 10px;
   right: 10px;
   z-index: 1000;
-  background: rgba(26, 26, 26, 0.9);
-  padding: 10px;
-  border-radius: 4px;
-  border: 1px solid #444;
-}
-
-.map-control {
-  display: block;
-  margin: 5px 0;
-  color: #ccc;
-  cursor: pointer;
-}
-
-.map-control input {
-  margin-right: 5px;
-}
-
-.map-control:hover {
-  color: #fff;
 }
 
 /* Mobile controls toggle button */
@@ -672,110 +796,6 @@ const applyRotation = () => {
 
 .map-controls-toggle:active {
   transform: scale(0.95);
-}
-
-/* Mobile controls panel */
-.map-controls.mobile-controls {
-  position: fixed;
-  top: 0;
-  right: -350px; /* Fully hide panel including padding, border and shadow */
-  width: 280px;
-  height: 100%;
-  max-width: 80vw;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  transition: right 0.3s ease;
-  z-index: 1002;
-  padding: 20px;
-  padding-bottom: 80px;
-}
-
-.map-controls.mobile-controls.controls-open {
-  right: 0;
-}
-
-/* Mobile backdrop */
-.map-controls-backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 1001;
-  animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-/* Close button for mobile */
-.close-controls {
-  width: 100%;
-  padding: 12px;
-  margin-top: 20px;
-  background: #333;
-  border: 1px solid #555;
-  color: #fff;
-  border-radius: 4px;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-.close-controls:active {
-  background: #444;
-}
-
-.rotation-slider {
-  flex-direction: column;
-  gap: 5px;
-}
-
-.rotation-slider label {
-  font-size: 11px;
-  color: #FFD700;
-}
-
-.slider {
-  width: 150px;
-  height: 4px;
-  border-radius: 2px;
-  background: #444;
-  outline: none;
-}
-
-.slider::-webkit-slider-thumb {
-  appearance: none;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: #FFD700;
-  cursor: pointer;
-}
-
-.slider::-moz-range-thumb {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: #FFD700;
-  cursor: pointer;
-  border: none;
-}
-
-.rotation-note {
-  font-size: 10px;
-  color: #00ff88;
-  margin-top: 3px;
-  text-align: center;
-  line-height: 1.2;
-}
-
-.controls-divider {
-  margin: 10px 0;
-  border: none;
-  border-top: 1px solid #444;
 }
 
 /* Marker styles */
@@ -836,126 +856,62 @@ const applyRotation = () => {
   margin-left: 5px;
 }
 
-/* Map Legend */
-.map-legend {
-  position: fixed;
-  bottom: 20px;
-  left: 10px;
-  z-index: 1000;
-  background: rgba(26, 26, 26, 0.95);
-  padding: 15px;
-  border-radius: 4px;
-  border: 1px solid #444;
-  max-width: 200px;
-}
 
-.map-legend h4 {
-  margin: 0 0 10px 0;
-  color: #FFD700;
-  font-size: 14px;
-  text-transform: uppercase;
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  margin: 5px 0;
-  color: #ccc;
-  font-size: 12px;
-}
-
-.legend-divider {
-  margin: 10px 0;
-  border: none;
-  border-top: 1px solid #444;
-}
-
-.legend-icon {
-  width: 20px;
-  height: 20px;
-  margin-right: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  font-size: 12px;
-}
-
-.legend-icon.special-location {
-  background: rgba(139, 0, 0, 0.9);
-  border: 2px solid #FFD700;
-}
-
-.legend-icon.camp {
-  background: rgba(34, 139, 34, 0.9);
-  border: 2px solid #fff;
-}
-
-.legend-icon.art {
-  background: rgba(106, 90, 205, 0.9);
-  border: 2px solid #fff;
-}
-
-.legend-icon.event {
-  background: rgba(255, 140, 0, 0.9);
-  border: 2px solid #fff;
-}
-
-.legend-icon.cpn {
-  background: rgba(106, 13, 173, 0.9);
-  border: 2px solid #fff;
-}
-
-.legend-line {
-  width: 20px;
-  height: 2px;
-  margin-right: 8px;
-  display: block;
-}
-
-.legend-line.street {
-  background: #666666;
-}
-
-.legend-line.trash-fence {
-  background: #ff0000;
-  border-top: 2px dashed #ff0000;
-  height: 0;
-}
-
-.legend-area {
-  width: 20px;
-  height: 14px;
-  margin-right: 8px;
-  display: block;
-  border: 1px solid;
-}
-
-.legend-area.city-block {
-  border-color: #444444;
-  background: rgba(34, 34, 34, 0.3);
-}
-
-.legend-area.plaza {
-  border-color: #6a0dad;
-  background: rgba(106, 13, 173, 0.3);
-}
-
+/* Leaflet Popup Styling */
 :deep(.leaflet-popup-content-wrapper) {
-  background: #1a1a1a;
-  color: #ccc;
+  background: rgba(26, 26, 26, 0.95);
+  color: #fff;
+  border: 1px solid #444;
+  border-radius: 8px;
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.4);
+}
+
+:deep(.leaflet-popup-content) {
+  margin: 12px;
+  font-size: 14px;
+  line-height: 1.4;
 }
 
 :deep(.leaflet-popup-tip) {
-  background: #1a1a1a;
+  background: rgba(26, 26, 26, 0.95);
+  border: 1px solid #444;
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.4);
 }
 
 :deep(.leaflet-popup-close-button) {
-  color: #ccc;
+  color: #999;
+  font-size: 20px;
+  font-weight: normal;
+  padding: 4px 8px;
 }
 
 :deep(.leaflet-popup-close-button:hover) {
   color: #fff;
+  background: rgba(139, 0, 0, 0.3);
+  border-radius: 4px;
+}
+
+/* Popup content styling */
+:deep(.map-popup) {
+  color: #fff;
+}
+
+:deep(.map-popup strong) {
+  color: #FFD700;
+  font-size: 16px;
+  display: block;
+  margin-bottom: 4px;
+}
+
+:deep(.map-popup small) {
+  color: #ccc;
+  font-size: 12px;
+}
+
+:deep(.map-popup .favorited) {
+  color: #FFD700;
+  font-size: 16px;
+  margin-left: 8px;
 }
 
 /* Map background styling */
@@ -965,15 +921,5 @@ const applyRotation = () => {
 
 :deep(.leaflet-container) {
   background-color: inherit;
-}
-
-/* Disabled control styling */
-.map-control.disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.map-control.disabled input {
-  cursor: not-allowed;
 }
 </style>

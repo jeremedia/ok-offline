@@ -1,0 +1,458 @@
+<template>
+  <div 
+    class="map-legend"
+    :class="{ collapsed: isCollapsed, dragging: isDragging }"
+    :style="legendStyle"
+    ref="legendEl"
+  >
+    <!-- Legend Header -->
+    <div 
+      class="legend-header"
+      @mousedown="startDrag"
+      @touchstart="startDrag"
+    >
+      <h4>Map Legend</h4>
+      <button 
+        @click.stop="toggleCollapse"
+        class="collapse-btn"
+        :aria-label="isCollapsed ? 'Expand legend' : 'Collapse legend'"
+      >
+        {{ isCollapsed ? '▲' : '▼' }}
+      </button>
+    </div>
+    
+    <!-- Legend Content -->
+    <div v-show="!isCollapsed" class="legend-content">
+      <!-- Special Locations -->
+      <div class="legend-section">
+        <div class="legend-item">
+          <span class="legend-icon special-location">🔥</span>
+          <span>The Man</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-icon special-location">⛺</span>
+          <span>Center Camp</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-icon special-location">🏛</span>
+          <span>Temple</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-icon special-location">✈️</span>
+          <span>Airport</span>
+        </div>
+      </div>
+      
+      <hr class="legend-divider">
+      
+      <!-- Content Markers -->
+      <div class="legend-section">
+        <div class="legend-item">
+          <span class="legend-icon camp">🏠</span>
+          <span>Camps</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-icon art">🎨</span>
+          <span>Art</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-icon event">🎉</span>
+          <span>Events</span>
+        </div>
+      </div>
+      
+      <hr class="legend-divider">
+      
+      <!-- GIS Layers -->
+      <div class="legend-section">
+        <div class="legend-item">
+          <span class="legend-line street"></span>
+          <span>Streets</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-line trash-fence"></span>
+          <span>Trash Fence</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-area city-block"></span>
+          <span>City Blocks</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-area plaza"></span>
+          <span>Plazas</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-icon cpn">📍</span>
+          <span>CPN Locations</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, reactive, onMounted, computed } from 'vue'
+
+const props = defineProps({
+  isMobile: Boolean
+})
+
+const legendEl = ref(null)
+const isCollapsed = ref(false)
+const isDragging = ref(false)
+
+// Position state
+const position = reactive({
+  x: 10,
+  y: window.innerHeight - 400
+})
+
+// Drag state
+const dragStart = reactive({
+  x: 0,
+  y: 0,
+  offsetX: 0,
+  offsetY: 0
+})
+
+const legendStyle = computed(() => {
+  if (props.isMobile) {
+    // Mobile positioning
+    return {
+      left: '10px',
+      bottom: isCollapsed.value ? '20px' : '20px',
+      top: 'auto'
+    }
+  }
+  
+  // Desktop draggable positioning
+  if (isCollapsed.value) {
+    // When collapsed, snap to bottom
+    return {
+      left: `${position.x}px`,
+      bottom: '20px',
+      top: 'auto'
+    }
+  }
+  
+  // Normal expanded state
+  return {
+    left: `${position.x}px`,
+    top: `${position.y}px`
+  }
+})
+
+// Load saved state
+onMounted(() => {
+  // Load collapsed state
+  const savedCollapsed = localStorage.getItem('mapLegendCollapsed')
+  if (savedCollapsed !== null) {
+    isCollapsed.value = savedCollapsed === 'true'
+  }
+  
+  // Load position (desktop only)
+  if (!props.isMobile) {
+    const savedPosition = localStorage.getItem('mapLegendPosition')
+    if (savedPosition) {
+      try {
+        const parsed = JSON.parse(savedPosition)
+        position.x = parsed.x
+        position.y = parsed.y
+        
+        // Ensure legend stays in viewport
+        constrainToViewport()
+      } catch (e) {
+        console.error('Failed to load legend position:', e)
+      }
+    }
+  }
+})
+
+// Toggle collapse state
+const toggleCollapse = () => {
+  isCollapsed.value = !isCollapsed.value
+  localStorage.setItem('mapLegendCollapsed', isCollapsed.value)
+  
+  // If expanding on desktop, restore to saved position
+  if (!isCollapsed.value && !props.isMobile) {
+    const savedPosition = localStorage.getItem('mapLegendPosition')
+    if (savedPosition) {
+      try {
+        const parsed = JSON.parse(savedPosition)
+        position.x = parsed.x
+        position.y = parsed.y
+        constrainToViewport()
+      } catch (e) {
+        // If no saved position, place it at a default spot
+        position.y = window.innerHeight - 400
+      }
+    }
+  }
+}
+
+// Drag functionality (desktop only)
+const startDrag = (e) => {
+  if (props.isMobile || isCollapsed.value) return
+  
+  isDragging.value = true
+  
+  const event = e.type.includes('touch') ? e.touches[0] : e
+  dragStart.x = event.clientX
+  dragStart.y = event.clientY
+  dragStart.offsetX = position.x
+  dragStart.offsetY = position.y
+  
+  document.addEventListener('mousemove', onDrag)
+  document.addEventListener('mouseup', endDrag)
+  document.addEventListener('touchmove', onDrag)
+  document.addEventListener('touchend', endDrag)
+  
+  e.preventDefault()
+}
+
+let animationFrameId = null
+
+const onDrag = (e) => {
+  if (!isDragging.value) return
+  
+  e.preventDefault()
+  
+  // Cancel any pending animation frame
+  if (animationFrameId) {
+    cancelAnimationFrame(animationFrameId)
+  }
+  
+  // Use requestAnimationFrame for smooth updates
+  animationFrameId = requestAnimationFrame(() => {
+    const event = e.type.includes('touch') ? e.touches[0] : e
+    const deltaX = event.clientX - dragStart.x
+    const deltaY = event.clientY - dragStart.y
+    
+    position.x = dragStart.offsetX + deltaX
+    position.y = dragStart.offsetY + deltaY
+    
+    constrainToViewport()
+  })
+}
+
+const endDrag = () => {
+  if (!isDragging.value) return
+  
+  isDragging.value = false
+  
+  // Cancel any pending animation frame
+  if (animationFrameId) {
+    cancelAnimationFrame(animationFrameId)
+    animationFrameId = null
+  }
+  
+  // Save position
+  localStorage.setItem('mapLegendPosition', JSON.stringify({
+    x: position.x,
+    y: position.y
+  }))
+  
+  document.removeEventListener('mousemove', onDrag)
+  document.removeEventListener('mouseup', endDrag)
+  document.removeEventListener('touchmove', onDrag)
+  document.removeEventListener('touchend', endDrag)
+}
+
+// Ensure legend stays within viewport
+const constrainToViewport = () => {
+  if (!legendEl.value) return
+  
+  const rect = legendEl.value.getBoundingClientRect()
+  const maxX = window.innerWidth - rect.width - 10
+  const maxY = window.innerHeight - rect.height - 10
+  
+  position.x = Math.max(10, Math.min(position.x, maxX))
+  position.y = Math.max(10, Math.min(position.y, maxY))
+}
+
+// Update position on window resize
+window.addEventListener('resize', constrainToViewport)
+</script>
+
+<style scoped>
+.map-legend {
+  position: fixed;
+  z-index: 1000;
+  background: rgba(26, 26, 26, 0.95);
+  padding: 0;
+  border-radius: 8px;
+  border: 1px solid #444;
+  min-width: 200px;
+  max-width: 250px;
+  transition: opacity 0.2s ease, min-width 0.3s ease, max-width 0.3s ease;
+  user-select: none;
+}
+
+.map-legend.dragging {
+  opacity: 0.9;
+  cursor: move;
+  transition: opacity 0.2s ease; /* Only transition opacity when dragging */
+}
+
+.map-legend.collapsed {
+  min-width: auto;
+  max-width: fit-content;
+}
+
+/* Legend Header */
+.legend-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px 8px 0 0;
+  cursor: move;
+}
+
+.collapsed .legend-header {
+  cursor: default;
+  border-radius: 8px;
+}
+
+.legend-header h4 {
+  margin: 0;
+  color: #FFD700;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.collapse-btn {
+  background: none;
+  border: none;
+  color: #ccc;
+  font-size: 0.75rem;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  margin-left: 0.5rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
+.collapse-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+/* Legend Content */
+.legend-content {
+  padding: 1rem;
+}
+
+.legend-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #ccc;
+  font-size: 0.75rem;
+}
+
+.legend-divider {
+  margin: 0.75rem 0;
+  border: none;
+  border-top: 1px solid #444;
+}
+
+/* Legend Icons */
+.legend-icon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.legend-icon.special-location {
+  background: rgba(139, 0, 0, 0.9);
+  border: 2px solid #FFD700;
+}
+
+.legend-icon.camp {
+  background: rgba(34, 139, 34, 0.9);
+  border: 2px solid #fff;
+}
+
+.legend-icon.art {
+  background: rgba(106, 90, 205, 0.9);
+  border: 2px solid #fff;
+}
+
+.legend-icon.event {
+  background: rgba(255, 140, 0, 0.9);
+  border: 2px solid #fff;
+}
+
+.legend-icon.cpn {
+  background: rgba(106, 13, 173, 0.9);
+  border: 2px solid #fff;
+}
+
+/* Legend Lines */
+.legend-line {
+  width: 20px;
+  height: 2px;
+  flex-shrink: 0;
+}
+
+.legend-line.street {
+  background: #666666;
+}
+
+.legend-line.trash-fence {
+  background: #ff0000;
+  border-top: 2px dashed #ff0000;
+  height: 0;
+}
+
+/* Legend Areas */
+.legend-area {
+  width: 20px;
+  height: 14px;
+  border: 1px solid;
+  flex-shrink: 0;
+}
+
+.legend-area.city-block {
+  border-color: #444444;
+  background: rgba(34, 34, 34, 0.3);
+}
+
+.legend-area.plaza {
+  border-color: #6a0dad;
+  background: rgba(106, 13, 173, 0.3);
+}
+
+/* Mobile styles */
+@media (max-width: 600px) {
+  .map-legend {
+    position: fixed;
+    left: 10px !important;
+    bottom: 20px !important;
+    top: auto !important;
+  }
+  
+  .legend-header {
+    cursor: default;
+  }
+}
+</style>
