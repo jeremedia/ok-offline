@@ -162,6 +162,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import L from 'leaflet'
 import 'leaflet-rotate'
+import 'leaflet.offline'
 import { BRC_CENTER } from '../config'
 import { getFromCache } from '../services/storage'
 import { isFavorite } from '../services/favorites'
@@ -267,8 +268,8 @@ onMounted(async () => {
     mapContainer.value.style.backgroundColor = '#000000'
   }
   
-  // Create basemap layer (tiles will be cached by service worker and leaflet.offline)
-  basemapLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  // Create offline-capable basemap layer
+  basemapLayer = L.tileLayer.offline('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap contributors',
     maxZoom: 19,
     subdomains: 'abc',
