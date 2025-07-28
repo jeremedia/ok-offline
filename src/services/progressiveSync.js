@@ -330,7 +330,15 @@ export class ProgressiveSync {
         // Only update progress every 5% to avoid too many updates
         if (percentage - lastReportedPercentage >= 5 || percentage === 100) {
           lastReportedPercentage = percentage
-          const details = `Downloading map tiles: ${downloaded}/${total} (${percentage}%)`
+          
+          // Different messages for ZIP download vs extraction
+          let details
+          if (percentage <= 50) {
+            details = `Downloading map package: ${percentage * 2}%`
+          } else {
+            const extractPercent = (percentage - 50) * 2
+            details = `Extracting map tiles: ${extractPercent}%`
+          }
           
           // Keep the current stage progress, but update the details
           this.updateProgress(details, this.progress.current, this.progress.total)

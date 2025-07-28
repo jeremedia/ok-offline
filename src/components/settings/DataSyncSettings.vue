@@ -256,8 +256,16 @@ const syncAllYears = async () => {
     try {
       await tileDownloader.downloadAllTiles((downloaded, total, percentage) => {
         tileProgress.value = { downloaded, total, percentage }
-        syncAllProgress.value = `Downloading map tiles: ${downloaded}/${total} (${percentage}%)`
-        console.log('[DataSyncSettings] Tile progress in syncAllYears:', downloaded, total, percentage)
+        
+        // Different messages for ZIP download vs extraction
+        if (percentage <= 50) {
+          syncAllProgress.value = `Downloading map package: ${percentage * 2}%`
+        } else {
+          const extractPercent = (percentage - 50) * 2
+          syncAllProgress.value = `Extracting map tiles: ${extractPercent}%`
+        }
+        
+        // console.log('[DataSyncSettings] Tile progress in syncAllYears:', downloaded, total, percentage)
       })
       
       showSuccess('Map tiles downloaded successfully!')
@@ -304,17 +312,17 @@ const clearAllData = async () => {
 
 // Download tiles manually
 const downloadTiles = async () => {
-  console.log('[DataSyncSettings] Manual tile download requested')
+  // console.log('[DataSyncSettings] Manual tile download requested')
   downloadingTiles.value = true
   tileProgress.value = { downloaded: 0, total: 0, percentage: 0 }
   
   try {
     const result = await tileDownloader.downloadAllTiles((downloaded, total, percentage) => {
-      console.log('[DataSyncSettings] Tile progress:', downloaded, total, percentage)
+      // console.log('[DataSyncSettings] Tile progress:', downloaded, total, percentage)
       tileProgress.value = { downloaded, total, percentage }
     })
     
-    console.log('[DataSyncSettings] Tile download result:', result)
+    // console.log('[DataSyncSettings] Tile download result:', result)
     
     if (result.success) {
       showSuccess(`Downloaded ${result.downloaded} map tiles successfully!`)
@@ -322,7 +330,7 @@ const downloadTiles = async () => {
       showWarning('Failed to download some tiles. Maps may not work fully offline.')
     }
   } catch (error) {
-    console.error('[DataSyncSettings] Tile download error:', error)
+    // console.error('[DataSyncSettings] Tile download error:', error)
     showError(`Failed to download map tiles: ${error.message}`)
   } finally {
     downloadingTiles.value = false
@@ -352,7 +360,7 @@ const clearTiles = async () => {
 // Load initial status
 onMounted(async () => {
   await loadSyncStatus()
-  console.log('[DataSyncSettings] Initial tile stats:', tileStats.value)
+  // console.log('[DataSyncSettings] Initial tile stats:', tileStats.value)
 })
 </script>
 
