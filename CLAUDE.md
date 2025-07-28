@@ -300,17 +300,19 @@ npm run preview
 
 ### IndexedDB Structure
 ```javascript
-Database: bm2025-db
+Database: bm2025-db (version: 2)
 ├── art (object store)
 │   ├── Key: uid
-│   └── Index: year
+│   └── Index: year (added in v2)
 ├── camp (object store)
 │   ├── Key: uid
-│   └── Index: year
+│   └── Index: year (added in v2)
 └── event (object store)
     ├── Key: uid
-    └── Index: year
+    └── Index: year (added in v2)
 ```
+
+**Note**: DB_VERSION is currently 2. The upgrade handler automatically adds the 'year' index to existing stores during migration.
 
 ### LocalStorage Keys
 - `selectedYear` - Current year selection

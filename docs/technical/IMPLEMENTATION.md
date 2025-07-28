@@ -95,7 +95,7 @@ filteredItems - Apply all filters
 ```javascript
 // Database configuration
 const DB_NAME = 'bm2025-db'
-const DB_VERSION = 1
+const DB_VERSION = 2  // Increased to add year index to all stores
 
 // Core methods:
 async function initDB() {
@@ -113,6 +113,12 @@ async function getFromCache(type, year) {
   // Return empty array if none
 }
 ```
+
+**Database Version History:**
+- **Version 1**: Initial schema with basic object stores (art, camp, event)
+- **Version 2**: Added 'year' index to all stores for efficient multi-year queries
+
+The `onupgradeneeded` handler manages schema migrations automatically, preserving existing data while adding new indexes or stores as needed.
 
 #### dataSync.js - API Sync & Enrichment
 ```javascript
