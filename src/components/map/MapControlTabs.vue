@@ -214,6 +214,7 @@ const controls = reactive({
   showRangers: true,
   showDPW: true,
   showArctica: true,
+  showPoints: true,
   // Layer controls
   showStreets: true,
   showTrashFence: true,

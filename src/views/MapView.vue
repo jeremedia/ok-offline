@@ -121,6 +121,7 @@ const mapControls = reactive({
   showRangers: true,
   showDPW: true,
   showArctica: true,
+  showPoints: true,
   // Layer controls
   showStreets: true,
   showTrashFence: true,
@@ -226,7 +227,7 @@ const handleControlUpdate = (newControls) => {
       'showCenterCamp' in newControls || 'showTemple' in newControls ||
       'showAirport' in newControls || 'showMedical' in newControls ||
       'showRangers' in newControls || 'showDPW' in newControls ||
-      'showArctica' in newControls) {
+      'showArctica' in newControls || 'showPoints' in newControls) {
     // Clear existing infrastructure markers
     markersLayer.eachLayer(layer => {
       if (layer.options.icon?.options?.className === 'infrastructure-marker') {
@@ -594,6 +595,42 @@ const addInfrastructureMarkers = () => {
       icon: '🧊',
       description: 'Ice sales - 9:00 sector',
       controlKey: 'showArctica'
+    },
+    // Fence Points
+    {
+      name: 'Point 1',
+      coords: [40.783393446220742, -119.23273810046453],
+      icon: '1️⃣',
+      description: 'Pentagon fence perimeter point',
+      controlKey: 'showPoints'
+    },
+    {
+      name: 'Point 2',
+      coords: [40.80735944960697, -119.21663410121627],
+      icon: '2️⃣',
+      description: 'Pentagon fence perimeter point',
+      controlKey: 'showPoints'
+    },
+    {
+      name: 'Point 3',
+      coords: [40.803105452153233, -119.18168009473446],
+      icon: '3️⃣',
+      description: 'Pentagon fence perimeter point',
+      controlKey: 'showPoints'
+    },
+    {
+      name: 'Point 4',
+      coords: [40.776562450338268, -119.17619408999123],
+      icon: '4️⃣',
+      description: 'Pentagon fence perimeter point',
+      controlKey: 'showPoints'
+    },
+    {
+      name: 'Point 5',
+      coords: [40.764368446673565, -119.20773209353284],
+      icon: '5️⃣',
+      description: 'Pentagon fence perimeter point',
+      controlKey: 'showPoints'
     }
   ]
   
@@ -842,7 +879,9 @@ const updateGISLayers = () => {
         // Ranger stations
         'Ranger HQ', 'Ranger Station Berlin', 'Ranger Station Tokyo',
         // Ice/Arctica locations
-        'Arctica', 'Arctica Center Camp', 'Ice Cubed Arctica 3', 'Ice Nine Arctica'
+        'Arctica', 'Arctica Center Camp', 'Ice Cubed Arctica 3', 'Ice Nine Arctica',
+        // Fence points
+        'Point 1', 'Point 2', 'Point 3', 'Point 4', 'Point 5'
       ]
       
       cpnData.features.forEach(feature => {
