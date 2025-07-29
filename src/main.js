@@ -15,7 +15,8 @@ import ResetView from './views/ResetView.vue'
 import NotFound from './views/NotFound.vue'
 
 // Import CSS
-import '/style.css'
+import './styles/fonts.css'
+import './styles/global.css'
 import 'leaflet/dist/leaflet.css'
 
 // Routes
@@ -166,7 +167,7 @@ nextTick(() => {
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     // Add cache-busting parameter to force service worker update
-    navigator.serviceWorker.register('/sw-enhanced.js?v=3.9.0')
+    navigator.serviceWorker.register('/sw.js?v=3.9.0')
       .then(registration => {
         console.log('Enhanced ServiceWorker registration successful:', registration)
         

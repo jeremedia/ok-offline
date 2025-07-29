@@ -377,15 +377,16 @@ export function brcAddressToLatLon(address) {
  */
 export function getSpecialLocationCoords(name) {
   const specialLocations = {
-    'CENTER CAMP': brcAddressToLatLon('6:00 & D'),
+    'CENTER CAMP': [40.78108859485657, -119.210735421], // Center Camp from 2025 GIS data
     'THE MAN': BRC_CONFIG.center,
     'GOLDEN SPIKE': BRC_CONFIG.center,
-    'TEMPLE': brcAddressToLatLon('12:00 & K'), // Temple location varies by year
+    'TEMPLE': [40.791815152314989, -119.19662192527863], // Temple location from 2025 GIS data
     'AIRPORT': [40.764261391285487, -119.205226911], // Airport from GIS data
     'DPOW': brcAddressToLatLon('5:30 & H'), // DPW location
-    'MEDICAL': brcAddressToLatLon('5:30 & ESPLANADE'), // Medical station
-    'RANGER HQ': brcAddressToLatLon('5:45 & ESPLANADE'), // Ranger HQ
-    'ARCTICA': brcAddressToLatLon('3:00 & C'), // Ice sales
+    'MEDICAL': [40.780065841922166, -119.20676566604881], // Legacy medical location (same as Rampart)
+    'RAMPART': [40.780065841922166, -119.20676566604881], // Rampart field hospital from GIS data
+    'RANGER HQ': [40.783641284089448, -119.21150356651343], // Ranger HQ from GIS data
+    // Note: ARCTICA removed - use specific locations (Ice Nine, Arctica Center Camp, Ice Cubed)
   }
   
   return specialLocations[name.toUpperCase()] || null

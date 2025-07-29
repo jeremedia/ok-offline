@@ -1,164 +1,62 @@
 <template>
   <section id="map-section" class="view">
+    <!-- Mobile Controls -->
     <button 
       v-if="isMobile" 
-      @click="controlsOpen = !controlsOpen"
+      @click="openBottomSheet"
       class="map-controls-toggle"
-      aria-label="Toggle map controls"
+      aria-label="Open map controls"
     >
-      {{ controlsOpen ? '✕' : '☰' }}
+      ☰
     </button>
-    <div 
-      class="map-controls" 
-      :class="{ 
-        'mobile-controls': isMobile,
-        'controls-open': controlsOpen 
-      }"
-    >
-      <label class="map-control">
-        <input type="checkbox" v-model="showCamps" @change="updateMarkers">
-        🏠 Camps
-      </label>
-      <label class="map-control">
-        <input type="checkbox" v-model="showArt" @change="updateMarkers">
-        🎨 Art
-      </label>
-      <label class="map-control">
-        <input type="checkbox" v-model="showEvents" @change="updateMarkers">
-        🎉 Events
-      </label>
-      <label class="map-control">
-        <input type="checkbox" v-model="showFavoritesOnly" @change="updateMarkers">
-        ⭐ Favorites Only
-      </label>
-      <hr class="controls-divider">
-      <label class="map-control">
-        <input type="checkbox" v-model="showStreets" @change="updateGISLayers">
-        🛣️ Streets
-      </label>
-      <label class="map-control">
-        <input type="checkbox" v-model="showTrashFence" @change="updateGISLayers">
-        🚧 Trash Fence
-      </label>
-      <label class="map-control">
-        <input type="checkbox" v-model="showCityBlocks" @change="updateGISLayers">
-        🏗️ City Blocks
-      </label>
-      <label class="map-control">
-        <input type="checkbox" v-model="showPlazas" @change="updateGISLayers">
-        📍 Plazas & CPNs
-      </label>
-      <div v-if="gisLoadingState.isLoading" class="loading-indicator">
-        Loading GIS data...
-      </div>
-      <div v-if="gisLoadingState.error" class="error-indicator">
-        Error loading GIS data
-      </div>
-      <hr class="controls-divider">
-      <label class="map-control" :class="{ disabled: year !== '2025' }">
-        <input 
-          type="checkbox" 
-          v-model="showBasemap" 
-          @change="toggleBasemap"
-          :disabled="year !== '2025'"
-        >
-        🗺️ Base Map {{ year !== '2025' ? '(2025 only)' : '' }}
-      </label>
-      <label class="map-control">
-        <input type="checkbox" v-model="cityAligned" @change="toggleRotation">
-        🧭 City Aligned
-      </label>
-      <div v-if="cityAligned" class="map-control rotation-slider">
-        <label>🔄 Rotation: {{ rotationAngle }}°</label>
-        <input 
-          type="range" 
-          v-model="rotationAngle" 
-          @input="applyRotation"
-          min="-180" 
-          max="180" 
-          step="1"
-          class="slider"
-        >
-        <div class="rotation-note">
-          🔄 Drag/zoom work with rotation
-        </div>
-      </div>
-      <label class="map-control">
-        <input type="checkbox" v-model="showLegend">
-        📊 Show Legend
-      </label>
-      <button 
-        v-if="isMobile && controlsOpen" 
-        @click="controlsOpen = false"
-        class="close-controls"
-      >
-        Close
-      </button>
+    
+    <!-- Desktop Controls -->
+    <div v-if="!isMobile" class="map-controls-desktop">
+      <MapControlTabs
+        :isMobile="false"
+        :year="year"
+        :gisLoadingState="gisLoadingState"
+        :initialControls="mapControls"
+        :showResetView="showResetView"
+        @update:controls="handleControlUpdate"
+        @reset-view="resetMapView"
+      />
     </div>
-    <div 
-      v-if="isMobile && controlsOpen" 
-      @click="controlsOpen = false"
-      class="map-controls-backdrop"
-    ></div>
+    
+    <!-- Mobile Bottom Sheet -->
+    <MapBottomSheet
+      v-if="isMobile"
+      ref="bottomSheet"
+      :year="year"
+      :gisLoadingState="gisLoadingState"
+      :controls="mapControls"
+      :showResetView="showResetView"
+      @update:controls="handleControlUpdate"
+      @reset-view="resetMapView"
+    />
+    
+    <!-- Map Container -->
     <div id="map" ref="mapContainer"></div>
-    <div class="map-legend" v-if="showLegend">
-      <h4>Map Legend</h4>
-      <div class="legend-item">
-        <span class="legend-icon special-location">🔥</span>
-        <span>The Man</span>
-      </div>
-      <div class="legend-item">
-        <span class="legend-icon special-location">⛺</span>
-        <span>Center Camp</span>
-      </div>
-      <div class="legend-item">
-        <span class="legend-icon special-location">🏛</span>
-        <span>Temple</span>
-      </div>
-      <div class="legend-item">
-        <span class="legend-icon special-location">✈️</span>
-        <span>Airport</span>
-      </div>
-      <hr class="legend-divider">
-      <div class="legend-item">
-        <span class="legend-icon camp">🏠</span>
-        <span>Camps</span>
-      </div>
-      <div class="legend-item">
-        <span class="legend-icon art">🎨</span>
-        <span>Art</span>
-      </div>
-      <div class="legend-item">
-        <span class="legend-icon event">🎉</span>
-        <span>Events</span>
-      </div>
-      <hr class="legend-divider">
-      <div class="legend-item">
-        <span class="legend-line street"></span>
-        <span>Streets</span>
-      </div>
-      <div class="legend-item">
-        <span class="legend-line trash-fence"></span>
-        <span>Trash Fence</span>
-      </div>
-      <div class="legend-item">
-        <span class="legend-area city-block"></span>
-        <span>City Blocks</span>
-      </div>
-      <div class="legend-item">
-        <span class="legend-area plaza"></span>
-        <span>Plazas</span>
-      </div>
-      <div class="legend-item">
-        <span class="legend-icon cpn">📍</span>
-        <span>CPN Locations</span>
-      </div>
-    </div>
+    
+    <!-- Legend (Desktop draggable, Mobile fixed) -->
+    <MapLegend 
+      v-if="mapControls.showLegend"
+      :isMobile="isMobile"
+    />
+    
+    <!-- Map Info Inspector -->
+    <MapInfo
+      v-if="mapControls.showMapInfo"
+      :isMobile="isMobile"
+      :mapState="mapInfoState"
+      :markerStats="markerStats"
+      :layerStatus="layerStatus"
+    />
   </section>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, reactive, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import L from 'leaflet'
 import 'leaflet-rotate'
@@ -175,13 +73,20 @@ import {
   getCityBlocks,
   getPlazas,
   getCPNs,
+  getToilets,
+  getStreetOutlines,
   getLoadingState,
   gisStyles,
   setGISYear 
 } from '../services/gisData'
+import MapControlTabs from '../components/map/MapControlTabs.vue'
+import MapBottomSheet from '../components/map/MapBottomSheet.vue'
+import MapLegend from '../components/map/MapLegend.vue'
+import MapInfo from '../components/map/MapInfo.vue'
 
 const route = useRoute()
 const mapContainer = ref(null)
+const bottomSheet = ref(null)
 
 // Mobile detection and controls state
 const checkIfMobile = () => {
@@ -199,7 +104,87 @@ const checkIfMobile = () => {
 }
 
 const isMobile = ref(checkIfMobile())
-const controlsOpen = ref(false)
+const year = computed(() => route.params.year || localStorage.getItem('selectedYear') || '2025')
+
+// Consolidated map controls
+const mapControls = reactive({
+  // Content controls
+  showCamps: true,
+  showArt: true,
+  showEvents: true,
+  showFavoritesOnly: false,
+  showInfrastructure: true,
+  // Infrastructure subcategories
+  showTheMan: true,
+  showCenterCamp: true,
+  showTemple: true,
+  showAirport: true,
+  showMedical: true,
+  showRangers: true,
+  showDPW: true,
+  showArctica: true,
+  showPoints: true,
+  showDMZ: true,
+  showHellStation: true,
+  showToilets: true,
+  // Layer controls
+  showStreets: true,
+  showStreetOutlines: false,
+  showTrashFence: true,
+  showCityBlocks: false,
+  showPlazas: true,
+  showPortals: true,
+  showCPNs: false, // Hidden by default
+  // Display controls
+  showBasemap: false,
+  cityAligned: false,
+  rotationAngle: 0,
+  showLegend: !isMobile.value,
+  showMapInfo: false
+})
+
+const gisLoadingState = ref({ isLoading: false, error: null })
+
+// Track if we're at default view
+const isDefaultView = ref(true)
+const defaultZoom = 15  // Zoom level that shows city streets on base map
+const defaultCenter = BRC_CENTER
+const defaultBearing = 0
+
+// Computed property to show reset view button
+const showResetView = computed(() => !isDefaultView.value)
+
+// Map info state
+const mapInfoState = reactive({
+  zoom: defaultZoom,
+  center: { lat: defaultCenter[0], lng: defaultCenter[1] },
+  bearing: 0,
+  bounds: null,
+  size: { width: 0, height: 0 }
+})
+
+// Marker statistics
+const markerStats = reactive({
+  camps: 0,
+  campsFiltered: 0,
+  art: 0,
+  artFiltered: 0,
+  events: 0,
+  eventsFiltered: 0,
+  totalVisible: 0
+})
+
+// Layer status for info panel
+const layerStatus = computed(() => ({
+  basemap: mapControls.showBasemap,
+  streets: mapControls.showStreets,
+  trashFence: mapControls.showTrashFence,
+  cityBlocks: mapControls.showCityBlocks,
+  plazas: mapControls.showPlazas,
+  cpns: mapControls.showCPNs,
+  infrastructure: mapControls.showInfrastructure,
+  favoritesOnly: mapControls.showFavoritesOnly
+}))
 
 // Debug mobile detection
 console.log('MapView mobile detection:', {
@@ -212,26 +197,75 @@ console.log('MapView mobile detection:', {
 // Handle window resize
 const handleResize = () => {
   isMobile.value = checkIfMobile()
-  // Close controls when switching to desktop
-  if (!isMobile.value) {
-    controlsOpen.value = false
+}
+
+// Open bottom sheet on mobile
+const openBottomSheet = () => {
+  if (bottomSheet.value) {
+    bottomSheet.value.open()
   }
 }
 
-const showCamps = ref(true)
-const showArt = ref(true)
-const showEvents = ref(true)
-const showFavoritesOnly = ref(false)
-const showStreets = ref(true)
-const showTrashFence = ref(true)
-const showCityBlocks = ref(false)
-const showPlazas = ref(true)
-const gisLoadingState = ref({ isLoading: false, error: null })
-const showLegend = ref(!isMobile.value) // Off by default on mobile
-const showBasemap = ref(false) // Default to off, will be enabled for 2025
-const cityAligned = ref(false)
-const rotationAngle = ref(0)
-const year = computed(() => route.params.year || localStorage.getItem('selectedYear') || '2025')
+// Handle control updates from child components
+const handleControlUpdate = (newControls) => {
+  Object.assign(mapControls, newControls)
+  
+  // Don't process updates if map isn't initialized yet
+  if (!map || !markersLayer) {
+    console.log('Map not initialized yet, skipping control update')
+    return
+  }
+  
+  // Update markers based on content controls
+  if ('showCamps' in newControls || 'showArt' in newControls || 
+      'showEvents' in newControls || 'showFavoritesOnly' in newControls) {
+    updateMarkers()
+  }
+  
+  // Update GIS layers
+  if ('showStreets' in newControls || 'showTrashFence' in newControls || 
+      'showCityBlocks' in newControls || 'showPlazas' in newControls || 
+      'showCPNs' in newControls) {
+    updateGISLayers()
+  }
+  
+  // Update infrastructure markers
+  if ('showInfrastructure' in newControls || 'showTheMan' in newControls || 
+      'showCenterCamp' in newControls || 'showTemple' in newControls ||
+      'showAirport' in newControls || 'showMedical' in newControls ||
+      'showRangers' in newControls || 'showDPW' in newControls ||
+      'showArctica' in newControls || 'showPoints' in newControls ||
+      'showDMZ' in newControls || 'showHellStation' in newControls || 
+      'showToilets' in newControls) {
+    // Clear existing infrastructure markers
+    markersLayer.eachLayer(layer => {
+      if (layer.options.icon?.options?.className === 'infrastructure-marker' ||
+          layer.options.icon?.options?.className === 'point-marker') {
+        markersLayer.removeLayer(layer)
+      }
+    })
+    // Re-add with new settings
+    addInfrastructureMarkers()
+  }
+  
+  // Update plazas, portals and CPNs layers
+  if ('showPlazas' in newControls || 'showPortals' in newControls || 'showCPNs' in newControls ||
+      'showStreets' in newControls || 'showStreetOutlines' in newControls) {
+    updateGISLayers()
+  }
+  
+  // Handle basemap toggle
+  if ('showBasemap' in newControls) {
+    toggleBasemap()
+  }
+  
+  // Handle rotation
+  if ('cityAligned' in newControls) {
+    toggleRotation()
+  } else if ('rotationAngle' in newControls && mapControls.cityAligned) {
+    applyRotation()
+  }
+}
 
 let map = null
 let markersLayer = null
@@ -248,23 +282,124 @@ let items = {
   events: []
 }
 
+// Function to check if we're at default view
+const checkDefaultView = () => {
+  if (!map) return
+  
+  const currentZoom = map.getZoom()
+  const currentCenter = map.getCenter()
+  const currentBearing = map.getBearing() || 0
+  
+  const isAtDefaultZoom = Math.abs(currentZoom - defaultZoom) < 0.5
+  const isAtDefaultCenter = currentCenter.distanceTo(defaultCenter) < 100 // within 100 meters
+  const isAtDefaultBearing = Math.abs(currentBearing - defaultBearing) < 5 // within 5 degrees
+  
+  isDefaultView.value = isAtDefaultZoom && isAtDefaultCenter && isAtDefaultBearing && !mapControls.cityAligned
+}
+
+// Update map info state
+const updateMapInfoState = () => {
+  if (!map) return
+  
+  const center = map.getCenter()
+  const size = map.getSize()
+  
+  mapInfoState.zoom = map.getZoom()
+  mapInfoState.center = { lat: center.lat, lng: center.lng }
+  mapInfoState.bearing = map.getBearing() || 0
+  mapInfoState.bounds = map.getBounds()
+  mapInfoState.size = { width: size.x, height: size.y }
+}
+
+// Reset map to default view
+const resetMapView = () => {
+  if (!map) return
+  
+  // Reset rotation if needed
+  if (mapControls.cityAligned) {
+    mapControls.cityAligned = false
+    mapControls.rotationAngle = 0
+  }
+  
+  // Animate to default view
+  map.flyTo(defaultCenter, defaultZoom, {
+    bearing: defaultBearing,
+    duration: 1.5
+  })
+  
+  // Update default view state after animation
+  setTimeout(() => {
+    checkDefaultView()
+  }, 1600)
+}
+
+// Watch for year changes and reload data
+watch(year, async (newYear, oldYear) => {
+  if (!map || newYear === oldYear) return
+  
+  console.log(`Year changed from ${oldYear} to ${newYear}, reloading map data...`)
+  
+  // Update basemap availability (only 2025 has basemap)
+  if (newYear !== '2025' && mapControls.showBasemap) {
+    mapControls.showBasemap = false
+    toggleBasemap()
+  } else if (newYear === '2025' && !mapControls.showBasemap) {
+    // Optionally enable basemap for 2025
+    mapControls.showBasemap = true
+    toggleBasemap()
+  }
+  
+  // Clear existing markers
+  markersLayer.clearLayers()
+  
+  // Update GIS data year
+  setGISYear(parseInt(newYear))
+  
+  // Reload GIS layers with new year's data
+  updateGISLayers()
+  
+  // Re-add infrastructure markers
+  addInfrastructureMarkers()
+  
+  // Reload camps/art/events data
+  await loadData()
+  
+  // Update map info state
+  updateMapInfoState()
+})
+
 onMounted(async () => {
-  // Enable basemap only for 2025
+  // Load saved control state from localStorage
+  const savedState = localStorage.getItem('mapControlState')
+  if (savedState) {
+    try {
+      const parsed = JSON.parse(savedState)
+      Object.assign(mapControls, parsed)
+    } catch (e) {
+      console.error('Failed to load map control state:', e)
+    }
+  }
+  
+  // Enable basemap by default for 2025
   if (year.value === '2025') {
-    showBasemap.value = true
+    // If no saved state exists, or saved state doesn't have showBasemap property, default to true
+    const parsed = savedState ? JSON.parse(savedState) : null
+    if (!parsed || !parsed.hasOwnProperty('showBasemap')) {
+      mapControls.showBasemap = true
+    }
   }
   
   // Initialize Leaflet map with rotation support
   map = L.map(mapContainer.value, {
     center: BRC_CENTER,
-    zoom: 13,
+    zoom: defaultZoom,
     zoomControl: true,
     rotate: true,
     bearing: 0
   })
   
   // Set black background when basemap is off
-  if (!showBasemap.value) {
+  if (!mapControls.showBasemap) {
     mapContainer.value.style.backgroundColor = '#000000'
   }
   
@@ -277,11 +412,28 @@ onMounted(async () => {
   })
   
   // Add basemap if enabled and year is 2025
-  if (showBasemap.value && year.value === '2025') {
+  if (mapControls.showBasemap && year.value === '2025') {
     basemapLayer.addTo(map)
   }
   
   markersLayer = L.layerGroup().addTo(map)
+  
+  // Track map view changes
+  map.on('moveend zoomend rotate', () => {
+    checkDefaultView()
+    updateMapInfoState()
+  })
+  
+  // Track map size changes
+  map.on('resize', () => {
+    mapInfoState.size = {
+      width: map.getSize().x,
+      height: map.getSize().y
+    }
+  })
+  
+  // Initial map info update
+  updateMapInfoState()
   
   // Initialize GIS data
   gisLoadingState.value.isLoading = true
@@ -296,11 +448,21 @@ onMounted(async () => {
     gisLoadingState.value = { isLoading: false, error: error.message }
   }
   
-  // Add special location markers
-  addSpecialLocations()
+  // Add infrastructure markers
+  addInfrastructureMarkers()
   
   // Load data and add markers
   loadData()
+  
+  // Apply rotation if city aligned was saved
+  if (mapControls.cityAligned) {
+    // If no rotation angle is saved, calculate it
+    if (!mapControls.rotationAngle) {
+      mapControls.rotationAngle = calculateCityAlignmentAngle()
+    }
+    map.setBearing(mapControls.rotationAngle)
+    console.log(`Applied saved rotation: ${mapControls.rotationAngle}°`)
+  }
   
   // Fix map size after mounting
   setTimeout(() => {
@@ -323,29 +485,280 @@ onMounted(async () => {
   })
 })
 
-const addSpecialLocations = () => {
+const addInfrastructureMarkers = () => {
+  // Clear any existing infrastructure markers first
+  markersLayer.eachLayer(layer => {
+    if (layer.options.icon?.options?.className === 'infrastructure-marker' ||
+        layer.options.icon?.options?.className === 'point-marker') {
+      markersLayer.removeLayer(layer)
+    }
+  })
+  
+  // Only add if infrastructure is enabled
+  if (!mapControls.showInfrastructure) {
+    return
+  }
+  
   const specialLocations = [
-    { name: 'The Man', coords: BRC_CENTER, icon: '🔥' },
-    { name: 'Center Camp', coords: getSpecialLocationCoords('CENTER CAMP'), icon: '⛺' },
-    { name: 'Temple', coords: getSpecialLocationCoords('TEMPLE'), icon: '🏛' },
-    { name: 'Airport', coords: getSpecialLocationCoords('AIRPORT'), icon: '✈️' }
+    { 
+      name: 'The Man', 
+      coords: BRC_CENTER, 
+      icon: '🔥',
+      description: 'The heart of Black Rock City - our iconic effigy and gathering place',
+      controlKey: 'showTheMan'
+    },
+    { 
+      name: 'Center Camp', 
+      coords: getSpecialLocationCoords('CENTER CAMP'), 
+      icon: '⛺',
+      description: 'Central hub with cafe, performances, and community services',
+      controlKey: 'showCenterCamp'
+    },
+    { 
+      name: 'Temple', 
+      coords: getSpecialLocationCoords('TEMPLE'), 
+      icon: '🏛',
+      description: 'Sacred space for reflection, remembrance, and healing',
+      controlKey: 'showTemple'
+    },
+    { 
+      name: 'Airport', 
+      coords: getSpecialLocationCoords('AIRPORT'), 
+      icon: '✈️',
+      description: 'Black Rock City Municipal Airport - scenic flights and aviation services',
+      controlKey: 'showAirport'
+    },
+    {
+      name: 'Rampart',
+      coords: getSpecialLocationCoords('RAMPART'),
+      icon: '🏥',
+      description: 'Field hospital - Emergency medical services',
+      controlKey: 'showMedical'
+    },
+    {
+      name: 'Station 3',
+      coords: [40.779913445324667, -119.19410428430447],
+      icon: '🏥',
+      description: 'Emergency services station - 3:00 sector',
+      controlKey: 'showMedical'
+    },
+    {
+      name: 'Station 6',
+      coords: [40.780509618833086, -119.20652384845459],
+      icon: '🏥',
+      description: 'Emergency services station - 6:00 sector',
+      controlKey: 'showMedical'
+    },
+    {
+      name: 'Station 9',
+      coords: [40.794090422669733, -119.21197232230189],
+      icon: '🏥',
+      description: 'Emergency services station - 9:00 sector',
+      controlKey: 'showMedical'
+    },
+    {
+      name: 'Ranger HQ',
+      coords: getSpecialLocationCoords('RANGER HQ'),
+      icon: '🎯',
+      description: 'Black Rock Rangers headquarters',
+      controlKey: 'showRangers'
+    },
+    {
+      name: 'Ranger Station Berlin',
+      coords: [40.780198273707583, -119.19373531464844],
+      icon: '🎯',
+      description: 'Black Rock Rangers station - 3:00 sector',
+      controlKey: 'showRangers'
+    },
+    {
+      name: 'Ranger Station Tokyo', 
+      coords: [40.793802980792094, -119.21231514202253],
+      icon: '🎯',
+      description: 'Black Rock Rangers station - 9:00 sector',
+      controlKey: 'showRangers'
+    },
+    {
+      name: 'DPW Depot',
+      coords: getSpecialLocationCoords('DPOW'),
+      icon: '🔧',
+      description: 'Department of Public Works - city infrastructure and operations',
+      controlKey: 'showDPW'
+    },
+    {
+      name: 'DMZ',
+      coords: [40.801877800966253, -119.19912198324673],
+      icon: '🎵',
+      description: 'Deep Playa Music Zone - sound camps and art cars',
+      controlKey: 'showDMZ'
+    },
+    {
+      name: 'Hell Station',
+      coords: [40.803639907073524, -119.20864863758413],
+      icon: '⛽',
+      description: 'Fuel depot for mutant vehicles and art cars',
+      controlKey: 'showHellStation'
+    },
+    {
+      name: 'Arctica Center Camp',
+      coords: [40.781994283666222, -119.21188689559813],
+      icon: '🧊',
+      description: 'Ice sales - Center Camp area',
+      controlKey: 'showArctica'
+    },
+    {
+      name: 'Ice Cubed (Arctica 3)',
+      coords: [40.777479126910642, -119.19003308126543],
+      icon: '🧊',
+      description: 'Ice sales - 3:00 sector',
+      controlKey: 'showArctica'
+    },
+    {
+      name: 'Ice Nine (Arctica 9)',
+      coords: [40.796433491680219, -119.21595443147025],
+      icon: '🧊',
+      description: 'Ice sales - 9:00 sector',
+      controlKey: 'showArctica'
+    },
+    // Fence Points
+    {
+      name: 'Point 1',
+      coords: [40.783393446220742, -119.23273810046453],
+      icon: '1️⃣',
+      description: 'Pentagon fence perimeter point',
+      controlKey: 'showPoints',
+      isPoint: true
+    },
+    {
+      name: 'Point 2',
+      coords: [40.80735944960697, -119.21663410121627],
+      icon: '2️⃣',
+      description: 'Pentagon fence perimeter point',
+      controlKey: 'showPoints',
+      isPoint: true
+    },
+    {
+      name: 'Point 3',
+      coords: [40.803105452153233, -119.18168009473446],
+      icon: '3️⃣',
+      description: 'Pentagon fence perimeter point',
+      controlKey: 'showPoints',
+      isPoint: true
+    },
+    {
+      name: 'Point 4',
+      coords: [40.776562450338268, -119.17619408999123],
+      icon: '4️⃣',
+      description: 'Pentagon fence perimeter point',
+      controlKey: 'showPoints',
+      isPoint: true
+    },
+    {
+      name: 'Point 5',
+      coords: [40.764368446673565, -119.20773209353284],
+      icon: '5️⃣',
+      description: 'Pentagon fence perimeter point',
+      controlKey: 'showPoints',
+      isPoint: true
+    }
   ]
   
   specialLocations.forEach(loc => {
+    // Check if this specific infrastructure is enabled
+    if (!mapControls[loc.controlKey]) return
+    
     if (loc.coords) {
       const marker = L.marker(loc.coords, {
         icon: L.divIcon({
-          className: 'special-marker',
+          className: loc.isPoint ? 'point-marker' : 'infrastructure-marker',
           html: `<div class="marker-icon">${loc.icon}</div>`,
           iconSize: [30, 30],
           iconAnchor: [15, 15]
         })
       })
       
-      marker.bindPopup(`<strong>${loc.name}</strong>`)
+      marker.bindPopup(`
+        <div class="infrastructure-popup">
+          <strong>${loc.name}</strong>
+          <span class="description">${loc.description}</span>
+        </div>
+      `)
       markersLayer.addLayer(marker)
     }
   })
+  
+  // Add toilet polygons and markers from GIS data
+  if (mapControls.showInfrastructure && mapControls.showToilets && year.value === '2025') {
+    const toiletData = getToilets()
+    if (toiletData && toiletData.features) {
+      // Create a layer group for toilets if it doesn't exist
+      if (!gisLayers.toilets) {
+        gisLayers.toilets = L.layerGroup()
+      } else {
+        gisLayers.toilets.clearLayers()
+      }
+      
+      toiletData.features.forEach((feature, index) => {
+        if (feature.geometry && feature.geometry.coordinates) {
+          // Add the polygon
+          const polygon = L.geoJSON(feature, {
+            style: {
+              color: '#007BFF',
+              weight: 2,
+              opacity: 0.8,
+              fillOpacity: 0.3,
+              fillColor: '#007BFF'
+            }
+          })
+          
+          // Bind popup to polygon
+          polygon.bindPopup(`
+            <div class="infrastructure-popup">
+              <strong>Porto Bank ${index + 1}</strong>
+              <span class="description">Portable restroom facilities</span>
+            </div>
+          `)
+          
+          gisLayers.toilets.addLayer(polygon)
+          
+          // Get the center of the polygon for the icon
+          const coords = feature.geometry.coordinates[0]
+          let sumLat = 0, sumLon = 0
+          coords.forEach(coord => {
+            sumLon += coord[0]
+            sumLat += coord[1]
+          })
+          const centerLat = sumLat / coords.length
+          const centerLon = sumLon / coords.length
+          
+          // Add a smaller icon on top
+          const marker = L.marker([centerLat, centerLon], {
+            icon: L.divIcon({
+              className: 'toilet-marker',
+              html: '<div class="marker-icon">🚻</div>',
+              iconSize: [20, 20],
+              iconAnchor: [10, 10]
+            })
+          })
+          
+          // Bind the same popup to the marker
+          marker.bindPopup(`
+            <div class="infrastructure-popup">
+              <strong>Porto Bank ${index + 1}</strong>
+              <span class="description">Portable restroom facilities</span>
+            </div>
+          `)
+          
+          gisLayers.toilets.addLayer(marker)
+        }
+      })
+      
+      // Add the toilet layer group to the map
+      gisLayers.toilets.addTo(map)
+    }
+  } else if (gisLayers.toilets && map.hasLayer(gisLayers.toilets)) {
+    // Remove toilet layer if toggled off
+    map.removeLayer(gisLayers.toilets)
+  }
 }
 
 const loadData = async () => {
@@ -371,36 +784,67 @@ const loadData = async () => {
 }
 
 const updateMarkers = () => {
-  // Clear existing markers (except special locations)
+  // Clear existing markers (except infrastructure)
   markersLayer.eachLayer(layer => {
-    if (!layer.options.icon?.options?.className?.includes('special-marker')) {
+    if (!layer.options.icon?.options?.className?.includes('infrastructure-marker') &&
+        !layer.options.icon?.options?.className?.includes('point-marker') &&
+        !layer.options.icon?.options?.className?.includes('cpn-marker')) {
       markersLayer.removeLayer(layer)
     }
   })
   
+  // Reset marker statistics
+  let visibleCamps = 0
+  let filteredCamps = 0
+  let visibleArt = 0
+  let filteredArt = 0
+  let visibleEvents = 0
+  let filteredEvents = 0
+  
   // Add camp markers
-  if (showCamps.value) {
+  if (mapControls.showCamps) {
     items.camps.forEach(camp => {
-      if (showFavoritesOnly.value && !isFavorite('camp', camp.uid)) return
+      if (mapControls.showFavoritesOnly && !isFavorite('camp', camp.uid)) {
+        filteredCamps++
+        return
+      }
       addMarker(camp, 'camp', '🏠')
+      visibleCamps++
     })
   }
   
   // Add art markers
-  if (showArt.value) {
+  if (mapControls.showArt) {
     items.art.forEach(art => {
-      if (showFavoritesOnly.value && !isFavorite('art', art.uid)) return
+      if (mapControls.showFavoritesOnly && !isFavorite('art', art.uid)) {
+        filteredArt++
+        return
+      }
       addMarker(art, 'art', '🎨')
+      visibleArt++
     })
   }
   
   // Add event markers
-  if (showEvents.value) {
+  if (mapControls.showEvents) {
     items.events.forEach(event => {
-      if (showFavoritesOnly.value && !isFavorite('event', event.uid)) return
+      if (mapControls.showFavoritesOnly && !isFavorite('event', event.uid)) {
+        filteredEvents++
+        return
+      }
       addMarker(event, 'event', '🎉')
+      visibleEvents++
     })
   }
+  
+  // Update marker statistics
+  markerStats.camps = mapControls.showCamps ? visibleCamps : 0
+  markerStats.campsFiltered = mapControls.showCamps ? filteredCamps : 0
+  markerStats.art = mapControls.showArt ? visibleArt : 0
+  markerStats.artFiltered = mapControls.showArt ? filteredArt : 0
+  markerStats.events = mapControls.showEvents ? visibleEvents : 0
+  markerStats.eventsFiltered = mapControls.showEvents ? filteredEvents : 0
+  markerStats.totalVisible = visibleCamps + visibleArt + visibleEvents
 }
 
 const addMarker = (item, type, icon) => {
@@ -436,24 +880,24 @@ const addMarker = (item, type, icon) => {
 }
 
 const updateGISLayers = () => {
-  // Remove existing GIS layers
-  Object.values(gisLayers).forEach(layer => {
-    if (layer && map.hasLayer(layer)) {
+  // Remove existing GIS layers (except toilets which is handled separately)
+  Object.entries(gisLayers).forEach(([key, layer]) => {
+    if (key !== 'toilets' && layer && map.hasLayer(layer)) {
       map.removeLayer(layer)
     }
   })
   
   // Add street lines
-  if (showStreets.value) {
+  if (mapControls.showStreets) {
     const streetData = getStreetLines()
     if (streetData) {
       gisLayers.streetLines = L.geoJSON(streetData, {
         style: (feature) => {
           // Use custom red styling when basemap is off
-          if (!showBasemap.value) {
+          if (!mapControls.showBasemap) {
             return {
               color: '#FF0000',
-              weight: 4,
+              weight: 1,
               opacity: 1
             }
           }
@@ -463,7 +907,28 @@ const updateGISLayers = () => {
         },
         onEachFeature: (feature, layer) => {
           if (feature.properties && feature.properties.name) {
-            layer.bindPopup(`<strong>${feature.properties.name}</strong><br>Type: ${feature.properties.type}`)
+            layer.bindPopup(`<strong>${feature.properties.name}</strong>Type: ${feature.properties.type}`)
+          }
+        }
+      }).addTo(map)
+    }
+  }
+  
+  // Add street outlines
+  if (mapControls.showStreetOutlines) {
+    const streetOutlinesData = getStreetOutlines()
+    if (streetOutlinesData) {
+      gisLayers.streetOutlines = L.geoJSON(streetOutlinesData, {
+        style: {
+          color: '#FF0000',
+          weight: 2,
+          opacity: 1,
+          fillOpacity: 0.25,
+          fillColor: '#FF0000'
+        },
+        onEachFeature: (feature, layer) => {
+          if (feature.properties && feature.properties.name) {
+            layer.bindPopup(`<strong>${feature.properties.name}</strong><br>Street Width`)
           }
         }
       }).addTo(map)
@@ -471,7 +936,7 @@ const updateGISLayers = () => {
   }
   
   // Add trash fence
-  if (showTrashFence.value) {
+  if (mapControls.showTrashFence) {
     const trashFenceData = getTrashFence()
     if (trashFenceData) {
       gisLayers.trashFence = L.geoJSON(trashFenceData, {
@@ -481,7 +946,7 @@ const updateGISLayers = () => {
   }
   
   // Add city blocks
-  if (showCityBlocks.value) {
+  if (mapControls.showCityBlocks) {
     const cityBlocksData = getCityBlocks()
     if (cityBlocksData) {
       gisLayers.cityBlocks = L.geoJSON(cityBlocksData, {
@@ -490,16 +955,9 @@ const updateGISLayers = () => {
     }
   }
   
-  // Add plazas and CPNs
-  if (showPlazas.value) {
-    // Clear existing plaza markers
-    markersLayer.eachLayer(layer => {
-      if (layer.options.icon?.options?.className?.includes('plaza-marker')) {
-        markersLayer.removeLayer(layer)
-      }
-    })
-    
-    // Add plaza polygons
+  
+  // Add plaza polygons
+  if (mapControls.showPlazas) {
     const plazaData = getPlazas()
     if (plazaData) {
       gisLayers.plazas = L.geoJSON(plazaData, {
@@ -512,28 +970,131 @@ const updateGISLayers = () => {
         },
         onEachFeature: (feature, layer) => {
           if (feature.properties && feature.properties.Name) {
-            layer.bindPopup(`<strong>${feature.properties.Name}</strong>`)
+            layer.bindPopup(`
+              <div class="infrastructure-popup">
+                <strong>${feature.properties.Name}</strong>
+                <span class="description">Plaza area - Themed community space</span>
+              </div>
+            `)
           }
         }
       }).addTo(map)
     }
-    
-    // Add CPN markers
+  }
+  
+  // Clear existing CPN and portal markers
+  markersLayer.eachLayer(layer => {
+    if (layer.options.icon?.options?.className === 'cpn-marker' || 
+        layer.options.icon?.options?.className === 'portal-marker') {
+      markersLayer.removeLayer(layer)
+    }
+  })
+  
+  // Add portal markers if enabled
+  if (mapControls.showPortals) {
     const cpnData = getCPNs()
     if (cpnData && cpnData.features) {
+      // Define portal names to look for
+      const portalNames = ['300 Portal', '430 Portal', '600 Portal', '730 Portal', '900 Portal']
+      
       cpnData.features.forEach(feature => {
         if (feature.geometry && feature.geometry.coordinates) {
+          const cpnName = feature.properties.NAME || ''
+          
+          // Check if this is a portal
+          if (portalNames.includes(cpnName)) {
+            const coords = [feature.geometry.coordinates[1], feature.geometry.coordinates[0]]
+            const marker = L.marker(coords, {
+              icon: L.divIcon({
+                className: 'portal-marker',
+                html: '<div class="marker-icon">🅿️</div>',
+                iconSize: [30, 30],
+                iconAnchor: [15, 15]
+              })
+            })
+            
+            marker.bindPopup(`
+              <div class="infrastructure-popup">
+                <strong>${cpnName}</strong><br>
+                <span class="description">Plaza entry/exit portal</span>
+              </div>
+            `)
+            markersLayer.addLayer(marker)
+          }
+        }
+      })
+    }
+  }
+  
+  // Add CPN markers if enabled
+  if (mapControls.showCPNs) {
+    const cpnData = getCPNs()
+    if (cpnData && cpnData.features) {
+      // Infrastructure items that should not be shown as CPNs (already handled by infrastructure layer)
+      // Filter out all infrastructure items now shown in infrastructure layer
+      const infrastructureNames = [
+        'The Man', 'The Temple', 'Center Camp', 'Airport', 
+        'DMV', 'Media Mecca', 'Playa Info', 'HEaT', 'DMZ', 'Hell Station',
+        // Medical/Emergency services
+        'Rampart', 'Station 3', 'Station 6', 'Station 9',
+        // Ranger stations
+        'Ranger HQ', 'Ranger Station Berlin', 'Ranger Station Tokyo',
+        // Ice/Arctica locations
+        'Arctica', 'Arctica Center Camp', 'Ice Cubed Arctica 3', 'Ice Nine Arctica',
+        // Fence points
+        'Point 1', 'Point 2', 'Point 3', 'Point 4', 'Point 5'
+      ]
+      
+      cpnData.features.forEach(feature => {
+        if (feature.geometry && feature.geometry.coordinates) {
+          const cpnName = feature.properties.NAME || ''
+          
+          // Skip if this is an infrastructure item or a portal (handled separately)
+          if (infrastructureNames.includes(cpnName) || cpnName.includes('Portal')) {
+            return
+          }
+          
           const coords = [feature.geometry.coordinates[1], feature.geometry.coordinates[0]]
           const marker = L.marker(coords, {
             icon: L.divIcon({
-              className: 'plaza-marker',
+              className: 'cpn-marker',
               html: '<div class="marker-icon">📍</div>',
               iconSize: [20, 20],
               iconAnchor: [10, 10]
             })
           })
           
-          marker.bindPopup(`<strong>${feature.properties.NAME || 'CPN'}</strong>`)
+          // Determine description based on name patterns
+          let description = 'City reference point'
+          
+          if (cpnName.includes('Plaza')) {
+            description = 'Plaza location marker'
+          } else if (cpnName.includes('Portal')) {
+            description = 'Plaza entry/exit portal'
+          } else if (cpnName.includes('Promenade')) {
+            description = 'Wide pedestrian walkway (40\' wide)'
+          } else if (cpnName.match(/^Station \d+$/)) {
+            description = 'Emergency services station - may include first aid'
+          } else if (cpnName.includes('Point')) {
+            description = 'Fence perimeter point'
+          } else if (cpnName.includes(' & ')) {
+            description = 'Street intersection marker'
+          } else if (cpnName === 'Rampart') {
+            description = 'Field hospital location'
+          } else if (cpnName === 'Greeters') {
+            description = 'City entrance - participant greeting station'
+          } else if (cpnName.includes('Ranger')) {
+            description = 'Black Rock Rangers station'
+          } else if (cpnName.includes('Arctica') || cpnName.includes('Ice')) {
+            description = 'Ice sales location'
+          }
+          
+          marker.bindPopup(`
+            <div class="infrastructure-popup">
+              <strong>${cpnName}</strong><br>
+              <span class="description">${description}</span>
+            </div>
+          `)
           markersLayer.addLayer(marker)
         }
       })
@@ -544,7 +1105,7 @@ const updateGISLayers = () => {
 const toggleBasemap = () => {
   if (year.value !== '2025') return // Don't allow toggle for non-2025 years
   
-  if (showBasemap.value) {
+  if (mapControls.showBasemap) {
     basemapLayer.addTo(map)
     mapContainer.value.style.backgroundColor = ''
   } else {
@@ -557,24 +1118,26 @@ const toggleBasemap = () => {
 }
 
 const toggleRotation = () => {
-  if (cityAligned.value) {
-    // Start with calculated angle, but allow manual adjustment
-    const calculatedAngle = calculateCityAlignmentAngle()
-    rotationAngle.value = calculatedAngle
-    console.log(`Initial calculated angle: ${calculatedAngle}°`)
-    
-    // Show detailed geometric analysis
-    const analysis = analyzeCityGeometry(getTrashFence())
-    if (analysis.success) {
-      console.log('🔥 Black Rock City Geometric Analysis:', analysis)
+  if (mapControls.cityAligned) {
+    // Only calculate angle if we don't have one saved
+    if (!mapControls.rotationAngle) {
+      const calculatedAngle = calculateCityAlignmentAngle()
+      mapControls.rotationAngle = calculatedAngle
+      console.log(`Initial calculated angle: ${calculatedAngle}°`)
+      
+      // Show detailed geometric analysis
+      const analysis = analyzeCityGeometry(getTrashFence())
+      if (analysis.success) {
+        console.log('🔥 Black Rock City Geometric Analysis:', analysis)
+      }
     }
     
     // Use leaflet-rotate API for proper rotation
-    map.setBearing(calculatedAngle)
+    map.setBearing(mapControls.rotationAngle)
     console.log('🔄 Applied rotation using leaflet-rotate plugin')
   } else {
     // Reset to true north orientation
-    rotationAngle.value = 0
+    mapControls.rotationAngle = 0
     map.setBearing(0)
     console.log('🧭 Reset to true north orientation')
   }
@@ -584,12 +1147,12 @@ const toggleRotation = () => {
 }
 
 const applyRotation = () => {
-  if (!cityAligned.value) return
+  if (!mapControls.cityAligned) return
   
-  console.log(`Applying rotation: ${rotationAngle.value}°`)
+  console.log(`Applying rotation: ${mapControls.rotationAngle}°`)
   
   // Use leaflet-rotate API for proper rotation with maintained interactions
-  map.setBearing(rotationAngle.value)
+  map.setBearing(mapControls.rotationAngle)
   console.log('🔄 Applied rotation using leaflet-rotate plugin - interactions maintained!')
   
   // Force map to recalculate size after rotation
@@ -624,30 +1187,12 @@ const applyRotation = () => {
   margin-top: 0 !important;
 }
 
-.map-controls {
+/* Desktop controls container */
+.map-controls-desktop {
   position: absolute;
   top: 10px;
   right: 10px;
   z-index: 1000;
-  background: rgba(26, 26, 26, 0.9);
-  padding: 10px;
-  border-radius: 4px;
-  border: 1px solid #444;
-}
-
-.map-control {
-  display: block;
-  margin: 5px 0;
-  color: #ccc;
-  cursor: pointer;
-}
-
-.map-control input {
-  margin-right: 5px;
-}
-
-.map-control:hover {
-  color: #fff;
 }
 
 /* Mobile controls toggle button */
@@ -674,110 +1219,6 @@ const applyRotation = () => {
   transform: scale(0.95);
 }
 
-/* Mobile controls panel */
-.map-controls.mobile-controls {
-  position: fixed;
-  top: 0;
-  right: -350px; /* Fully hide panel including padding, border and shadow */
-  width: 280px;
-  height: 100%;
-  max-width: 80vw;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  transition: right 0.3s ease;
-  z-index: 1002;
-  padding: 20px;
-  padding-bottom: 80px;
-}
-
-.map-controls.mobile-controls.controls-open {
-  right: 0;
-}
-
-/* Mobile backdrop */
-.map-controls-backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 1001;
-  animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-/* Close button for mobile */
-.close-controls {
-  width: 100%;
-  padding: 12px;
-  margin-top: 20px;
-  background: #333;
-  border: 1px solid #555;
-  color: #fff;
-  border-radius: 4px;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-.close-controls:active {
-  background: #444;
-}
-
-.rotation-slider {
-  flex-direction: column;
-  gap: 5px;
-}
-
-.rotation-slider label {
-  font-size: 11px;
-  color: #FFD700;
-}
-
-.slider {
-  width: 150px;
-  height: 4px;
-  border-radius: 2px;
-  background: #444;
-  outline: none;
-}
-
-.slider::-webkit-slider-thumb {
-  appearance: none;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: #FFD700;
-  cursor: pointer;
-}
-
-.slider::-moz-range-thumb {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: #FFD700;
-  cursor: pointer;
-  border: none;
-}
-
-.rotation-note {
-  font-size: 10px;
-  color: #00ff88;
-  margin-top: 3px;
-  text-align: center;
-  line-height: 1.2;
-}
-
-.controls-divider {
-  margin: 10px 0;
-  border: none;
-  border-top: 1px solid #444;
-}
-
 /* Marker styles */
 :deep(.marker-icon) {
   background: rgba(26, 26, 26, 0.9);
@@ -789,10 +1230,38 @@ const applyRotation = () => {
   border: 2px solid #fff;
 }
 
-:deep(.special-marker .marker-icon) {
+:deep(.infrastructure-marker .marker-icon) {
   background: rgba(139, 0, 0, 0.9);
   border-color: #FFD700;
   font-size: 20px;
+}
+
+:deep(.point-marker .marker-icon) {
+  background: none;
+  border: none;
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+:deep(.cpn-marker .marker-icon) {
+  background: rgba(106, 13, 173, 0.9);
+  border-color: #fff;
+  font-size: 14px;
+}
+
+:deep(.portal-marker .marker-icon) {
+  background: rgba(139, 0, 0, 0.9);
+  border-color: #FFD700;
+  font-size: 18px;
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+}
+
+:deep(.toilet-marker .marker-icon) {
+  background: rgba(0, 123, 255, 0.9);
+  border-color: #fff;
+  font-size: 12px;
 }
 
 :deep(.camp-marker .marker-icon) {
@@ -836,126 +1305,92 @@ const applyRotation = () => {
   margin-left: 5px;
 }
 
-/* Map Legend */
-.map-legend {
-  position: fixed;
-  bottom: 20px;
-  left: 10px;
-  z-index: 1000;
-  background: rgba(26, 26, 26, 0.95);
-  padding: 15px;
-  border-radius: 4px;
-  border: 1px solid #444;
-  max-width: 200px;
-}
 
-.map-legend h4 {
-  margin: 0 0 10px 0;
-  color: #FFD700;
-  font-size: 14px;
-  text-transform: uppercase;
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  margin: 5px 0;
-  color: #ccc;
-  font-size: 12px;
-}
-
-.legend-divider {
-  margin: 10px 0;
-  border: none;
-  border-top: 1px solid #444;
-}
-
-.legend-icon {
-  width: 20px;
-  height: 20px;
-  margin-right: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  font-size: 12px;
-}
-
-.legend-icon.special-location {
-  background: rgba(139, 0, 0, 0.9);
-  border: 2px solid #FFD700;
-}
-
-.legend-icon.camp {
-  background: rgba(34, 139, 34, 0.9);
-  border: 2px solid #fff;
-}
-
-.legend-icon.art {
-  background: rgba(106, 90, 205, 0.9);
-  border: 2px solid #fff;
-}
-
-.legend-icon.event {
-  background: rgba(255, 140, 0, 0.9);
-  border: 2px solid #fff;
-}
-
-.legend-icon.cpn {
-  background: rgba(106, 13, 173, 0.9);
-  border: 2px solid #fff;
-}
-
-.legend-line {
-  width: 20px;
-  height: 2px;
-  margin-right: 8px;
-  display: block;
-}
-
-.legend-line.street {
-  background: #666666;
-}
-
-.legend-line.trash-fence {
-  background: #ff0000;
-  border-top: 2px dashed #ff0000;
-  height: 0;
-}
-
-.legend-area {
-  width: 20px;
-  height: 14px;
-  margin-right: 8px;
-  display: block;
-  border: 1px solid;
-}
-
-.legend-area.city-block {
-  border-color: #444444;
-  background: rgba(34, 34, 34, 0.3);
-}
-
-.legend-area.plaza {
-  border-color: #6a0dad;
-  background: rgba(106, 13, 173, 0.3);
-}
-
+/* Leaflet Popup Styling */
 :deep(.leaflet-popup-content-wrapper) {
-  background: #1a1a1a;
-  color: #ccc;
+  background: rgba(26, 26, 26, 0.95);
+  color: #fff;
+  border: 1px solid #444;
+  border-radius: 8px;
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.4);
+}
+
+:deep(.leaflet-popup-content) {
+  margin: 12px;
+  font-size: 14px;
+  line-height: 1.4;
 }
 
 :deep(.leaflet-popup-tip) {
-  background: #1a1a1a;
+  background: rgba(26, 26, 26, 0.95);
+  border: 1px solid #444;
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.4);
 }
 
 :deep(.leaflet-popup-close-button) {
-  color: #ccc;
+  color: #999;
+  font-size: 20px;
+  font-weight: normal;
+  padding: 4px 8px;
 }
 
 :deep(.leaflet-popup-close-button:hover) {
   color: #fff;
+  background: rgba(139, 0, 0, 0.3);
+  border-radius: 4px;
+}
+
+/* Popup content styling */
+:deep(.map-popup) {
+  color: #fff;
+}
+
+/* Infrastructure popup styling */
+:deep(.infrastructure-popup) {
+  min-width: 200px;
+}
+
+/* Speed up popup animations */
+:deep(.leaflet-fade-anim .leaflet-popup) {
+  transition: opacity 0.1s linear !important;
+}
+
+:deep(.leaflet-fade-anim .leaflet-map-pane .leaflet-popup) {
+  opacity: 1;
+  transition: opacity 0.1s !important;
+}
+
+:deep(.infrastructure-popup strong) {
+  color: #FFD700;
+  font-weight: bold;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+:deep(.infrastructure-popup .description) {
+  color: #ccc;
+  font-size: 0.8rem;
+  line-height: 1.3;
+  display: block;
+  margin-top: 0.25rem;
+}
+
+:deep(.map-popup strong) {
+  color: #FFD700;
+  font-size: 16px;
+  display: block;
+  margin-bottom: 4px;
+}
+
+:deep(.map-popup small) {
+  color: #ccc;
+  font-size: 12px;
+}
+
+:deep(.map-popup .favorited) {
+  color: #FFD700;
+  font-size: 16px;
+  margin-left: 8px;
 }
 
 /* Map background styling */
@@ -965,15 +1400,5 @@ const applyRotation = () => {
 
 :deep(.leaflet-container) {
   background-color: inherit;
-}
-
-/* Disabled control styling */
-.map-control.disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.map-control.disabled input {
-  cursor: not-allowed;
 }
 </style>

@@ -11,6 +11,8 @@ const gisDataCache = {
     cpns: null,
     plazas: null,
     cityBlocks: null,
+    toilets: null,
+    streetOutlines: null,
   },
   2025: {
     streetLines: null,
@@ -18,6 +20,8 @@ const gisDataCache = {
     cpns: null,
     plazas: null,
     cityBlocks: null,
+    toilets: null,
+    streetOutlines: null,
   }
 };
 
@@ -90,21 +94,27 @@ export async function loadAllGISData(year = currentYear) {
       trashFence: 'Trash_Fence.geojson',
       cpns: 'CPNs.geojson',
       plazas: 'Plazas.geojson',
-      cityBlocks: 'City_Blocks.geojson'
+      cityBlocks: 'City_Blocks.geojson',
+      toilets: null, // No toilets data for 2024
+      streetOutlines: null // No street outlines for 2024
     } : {
       streetLines: 'street_lines.geojson',
       trashFence: 'trash_fence.geojson',
       cpns: 'cpns.geojson',
       plazas: 'plazas.geojson',
-      cityBlocks: 'city_blocks.geojson'
+      cityBlocks: 'city_blocks.geojson',
+      toilets: 'toilets.geojson',
+      streetOutlines: 'street_outlines.geojson'
     };
     
-    const [streetLines, trashFence, cpns, plazas, cityBlocks] = await Promise.all([
+    const [streetLines, trashFence, cpns, plazas, cityBlocks, toilets, streetOutlines] = await Promise.all([
       loadGeoJSON(fileNames.streetLines, year),
       loadGeoJSON(fileNames.trashFence, year),
       loadGeoJSON(fileNames.cpns, year),
       loadGeoJSON(fileNames.plazas, year),
-      loadGeoJSON(fileNames.cityBlocks, year)
+      loadGeoJSON(fileNames.cityBlocks, year),
+      fileNames.toilets ? loadGeoJSON(fileNames.toilets, year) : Promise.resolve(null),
+      fileNames.streetOutlines ? loadGeoJSON(fileNames.streetOutlines, year) : Promise.resolve(null)
     ]);
 
     yearCache.streetLines = streetLines;
@@ -112,6 +122,8 @@ export async function loadAllGISData(year = currentYear) {
     yearCache.cpns = cpns;
     yearCache.plazas = plazas;
     yearCache.cityBlocks = cityBlocks;
+    yearCache.toilets = toilets;
+    yearCache.streetOutlines = streetOutlines;
 
     // Track loaded layers with year prefix
     if (streetLines) loadingState.loadedLayers.add(`${year}-streetLines`);
@@ -119,13 +131,17 @@ export async function loadAllGISData(year = currentYear) {
     if (cpns) loadingState.loadedLayers.add(`${year}-cpns`);
     if (plazas) loadingState.loadedLayers.add(`${year}-plazas`);
     if (cityBlocks) loadingState.loadedLayers.add(`${year}-cityBlocks`);
+    if (toilets) loadingState.loadedLayers.add(`${year}-toilets`);
+    if (streetOutlines) loadingState.loadedLayers.add(`${year}-streetOutlines`);
 
     console.log('GIS data loaded:', {
       streetLines: streetLines?.features?.length || 0,
       trashFence: trashFence?.features?.length || 0,
       cpns: cpns?.features?.length || 0,
       plazas: plazas?.features?.length || 0,
-      cityBlocks: cityBlocks?.features?.length || 0
+      cityBlocks: cityBlocks?.features?.length || 0,
+      toilets: toilets?.features?.length || 0,
+      streetOutlines: streetOutlines?.features?.length || 0
     });
 
     return yearCache;
@@ -161,6 +177,16 @@ export function getPlazas(year = currentYear) {
 // Get city blocks data
 export function getCityBlocks(year = currentYear) {
   return gisDataCache[year]?.cityBlocks || null;
+}
+
+// Get toilets data
+export function getToilets(year = currentYear) {
+  return gisDataCache[year]?.toilets || null;
+}
+
+// Get street outlines data
+export function getStreetOutlines(year = currentYear) {
+  return gisDataCache[year]?.streetOutlines || null;
 }
 
 

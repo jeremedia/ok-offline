@@ -7,6 +7,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.12.0] - 2025-07-29
+
+### Added
+- **Ultimate Map Enhancement - Phase 1** - Major overhaul of map interface and controls
+  - Tabbed control interface organizing controls into Content/Layers/Display tabs
+  - Map Info inspector panel with live cursor tracking showing coordinates and BRC address
+  - Interactive legend with drag support, minimize functionality, and collision detection
+  - Reset View button for quick navigation back to default map position
+  - Enhanced keyboard shortcuts for improved map navigation
+- **Infrastructure Layer Expansion** - Comprehensive service location mapping
+  - Complete infrastructure categorization with alphabetized controls
+  - Added DMZ (music zone) and Hell Station (fuel) infrastructure locations
+  - Pentagon fence perimeter points with number emojis (1️⃣-5️⃣)
+  - Medical infrastructure showing all Rampart locations with accurate coordinates
+  - Portos (toilets) - 45 locations displayed as blue polygons with clickable icons
+  - Plaza Portals layer - separate layer for 5 plaza entrance points
+- **GIS Data Enhancements** - Official data integration and improved visualization
+  - Git submodule integration for official GIS data with automatic updates
+  - Street outlines layer showing road boundaries with red semi-transparent fill
+  - Accurate Temple and Center Camp coordinates from 2025 GIS reference data
+  - Optimized street line display with weight reduced from 4px to 1px
+- **Location Data Compliance** - Full Burning Man API policy enforcement
+  - Countdown timer showing time until location data release (Aug 17, 2025 at 12:01am)
+  - Smart control disabling - Camps/Art/Events checkboxes disabled when data unavailable
+  - Year-specific handling with different rules for historical vs current year
+  - Clear user messaging with warning banner explaining policy
+
+### Fixed
+- **Base Map Initialization** - 2025 satellite imagery now enabled by default for new users
+- **Infrastructure Toggle Logic** - Markers properly clear when categories are disabled
+- **Porto Display Persistence** - Fixed polygons disappearing after street outlines were added
+- **Porto Icon Interaction** - Removed CSS preventing click events on porto icons
+- **Temple Location Accuracy** - Now using actual GIS coordinates instead of calculations
+- **Reference Point Cleanup** - CPNs (Civic Plaza Network points) properly clear when unchecked
+- **Map Rotation Controls** - Reset buttons now properly update the map view
+
+### Changed
+- **Map Controls Organization** - Infrastructure moved to Content tab, Plazas/CPNs moved to Layers tab
+- **Base Map Logic** - Only available for 2025 (disabled for other years)
+
+### Technical
+- **Vite Configuration** - Added @ alias resolving to src/ for cleaner imports
+- **Component Architecture** - Modular control tabs with persistent state management
+- **LocalStorage Integration** - User preferences remembered across sessions
+- **UI Polish** - Consistent dark theme styling with Berkeley Mono font
+
 ## [3.11.0] - 2025-07-28
 
 ### Fixed

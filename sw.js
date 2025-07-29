@@ -19,10 +19,7 @@ const DATA_CACHE_NAME = 'bm25-data-v1';
 const FILES_TO_CACHE = [
   '/',
   '/index.html',
-  '/style.css',
-  '/app.js',
   '/manifest.json',
-  '/example.geojson',
   'https://unpkg.com/leaflet@1.9.3/dist/leaflet.css',
   'https://unpkg.com/leaflet@1.9.3/dist/leaflet.js'
 ];
