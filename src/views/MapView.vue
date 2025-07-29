@@ -229,7 +229,7 @@ const handleControlUpdate = (newControls) => {
       'showArctica' in newControls) {
     // Clear existing infrastructure markers
     markersLayer.eachLayer(layer => {
-      if (layer.options.className === 'infrastructure-marker') {
+      if (layer.options.icon?.options?.className === 'infrastructure-marker') {
         markersLayer.removeLayer(layer)
       }
     })
@@ -470,6 +470,13 @@ onMounted(async () => {
 })
 
 const addInfrastructureMarkers = () => {
+  // Clear any existing infrastructure markers first
+  markersLayer.eachLayer(layer => {
+    if (layer.options.icon?.options?.className === 'infrastructure-marker') {
+      markersLayer.removeLayer(layer)
+    }
+  })
+  
   // Only add if infrastructure is enabled
   if (!mapControls.showInfrastructure) {
     return
@@ -537,6 +544,12 @@ const addInfrastructureMarkers = () => {
   specialLocations.forEach(loc => {
     // Check if this specific infrastructure is enabled
     if (!mapControls[loc.controlKey]) return
+    
+    // Debug log for Temple
+    if (loc.name === 'Temple') {
+      console.log('Temple location:', loc.coords)
+    }
+    
     if (loc.coords) {
       const marker = L.marker(loc.coords, {
         icon: L.divIcon({
@@ -1023,6 +1036,16 @@ const applyRotation = () => {
 /* Infrastructure popup styling */
 :deep(.infrastructure-popup) {
   min-width: 200px;
+}
+
+/* Speed up popup animations */
+:deep(.leaflet-fade-anim .leaflet-popup) {
+  transition: opacity 0.1s linear !important;
+}
+
+:deep(.leaflet-fade-anim .leaflet-map-pane .leaflet-popup) {
+  opacity: 1;
+  transition: opacity 0.1s !important;
 }
 
 :deep(.infrastructure-popup strong) {
