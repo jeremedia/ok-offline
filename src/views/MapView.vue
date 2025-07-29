@@ -436,10 +436,54 @@ onMounted(async () => {
 
 const addSpecialLocations = () => {
   const specialLocations = [
-    { name: 'The Man', coords: BRC_CENTER, icon: '🔥' },
-    { name: 'Center Camp', coords: getSpecialLocationCoords('CENTER CAMP'), icon: '⛺' },
-    { name: 'Temple', coords: getSpecialLocationCoords('TEMPLE'), icon: '🏛' },
-    { name: 'Airport', coords: getSpecialLocationCoords('AIRPORT'), icon: '✈️' }
+    { 
+      name: 'The Man', 
+      coords: BRC_CENTER, 
+      icon: '🔥',
+      description: 'The heart of Black Rock City - our iconic effigy and gathering place'
+    },
+    { 
+      name: 'Center Camp', 
+      coords: getSpecialLocationCoords('CENTER CAMP'), 
+      icon: '⛺',
+      description: 'Central hub with cafe, performances, and community services'
+    },
+    { 
+      name: 'Temple', 
+      coords: getSpecialLocationCoords('TEMPLE'), 
+      icon: '🏛',
+      description: 'Sacred space for reflection, remembrance, and healing'
+    },
+    { 
+      name: 'Airport', 
+      coords: getSpecialLocationCoords('AIRPORT'), 
+      icon: '✈️',
+      description: 'Black Rock City Municipal Airport - scenic flights and aviation services'
+    },
+    {
+      name: 'Medical',
+      coords: getSpecialLocationCoords('MEDICAL'),
+      icon: '🏥',
+      description: 'Emergency medical services - 5:30 & Esplanade'
+    },
+    {
+      name: 'Ranger HQ',
+      coords: getSpecialLocationCoords('RANGER HQ'),
+      icon: '🎯',
+      description: 'Black Rock Rangers headquarters - 5:45 & Esplanade'
+    },
+    {
+      name: 'DPW Depot',
+      coords: getSpecialLocationCoords('DPOW'),
+      icon: '🔧',
+      description: 'Department of Public Works - city infrastructure and operations'
+    },
+    {
+      name: 'Arctica',
+      coords: getSpecialLocationCoords('ARCTICA'),
+      icon: '🧊',
+      description: 'Ice sales for keeping cool in the desert - 3:00 & C'
+    }
   ]
   
   specialLocations.forEach(loc => {
@@ -453,7 +497,12 @@ const addSpecialLocations = () => {
         })
       })
       
-      marker.bindPopup(`<strong>${loc.name}</strong>`)
+      marker.bindPopup(`
+        <div class="infrastructure-popup">
+          <strong>${loc.name}</strong><br>
+          <span class="description">${loc.description}</span>
+        </div>
+      `)
       markersLayer.addLayer(marker)
     }
   })
@@ -673,7 +722,25 @@ const updateGISLayers = () => {
             })
           })
           
-          marker.bindPopup(`<strong>${feature.properties.NAME || 'CPN'}</strong>`)
+          // Determine CPN type and description
+          const cpnName = feature.properties.NAME || 'CPN'
+          let description = 'Info Pending'
+          
+          // Check if it's a plaza portal based on name or location
+          if (cpnName.includes('Plaza') || cpnName.includes('PLAZA')) {
+            description = 'Plaza portal - Entry/exit point to themed plaza area'
+          } else if (cpnName.includes('Center') || cpnName.includes('CENTER')) {
+            description = 'Center Camp Portal - Access point to Center Camp plaza'
+          } else if (cpnName.includes('CPN')) {
+            description = 'Camp Placement Number - Reference point for camp locations'
+          }
+          
+          marker.bindPopup(`
+            <div class="infrastructure-popup">
+              <strong>${cpnName}</strong><br>
+              <span class="description">${description}</span>
+            </div>
+          `)
           markersLayer.addLayer(marker)
         }
       })
@@ -894,6 +961,26 @@ const applyRotation = () => {
 /* Popup content styling */
 :deep(.map-popup) {
   color: #fff;
+}
+
+/* Infrastructure popup styling */
+:deep(.infrastructure-popup) {
+  min-width: 200px;
+}
+
+:deep(.infrastructure-popup strong) {
+  color: #FFD700;
+  font-weight: bold;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+:deep(.infrastructure-popup .description) {
+  color: #ccc;
+  font-size: 0.8rem;
+  line-height: 1.3;
+  display: block;
+  margin-top: 0.25rem;
 }
 
 :deep(.map-popup strong) {
