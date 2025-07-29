@@ -13,6 +13,7 @@ import ScheduleView from './views/ScheduleView.vue'
 import DustForecastView from './views/DustForecastView.vue'
 import ResetView from './views/ResetView.vue'
 import NotFound from './views/NotFound.vue'
+import PromptsView from './views/PromptsView.vue'
 
 // Import CSS
 import './styles/fonts.css'
@@ -125,6 +126,11 @@ const routes = [
     props: { autoReset: true }
   },
   {
+    path: '/prompts',
+    name: 'prompts',
+    component: PromptsView
+  },
+  {
     path: '/reload',
     beforeEnter: () => {
       // Force a full page reload
@@ -146,6 +152,10 @@ const router = createRouter({
 })
 
 const app = createApp(App)
+<<<<<<< HEAD
+=======
+const head = createHead()
+>>>>>>> f0ab71a (feat: Add Claude prompts extraction and display page)
 app.use(router)
 app.mount('#app')
 
