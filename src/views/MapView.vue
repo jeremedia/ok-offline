@@ -111,7 +111,7 @@ const mapControls = reactive({
   showArt: true,
   showEvents: true,
   showFavoritesOnly: false,
-  showPlazas: true,
+  showInfrastructure: true,
   // Infrastructure subcategories
   showTheMan: true,
   showCenterCamp: true,
@@ -121,11 +121,12 @@ const mapControls = reactive({
   showRangers: true,
   showDPW: true,
   showArctica: true,
-  showCPNs: true,
   // Layer controls
   showStreets: true,
   showTrashFence: true,
   showCityBlocks: false,
+  showPlazas: true,
+  showCPNs: true,
   // Display controls
   showBasemap: false,
   cityAligned: false,
@@ -172,6 +173,8 @@ const layerStatus = computed(() => ({
   trashFence: mapControls.showTrashFence,
   cityBlocks: mapControls.showCityBlocks,
   plazas: mapControls.showPlazas,
+  cpns: mapControls.showCPNs,
+  infrastructure: mapControls.showInfrastructure,
   favoritesOnly: mapControls.showFavoritesOnly
 }))
 
@@ -213,30 +216,30 @@ const handleControlUpdate = (newControls) => {
   
   // Update GIS layers
   if ('showStreets' in newControls || 'showTrashFence' in newControls || 
-      'showCityBlocks' in newControls) {
+      'showCityBlocks' in newControls || 'showPlazas' in newControls || 
+      'showCPNs' in newControls) {
     updateGISLayers()
   }
   
   // Update infrastructure markers
-  if ('showPlazas' in newControls || 'showTheMan' in newControls || 
+  if ('showInfrastructure' in newControls || 'showTheMan' in newControls || 
       'showCenterCamp' in newControls || 'showTemple' in newControls ||
       'showAirport' in newControls || 'showMedical' in newControls ||
       'showRangers' in newControls || 'showDPW' in newControls ||
-      'showArctica' in newControls || 'showCPNs' in newControls) {
+      'showArctica' in newControls) {
     // Clear existing infrastructure markers
     markersLayer.eachLayer(layer => {
-      if (layer.options.className === 'special-marker' || 
-          layer.options.className === 'cpn-marker') {
+      if (layer.options.className === 'infrastructure-marker') {
         markersLayer.removeLayer(layer)
       }
     })
-    // Clear plaza polygons
-    if (gisLayers.plazas && map.hasLayer(gisLayers.plazas)) {
-      map.removeLayer(gisLayers.plazas)
-      gisLayers.plazas = null
-    }
     // Re-add with new settings
-    addSpecialLocations()
+    addInfrastructureMarkers()
+  }
+  
+  // Update plazas and CPNs layers
+  if ('showPlazas' in newControls || 'showCPNs' in newControls) {
+    updateGISLayers()
   }
   
   // Handle basemap toggle
@@ -343,8 +346,8 @@ watch(year, async (newYear, oldYear) => {
   // Reload GIS layers with new year's data
   updateGISLayers()
   
-  // Re-add special locations
-  addSpecialLocations()
+  // Re-add infrastructure markers
+  addInfrastructureMarkers()
   
   // Reload camps/art/events data
   await loadData()
@@ -429,8 +432,8 @@ onMounted(async () => {
     gisLoadingState.value = { isLoading: false, error: error.message }
   }
   
-  // Add special location markers
-  addSpecialLocations()
+  // Add infrastructure markers
+  addInfrastructureMarkers()
   
   // Load data and add markers
   loadData()
@@ -466,14 +469,9 @@ onMounted(async () => {
   })
 })
 
-const addSpecialLocations = () => {
+const addInfrastructureMarkers = () => {
   // Only add if infrastructure is enabled
-  if (!mapControls.showPlazas) {
-    // Remove plaza polygons if they exist
-    if (gisLayers.plazas && map.hasLayer(gisLayers.plazas)) {
-      map.removeLayer(gisLayers.plazas)
-      gisLayers.plazas = null
-    }
+  if (!mapControls.showInfrastructure) {
     return
   }
   
@@ -542,7 +540,7 @@ const addSpecialLocations = () => {
     if (loc.coords) {
       const marker = L.marker(loc.coords, {
         icon: L.divIcon({
-          className: 'special-marker',
+          className: 'infrastructure-marker',
           html: `<div class="marker-icon">${loc.icon}</div>`,
           iconSize: [30, 30],
           iconAnchor: [15, 15]
@@ -551,76 +549,13 @@ const addSpecialLocations = () => {
       
       marker.bindPopup(`
         <div class="infrastructure-popup">
-          <strong>${loc.name}</strong><br>
+          <strong>${loc.name}</strong>
           <span class="description">${loc.description}</span>
         </div>
       `)
       markersLayer.addLayer(marker)
     }
   })
-  
-  // Add plaza polygons
-  const plazaData = getPlazas()
-  if (plazaData) {
-    gisLayers.plazas = L.geoJSON(plazaData, {
-      style: {
-        color: '#6a0dad',
-        weight: 2,
-        opacity: 0.8,
-        fillOpacity: 0.3,
-        fillColor: '#6a0dad'
-      },
-      onEachFeature: (feature, layer) => {
-        if (feature.properties && feature.properties.Name) {
-          layer.bindPopup(`
-            <div class="infrastructure-popup">
-              <strong>${feature.properties.Name}</strong><br>
-              <span class="description">Plaza area - Themed community space</span>
-            </div>
-          `)
-        }
-      }
-    }).addTo(map)
-  }
-  
-  // Add CPN markers
-  const cpnData = getCPNs()
-  if (cpnData && cpnData.features && mapControls.showCPNs) {
-    cpnData.features.forEach(feature => {
-      if (feature.geometry && feature.geometry.coordinates) {
-        const coords = [feature.geometry.coordinates[1], feature.geometry.coordinates[0]]
-        const marker = L.marker(coords, {
-          icon: L.divIcon({
-            className: 'cpn-marker',
-            html: '<div class="marker-icon">📍</div>',
-            iconSize: [20, 20],
-            iconAnchor: [10, 10]
-          })
-        })
-        
-        // Determine CPN type and description
-        const cpnName = feature.properties.NAME || 'CPN'
-        let description = 'Info Pending'
-        
-        // Check if it's a plaza portal based on name or location
-        if (cpnName.includes('Plaza') || cpnName.includes('PLAZA')) {
-          description = 'Plaza portal - Entry/exit point to themed plaza area'
-        } else if (cpnName.includes('Center') || cpnName.includes('CENTER')) {
-          description = 'Center Camp Portal - Access point to Center Camp plaza'
-        } else if (cpnName.includes('CPN')) {
-          description = 'Camp Placement Number - Reference point for camp locations'
-        }
-        
-        marker.bindPopup(`
-          <div class="infrastructure-popup">
-            <strong>${cpnName}</strong><br>
-            <span class="description">${description}</span>
-          </div>
-        `)
-        markersLayer.addLayer(marker)
-      }
-    })
-  }
 }
 
 const loadData = async () => {
@@ -646,9 +581,10 @@ const loadData = async () => {
 }
 
 const updateMarkers = () => {
-  // Clear existing markers (except special locations)
+  // Clear existing markers (except infrastructure)
   markersLayer.eachLayer(layer => {
-    if (!layer.options.icon?.options?.className?.includes('special-marker')) {
+    if (!layer.options.icon?.options?.className?.includes('infrastructure-marker') &&
+        !layer.options.icon?.options?.className?.includes('cpn-marker')) {
       markersLayer.removeLayer(layer)
     }
   })
@@ -767,7 +703,7 @@ const updateGISLayers = () => {
         },
         onEachFeature: (feature, layer) => {
           if (feature.properties && feature.properties.name) {
-            layer.bindPopup(`<strong>${feature.properties.name}</strong><br>Type: ${feature.properties.type}`)
+            layer.bindPopup(`<strong>${feature.properties.name}</strong>Type: ${feature.properties.type}`)
           }
         }
       }).addTo(map)
@@ -794,7 +730,73 @@ const updateGISLayers = () => {
     }
   }
   
-  // Note: Plazas and CPNs are now handled by addSpecialLocations as infrastructure
+  
+  // Add plaza polygons
+  if (mapControls.showPlazas) {
+    const plazaData = getPlazas()
+    if (plazaData) {
+      gisLayers.plazas = L.geoJSON(plazaData, {
+        style: {
+          color: '#6a0dad',
+          weight: 2,
+          opacity: 0.8,
+          fillOpacity: 0.3,
+          fillColor: '#6a0dad'
+        },
+        onEachFeature: (feature, layer) => {
+          if (feature.properties && feature.properties.Name) {
+            layer.bindPopup(`
+              <div class="infrastructure-popup">
+                <strong>${feature.properties.Name}</strong>
+                <span class="description">Plaza area - Themed community space</span>
+              </div>
+            `)
+          }
+        }
+      }).addTo(map)
+    }
+  }
+  
+  // Add CPN markers
+  if (mapControls.showCPNs) {
+    const cpnData = getCPNs()
+    if (cpnData && cpnData.features) {
+      cpnData.features.forEach(feature => {
+        if (feature.geometry && feature.geometry.coordinates) {
+          const coords = [feature.geometry.coordinates[1], feature.geometry.coordinates[0]]
+          const marker = L.marker(coords, {
+            icon: L.divIcon({
+              className: 'cpn-marker',
+              html: '<div class="marker-icon">📍</div>',
+              iconSize: [20, 20],
+              iconAnchor: [10, 10]
+            })
+          })
+          
+          // Determine CPN type and description
+          const cpnName = feature.properties.NAME || 'CPN'
+          let description = 'Info Pending'
+          
+          // Check if it's a plaza portal based on name or location
+          if (cpnName.includes('Plaza') || cpnName.includes('PLAZA')) {
+            description = 'Plaza portal - Entry/exit point to themed plaza area'
+          } else if (cpnName.includes('Center') || cpnName.includes('CENTER')) {
+            description = 'Center Camp Portal - Access point to Center Camp plaza'
+          } else if (cpnName.includes('CPN')) {
+            description = 'Camp Placement Number - Reference point for camp locations'
+          }
+          
+          marker.bindPopup(`
+            <div class="infrastructure-popup">
+              <strong>${cpnName}</strong>
+              <span class="description">${description}</span>
+            </div>
+          `)
+          markersLayer.addLayer(marker)
+        }
+      })
+    }
+  }
 }
 
 const toggleBasemap = () => {
@@ -925,10 +927,16 @@ const applyRotation = () => {
   border: 2px solid #fff;
 }
 
-:deep(.special-marker .marker-icon) {
+:deep(.infrastructure-marker .marker-icon) {
   background: rgba(139, 0, 0, 0.9);
   border-color: #FFD700;
   font-size: 20px;
+}
+
+:deep(.cpn-marker .marker-icon) {
+  background: rgba(106, 13, 173, 0.9);
+  border-color: #fff;
+  font-size: 14px;
 }
 
 :deep(.camp-marker .marker-icon) {

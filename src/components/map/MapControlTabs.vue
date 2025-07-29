@@ -46,12 +46,12 @@
           <span class="control-label">⭐ Favorites Only</span>
         </label>
         <label class="control-item">
-          <input type="checkbox" v-model="controls.showPlazas" @change="updateControls">
+          <input type="checkbox" v-model="controls.showInfrastructure" @change="updateControls">
           <span class="control-label">📍 Infrastructure</span>
         </label>
         
         <!-- Infrastructure Categories (shown when Infrastructure is enabled) -->
-        <div v-if="controls.showPlazas" class="infra-categories">
+        <div v-if="controls.showInfrastructure" class="infra-categories">
           <label class="control-item sub-item">
             <input type="checkbox" v-model="controls.showTheMan" @change="updateControls">
             <span class="control-label">🔥 The Man</span>
@@ -84,10 +84,6 @@
             <input type="checkbox" v-model="controls.showArctica" @change="updateControls">
             <span class="control-label">🧊 Arctica</span>
           </label>
-          <label class="control-item sub-item">
-            <input type="checkbox" v-model="controls.showCPNs" @change="updateControls">
-            <span class="control-label">📍 CPNs</span>
-          </label>
         </div>
         
         <div class="reset-view-container" v-if="showResetView">
@@ -113,6 +109,14 @@
         <label class="control-item">
           <input type="checkbox" v-model="controls.showCityBlocks" @change="updateControls">
           <span class="control-label">🏗️ City Blocks</span>
+        </label>
+        <label class="control-item">
+          <input type="checkbox" v-model="controls.showPlazas" @change="updateControls">
+          <span class="control-label">🟪 Plazas</span>
+        </label>
+        <label class="control-item">
+          <input type="checkbox" v-model="controls.showCPNs" @change="updateControls">
+          <span class="control-label">📍 CPNs</span>
         </label>
         <div v-if="gisLoadingState.isLoading" class="loading-indicator">
           Loading GIS data...
@@ -200,7 +204,7 @@ const controls = reactive({
   showArt: true,
   showEvents: true,
   showFavoritesOnly: false,
-  showPlazas: true,
+  showInfrastructure: true,
   // Infrastructure subcategories
   showTheMan: true,
   showCenterCamp: true,
@@ -210,11 +214,12 @@ const controls = reactive({
   showRangers: true,
   showDPW: true,
   showArctica: true,
-  showCPNs: true,
   // Layer controls
   showStreets: true,
   showTrashFence: true,
   showCityBlocks: false,
+  showPlazas: true,
+  showCPNs: true,
   // Display controls
   showBasemap: false,
   cityAligned: false,
