@@ -45,6 +45,50 @@
           <input type="checkbox" v-model="controls.showFavoritesOnly" @change="updateControls">
           <span class="control-label">⭐ Favorites Only</span>
         </label>
+        <label class="control-item">
+          <input type="checkbox" v-model="controls.showPlazas" @change="updateControls">
+          <span class="control-label">📍 Infrastructure</span>
+        </label>
+        
+        <!-- Infrastructure Categories (shown when Infrastructure is enabled) -->
+        <div v-if="controls.showPlazas" class="infra-categories">
+          <label class="control-item sub-item">
+            <input type="checkbox" v-model="controls.showTheMan" @change="updateControls">
+            <span class="control-label">🔥 The Man</span>
+          </label>
+          <label class="control-item sub-item">
+            <input type="checkbox" v-model="controls.showCenterCamp" @change="updateControls">
+            <span class="control-label">⛺ Center Camp</span>
+          </label>
+          <label class="control-item sub-item">
+            <input type="checkbox" v-model="controls.showTemple" @change="updateControls">
+            <span class="control-label">🏛 Temple</span>
+          </label>
+          <label class="control-item sub-item">
+            <input type="checkbox" v-model="controls.showAirport" @change="updateControls">
+            <span class="control-label">✈️ Airport</span>
+          </label>
+          <label class="control-item sub-item">
+            <input type="checkbox" v-model="controls.showMedical" @change="updateControls">
+            <span class="control-label">🏥 Medical</span>
+          </label>
+          <label class="control-item sub-item">
+            <input type="checkbox" v-model="controls.showRangers" @change="updateControls">
+            <span class="control-label">🎯 Rangers</span>
+          </label>
+          <label class="control-item sub-item">
+            <input type="checkbox" v-model="controls.showDPW" @change="updateControls">
+            <span class="control-label">🔧 DPW</span>
+          </label>
+          <label class="control-item sub-item">
+            <input type="checkbox" v-model="controls.showArctica" @change="updateControls">
+            <span class="control-label">🧊 Arctica</span>
+          </label>
+          <label class="control-item sub-item">
+            <input type="checkbox" v-model="controls.showCPNs" @change="updateControls">
+            <span class="control-label">📍 CPNs</span>
+          </label>
+        </div>
         
         <div class="reset-view-container" v-if="showResetView">
           <button 
@@ -69,10 +113,6 @@
         <label class="control-item">
           <input type="checkbox" v-model="controls.showCityBlocks" @change="updateControls">
           <span class="control-label">🏗️ City Blocks</span>
-        </label>
-        <label class="control-item">
-          <input type="checkbox" v-model="controls.showPlazas" @change="updateControls">
-          <span class="control-label">📍 Plazas & CPNs</span>
         </label>
         <div v-if="gisLoadingState.isLoading" class="loading-indicator">
           Loading GIS data...
@@ -160,11 +200,21 @@ const controls = reactive({
   showArt: true,
   showEvents: true,
   showFavoritesOnly: false,
+  showPlazas: true,
+  // Infrastructure subcategories
+  showTheMan: true,
+  showCenterCamp: true,
+  showTemple: true,
+  showAirport: true,
+  showMedical: true,
+  showRangers: true,
+  showDPW: true,
+  showArctica: true,
+  showCPNs: true,
   // Layer controls
   showStreets: true,
   showTrashFence: true,
   showCityBlocks: false,
-  showPlazas: true,
   // Display controls
   showBasemap: false,
   cityAligned: false,
@@ -375,6 +425,25 @@ const toggleCollapse = () => {
 .control-label {
   flex: 1;
   user-select: none;
+}
+
+/* Infrastructure Categories */
+.infra-categories {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  padding: 0.5rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  border-left: 3px solid #FFD700;
+}
+
+.control-item.sub-item {
+  padding: 0.375rem 0.5rem;
+  font-size: 0.813rem;
+}
+
+.control-item.sub-item .control-label {
+  margin-left: 0.25rem;
 }
 
 /* Checkbox styling */
