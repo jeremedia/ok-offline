@@ -765,12 +765,33 @@ const updateGISLayers = () => {
     }
   }
   
-  // Add CPN markers
+  // Clear existing CPN markers
+  markersLayer.eachLayer(layer => {
+    if (layer.options.icon?.options?.className === 'cpn-marker') {
+      markersLayer.removeLayer(layer)
+    }
+  })
+  
+  // Add CPN markers if enabled
   if (mapControls.showCPNs) {
     const cpnData = getCPNs()
     if (cpnData && cpnData.features) {
+      // Infrastructure items that should not be shown as CPNs (already handled by infrastructure layer)
+      const infrastructureNames = [
+        'The Man', 'The Temple', 'Center Camp', 'Airport', 
+        'Arctica', 'Arctica Center Camp', 'Ice Cubed Arctica 3', 'Ice Nine Arctica',
+        'Ranger HQ', 'DMV', 'Media Mecca', 'Playa Info', 'HEaT'
+      ]
+      
       cpnData.features.forEach(feature => {
         if (feature.geometry && feature.geometry.coordinates) {
+          const cpnName = feature.properties.NAME || ''
+          
+          // Skip if this is an infrastructure item
+          if (infrastructureNames.includes(cpnName)) {
+            return
+          }
+          
           const coords = [feature.geometry.coordinates[1], feature.geometry.coordinates[0]]
           const marker = L.marker(coords, {
             icon: L.divIcon({
@@ -781,22 +802,30 @@ const updateGISLayers = () => {
             })
           })
           
-          // Determine CPN type and description
-          const cpnName = feature.properties.NAME || 'CPN'
-          let description = 'Info Pending'
+          // Determine description based on name patterns
+          let description = 'City reference point'
           
-          // Check if it's a plaza portal based on name or location
-          if (cpnName.includes('Plaza') || cpnName.includes('PLAZA')) {
-            description = 'Plaza portal - Entry/exit point to themed plaza area'
-          } else if (cpnName.includes('Center') || cpnName.includes('CENTER')) {
-            description = 'Center Camp Portal - Access point to Center Camp plaza'
-          } else if (cpnName.includes('CPN')) {
-            description = 'Camp Placement Number - Reference point for camp locations'
+          if (cpnName.includes('Plaza')) {
+            description = 'Plaza location marker'
+          } else if (cpnName.includes('Portal')) {
+            description = 'Plaza entry/exit portal'
+          } else if (cpnName.includes('Promenade')) {
+            description = 'Wide pedestrian walkway (40\' wide)'
+          } else if (cpnName.includes('Station')) {
+            description = 'Service station'
+          } else if (cpnName.includes('Point')) {
+            description = 'Fence perimeter point'
+          } else if (cpnName.includes(' & ')) {
+            description = 'Street intersection marker'
+          } else if (cpnName === 'Rampart' || cpnName === 'DMZ' || cpnName === 'Hell Station') {
+            description = 'DPW/operations location'
+          } else if (cpnName === 'Greeters') {
+            description = 'City entrance - participant greeting station'
           }
           
           marker.bindPopup(`
             <div class="infrastructure-popup">
-              <strong>${cpnName}</strong>
+              <strong>${cpnName}</strong><br>
               <span class="description">${description}</span>
             </div>
           `)

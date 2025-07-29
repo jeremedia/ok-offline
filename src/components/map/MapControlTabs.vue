@@ -116,7 +116,7 @@
         </label>
         <label class="control-item">
           <input type="checkbox" v-model="controls.showCPNs" @change="updateControls">
-          <span class="control-label">📍 CPNs</span>
+          <span class="control-label">📍 Reference Points</span>
         </label>
         <div v-if="gisLoadingState.isLoading" class="loading-indicator">
           Loading GIS data...
