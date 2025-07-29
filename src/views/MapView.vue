@@ -545,11 +545,6 @@ const addInfrastructureMarkers = () => {
     // Check if this specific infrastructure is enabled
     if (!mapControls[loc.controlKey]) return
     
-    // Debug log for Temple
-    if (loc.name === 'Temple') {
-      console.log('Temple location:', loc.coords)
-    }
-    
     if (loc.coords) {
       const marker = L.marker(loc.coords, {
         icon: L.divIcon({
