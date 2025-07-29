@@ -380,9 +380,13 @@ onMounted(async () => {
     }
   }
   
-  // Enable basemap only for 2025 (if not already set by saved state)
-  if (year.value === '2025' && savedState && !JSON.parse(savedState).hasOwnProperty('showBasemap')) {
-    mapControls.showBasemap = true
+  // Enable basemap by default for 2025
+  if (year.value === '2025') {
+    // If no saved state exists, or saved state doesn't have showBasemap property, default to true
+    const parsed = savedState ? JSON.parse(savedState) : null
+    if (!parsed || !parsed.hasOwnProperty('showBasemap')) {
+      mapControls.showBasemap = true
+    }
   }
   
   // Initialize Leaflet map with rotation support

@@ -251,7 +251,7 @@ const controls = reactive({
   showPlazas: true,
   showCPNs: false,
   // Display controls
-  showBasemap: false,
+  showBasemap: props.year === '2025', // Default to true for 2025
   cityAligned: false,
   rotationAngle: 0,
   showLegend: true,
