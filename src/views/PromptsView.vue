@@ -81,7 +81,7 @@ import { useToast } from '../composables/useToast'
 export default {
   name: 'PromptsView',
   setup() {
-    const { showToast } = useToast()
+    const { showSuccess, showError } = useToast()
     
     const prompts = ref([])
     const loading = ref(true)
@@ -142,9 +142,9 @@ export default {
     async function copyPrompt(text) {
       try {
         await navigator.clipboard.writeText(text)
-        showToast('Prompt copied to clipboard')
+        showSuccess('Prompt copied to clipboard')
       } catch (err) {
-        showToast('Failed to copy prompt', 'error')
+        showError('Failed to copy prompt')
       }
     }
     
@@ -157,7 +157,7 @@ export default {
       a.download = 'claude-prompts.json'
       a.click()
       URL.revokeObjectURL(url)
-      showToast('Exported prompts as JSON')
+      showSuccess('Exported prompts as JSON')
     }
     
     function exportCSV() {
@@ -178,7 +178,7 @@ export default {
       a.download = 'claude-prompts.csv'
       a.click()
       URL.revokeObjectURL(url)
-      showToast('Exported prompts as CSV')
+      showSuccess('Exported prompts as CSV')
     }
     
     onMounted(() => {
