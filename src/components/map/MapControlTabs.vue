@@ -65,8 +65,16 @@
             <span class="control-label">⛺ Center Camp</span>
           </label>
           <label class="control-item sub-item">
+            <input type="checkbox" v-model="controls.showDMZ" @change="updateControls">
+            <span class="control-label">🎵 DMZ</span>
+          </label>
+          <label class="control-item sub-item">
             <input type="checkbox" v-model="controls.showDPW" @change="updateControls">
             <span class="control-label">🔧 DPW</span>
+          </label>
+          <label class="control-item sub-item">
+            <input type="checkbox" v-model="controls.showHellStation" @change="updateControls">
+            <span class="control-label">⛽ Hell Station</span>
           </label>
           <label class="control-item sub-item">
             <input type="checkbox" v-model="controls.showTheMan" @change="updateControls">
@@ -219,6 +227,8 @@ const controls = reactive({
   showDPW: true,
   showArctica: true,
   showPoints: true,
+  showDMZ: true,
+  showHellStation: true,
   // Layer controls
   showStreets: true,
   showTrashFence: true,

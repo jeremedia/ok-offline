@@ -122,6 +122,8 @@ const mapControls = reactive({
   showDPW: true,
   showArctica: true,
   showPoints: true,
+  showDMZ: true,
+  showHellStation: true,
   // Layer controls
   showStreets: true,
   showTrashFence: true,
@@ -227,7 +229,8 @@ const handleControlUpdate = (newControls) => {
       'showCenterCamp' in newControls || 'showTemple' in newControls ||
       'showAirport' in newControls || 'showMedical' in newControls ||
       'showRangers' in newControls || 'showDPW' in newControls ||
-      'showArctica' in newControls || 'showPoints' in newControls) {
+      'showArctica' in newControls || 'showPoints' in newControls ||
+      'showDMZ' in newControls || 'showHellStation' in newControls) {
     // Clear existing infrastructure markers
     markersLayer.eachLayer(layer => {
       if (layer.options.icon?.options?.className === 'infrastructure-marker' ||
@@ -571,6 +574,20 @@ const addInfrastructureMarkers = () => {
       controlKey: 'showDPW'
     },
     {
+      name: 'DMZ',
+      coords: [40.801877800966253, -119.19912198324673],
+      icon: '🎵',
+      description: 'Deep Playa Music Zone - sound camps and art cars',
+      controlKey: 'showDMZ'
+    },
+    {
+      name: 'Hell Station',
+      coords: [40.803639907073524, -119.20864863758413],
+      icon: '⛽',
+      description: 'Fuel depot for mutant vehicles and art cars',
+      controlKey: 'showHellStation'
+    },
+    {
       name: 'Arctica',
       coords: getSpecialLocationCoords('ARCTICA'),
       icon: '🧊',
@@ -881,7 +898,7 @@ const updateGISLayers = () => {
       // Filter out all infrastructure items now shown in infrastructure layer
       const infrastructureNames = [
         'The Man', 'The Temple', 'Center Camp', 'Airport', 
-        'DMV', 'Media Mecca', 'Playa Info', 'HEaT',
+        'DMV', 'Media Mecca', 'Playa Info', 'HEaT', 'DMZ', 'Hell Station',
         // Medical/Emergency services
         'Rampart', 'Station 3', 'Station 6', 'Station 9',
         // Ranger stations
@@ -926,8 +943,8 @@ const updateGISLayers = () => {
             description = 'Fence perimeter point'
           } else if (cpnName.includes(' & ')) {
             description = 'Street intersection marker'
-          } else if (cpnName === 'Rampart' || cpnName === 'DMZ' || cpnName === 'Hell Station') {
-            description = 'DPW/operations location'
+          } else if (cpnName === 'Rampart') {
+            description = 'Field hospital location'
           } else if (cpnName === 'Greeters') {
             description = 'City entrance - participant greeting station'
           } else if (cpnName.includes('Ranger')) {
