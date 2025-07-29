@@ -25,8 +25,8 @@ async function extractPrompts() {
     await processFile(file, prompts);
   }
   
-  // Sort by timestamp
-  prompts.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+  // Sort by timestamp (newest first)
+  prompts.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
   
   // Ensure output directory exists
   const outputDir = path.dirname(OUTPUT_FILE);
