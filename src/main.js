@@ -152,10 +152,6 @@ const router = createRouter({
 })
 
 const app = createApp(App)
-<<<<<<< HEAD
-=======
-const head = createHead()
->>>>>>> f0ab71a (feat: Add Claude prompts extraction and display page)
 app.use(router)
 app.mount('#app')
 
