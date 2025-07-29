@@ -127,6 +127,10 @@
           <span class="control-label">🟪 Plazas</span>
         </label>
         <label class="control-item">
+          <input type="checkbox" v-model="controls.showPortals" @change="updateControls">
+          <span class="control-label">🅿️ Portals</span>
+        </label>
+        <label class="control-item" v-show="false">
           <input type="checkbox" v-model="controls.showCPNs" @change="updateControls">
           <span class="control-label">📍 Reference Points</span>
         </label>
@@ -231,10 +235,11 @@ const controls = reactive({
   showHellStation: true,
   // Layer controls
   showStreets: true,
+  showPortals: false,
   showTrashFence: true,
   showCityBlocks: false,
   showPlazas: true,
-  showCPNs: true,
+  showCPNs: false,
   // Display controls
   showBasemap: false,
   cityAligned: false,

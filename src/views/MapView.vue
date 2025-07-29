@@ -129,7 +129,8 @@ const mapControls = reactive({
   showTrashFence: true,
   showCityBlocks: false,
   showPlazas: true,
-  showCPNs: true,
+  showPortals: true,
+  showCPNs: false, // Hidden by default
   // Display controls
   showBasemap: false,
   cityAligned: false,
@@ -242,8 +243,8 @@ const handleControlUpdate = (newControls) => {
     addInfrastructureMarkers()
   }
   
-  // Update plazas and CPNs layers
-  if ('showPlazas' in newControls || 'showCPNs' in newControls) {
+  // Update plazas, portals and CPNs layers
+  if ('showPlazas' in newControls || 'showPortals' in newControls || 'showCPNs' in newControls) {
     updateGISLayers()
   }
   
@@ -588,13 +589,6 @@ const addInfrastructureMarkers = () => {
       controlKey: 'showHellStation'
     },
     {
-      name: 'Arctica',
-      coords: getSpecialLocationCoords('ARCTICA'),
-      icon: '🧊',
-      description: 'Ice sales - 3:00 & C',
-      controlKey: 'showArctica'
-    },
-    {
       name: 'Arctica Center Camp',
       coords: [40.781994283666222, -119.21188689559813],
       icon: '🧊',
@@ -883,12 +877,49 @@ const updateGISLayers = () => {
     }
   }
   
-  // Clear existing CPN markers
+  // Clear existing CPN and portal markers
   markersLayer.eachLayer(layer => {
-    if (layer.options.icon?.options?.className === 'cpn-marker') {
+    if (layer.options.icon?.options?.className === 'cpn-marker' || 
+        layer.options.icon?.options?.className === 'portal-marker') {
       markersLayer.removeLayer(layer)
     }
   })
+  
+  // Add portal markers if enabled
+  if (mapControls.showPortals) {
+    const cpnData = getCPNs()
+    if (cpnData && cpnData.features) {
+      // Define portal names to look for
+      const portalNames = ['300 Portal', '430 Portal', '600 Portal', '730 Portal', '900 Portal']
+      
+      cpnData.features.forEach(feature => {
+        if (feature.geometry && feature.geometry.coordinates) {
+          const cpnName = feature.properties.NAME || ''
+          
+          // Check if this is a portal
+          if (portalNames.includes(cpnName)) {
+            const coords = [feature.geometry.coordinates[1], feature.geometry.coordinates[0]]
+            const marker = L.marker(coords, {
+              icon: L.divIcon({
+                className: 'portal-marker',
+                html: '<div class="marker-icon">🅿️</div>',
+                iconSize: [30, 30],
+                iconAnchor: [15, 15]
+              })
+            })
+            
+            marker.bindPopup(`
+              <div class="infrastructure-popup">
+                <strong>${cpnName}</strong><br>
+                <span class="description">Plaza entry/exit portal</span>
+              </div>
+            `)
+            markersLayer.addLayer(marker)
+          }
+        }
+      })
+    }
+  }
   
   // Add CPN markers if enabled
   if (mapControls.showCPNs) {
@@ -913,8 +944,8 @@ const updateGISLayers = () => {
         if (feature.geometry && feature.geometry.coordinates) {
           const cpnName = feature.properties.NAME || ''
           
-          // Skip if this is an infrastructure item
-          if (infrastructureNames.includes(cpnName)) {
+          // Skip if this is an infrastructure item or a portal (handled separately)
+          if (infrastructureNames.includes(cpnName) || cpnName.includes('Portal')) {
             return
           }
           
@@ -1113,6 +1144,13 @@ const applyRotation = () => {
   background: rgba(106, 13, 173, 0.9);
   border-color: #fff;
   font-size: 14px;
+}
+
+:deep(.portal-marker .marker-icon) {
+  background: rgba(139, 0, 0, 0.9);
+  border-color: #FFD700;
+  font-size: 18px;
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
 }
 
 :deep(.camp-marker .marker-icon) {
