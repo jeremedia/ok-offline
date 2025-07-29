@@ -73,6 +73,8 @@ import {
   getCityBlocks,
   getPlazas,
   getCPNs,
+  getToilets,
+  getStreetOutlines,
   getLoadingState,
   gisStyles,
   setGISYear 
@@ -124,8 +126,10 @@ const mapControls = reactive({
   showPoints: true,
   showDMZ: true,
   showHellStation: true,
+  showToilets: true,
   // Layer controls
   showStreets: true,
+  showStreetOutlines: false,
   showTrashFence: true,
   showCityBlocks: false,
   showPlazas: true,
@@ -231,7 +235,8 @@ const handleControlUpdate = (newControls) => {
       'showAirport' in newControls || 'showMedical' in newControls ||
       'showRangers' in newControls || 'showDPW' in newControls ||
       'showArctica' in newControls || 'showPoints' in newControls ||
-      'showDMZ' in newControls || 'showHellStation' in newControls) {
+      'showDMZ' in newControls || 'showHellStation' in newControls || 
+      'showToilets' in newControls) {
     // Clear existing infrastructure markers
     markersLayer.eachLayer(layer => {
       if (layer.options.icon?.options?.className === 'infrastructure-marker' ||
@@ -244,7 +249,8 @@ const handleControlUpdate = (newControls) => {
   }
   
   // Update plazas, portals and CPNs layers
-  if ('showPlazas' in newControls || 'showPortals' in newControls || 'showCPNs' in newControls) {
+  if ('showPlazas' in newControls || 'showPortals' in newControls || 'showCPNs' in newControls ||
+      'showStreets' in newControls || 'showStreetOutlines' in newControls) {
     updateGISLayers()
   }
   
@@ -675,6 +681,80 @@ const addInfrastructureMarkers = () => {
       markersLayer.addLayer(marker)
     }
   })
+  
+  // Add toilet polygons and markers from GIS data
+  if (mapControls.showInfrastructure && mapControls.showToilets && year.value === '2025') {
+    const toiletData = getToilets()
+    if (toiletData && toiletData.features) {
+      // Create a layer group for toilets if it doesn't exist
+      if (!gisLayers.toilets) {
+        gisLayers.toilets = L.layerGroup()
+      } else {
+        gisLayers.toilets.clearLayers()
+      }
+      
+      toiletData.features.forEach((feature, index) => {
+        if (feature.geometry && feature.geometry.coordinates) {
+          // Add the polygon
+          const polygon = L.geoJSON(feature, {
+            style: {
+              color: '#007BFF',
+              weight: 2,
+              opacity: 0.8,
+              fillOpacity: 0.3,
+              fillColor: '#007BFF'
+            }
+          })
+          
+          // Bind popup to polygon
+          polygon.bindPopup(`
+            <div class="infrastructure-popup">
+              <strong>Porto Bank ${index + 1}</strong>
+              <span class="description">Portable restroom facilities</span>
+            </div>
+          `)
+          
+          gisLayers.toilets.addLayer(polygon)
+          
+          // Get the center of the polygon for the icon
+          const coords = feature.geometry.coordinates[0]
+          let sumLat = 0, sumLon = 0
+          coords.forEach(coord => {
+            sumLon += coord[0]
+            sumLat += coord[1]
+          })
+          const centerLat = sumLat / coords.length
+          const centerLon = sumLon / coords.length
+          
+          // Add a smaller icon on top
+          const marker = L.marker([centerLat, centerLon], {
+            icon: L.divIcon({
+              className: 'toilet-marker',
+              html: '<div class="marker-icon">🚻</div>',
+              iconSize: [20, 20],
+              iconAnchor: [10, 10]
+            })
+          })
+          
+          // Bind the same popup to the marker
+          marker.bindPopup(`
+            <div class="infrastructure-popup">
+              <strong>Porto Bank ${index + 1}</strong>
+              <span class="description">Portable restroom facilities</span>
+            </div>
+          `)
+          
+          gisLayers.toilets.addLayer(marker)
+        }
+      })
+      
+      // Add the toilet layer group to the map
+      gisLayers.toilets.addTo(map)
+    }
+  } else if (gisLayers.toilets && map.hasLayer(gisLayers.toilets)) {
+    // Remove toilet layer if toggled off
+    map.removeLayer(gisLayers.toilets)
+  }
 }
 
 const loadData = async () => {
@@ -796,9 +876,9 @@ const addMarker = (item, type, icon) => {
 }
 
 const updateGISLayers = () => {
-  // Remove existing GIS layers
-  Object.values(gisLayers).forEach(layer => {
-    if (layer && map.hasLayer(layer)) {
+  // Remove existing GIS layers (except toilets which is handled separately)
+  Object.entries(gisLayers).forEach(([key, layer]) => {
+    if (key !== 'toilets' && layer && map.hasLayer(layer)) {
       map.removeLayer(layer)
     }
   })
@@ -813,7 +893,7 @@ const updateGISLayers = () => {
           if (!mapControls.showBasemap) {
             return {
               color: '#FF0000',
-              weight: 4,
+              weight: 1,
               opacity: 1
             }
           }
@@ -824,6 +904,27 @@ const updateGISLayers = () => {
         onEachFeature: (feature, layer) => {
           if (feature.properties && feature.properties.name) {
             layer.bindPopup(`<strong>${feature.properties.name}</strong>Type: ${feature.properties.type}`)
+          }
+        }
+      }).addTo(map)
+    }
+  }
+  
+  // Add street outlines
+  if (mapControls.showStreetOutlines) {
+    const streetOutlinesData = getStreetOutlines()
+    if (streetOutlinesData) {
+      gisLayers.streetOutlines = L.geoJSON(streetOutlinesData, {
+        style: {
+          color: '#FF0000',
+          weight: 2,
+          opacity: 1,
+          fillOpacity: 0.25,
+          fillColor: '#FF0000'
+        },
+        onEachFeature: (feature, layer) => {
+          if (feature.properties && feature.properties.name) {
+            layer.bindPopup(`<strong>${feature.properties.name}</strong><br>Street Width`)
           }
         }
       }).addTo(map)
@@ -1151,6 +1252,12 @@ const applyRotation = () => {
   border-color: #FFD700;
   font-size: 18px;
   box-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+}
+
+:deep(.toilet-marker .marker-icon) {
+  background: rgba(0, 123, 255, 0.9);
+  border-color: #fff;
+  font-size: 12px;
 }
 
 :deep(.camp-marker .marker-icon) {

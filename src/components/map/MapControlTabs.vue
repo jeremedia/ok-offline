@@ -96,6 +96,10 @@
             <input type="checkbox" v-model="controls.showTemple" @change="updateControls">
             <span class="control-label">🏛 Temple</span>
           </label>
+          <label class="control-item sub-item">
+            <input type="checkbox" v-model="controls.showToilets" @change="updateControls">
+            <span class="control-label">🚻 Portos</span>
+          </label>
         </div>
         
         <div class="reset-view-container" v-if="showResetView">
@@ -113,6 +117,10 @@
         <label class="control-item">
           <input type="checkbox" v-model="controls.showStreets" @change="updateControls">
           <span class="control-label">🛣️ Streets</span>
+        </label>
+        <label class="control-item">
+          <input type="checkbox" v-model="controls.showStreetOutlines" @change="updateControls">
+          <span class="control-label">🛤️ Street Outlines</span>
         </label>
         <label class="control-item">
           <input type="checkbox" v-model="controls.showTrashFence" @change="updateControls">
@@ -233,8 +241,10 @@ const controls = reactive({
   showPoints: true,
   showDMZ: true,
   showHellStation: true,
+  showToilets: true,
   // Layer controls
   showStreets: true,
+  showStreetOutlines: false,
   showPortals: false,
   showTrashFence: true,
   showCityBlocks: false,
