@@ -29,16 +29,27 @@
     <div v-show="!isCollapsed" class="tab-content">
       <!-- Content Tab -->
       <div v-show="activeTab === 'content'" class="tab-panel">
-        <label class="control-item">
-          <input type="checkbox" v-model="controls.showCamps" @change="updateControls">
+        <!-- Location Data Warning -->
+        <div v-if="!locationsAvailable" class="location-warning">
+          <div class="warning-title">📍 Location Data Not Yet Released for {{ year }}</div>
+          <div v-if="timeUntilRelease" class="warning-countdown">
+            Available in {{ timeUntilRelease }}
+          </div>
+          <div class="warning-note">
+            Camp locations visible first Sunday of build week (12:01am)
+          </div>
+        </div>
+        
+        <label class="control-item" :class="{ disabled: !locationsAvailable }">
+          <input type="checkbox" v-model="controls.showCamps" @change="updateControls" :disabled="!locationsAvailable">
           <span class="control-label">🏠 Camps</span>
         </label>
-        <label class="control-item">
-          <input type="checkbox" v-model="controls.showArt" @change="updateControls">
+        <label class="control-item" :class="{ disabled: !locationsAvailable }">
+          <input type="checkbox" v-model="controls.showArt" @change="updateControls" :disabled="!locationsAvailable">
           <span class="control-label">🎨 Art</span>
         </label>
-        <label class="control-item">
-          <input type="checkbox" v-model="controls.showEvents" @change="updateControls">
+        <label class="control-item" :class="{ disabled: !locationsAvailable }">
+          <input type="checkbox" v-model="controls.showEvents" @change="updateControls" :disabled="!locationsAvailable">
           <span class="control-label">🎉 Events</span>
         </label>
         <label class="control-item">
@@ -199,7 +210,8 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, watch, nextTick } from 'vue'
+import { ref, reactive, onMounted, watch, nextTick, computed } from 'vue'
+import { canShowLocations } from '@/stores/globalState'
 
 const props = defineProps({
   isMobile: Boolean,
@@ -259,6 +271,66 @@ const controls = reactive({
   ...props.initialControls
 })
 
+// Check if locations are available for the current year
+const locationsAvailable = computed(() => {
+  return canShowLocations(props.year)
+})
+
+// Calculate time until location data is released
+const timeUntilRelease = computed(() => {
+  if (props.year !== '2025' || locationsAvailable.value) {
+    return null
+  }
+  
+  const now = new Date()
+  const buildWeekSunday = new Date(2025, 7, 17, 0, 1) // Aug 17, 2025 at 12:01am
+  
+  if (now >= buildWeekSunday) {
+    return null
+  }
+  
+  const diff = buildWeekSunday - now
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+  
+  if (days > 0) {
+    return `${days} day${days !== 1 ? 's' : ''} ${hours} hour${hours !== 1 ? 's' : ''}`
+  } else if (hours > 0) {
+    return `${hours} hour${hours !== 1 ? 's' : ''}`
+  } else {
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+    return `${minutes} minute${minutes !== 1 ? 's' : ''}`
+  }
+})
+
+// Watch for location availability changes
+watch(locationsAvailable, (available) => {
+  if (!available) {
+    // Disable location-based controls when locations aren't available
+    controls.showCamps = false
+    controls.showArt = false
+    controls.showEvents = false
+    updateControls()
+  }
+})
+
+// Watch for year changes to update location-based controls
+watch(() => props.year, (newYear) => {
+  // Handle location-based controls
+  if (!canShowLocations(newYear)) {
+    controls.showCamps = false
+    controls.showArt = false
+    controls.showEvents = false
+  }
+  
+  // Handle basemap control (only available for 2025)
+  if (newYear !== '2025' && controls.showBasemap) {
+    controls.showBasemap = false
+  }
+  
+  updateControls()
+})
+
 // Load saved state from localStorage
 onMounted(() => {
   const savedState = localStorage.getItem('mapControlState')
@@ -266,6 +338,19 @@ onMounted(() => {
     try {
       const parsed = JSON.parse(savedState)
       Object.assign(controls, parsed)
+      
+      // Check location availability and disable controls if needed
+      if (!canShowLocations(props.year)) {
+        controls.showCamps = false
+        controls.showArt = false
+        controls.showEvents = false
+      }
+      
+      // Disable basemap for non-2025 years
+      if (props.year !== '2025' && controls.showBasemap) {
+        controls.showBasemap = false
+      }
+      
       // Emit the loaded state to parent
       emit('update:controls', { ...controls })
     } catch (e) {
@@ -559,7 +644,8 @@ const toggleCollapse = () => {
 
 /* Loading/Error States */
 .loading-indicator,
-.error-indicator {
+.error-indicator,
+.location-warning {
   padding: 0.5rem;
   text-align: center;
   font-size: 0.75rem;
@@ -574,6 +660,30 @@ const toggleCollapse = () => {
 .error-indicator {
   background: rgba(255, 107, 107, 0.1);
   color: #ff6b6b;
+}
+
+.location-warning {
+  background: rgba(139, 0, 0, 0.2);
+  color: #ff9999;
+  border: 1px solid rgba(139, 0, 0, 0.3);
+  padding: 0.75rem;
+}
+
+.location-warning .warning-title {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.location-warning .warning-countdown {
+  color: #FFD700;
+  font-weight: 500;
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+}
+
+.location-warning .warning-note {
+  font-size: 0.688rem;
+  opacity: 0.9;
 }
 
 /* Reset View Button */
