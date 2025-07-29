@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ok-offline-v16'; // Restored style.css
+const CACHE_NAME = 'ok-offline-v17'; // Searchable notes feature
 const urlsToCache = [
   // Core app files
   '/',

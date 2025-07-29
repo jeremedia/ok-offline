@@ -158,6 +158,22 @@ onMounted(() => {
 // Release notes data
 const releaseNotes = [
   {
+    version: '3.13.4',
+    date: '2025-07-29',
+    added: [
+      '🔍 Searchable Notes - Personal notes are now searchable across camps, art, and events',
+      '👥 Find friends easily by searching for names mentioned in your notes',
+      '📝 Enhanced search functionality includes all your personal annotations'
+    ],
+    fixed: [
+      '🔎 Search now includes notes field when looking for camps, art, or events'
+    ],
+    technical: [
+      '🔧 Modified keyword search to include notes from visits service',
+      '📦 Import getItemNotes function for comprehensive search coverage'
+    ]
+  },
+  {
     version: '3.12.0',
     date: '2025-07-29',
     added: [
