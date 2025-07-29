@@ -304,7 +304,7 @@ window.addEventListener('resize', constrainToViewport)
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.75rem 1rem;
+  padding: 0.5rem 0.75rem;
   background: rgba(0, 0, 0, 0.3);
   border-radius: 8px 8px 0 0;
   cursor: move;

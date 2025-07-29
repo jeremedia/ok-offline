@@ -15,6 +15,8 @@ import ResetView from './views/ResetView.vue'
 import NotFound from './views/NotFound.vue'
 
 // Import CSS
+import './styles/fonts.css'
+import './styles/global.css'
 import 'leaflet/dist/leaflet.css'
 
 // Routes

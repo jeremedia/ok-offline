@@ -121,10 +121,10 @@ const infoEl = ref(null)
 const isCollapsed = ref(false)
 const isDragging = ref(false)
 
-// Position state - positioned on left side by default
+// Position state - positioned on bottom right by default
 const position = reactive({
-  x: 10,
-  y: 120  // Below the zoom controls
+  x: window.innerWidth - 270,  // 250px width + 20px margin
+  y: window.innerHeight - 420  // Approximate height + margin from bottom
 })
 
 // Drag state
@@ -148,11 +148,11 @@ const infoStyle = computed(() => {
   
   // Desktop draggable positioning
   if (isCollapsed.value) {
-    // When collapsed, snap to bottom left
+    // When collapsed, snap to bottom right
     return {
-      left: `${position.x}px`,
+      right: '20px',
       bottom: '20px',
-      right: 'auto',
+      left: 'auto',
       top: 'auto'
     }
   }
@@ -212,7 +212,14 @@ onMounted(() => {
         constrainToViewport()
       } catch (e) {
         console.error('Failed to load info position:', e)
+        // Reset to default bottom-right position
+        position.x = window.innerWidth - 270
+        position.y = window.innerHeight - 420
       }
+    } else {
+      // No saved position, set default bottom-right
+      position.x = window.innerWidth - 270
+      position.y = window.innerHeight - 420
     }
   }
 })
@@ -232,9 +239,9 @@ const toggleCollapse = () => {
         position.y = parsed.y
         constrainToViewport()
       } catch (e) {
-        // If no saved position, use default
-        position.x = 10
-        position.y = 120
+        // If no saved position, use default bottom-right
+        position.x = window.innerWidth - 270
+        position.y = window.innerHeight - 420
       }
     }
   }
@@ -368,7 +375,7 @@ window.addEventListener('resize', constrainToViewport)
 
 .info-header h4 {
   margin: 0;
-  color: #00ff88;
+  color: #FFD700;
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;

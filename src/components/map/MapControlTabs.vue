@@ -1,7 +1,19 @@
 <template>
-  <div class="map-control-tabs" :class="{ 'mobile-view': isMobile }">
+  <div class="map-control-tabs" :class="{ 'mobile-view': isMobile, 'collapsed': isCollapsed }">
+    <!-- Control Header (Desktop Only) -->
+    <div v-if="!isMobile" class="control-header">
+      <h4>{{ year }} Map</h4>
+      <button 
+        @click="toggleCollapse"
+        class="collapse-btn"
+        :aria-label="isCollapsed ? 'Expand controls' : 'Collapse controls'"
+      >
+        {{ isCollapsed ? '◀' : '▶' }}
+      </button>
+    </div>
+    
     <!-- Tab Headers -->
-    <div class="tab-header">
+    <div v-show="!isCollapsed" class="tab-header">
       <button 
         v-for="tab in tabs" 
         :key="tab.id"
@@ -14,7 +26,7 @@
     </div>
     
     <!-- Tab Content -->
-    <div class="tab-content">
+    <div v-show="!isCollapsed" class="tab-content">
       <!-- Content Tab -->
       <div v-show="activeTab === 'content'" class="tab-panel">
         <label class="control-item">
@@ -139,6 +151,7 @@ const tabs = [
 ]
 
 const activeTab = ref('content')
+const isCollapsed = ref(false)
 
 // Control state
 const controls = reactive({
@@ -180,6 +193,14 @@ onMounted(() => {
   if (savedTab && tabs.some(t => t.id === savedTab)) {
     activeTab.value = savedTab
   }
+  
+  // Load collapsed state (desktop only)
+  if (!props.isMobile) {
+    const savedCollapsed = localStorage.getItem('mapControlsCollapsed')
+    if (savedCollapsed !== null) {
+      isCollapsed.value = savedCollapsed === 'true'
+    }
+  }
 })
 
 // Save state changes
@@ -207,6 +228,12 @@ const setRotation = (angle) => {
   // Emit ONLY the rotationAngle change to avoid triggering toggleRotation
   emit('update:controls', { rotationAngle: angle })
 }
+
+// Toggle collapse state
+const toggleCollapse = () => {
+  isCollapsed.value = !isCollapsed.value
+  localStorage.setItem('mapControlsCollapsed', isCollapsed.value)
+}
 </script>
 
 <style scoped>
@@ -216,6 +243,58 @@ const setRotation = (angle) => {
   border: 1px solid #444;
   overflow: hidden;
   max-width: 320px;
+  transition: all 0.3s ease;
+}
+
+.map-control-tabs.collapsed {
+  max-width: fit-content;
+}
+
+/* Control Header (matching legend header style) */
+.control-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px 8px 0 0;
+  border-bottom: 1px solid #444;
+}
+
+.collapsed .control-header {
+  border-radius: 8px;
+  border-bottom: none;
+}
+
+.control-header h4 {
+  margin: 0;
+  color: #FFD700;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.control-header .collapse-btn {
+  background: none;
+  border: none;
+  color: #ccc;
+  font-size: 0.75rem;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  margin-left: 0.5rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
+.control-header .collapse-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
 }
 
 /* Tab Header */
@@ -235,6 +314,8 @@ const setRotation = (angle) => {
   cursor: pointer;
   transition: all 0.2s ease;
   border-right: 1px solid #333;
+  white-space: nowrap;
+  text-transform: uppercase;
 }
 
 .tab-button:last-child {
@@ -393,9 +474,8 @@ const setRotation = (angle) => {
 
 /* Reset View Button */
 .reset-view-container {
-  margin-top: 1rem;
-  padding-top: 1rem;
   border-top: 1px solid #333;
+  padding: 0 0.5rem 0.5rem 0.5rem;
 }
 
 .reset-view-btn {
