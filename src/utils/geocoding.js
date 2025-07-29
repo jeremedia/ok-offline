@@ -385,7 +385,7 @@ export function getSpecialLocationCoords(name) {
     'DPOW': brcAddressToLatLon('5:30 & H'), // DPW location
     'MEDICAL': brcAddressToLatLon('5:30 & ESPLANADE'), // Legacy medical location
     'RAMPART': [40.780065841922166, -119.20676566604881], // Rampart field hospital from GIS data
-    'RANGER HQ': brcAddressToLatLon('5:45 & ESPLANADE'), // Ranger HQ
+    'RANGER HQ': [40.783641284089448, -119.21150356651343], // Ranger HQ from GIS data
     'ARCTICA': brcAddressToLatLon('3:00 & C'), // Ice sales
   }
   

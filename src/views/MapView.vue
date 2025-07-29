@@ -519,10 +519,45 @@ const addInfrastructureMarkers = () => {
       controlKey: 'showMedical'
     },
     {
+      name: 'Station 3',
+      coords: [40.779913445324667, -119.19410428430447],
+      icon: '🏥',
+      description: 'Emergency services station - 3:00 sector',
+      controlKey: 'showMedical'
+    },
+    {
+      name: 'Station 6',
+      coords: [40.780509618833086, -119.20652384845459],
+      icon: '🏥',
+      description: 'Emergency services station - 6:00 sector',
+      controlKey: 'showMedical'
+    },
+    {
+      name: 'Station 9',
+      coords: [40.794090422669733, -119.21197232230189],
+      icon: '🏥',
+      description: 'Emergency services station - 9:00 sector',
+      controlKey: 'showMedical'
+    },
+    {
       name: 'Ranger HQ',
       coords: getSpecialLocationCoords('RANGER HQ'),
       icon: '🎯',
-      description: 'Black Rock Rangers headquarters - 5:45 & Esplanade',
+      description: 'Black Rock Rangers headquarters',
+      controlKey: 'showRangers'
+    },
+    {
+      name: 'Ranger Station Berlin',
+      coords: [40.780198273707583, -119.19373531464844],
+      icon: '🎯',
+      description: 'Black Rock Rangers station - 3:00 sector',
+      controlKey: 'showRangers'
+    },
+    {
+      name: 'Ranger Station Tokyo', 
+      coords: [40.793802980792094, -119.21231514202253],
+      icon: '🎯',
+      description: 'Black Rock Rangers station - 9:00 sector',
       controlKey: 'showRangers'
     },
     {
@@ -536,7 +571,28 @@ const addInfrastructureMarkers = () => {
       name: 'Arctica',
       coords: getSpecialLocationCoords('ARCTICA'),
       icon: '🧊',
-      description: 'Ice sales for keeping cool in the desert - 3:00 & C',
+      description: 'Ice sales - 3:00 & C',
+      controlKey: 'showArctica'
+    },
+    {
+      name: 'Arctica Center Camp',
+      coords: [40.781994283666222, -119.21188689559813],
+      icon: '🧊',
+      description: 'Ice sales - Center Camp area',
+      controlKey: 'showArctica'
+    },
+    {
+      name: 'Ice Cubed (Arctica 3)',
+      coords: [40.777479126910642, -119.19003308126543],
+      icon: '🧊',
+      description: 'Ice sales - 3:00 sector',
+      controlKey: 'showArctica'
+    },
+    {
+      name: 'Ice Nine (Arctica 9)',
+      coords: [40.796433491680219, -119.21595443147025],
+      icon: '🧊',
+      description: 'Ice sales - 9:00 sector',
       controlKey: 'showArctica'
     }
   ]
@@ -777,11 +833,16 @@ const updateGISLayers = () => {
     const cpnData = getCPNs()
     if (cpnData && cpnData.features) {
       // Infrastructure items that should not be shown as CPNs (already handled by infrastructure layer)
-      // Only filter out the main infrastructure - let the satellite locations show
+      // Filter out all infrastructure items now shown in infrastructure layer
       const infrastructureNames = [
         'The Man', 'The Temple', 'Center Camp', 'Airport', 
         'DMV', 'Media Mecca', 'Playa Info', 'HEaT',
-        'Rampart' // Main field hospital shown in infrastructure
+        // Medical/Emergency services
+        'Rampart', 'Station 3', 'Station 6', 'Station 9',
+        // Ranger stations
+        'Ranger HQ', 'Ranger Station Berlin', 'Ranger Station Tokyo',
+        // Ice/Arctica locations
+        'Arctica', 'Arctica Center Camp', 'Ice Cubed Arctica 3', 'Ice Nine Arctica'
       ]
       
       cpnData.features.forEach(feature => {
