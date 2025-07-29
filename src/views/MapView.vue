@@ -230,7 +230,8 @@ const handleControlUpdate = (newControls) => {
       'showArctica' in newControls || 'showPoints' in newControls) {
     // Clear existing infrastructure markers
     markersLayer.eachLayer(layer => {
-      if (layer.options.icon?.options?.className === 'infrastructure-marker') {
+      if (layer.options.icon?.options?.className === 'infrastructure-marker' ||
+          layer.options.icon?.options?.className === 'point-marker') {
         markersLayer.removeLayer(layer)
       }
     })
@@ -473,7 +474,8 @@ onMounted(async () => {
 const addInfrastructureMarkers = () => {
   // Clear any existing infrastructure markers first
   markersLayer.eachLayer(layer => {
-    if (layer.options.icon?.options?.className === 'infrastructure-marker') {
+    if (layer.options.icon?.options?.className === 'infrastructure-marker' ||
+        layer.options.icon?.options?.className === 'point-marker') {
       markersLayer.removeLayer(layer)
     }
   })
@@ -602,35 +604,40 @@ const addInfrastructureMarkers = () => {
       coords: [40.783393446220742, -119.23273810046453],
       icon: '1️⃣',
       description: 'Pentagon fence perimeter point',
-      controlKey: 'showPoints'
+      controlKey: 'showPoints',
+      isPoint: true
     },
     {
       name: 'Point 2',
       coords: [40.80735944960697, -119.21663410121627],
       icon: '2️⃣',
       description: 'Pentagon fence perimeter point',
-      controlKey: 'showPoints'
+      controlKey: 'showPoints',
+      isPoint: true
     },
     {
       name: 'Point 3',
       coords: [40.803105452153233, -119.18168009473446],
       icon: '3️⃣',
       description: 'Pentagon fence perimeter point',
-      controlKey: 'showPoints'
+      controlKey: 'showPoints',
+      isPoint: true
     },
     {
       name: 'Point 4',
       coords: [40.776562450338268, -119.17619408999123],
       icon: '4️⃣',
       description: 'Pentagon fence perimeter point',
-      controlKey: 'showPoints'
+      controlKey: 'showPoints',
+      isPoint: true
     },
     {
       name: 'Point 5',
       coords: [40.764368446673565, -119.20773209353284],
       icon: '5️⃣',
       description: 'Pentagon fence perimeter point',
-      controlKey: 'showPoints'
+      controlKey: 'showPoints',
+      isPoint: true
     }
   ]
   
@@ -641,7 +648,7 @@ const addInfrastructureMarkers = () => {
     if (loc.coords) {
       const marker = L.marker(loc.coords, {
         icon: L.divIcon({
-          className: 'infrastructure-marker',
+          className: loc.isPoint ? 'point-marker' : 'infrastructure-marker',
           html: `<div class="marker-icon">${loc.icon}</div>`,
           iconSize: [30, 30],
           iconAnchor: [15, 15]
@@ -685,6 +692,7 @@ const updateMarkers = () => {
   // Clear existing markers (except infrastructure)
   markersLayer.eachLayer(layer => {
     if (!layer.options.icon?.options?.className?.includes('infrastructure-marker') &&
+        !layer.options.icon?.options?.className?.includes('point-marker') &&
         !layer.options.icon?.options?.className?.includes('cpn-marker')) {
       markersLayer.removeLayer(layer)
     }
@@ -1073,6 +1081,15 @@ const applyRotation = () => {
   background: rgba(139, 0, 0, 0.9);
   border-color: #FFD700;
   font-size: 20px;
+}
+
+:deep(.point-marker .marker-icon) {
+  background: none;
+  border: none;
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 :deep(.cpn-marker .marker-icon) {

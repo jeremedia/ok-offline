@@ -53,36 +53,40 @@
         <!-- Infrastructure Categories (shown when Infrastructure is enabled) -->
         <div v-if="controls.showInfrastructure" class="infra-categories">
           <label class="control-item sub-item">
-            <input type="checkbox" v-model="controls.showTheMan" @change="updateControls">
-            <span class="control-label">🔥 The Man</span>
+            <input type="checkbox" v-model="controls.showAirport" @change="updateControls">
+            <span class="control-label">✈️ Airport</span>
+          </label>
+          <label class="control-item sub-item">
+            <input type="checkbox" v-model="controls.showArctica" @change="updateControls">
+            <span class="control-label">🧊 Arctica</span>
           </label>
           <label class="control-item sub-item">
             <input type="checkbox" v-model="controls.showCenterCamp" @change="updateControls">
             <span class="control-label">⛺ Center Camp</span>
           </label>
           <label class="control-item sub-item">
-            <input type="checkbox" v-model="controls.showTemple" @change="updateControls">
-            <span class="control-label">🏛 Temple</span>
+            <input type="checkbox" v-model="controls.showDPW" @change="updateControls">
+            <span class="control-label">🔧 DPW</span>
           </label>
           <label class="control-item sub-item">
-            <input type="checkbox" v-model="controls.showAirport" @change="updateControls">
-            <span class="control-label">✈️ Airport</span>
+            <input type="checkbox" v-model="controls.showTheMan" @change="updateControls">
+            <span class="control-label">🔥 The Man</span>
           </label>
           <label class="control-item sub-item">
             <input type="checkbox" v-model="controls.showMedical" @change="updateControls">
             <span class="control-label">🏥 Medical</span>
           </label>
           <label class="control-item sub-item">
+            <input type="checkbox" v-model="controls.showPoints" @change="updateControls">
+            <span class="control-label">#️⃣ Points</span>
+          </label>
+          <label class="control-item sub-item">
             <input type="checkbox" v-model="controls.showRangers" @change="updateControls">
             <span class="control-label">🎯 Rangers</span>
           </label>
           <label class="control-item sub-item">
-            <input type="checkbox" v-model="controls.showDPW" @change="updateControls">
-            <span class="control-label">🔧 DPW</span>
-          </label>
-          <label class="control-item sub-item">
-            <input type="checkbox" v-model="controls.showArctica" @change="updateControls">
-            <span class="control-label">🧊 Arctica</span>
+            <input type="checkbox" v-model="controls.showTemple" @change="updateControls">
+            <span class="control-label">🏛 Temple</span>
           </label>
         </div>
         
@@ -438,7 +442,6 @@ const toggleCollapse = () => {
   background: rgba(0, 0, 0, 0.2);
   border-radius: 4px;
   padding: 0.5rem;
-  margin-top: 0.5rem;
   margin-bottom: 0.5rem;
   border-left: 3px solid #FFD700;
 }
