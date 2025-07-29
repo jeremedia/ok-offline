@@ -139,6 +139,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { getFromCache } from '../services/storage.js'
 import { isFavorite, toggleFavorite as toggleFav } from '../services/favorites.js'
 import { getItemName, getItemLocation } from '../utils.js'
+import { getItemNotes } from '../services/visits.js'
 import SearchModeSelector from '../components/search/SearchModeSelector.vue'
 import SearchResultItem from '../components/search/SearchResultItem.vue'
 import SearchSuggestions from '../components/search/SearchSuggestions.vue'
@@ -506,10 +507,15 @@ const matchesSearch = (item, query) => {
   const description = (item.description || '').toLowerCase()
   const hometown = (item.hometown || '').toLowerCase()
   
+  // Check personal notes for this item
+  const itemType = item.occurrence_set ? 'event' : item.artist ? 'art' : 'camp'
+  const notes = getItemNotes(itemType, item.uid, year.value).toLowerCase()
+  
   return name.includes(query) || 
          location.includes(query) || 
          description.includes(query) ||
-         hometown.includes(query)
+         hometown.includes(query) ||
+         notes.includes(query)
 }
 
 // Navigation and interaction
