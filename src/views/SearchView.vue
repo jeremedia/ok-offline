@@ -536,7 +536,8 @@ const loadMore = () => {
   min-height: 100vh;
   box-sizing: border-box;
   width: 100%;
-  max-width: 100vw;
+  max-width: 1000px;
+  margin: 0 auto;
   overflow-x: hidden;
 }
 
