@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ok-offline-v15'; // Ultimate map enhancement update
+const CACHE_NAME = 'ok-offline-v16'; // Restored style.css
 const urlsToCache = [
   // Core app files
   '/',
