@@ -70,7 +70,7 @@
           </label>
           <label class="control-item sub-item">
             <input type="checkbox" v-model="controls.showMedical" @change="updateControls">
-            <span class="control-label">🏥 Medical</span>
+            <span class="control-label">🏥 Rampart</span>
           </label>
           <label class="control-item sub-item">
             <input type="checkbox" v-model="controls.showRangers" @change="updateControls">

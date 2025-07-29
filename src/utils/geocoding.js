@@ -383,7 +383,8 @@ export function getSpecialLocationCoords(name) {
     'TEMPLE': [40.791815152314989, -119.19662192527863], // Temple location from 2025 GIS data
     'AIRPORT': [40.764261391285487, -119.205226911], // Airport from GIS data
     'DPOW': brcAddressToLatLon('5:30 & H'), // DPW location
-    'MEDICAL': brcAddressToLatLon('5:30 & ESPLANADE'), // Medical station
+    'MEDICAL': brcAddressToLatLon('5:30 & ESPLANADE'), // Legacy medical location
+    'RAMPART': [40.780065841922166, -119.20676566604881], // Rampart field hospital from GIS data
     'RANGER HQ': brcAddressToLatLon('5:45 & ESPLANADE'), // Ranger HQ
     'ARCTICA': brcAddressToLatLon('3:00 & C'), // Ice sales
   }

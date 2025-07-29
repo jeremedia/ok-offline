@@ -512,10 +512,10 @@ const addInfrastructureMarkers = () => {
       controlKey: 'showAirport'
     },
     {
-      name: 'Medical',
-      coords: getSpecialLocationCoords('MEDICAL'),
+      name: 'Rampart',
+      coords: getSpecialLocationCoords('RAMPART'),
       icon: '🏥',
-      description: 'Emergency medical services - 5:30 & Esplanade',
+      description: 'Field hospital - Emergency medical services',
       controlKey: 'showMedical'
     },
     {
@@ -777,10 +777,11 @@ const updateGISLayers = () => {
     const cpnData = getCPNs()
     if (cpnData && cpnData.features) {
       // Infrastructure items that should not be shown as CPNs (already handled by infrastructure layer)
+      // Only filter out the main infrastructure - let the satellite locations show
       const infrastructureNames = [
         'The Man', 'The Temple', 'Center Camp', 'Airport', 
-        'Arctica', 'Arctica Center Camp', 'Ice Cubed Arctica 3', 'Ice Nine Arctica',
-        'Ranger HQ', 'DMV', 'Media Mecca', 'Playa Info', 'HEaT'
+        'DMV', 'Media Mecca', 'Playa Info', 'HEaT',
+        'Rampart' // Main field hospital shown in infrastructure
       ]
       
       cpnData.features.forEach(feature => {
@@ -811,8 +812,8 @@ const updateGISLayers = () => {
             description = 'Plaza entry/exit portal'
           } else if (cpnName.includes('Promenade')) {
             description = 'Wide pedestrian walkway (40\' wide)'
-          } else if (cpnName.includes('Station')) {
-            description = 'Service station'
+          } else if (cpnName.match(/^Station \d+$/)) {
+            description = 'Emergency services station - may include first aid'
           } else if (cpnName.includes('Point')) {
             description = 'Fence perimeter point'
           } else if (cpnName.includes(' & ')) {
@@ -821,6 +822,10 @@ const updateGISLayers = () => {
             description = 'DPW/operations location'
           } else if (cpnName === 'Greeters') {
             description = 'City entrance - participant greeting station'
+          } else if (cpnName.includes('Ranger')) {
+            description = 'Black Rock Rangers station'
+          } else if (cpnName.includes('Arctica') || cpnName.includes('Ice')) {
+            description = 'Ice sales location'
           }
           
           marker.bindPopup(`
