@@ -1,0 +1,3 @@
+[submodule "public/data/gis-submodule"]
+	path = public/data/gis-submodule
+	url = https://github.com/burningmantech/innovate-GIS-data.git
