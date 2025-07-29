@@ -158,6 +158,43 @@ onMounted(() => {
 // Release notes data
 const releaseNotes = [
   {
+    version: '3.12.0',
+    date: '2025-07-29',
+    added: [
+      '🗺️ Ultimate Map Enhancement - Complete overhaul of map interface with tabbed controls',
+      '📑 Organized controls into Content/Layers/Display tabs for better UX',
+      '🔍 Map Info Inspector showing live coordinates and BRC address under cursor',
+      '📊 Draggable interactive legend with minimize functionality',
+      '🏗️ Comprehensive infrastructure layer with DMZ, Hell Station, and all services',
+      '🚻 Porto (toilet) locations - 45 banks displayed as blue polygons with icons',
+      '🅿️ Plaza Portals layer showing 5 entrance points to themed plazas',
+      '#️⃣ Pentagon fence perimeter points with number emojis',
+      '🛤️ Street outlines layer with red semi-transparent fill',
+      '🔄 Official GIS data integration via git submodule for automatic updates',
+      '🔐 Location data compliance with countdown timer and smart controls',
+      '⏰ Automatic enforcement of Burning Man API visibility policy'
+    ],
+    fixed: [
+      '🗺️ Base map tiles now enabled by default for 2025',
+      '🔧 Infrastructure markers properly clear when toggled off',
+      '🚻 Porto polygons no longer disappear when street outlines enabled',
+      '👆 Porto icons now properly clickable for popup information',
+      '🏛️ Temple location using accurate GIS coordinates',
+      '📍 Reference points (CPNs) clear correctly when disabled',
+      '🔄 Map rotation reset buttons properly update the map view'
+    ],
+    changed: [
+      '📋 Map controls reorganized - Infrastructure in Content tab, Plazas/CPNs in Layers',
+      '🗺️ Base map logic - only available for 2025 (disabled for other years)'
+    ],
+    technical: [
+      '⚙️ Added Vite @ alias configuration for cleaner imports',
+      '🏗️ Modular map control components with persistent state',
+      '💾 Enhanced localStorage integration for user preferences',
+      '🎨 Consistent dark theme styling throughout map controls'
+    ]
+  },
+  {
     version: '3.11.0',
     date: '2025-07-28',
     added: [

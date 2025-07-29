@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ok-offline-v14'; // API tile hosting implementation
+const CACHE_NAME = 'ok-offline-v15'; // Ultimate map enhancement update
 const urlsToCache = [
   // Core app files
   '/',

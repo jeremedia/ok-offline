@@ -760,6 +760,7 @@ Maintain release history in `CHANGELOG.md`:
 Before pushing to main:
 - [ ] Test locally with `npm run build && npm run preview`
 - [ ] Update CHANGELOG.md if adding features
+- [ ] **Update release notes in AboutSettings.vue** - The release notes are hardcoded in `src/components/settings/AboutSettings.vue` in the `releaseNotes` array. Copy the content from CHANGELOG.md and format it according to the existing structure with `added`, `fixed`, `changed`, and `technical` arrays.
 - [ ] **Increment service worker cache version** in `public/sw.js` (e.g., `ok-offline-v4` → `ok-offline-v5`)
 - [ ] Use conventional commit messages for proper versioning
 - [ ] Check GitHub Actions after push for deployment status
