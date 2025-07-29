@@ -3670,5 +3670,21 @@
     "branch": "feat/ultimate-map-experience",
     "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
     "version": "1.0.62"
+  },
+  {
+    "timestamp": "2025-07-29T21:09:41.210Z",
+    "prompt": "PromptsView.vue:147 Uncaught (in promise) TypeError: showToast is not a function\n    at Proxy.copyPrompt (PromptsView.vue:147:9)\n    at onClick (PromptsView.vue:48:29)\n    at callWithErrorHandling (runtime-core.esm-bundler.js:199:19)\n    at callWithAsyncErrorHandling (runtime-core.esm-bundler.js:206:17)\n    at HTMLButtonElement.invoker (runtime-dom.esm-bundler.js:730:5)\ncopyPrompt    @    PromptsView.vue:147\nonClick    @    PromptsView.vue:48\ncallWithErrorHandling    @    runtime-core.esm-bundler.js:199\ncallWithAsyncErrorHandling    @    runtime-core.esm-bundler.js:206\ninvoker    @    runtime-dom.esm-bundler.js:730",
+    "session": "8c64b586-3470-44db-8361-0c946267c978",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.62"
+  },
+  {
+    "timestamp": "2025-07-29T21:09:59.251Z",
+    "prompt": "there are toasts, you're using it wrong",
+    "session": "8c64b586-3470-44db-8361-0c946267c978",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.62"
   }
 ]
