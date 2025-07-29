@@ -380,31 +380,7 @@ export function getSpecialLocationCoords(name) {
     'CENTER CAMP': brcAddressToLatLon('6:00 & D'),
     'THE MAN': BRC_CONFIG.center,
     'GOLDEN SPIKE': BRC_CONFIG.center,
-    'TEMPLE': (() => {
-      // Temple is at 12:00, same distance from Man as Center Camp (2500 feet)
-      // Calculate coordinates 2500 feet north (12:00 direction) from The Man
-      const distanceInFeet = 2500
-      const distanceInMeters = distanceInFeet * 0.3048
-      const earthRadius = 6371000 // meters
-      
-      const lat1 = BRC_CONFIG.center[0] * Math.PI / 180
-      const lon1 = BRC_CONFIG.center[1] * Math.PI / 180
-      
-      // 12:00 is true north (0 degrees)
-      const bearing = 0 * Math.PI / 180
-      
-      const lat2 = Math.asin(
-        Math.sin(lat1) * Math.cos(distanceInMeters / earthRadius) +
-        Math.cos(lat1) * Math.sin(distanceInMeters / earthRadius) * Math.cos(bearing)
-      )
-      
-      const lon2 = lon1 + Math.atan2(
-        Math.sin(bearing) * Math.sin(distanceInMeters / earthRadius) * Math.cos(lat1),
-        Math.cos(distanceInMeters / earthRadius) - Math.sin(lat1) * Math.sin(lat2)
-      )
-      
-      return [lat2 * 180 / Math.PI, lon2 * 180 / Math.PI]
-    })(), // Temple at 12:00, 2500 feet from Man
+    'TEMPLE': [40.791815152314989, -119.19662192527863], // Temple location from 2025 GIS data
     'AIRPORT': [40.764261391285487, -119.205226911], // Airport from GIS data
     'DPOW': brcAddressToLatLon('5:30 & H'), // DPW location
     'MEDICAL': brcAddressToLatLon('5:30 & ESPLANADE'), // Medical station
