@@ -1,7 +1,7 @@
 <template>
   <div class="prompts-view">
     <div class="header">
-      <h1>My Claude Conversation History</h1>
+      <h1>OK-OFFLINE PROMPT HISTORY</h1>
       <div class="stats">
         <span>{{ filteredPrompts.length }} prompts</span>
         <span v-if="searchQuery">matching "{{ searchQuery }}"</span>
