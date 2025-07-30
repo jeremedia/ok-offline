@@ -48,11 +48,11 @@
         
         <!-- Mobile Actions -->
         <div class="mobile-actions" v-if="isMobile">
-          <button @click="toggleMobileMenu" class="mobile-action-btn" aria-label="Menu">
-            ≡
-          </button>
           <button @click="navigate('search')" class="mobile-action-btn" aria-label="Search">
             🔍
+          </button>
+          <button @click="toggleMobileMenu" class="mobile-action-btn hamburger-btn" aria-label="Menu">
+            ≡
           </button>
         </div>
       </div>
@@ -67,7 +67,7 @@
     <transition name="menu-slide">
       <div v-if="showMobileMenu" class="mobile-menu">
         <div class="mobile-menu-header">
-          <h3>Menu</h3>
+          <h3>MENU</h3>
           <button @click="closeMobileMenu" class="close-menu-btn" aria-label="Close menu">
             ✕
           </button>
@@ -86,14 +86,14 @@
           
           <!-- Additional Navigation -->
           <div class="menu-section">
-            <h4 class="menu-section-title">More Sections</h4>
+            <h4 class="menu-section-title">MORE</h4>
             <button @click="navigateFromMenu('infrastructure')" class="menu-nav-btn">
               <span class="menu-icon">🏛️</span>
               <span class="menu-text">Infrastructure</span>
             </button>
             <button @click="navigateFromMenu('dust')" class="menu-nav-btn">
               <span class="menu-icon">🌪️</span>
-              <span class="menu-text">Dust Forecast</span>
+              <span class="menu-text">Weather</span>
             </button>
             <button @click="navigateFromMenu('search')" class="menu-nav-btn">
               <span class="menu-icon">🔍</span>
@@ -103,14 +103,10 @@
           
           <!-- Settings & Info -->
           <div class="menu-section">
-            <h4 class="menu-section-title">Settings & Info</h4>
+            <h4 class="menu-section-title">SETTINGS & INFO</h4>
             <button @click="navigateFromMenu('settings')" class="menu-nav-btn">
               <span class="menu-icon">⚙️</span>
               <span class="menu-text">Settings</span>
-            </button>
-            <button @click="navigateFromMenu('map-settings')" class="menu-nav-btn">
-              <span class="menu-icon">📊</span>
-              <span class="menu-text">Map Settings</span>
             </button>
             <button @click="navigateFromMenu('about')" class="menu-nav-btn">
               <span class="menu-icon">📱</span>
@@ -404,10 +400,16 @@ const navigateToDataSync = () => {
 // Mobile menu methods
 const toggleMobileMenu = () => {
   showMobileMenu.value = !showMobileMenu.value
+  if (showMobileMenu.value) {
+    document.body.style.overflow = 'hidden'
+  } else {
+    document.body.style.overflow = ''
+  }
 }
 
 const closeMobileMenu = () => {
   showMobileMenu.value = false
+  document.body.style.overflow = ''
 }
 
 const navigateFromMenu = (destination) => {
@@ -425,9 +427,6 @@ const navigateFromMenu = (destination) => {
       break
     case 'settings':
       router.push('/settings')
-      break
-    case 'map-settings':
-      router.push('/settings/map')
       break
     case 'about':
       router.push('/settings/about')
@@ -738,6 +737,11 @@ footer {
   color: #fff;
 }
 
+/* Hamburger button specific styles */
+.hamburger-btn {
+  font-size: 36px;
+}
+
 /* ===== FOOTER UNIFIED DESIGN ===== */
 footer {
   background: #333;
@@ -973,7 +977,7 @@ footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem;
+  padding: 0.5rem;
   background: #333;
   border-bottom: 1px solid #444;
 }
