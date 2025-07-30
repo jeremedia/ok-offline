@@ -3,34 +3,97 @@
     <div class="search-header">
       <h2>Search Everything</h2>
       
-      <!-- Search Mode Selector -->
-      <SearchModeSelector 
-        v-model:selectedMode="searchMode"
-        :isOnline="isOnline"
-        :showDescription="showModeDescription"
-        @modeChanged="onModeChanged"
-      />
-      
-      <div class="search-input-container">
-        <input 
-          v-model="searchQuery"
-          @keydown.enter="performSearch"
-          @keydown="handleKeyDown"
-          type="text"
-          placeholder="Search camps, art, events... (press Enter)"
-          class="search-input"
-          ref="searchInput"
-        >
-        
-        <!-- Search Suggestions -->
-        <SearchSuggestions
-          :query="searchQuery"
+      <!-- Mobile: Traditional stacked layout -->
+      <div class="mobile-search-layout">
+        <!-- Search Mode Selector -->
+        <SearchModeSelector 
+          v-model:selectedMode="searchMode"
           :isOnline="isOnline"
-          :enabled="false"
-          @select="onSuggestionSelect"
-          @keydown="handleSuggestionKeyDown"
-          ref="suggestionsRef"
+          :showDescription="showModeDescription"
+          @modeChanged="onModeChanged"
         />
+        
+        <div class="search-input-container">
+          <input 
+            v-model="searchQuery"
+            @keydown.enter="performSearch"
+            @keydown="handleKeyDown"
+            type="text"
+            placeholder="Search camps, art, events... (press Enter)"
+            class="search-input"
+            ref="searchInput"
+          >
+          
+          <!-- Search Suggestions -->
+          <SearchSuggestions
+            :query="searchQuery"
+            :isOnline="isOnline"
+            :enabled="false"
+            @select="onSuggestionSelect"
+            @keydown="handleSuggestionKeyDown"
+            ref="suggestionsRef"
+          />
+        </div>
+      </div>
+      
+      <!-- Desktop: Unified search form group -->
+      <div class="desktop-search-layout">
+        <div class="unified-search-form">
+          <!-- Mode buttons -->
+          <div class="mode-buttons-inline">
+            <button
+              v-for="mode in availableModes"
+              :key="mode.value"
+              @click="selectMode(mode.value)"
+              :class="[
+                'mode-btn-inline',
+                { 
+                  'active': searchMode === mode.value,
+                  'disabled': mode.disabled
+                }
+              ]"
+              :disabled="mode.disabled"
+              :title="mode.tooltip"
+            >
+              <span class="mode-icon">{{ mode.icon }}</span>
+              <span class="mode-label">{{ mode.label }}</span>
+            </button>
+          </div>
+          
+          <!-- Search input -->
+          <div class="search-input-wrapper">
+            <input 
+              v-model="searchQuery"
+              @keydown.enter="performSearch"
+              @keydown="handleKeyDown"
+              type="text"
+              placeholder="Search camps, art, events..."
+              class="search-input-unified"
+              ref="searchInputDesktop"
+            >
+            
+            <!-- Search Suggestions -->
+            <SearchSuggestions
+              :query="searchQuery"
+              :isOnline="isOnline"
+              :enabled="false"
+              @select="onSuggestionSelect"
+              @keydown="handleSuggestionKeyDown"
+              ref="suggestionsRefDesktop"
+            />
+          </div>
+          
+          <!-- Search/Clear button -->
+          <button 
+            class="search-action-btn"
+            :class="{ disabled: !searchQuery }"
+            :disabled="!searchQuery"
+            @click="searchQuery ? clearSearch() : performSearch()"
+            :title="searchQuery ? 'Clear search' : 'Search'"
+          >
+            {{ searchQuery ? 'Clear' : 'Search' }}
+          </button>
+        </div>
       </div>
       
       <!-- Search Status -->
@@ -40,22 +103,65 @@
     </div>
     
     <div class="search-filters">
-      <label class="filter-checkbox">
-        <input type="checkbox" v-model="includeTypes.camps" @change="performSearch">
-        🏠 Camps
-      </label>
-      <label class="filter-checkbox">
-        <input type="checkbox" v-model="includeTypes.art" @change="performSearch">
-        🎨 Art
-      </label>
-      <label class="filter-checkbox">
-        <input type="checkbox" v-model="includeTypes.events" @change="performSearch">
-        🎉 Events
-      </label>
+      <div class="filter-button-group">
+        <button
+          class="filter-btn"
+          :class="{ active: everythingSelected }"
+          @click="toggleEverything"
+        >
+          <span class="desktop-label">✨ Everything</span>
+          <span class="mobile-label">✨ Everything</span>
+        </button>
+        <button
+          class="filter-btn"
+          :class="{ active: includeTypes.camps }"
+          @click="toggleFilterType('camps')"
+          :title="'Camps'"
+        >
+          <span class="desktop-label">🏠 Camps</span>
+          <span class="mobile-label">🏠</span>
+        </button>
+        <button
+          class="filter-btn"
+          :class="{ active: includeTypes.art }"
+          @click="toggleFilterType('art')"
+          :title="'Art'"
+        >
+          <span class="desktop-label">🎨 Art</span>
+          <span class="mobile-label">🎨</span>
+        </button>
+        <button
+          class="filter-btn"
+          :class="{ active: includeTypes.events }"
+          @click="toggleFilterType('events')"
+          :title="'Events'"
+        >
+          <span class="desktop-label">🎉 Events</span>
+          <span class="mobile-label">🎉</span>
+        </button>
+        <button
+          class="filter-btn"
+          :class="{ active: includeTypes.infrastructure }"
+          @click="toggleFilterType('infrastructure')"
+          :title="'Infrastructure'"
+        >
+          <span class="desktop-label">🏛️ Infra</span>
+          <span class="mobile-label">🏛️</span>
+        </button>
+        <button
+          class="filter-btn"
+          :class="{ active: includeTypes.notes }"
+          @click="toggleFilterType('notes')"
+          :title="'Notes'"
+        >
+          <span class="desktop-label">📝 Notes</span>
+          <span class="mobile-label">📝</span>
+        </button>
+      </div>
     </div>
     
     <div class="search-results">
-      <div v-if="loading" class="loading">
+      <div v-if="loading" class="search-loading">
         <div class="loading-spinner"></div>
         <span>{{ loadingMessage }}</span>
       </div>
@@ -76,7 +182,7 @@
             </div>
           </div>
           <div v-if="isOnline" class="mode-info">
-            <span class="mode-icon">⚡</span>
+            <span class="mode-icon">🚀</span>
             <div>
               <strong>Smart Search</strong>
               <p>Best of both - hybrid results</p>
@@ -104,8 +210,11 @@
         <div class="results-header">
           <div class="results-count">
             {{ results.length }} result{{ results.length !== 1 ? 's' : '' }} found
+            <span v-if="totalItemsSearched > 0" class="total-searched">
+              (searched {{ totalItemsSearched.toLocaleString() }} items)
+            </span>
             <span v-if="searchExecutionTime" class="execution-time">
-              ({{ searchExecutionTime }}ms{{ fromCache ? ', cached' : '' }})
+              {{ searchExecutionTime }}ms{{ fromCache ? ', cached' : '' }}
             </span>
           </div>
           <div v-if="searchMode !== 'keyword'" class="search-mode-badge">
@@ -143,6 +252,7 @@ import { getItemNotes } from '../services/visits.js'
 import SearchModeSelector from '../components/search/SearchModeSelector.vue'
 import SearchResultItem from '../components/search/SearchResultItem.vue'
 import SearchSuggestions from '../components/search/SearchSuggestions.vue'
+import { getAllInfrastructure, searchInfrastructure } from '../services/infrastructure.js'
 import { 
   vectorSearch, 
   hybridSearch, 
@@ -169,17 +279,21 @@ const searchExecutionTime = ref(null)
 const fromCache = ref(false)
 const showSuggestions = ref(true)
 const showModeDescription = ref(false)
+const totalItemsSearched = ref(0)
 
 const includeTypes = reactive({
   camps: true,
   art: true,
-  events: true
+  events: true,
+  infrastructure: true,
+  notes: true
 })
 
 const typeIcons = {
   camp: '🏠',
   art: '🎨',
-  event: '🎉'
+  event: '🎉',
+  infrastructure: '🏛️'
 }
 
 const searchModeLabels = {
@@ -191,6 +305,8 @@ const searchModeLabels = {
 // Refs for components
 const searchInput = ref(null)
 const suggestionsRef = ref(null)
+const searchInputDesktop = ref(null)
+const suggestionsRefDesktop = ref(null)
 
 // Computed properties
 const paginatedResults = computed(() => {
@@ -214,7 +330,46 @@ const selectedTypes = computed(() => {
   if (includeTypes.camps) types.push('camp')
   if (includeTypes.art) types.push('art')
   if (includeTypes.events) types.push('event')
+  if (includeTypes.infrastructure) types.push('infrastructure')
+  if (includeTypes.notes) types.push('notes')
   return types
+})
+
+// Check if all filter types are selected
+const everythingSelected = computed(() => {
+  return includeTypes.camps && 
+         includeTypes.art && 
+         includeTypes.events && 
+         includeTypes.infrastructure && 
+         includeTypes.notes
+})
+
+// Available search modes for desktop inline buttons
+const availableModes = computed(() => {
+  const modes = [
+    {
+      value: 'keyword',
+      label: 'Keyword',
+      icon: '🔍',
+      tooltip: 'Traditional keyword search (always available)',
+      disabled: false
+    },
+    {
+      value: 'semantic',
+      label: 'Semantic', 
+      icon: '🧠',
+      tooltip: 'Find results by meaning, not just keywords (requires internet)',
+      disabled: !isOnline.value
+    },
+    {
+      value: 'smart',
+      label: 'Smart',
+      icon: '🚀',
+      tooltip: 'Hybrid search for best results (requires internet)', 
+      disabled: !isOnline.value
+    }
+  ]
+  return modes
 })
 
 // Watch for online status changes
@@ -247,8 +402,40 @@ function updateURL() {
   })
 }
 
+// Save filter preferences to localStorage
+const saveFilterPreferences = () => {
+  const filterPrefs = {
+    camps: includeTypes.camps,
+    art: includeTypes.art,
+    events: includeTypes.events,
+    infrastructure: includeTypes.infrastructure,
+    notes: includeTypes.notes
+  }
+  localStorage.setItem('search_filter_preferences', JSON.stringify(filterPrefs))
+}
+
+// Load filter preferences from localStorage
+const loadFilterPreferences = () => {
+  const saved = localStorage.getItem('search_filter_preferences')
+  if (saved) {
+    try {
+      const prefs = JSON.parse(saved)
+      includeTypes.camps = prefs.camps !== false
+      includeTypes.art = prefs.art !== false
+      includeTypes.events = prefs.events !== false
+      includeTypes.infrastructure = prefs.infrastructure !== false
+      includeTypes.notes = prefs.notes !== false
+    } catch (e) {
+      console.error('Error loading filter preferences:', e)
+    }
+  }
+}
+
 // Initialize component
 onMounted(async () => {
+  // Load filter preferences
+  loadFilterPreferences()
+  
   // Check for URL parameters first
   if (route.query.q) {
     searchQuery.value = route.query.q
@@ -275,14 +462,14 @@ onMounted(async () => {
   // If we have a query from URL, perform search
   if (searchQuery.value) {
     await performSearch()
+  } else {
+    // Only focus search input if no query
+    nextTick(() => {
+      if (searchInput.value) {
+        searchInput.value.focus()
+      }
+    })
   }
-  
-  // Focus search input
-  nextTick(() => {
-    if (searchInput.value && !searchQuery.value) {
-      searchInput.value.focus()
-    }
-  })
 })
 
 // Search is now triggered only on Enter key
@@ -311,14 +498,97 @@ const onModeChanged = (data) => {
   // Update URL to reflect mode change
   updateURL()
   
-  // Don't auto-search on mode change anymore
-  // User must press Enter to search
+  // Re-run search if we have a query or results
+  if (searchQuery.value || results.value.length > 0) {
+    performSearch()
+  }
   
   // Update status
   if (mode !== 'keyword' && !isOnline.value) {
     searchStatus.value = 'This search mode requires internet connection'
   } else {
     searchStatus.value = ''
+  }
+}
+
+// Select search mode (for desktop inline buttons)
+const selectMode = (mode) => {
+  if (availableModes.value.find(m => m.value === mode)?.disabled) return
+  
+  searchMode.value = mode
+  
+  // Save preference
+  const prefs = searchPreferences.get()
+  prefs.defaultMode = mode
+  searchPreferences.set(prefs)
+  
+  // Update URL to reflect mode change
+  updateURL()
+  
+  // Re-run search if we have a query or results
+  if (searchQuery.value || results.value.length > 0) {
+    performSearch()
+  }
+  
+  // Update status
+  if (mode !== 'keyword' && !isOnline.value) {
+    searchStatus.value = 'This search mode requires internet connection'
+  } else {
+    searchStatus.value = ''
+  }
+}
+
+// Clear search
+const clearSearch = () => {
+  searchQuery.value = ''
+  results.value = []
+  searchStatus.value = ''
+  totalItemsSearched.value = 0
+  updateURL() // Clear URL when search is cleared
+  
+  // Focus the search input
+  nextTick(() => {
+    const input = searchInputDesktop.value || searchInput.value
+    if (input) {
+      input.focus()
+    }
+  })
+}
+
+// Toggle filter type
+const toggleFilterType = (type) => {
+  includeTypes[type] = !includeTypes[type]
+  saveFilterPreferences()
+  
+  // Re-run search if we have results or a query
+  if (searchQuery.value || results.value.length > 0) {
+    performSearch()
+  }
+}
+
+// Toggle everything on/off
+const toggleEverything = () => {
+  if (everythingSelected.value) {
+    // If everything is selected, deselect all
+    includeTypes.camps = false
+    includeTypes.art = false
+    includeTypes.events = false
+    includeTypes.infrastructure = false
+    includeTypes.notes = false
+  } else {
+    // If not everything is selected, select all
+    includeTypes.camps = true
+    includeTypes.art = true
+    includeTypes.events = true
+    includeTypes.infrastructure = true
+    includeTypes.notes = true
+  }
+  
+  saveFilterPreferences()
+  
+  // Re-run search if we have results or a query
+  if (searchQuery.value || results.value.length > 0) {
+    performSearch()
   }
 }
 
@@ -392,11 +662,13 @@ const getLoadingMessage = () => {
 const performKeywordSearch = async () => {
   const query = searchQuery.value.toLowerCase()
   const searchResults = []
+  let itemsSearched = 0
   
   // Search camps
   if (includeTypes.camps) {
     const camps = await getFromCache('camp', parseInt(year.value) || 2024)
     if (camps) {
+      itemsSearched += camps.length
       camps.forEach(camp => {
         if (matchesSearch(camp, query)) {
           searchResults.push({
@@ -413,6 +685,7 @@ const performKeywordSearch = async () => {
   if (includeTypes.art) {
     const art = await getFromCache('art', parseInt(year.value) || 2024)
     if (art) {
+      itemsSearched += art.length
       art.forEach(artPiece => {
         if (matchesSearch(artPiece, query)) {
           searchResults.push({
@@ -429,12 +702,30 @@ const performKeywordSearch = async () => {
   if (includeTypes.events) {
     const events = await getFromCache('event', parseInt(year.value) || 2024)
     if (events) {
+      itemsSearched += events.length
       events.forEach(event => {
         if (matchesSearch(event, query)) {
           searchResults.push({
             type: 'event',
             item: event,
             isFavorited: isFavorite('event', event.uid)
+          })
+        }
+      })
+    }
+  }
+  
+  // Search infrastructure
+  if (includeTypes.infrastructure) {
+    const infrastructure = getAllInfrastructure()
+    if (infrastructure) {
+      itemsSearched += infrastructure.length
+      infrastructure.forEach(infraItem => {
+        if (matchesInfrastructureSearch(infraItem, query)) {
+          searchResults.push({
+            type: 'infrastructure',
+            item: infraItem,
+            isFavorited: false // Infrastructure doesn't use favorites currently
           })
         }
       })
@@ -453,6 +744,9 @@ const performKeywordSearch = async () => {
     
     return aName.localeCompare(bName)
   })
+  
+  // Update total items searched
+  totalItemsSearched.value = itemsSearched
   
   return searchResults
 }
@@ -478,6 +772,11 @@ const performVectorSearch = async () => {
     searchExecutionTime.value = apiResults.meta?.execution_time || null
     fromCache.value = apiResults.fromCache || false
     
+    // Update total items searched from API meta if available
+    if (apiResults.meta?.total_searched) {
+      totalItemsSearched.value = apiResults.meta.total_searched
+    }
+    
     // Convert API results to our format
     const searchResults = apiResults.results.map(result => ({
       type: result.type,
@@ -492,7 +791,7 @@ const performVectorSearch = async () => {
       isFavorited: isFavorite(result.type, result.uid)
     }))
     
-    searchStatus.value = fromCache.value ? 'Results from cache' : ''
+    searchStatus.value = ''
     
     return searchResults
   } catch (error) {
@@ -518,10 +817,31 @@ const matchesSearch = (item, query) => {
          notes.includes(query)
 }
 
+// Infrastructure-specific search function
+const matchesInfrastructureSearch = (item, query) => {
+  const name = (item.name || '').toLowerCase()
+  const shortDescription = (item.shortDescription || '').toLowerCase()
+  const category = (item.category || '').toLowerCase()
+  const history = (item.history || '').toLowerCase()
+  const civicPurpose = (item.civicPurpose || '').toLowerCase()
+  const operations = (item.operations || '').toLowerCase()
+  
+  return name.includes(query) ||
+         shortDescription.includes(query) ||
+         category.includes(query) ||
+         history.includes(query) ||
+         civicPurpose.includes(query) ||
+         operations.includes(query)
+}
+
 // Navigation and interaction
 const navigateToItem = (result) => {
   // Use the correct route pattern from other views
-  router.push(`/${year.value}/${result.type}s/${result.item.uid}`)
+  if (result.type === 'infrastructure') {
+    router.push(`/${year.value}/infrastructure/${result.item.id}`)
+  } else {
+    router.push(`/${year.value}/${result.type}s/${result.item.uid}`)
+  }
 }
 
 const toggleFavorite = (result) => {
@@ -548,7 +868,7 @@ const loadMore = () => {
 }
 
 .search-header {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
@@ -631,14 +951,14 @@ const loadMore = () => {
   cursor: pointer;
 }
 
-.loading {
+.search-loading {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 1rem;
   text-align: center;
   color: #999;
-  padding: 2rem;
+  padding: 1rem 0;
 }
 
 .loading-spinner {
@@ -651,35 +971,43 @@ const loadMore = () => {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 .hint {
   text-align: center;
   color: #999;
-  padding: 2rem;
+  padding: 1rem 0;
 }
 
 .search-modes-info {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 1rem;
-  margin: 2rem 0;
+  margin: 0 0 1rem 0;
 }
 
 .mode-info {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 1rem;
+  gap: 1rem;
+  padding: 1.25rem;
   background: #2a2a2a;
   border-radius: 8px;
   border: 1px solid #444;
+  transition: all 0.2s ease;
+}
+
+@media (min-width: 601px) {
+  .mode-info:hover {
+    border-color: #8B0000;
+    background: rgba(139, 0, 0, 0.1);
+  }
 }
 
 .mode-icon {
-  font-size: 1.5rem;
+  font-size: 2rem;
   flex-shrink: 0;
 }
 
@@ -687,18 +1015,21 @@ const loadMore = () => {
   color: #fff;
   display: block;
   margin-bottom: 0.25rem;
+  font-size: 1.1rem;
+  font-weight: 600;
 }
 
 .mode-info p {
   margin: 0;
-  font-size: 0.9rem;
-  color: #ccc;
+  font-size: 0.875rem;
+  color: #999;
+  line-height: 1.3;
 }
 
 .no-results {
   text-align: center;
   color: #999;
-  padding: 2rem;
+  padding: 1rem 0;
 }
 
 .no-results-content h3 {
@@ -740,6 +1071,12 @@ const loadMore = () => {
   font-size: 0.8rem;
 }
 
+.total-searched {
+  color: #888;
+  font-size: 0.9rem;
+  margin: 0 0.5rem;
+}
+
 .search-mode-badge {
   background: #8B0000;
   color: white;
@@ -754,6 +1091,7 @@ const loadMore = () => {
   background: #2a2a2a;
   border-radius: 8px;
   padding: 1rem;
+  margin-top: 1rem;
 }
 
 .load-more {
@@ -776,22 +1114,233 @@ const loadMore = () => {
   background: #a50000;
 }
 
+/* Desktop/Mobile layout switching */
+.mobile-search-layout {
+  display: block;
+}
+
+.desktop-search-layout {
+  display: none;
+}
+
+@media (min-width: 601px) {
+  .mobile-search-layout {
+    display: none;
+  }
+  
+  .desktop-search-layout {
+    display: block;
+  }
+}
+
+/* Desktop unified search form */
+.unified-search-form {
+  display: flex;
+  align-items: stretch;
+  background: #333;
+  border: 1px solid #555;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.mode-buttons-inline {
+  display: flex;
+  border-right: 1px solid #555;
+}
+
+.mode-btn-inline {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: none;
+  border: none;
+  border-right: 1px solid #555;
+  color: #ccc;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  font-size: 0.9rem;
+}
+
+.mode-btn-inline:last-child {
+  border-right: none;
+}
+
+.mode-btn-inline:hover:not(.disabled) {
+  background: #444;
+  color: #fff;
+}
+
+.mode-btn-inline.active {
+  background: #8B0000;
+  color: #fff;
+}
+
+.mode-btn-inline.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.mode-btn-inline .mode-icon {
+  font-size: 1rem;
+}
+
+.mode-btn-inline .mode-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.search-input-wrapper {
+  flex: 1;
+  position: relative;
+}
+
+.search-input-unified {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 1rem;
+  outline: none;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.search-input-unified::placeholder {
+  color: #999;
+}
+
+.search-action-btn {
+  padding: 0.75rem 1.5rem;
+  background: #8B0000;
+  border: none;
+  border-left: 1px solid #555;
+  color: #fff;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.search-action-btn:hover:not(.disabled) {
+  background: #a50000;
+}
+
+.search-action-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #666;
+}
+
+/* Search Filters Button Group */
+.search-filters {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.filter-button-group {
+  display: flex;
+  background: #333;
+  border: 1px solid #555;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.filter-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  padding: 0.875rem 0.75rem;
+  background: none;
+  border: none;
+  border-right: 1px solid #555;
+  color: #ccc;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  font-size: 0.875rem;
+  min-height: 44px;
+}
+
+.filter-btn:last-child {
+  border-right: none;
+}
+
+.filter-btn:hover:not(.active) {
+  background: #444;
+  color: #fff;
+}
+
+.filter-btn.active {
+  background: #8B0000;
+  color: #fff;
+}
+
+/* Show/hide labels based on screen size */
+.desktop-label {
+  display: inline;
+}
+
+.mobile-label {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .desktop-label {
+    display: none;
+  }
+  
+  .mobile-label {
+    display: inline;
+  }
+}
+
 /* Mobile optimizations */
 @media (max-width: 600px) {
   .view {
-    padding: 1rem;
+    padding: 0.75rem;
   }
   
   .search-header {
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem;
   }
   
-  .search-filters {
-    gap: 0.5rem;
+  .filter-button-group {
+    flex-wrap: nowrap;
+    border-radius: 8px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
   
-  .filter-checkbox {
-    font-size: 0.9rem;
+  .filter-btn {
+    flex: 0 0 44px;
+    width: 44px;
+    min-width: 44px;
+    padding: 0;
+    border-right: 1px solid #555;
+    border-bottom: none;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .filter-btn:first-child {
+    flex: 0 0 auto;
+    width: auto;
+    min-width: auto;
+    padding: 0.75rem 1rem;
+  }
+  
+  .filter-btn:last-child {
+    border-right: none;
   }
   
   .search-modes-info {

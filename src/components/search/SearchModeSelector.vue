@@ -62,8 +62,7 @@ const searchModes = {
     icon: '🧠',
     description: 'AI-powered understanding of meaning and context',
     tooltip: 'Find results by meaning, not just keywords (requires internet)',
-    disabled: false,
-    badge: 'NEW'
+    disabled: false
   },
   smart: {
     value: 'smart',
@@ -71,8 +70,7 @@ const searchModes = {
     icon: '⚡',
     description: 'Best of both worlds - combines keyword and semantic search',
     tooltip: 'Hybrid search for best results (requires internet)',
-    disabled: false,
-    badge: 'BETA'
+    disabled: false
   }
 }
 
