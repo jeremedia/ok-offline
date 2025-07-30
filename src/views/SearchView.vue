@@ -1,7 +1,64 @@
 <template>
   <section id="search-section" class="view">
     <div class="search-header">
-      <h2>Search Everything</h2>
+      <!-- Search Filters moved to top -->
+      <div class="search-filters">
+        <div class="filter-button-group">
+          <button
+            class="filter-btn"
+            :class="{ active: everythingSelected }"
+            @click="toggleEverything"
+          >
+            <span class="desktop-label">Search Everything</span>
+            <span class="mobile-label">Everything</span>
+          </button>
+          <button
+            class="filter-btn"
+            :class="{ active: includeTypes.camps }"
+            @click="toggleFilterType('camps')"
+            :title="'Camps'"
+          >
+            <span class="desktop-label">🏠 Camps</span>
+            <span class="mobile-label">🏠</span>
+          </button>
+          <button
+            class="filter-btn"
+            :class="{ active: includeTypes.art }"
+            @click="toggleFilterType('art')"
+            :title="'Art'"
+          >
+            <span class="desktop-label">🎨 Art</span>
+            <span class="mobile-label">🎨</span>
+          </button>
+          <button
+            class="filter-btn"
+            :class="{ active: includeTypes.events }"
+            @click="toggleFilterType('events')"
+            :title="'Events'"
+          >
+            <span class="desktop-label">🎉 Events</span>
+            <span class="mobile-label">🎉</span>
+          </button>
+          <button
+            class="filter-btn"
+            :class="{ active: includeTypes.infrastructure }"
+            @click="toggleFilterType('infrastructure')"
+            :title="'Infrastructure'"
+          >
+            <span class="desktop-label">🏛️ Infra</span>
+            <span class="mobile-label">🏛️</span>
+          </button>
+          <button
+            class="filter-btn"
+            :class="{ active: includeTypes.notes }"
+            @click="toggleFilterType('notes')"
+            :title="'Notes'"
+          >
+            <span class="desktop-label">📝 Notes</span>
+            <span class="mobile-label">📝</span>
+          </button>
+        </div>
+      </div>
       
       <!-- Mobile: Traditional stacked layout -->
       <div class="mobile-search-layout">
@@ -19,7 +76,7 @@
             @keydown.enter="performSearch"
             @keydown="handleKeyDown"
             type="text"
-            placeholder="Search camps, art, events... (press Enter)"
+            :placeholder="searchPlaceholder"
             class="search-input"
             ref="searchInput"
           >
@@ -67,7 +124,7 @@
               @keydown.enter="performSearch"
               @keydown="handleKeyDown"
               type="text"
-              placeholder="Search camps, art, events..."
+              :placeholder="searchPlaceholder"
               class="search-input-unified"
               ref="searchInputDesktop"
             >
@@ -99,64 +156,6 @@
       <!-- Search Status -->
       <div v-if="searchStatus" class="search-status">
         <span :class="searchStatusClass">{{ searchStatus }}</span>
-      </div>
-    </div>
-    
-    <div class="search-filters">
-      <div class="filter-button-group">
-        <button
-          class="filter-btn"
-          :class="{ active: everythingSelected }"
-          @click="toggleEverything"
-        >
-          <span class="desktop-label">✨ Everything</span>
-          <span class="mobile-label">✨ Everything</span>
-        </button>
-        <button
-          class="filter-btn"
-          :class="{ active: includeTypes.camps }"
-          @click="toggleFilterType('camps')"
-          :title="'Camps'"
-        >
-          <span class="desktop-label">🏠 Camps</span>
-          <span class="mobile-label">🏠</span>
-        </button>
-        <button
-          class="filter-btn"
-          :class="{ active: includeTypes.art }"
-          @click="toggleFilterType('art')"
-          :title="'Art'"
-        >
-          <span class="desktop-label">🎨 Art</span>
-          <span class="mobile-label">🎨</span>
-        </button>
-        <button
-          class="filter-btn"
-          :class="{ active: includeTypes.events }"
-          @click="toggleFilterType('events')"
-          :title="'Events'"
-        >
-          <span class="desktop-label">🎉 Events</span>
-          <span class="mobile-label">🎉</span>
-        </button>
-        <button
-          class="filter-btn"
-          :class="{ active: includeTypes.infrastructure }"
-          @click="toggleFilterType('infrastructure')"
-          :title="'Infrastructure'"
-        >
-          <span class="desktop-label">🏛️ Infra</span>
-          <span class="mobile-label">🏛️</span>
-        </button>
-        <button
-          class="filter-btn"
-          :class="{ active: includeTypes.notes }"
-          @click="toggleFilterType('notes')"
-          :title="'Notes'"
-        >
-          <span class="desktop-label">📝 Notes</span>
-          <span class="mobile-label">📝</span>
-        </button>
       </div>
     </div>
     
@@ -344,6 +343,30 @@ const everythingSelected = computed(() => {
          includeTypes.notes
 })
 
+// Dynamic placeholder based on selected filters
+const searchPlaceholder = computed(() => {
+  const selected = []
+  if (includeTypes.camps) selected.push('camps')
+  if (includeTypes.art) selected.push('art')
+  if (includeTypes.events) selected.push('events')
+  if (includeTypes.infrastructure) selected.push('infra')
+  if (includeTypes.notes) selected.push('notes')
+  
+  if (selected.length === 0) {
+    return 'Select a filter to search...'
+  } else if (selected.length === 5) {
+    return 'Search everything...'
+  } else if (selected.length === 1) {
+    return `Search ${selected[0]}...`
+  } else if (selected.length === 2) {
+    return `Search ${selected[0]} and ${selected[1]}...`
+  } else {
+    // 3 or more items: "camps, art, and events"
+    const lastItem = selected.pop()
+    return `Search ${selected.join(', ')}, and ${lastItem}...`
+  }
+})
+
 // Available search modes for desktop inline buttons
 const availableModes = computed(() => {
   const modes = [
@@ -463,9 +486,12 @@ onMounted(async () => {
   if (searchQuery.value) {
     await performSearch()
   } else {
-    // Only focus search input if no query
+    // Focus search input if no query
     nextTick(() => {
-      if (searchInput.value) {
+      // Try desktop input first, then mobile
+      if (searchInputDesktop.value) {
+        searchInputDesktop.value.focus()
+      } else if (searchInput.value) {
         searchInput.value.focus()
       }
     })
@@ -489,6 +515,16 @@ const handleSuggestionKeyDown = (event) => {
 // Search mode change handler
 const onModeChanged = (data) => {
   const { mode } = data
+  
+  // If everything is selected and user changes mode, deselect all filters
+  if (everythingSelected.value) {
+    includeTypes.camps = false
+    includeTypes.art = false
+    includeTypes.events = false
+    includeTypes.infrastructure = false
+    includeTypes.notes = false
+    saveFilterPreferences()
+  }
   
   // Save preference
   const prefs = searchPreferences.get()
@@ -557,7 +593,21 @@ const clearSearch = () => {
 
 // Toggle filter type
 const toggleFilterType = (type) => {
-  includeTypes[type] = !includeTypes[type]
+  // If everything is currently selected, clicking a filter should select only that one
+  if (everythingSelected.value) {
+    // Deselect all
+    includeTypes.camps = false
+    includeTypes.art = false
+    includeTypes.events = false
+    includeTypes.infrastructure = false
+    includeTypes.notes = false
+    // Select only the clicked one
+    includeTypes[type] = true
+  } else {
+    // Normal toggle behavior
+    includeTypes[type] = !includeTypes[type]
+  }
+  
   saveFilterPreferences()
   
   // Re-run search if we have results or a query
@@ -896,14 +946,16 @@ const loadMore = () => {
   color: #fff;
   border: 1px solid #444;
   border-radius: 8px;
-  transition: border-color 0.2s ease;
+  transition: all 0.2s ease;
   box-sizing: border-box;
   max-width: 100%;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .search-input:focus {
   outline: none;
-  border-color: #8B0000;
+  border-color: #680000 !important;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4), 0 0 0 2px rgba(104, 0, 0, 0.2);
 }
 
 .search-status {
@@ -924,7 +976,7 @@ const loadMore = () => {
 }
 
 .status-online {
-  color: #8B0000;
+  color: var(--color-dark-red);
 }
 
 .search-filters {
@@ -944,7 +996,7 @@ const loadMore = () => {
 }
 
 .filter-checkbox:hover {
-  color: #8B0000;
+  color: var(--color-dark-red);
 }
 
 .filter-checkbox input {
@@ -965,7 +1017,7 @@ const loadMore = () => {
   width: 32px;
   height: 32px;
   border: 3px solid #333;
-  border-top: 3px solid #8B0000;
+  border-top: 3px solid #680000;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -1001,8 +1053,8 @@ const loadMore = () => {
 
 @media (min-width: 601px) {
   .mode-info:hover {
-    border-color: #8B0000;
-    background: rgba(139, 0, 0, 0.1);
+    border-color: #680000 !important;
+    background: rgba(104, 0, 0, 0.1);
   }
 }
 
@@ -1078,7 +1130,7 @@ const loadMore = () => {
 }
 
 .search-mode-badge {
-  background: #8B0000;
+  background: var(--color-dark-red);
   color: white;
   padding: 0.25rem 0.5rem;
   border-radius: 12px;
@@ -1100,7 +1152,7 @@ const loadMore = () => {
 }
 
 .load-more-btn {
-  background: #8B0000;
+  background: var(--color-dark-red);
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -1108,10 +1160,11 @@ const loadMore = () => {
   cursor: pointer;
   font-size: 1rem;
   transition: background-color 0.2s ease;
+  text-transform: uppercase;
 }
 
 .load-more-btn:hover {
-  background: #a50000;
+  background: var(--color-dark-red-original);
 }
 
 /* Desktop/Mobile layout switching */
@@ -1173,7 +1226,7 @@ const loadMore = () => {
 }
 
 .mode-btn-inline.active {
-  background: #8B0000;
+  background: var(--color-dark-red);
   color: #fff;
 }
 
@@ -1207,15 +1260,21 @@ const loadMore = () => {
   height: 100%;
   display: flex;
   align-items: center;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: box-shadow 0.2s ease;
 }
 
 .search-input-unified::placeholder {
   color: #999;
 }
 
+.search-input-unified:focus {
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
 .search-action-btn {
   padding: 0.75rem 1.5rem;
-  background: #8B0000;
+  background: var(--color-dark-red);
   border: none;
   border-left: 1px solid #555;
   color: #fff;
@@ -1240,8 +1299,9 @@ const loadMore = () => {
 /* Search Filters Button Group */
 .search-filters {
   display: flex;
-  justify-content: center;
-  margin-bottom: 1rem;
+  justify-content: flex-start;
+  margin-bottom: 0.75rem;
+  width: 100%;
 }
 
 .filter-button-group {
@@ -1250,6 +1310,7 @@ const loadMore = () => {
   border: 1px solid #555;
   border-radius: 8px;
   overflow: hidden;
+  width: 100%;
 }
 
 .filter-btn {
@@ -1257,7 +1318,7 @@ const loadMore = () => {
   align-items: center;
   justify-content: center;
   gap: 0.375rem;
-  padding: 0.875rem 0.75rem;
+  padding: 0.875rem 1rem;
   background: none;
   border: none;
   border-right: 1px solid #555;
@@ -1267,6 +1328,12 @@ const loadMore = () => {
   white-space: nowrap;
   font-size: 0.875rem;
   min-height: 44px;
+  flex: 1;
+  text-transform: uppercase;
+}
+
+.filter-btn:first-child {
+  flex: 1.5;
 }
 
 .filter-btn:last-child {
@@ -1279,7 +1346,7 @@ const loadMore = () => {
 }
 
 .filter-btn.active {
-  background: #8B0000;
+  background: var(--color-dark-red);
   color: #fff;
 }
 
@@ -1320,8 +1387,8 @@ const loadMore = () => {
   }
   
   .filter-btn {
-    flex: 0 0 44px;
-    width: 44px;
+    flex: 1;
+    width: auto;
     min-width: 44px;
     padding: 0;
     border-right: 1px solid #555;
@@ -1333,9 +1400,7 @@ const loadMore = () => {
   }
   
   .filter-btn:first-child {
-    flex: 0 0 auto;
-    width: auto;
-    min-width: auto;
+    flex: 2;
     padding: 0.75rem 1rem;
   }
   
