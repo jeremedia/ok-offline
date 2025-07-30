@@ -1,5 +1,13 @@
 [
   {
+    "timestamp": "2025-07-30T16:37:39.497Z",
+    "prompt": "I can't get the update to load on PWA install on iOS. Make the app version in the slide-over link to /reset to help with troubleshooting.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
     "timestamp": "2025-07-30T16:26:27.385Z",
     "prompt": "can we detect when we're in a PWA? Because the extra padding looks wrong outside the PWA.",
     "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
