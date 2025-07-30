@@ -310,6 +310,15 @@ const everythingSelected = computed(() => {
          includeTypes.notes
 })
 
+// Check if at least one filter is selected
+const hasAtLeastOneFilter = computed(() => {
+  return includeTypes.camps || 
+         includeTypes.art || 
+         includeTypes.events || 
+         includeTypes.infrastructure || 
+         includeTypes.notes
+})
+
 // Dynamic placeholder based on selected filters
 const searchPlaceholder = computed(() => {
   const selected = []
@@ -361,6 +370,9 @@ const loadFilterPreferences = () => {
       console.error('Failed to load filter preferences:', e)
     }
   }
+  
+  // Ensure at least one filter is selected after loading
+  ensureAtLeastOneFilter()
 }
 
 // Fetch entity counts from API
@@ -412,6 +424,9 @@ const fetchPopularEntities = async () => {
 onMounted(async () => {
   // Load filter preferences
   loadFilterPreferences()
+  
+  // Ensure at least one filter is selected
+  ensureAtLeastOneFilter()
   
   // Check for URL parameters first
   if (route.query.q) {
@@ -481,16 +496,6 @@ const handleSuggestionKeyDown = (event) => {
 const onModeChanged = (data) => {
   const { mode } = data
   
-  // If everything is selected and user changes mode, deselect all filters
-  if (everythingSelected.value) {
-    includeTypes.camps = false
-    includeTypes.art = false
-    includeTypes.events = false
-    includeTypes.infrastructure = false
-    includeTypes.notes = false
-    saveFilterPreferences()
-  }
-  
   // Save preference
   const prefs = searchPreferences.get()
   prefs.defaultMode = mode
@@ -542,6 +547,21 @@ const clearSearch = () => {
 
 // Toggle filter type
 const toggleFilterType = (type) => {
+  // Count currently selected filters
+  const selectedCount = Object.values(includeTypes).filter(v => v).length
+  
+  // If this is the last selected filter and user is trying to deselect it, don't allow
+  if (selectedCount === 1 && includeTypes[type]) {
+    searchStatus.value = 'At least one filter must be selected'
+    // Clear the status message after 2 seconds
+    setTimeout(() => {
+      if (searchStatus.value === 'At least one filter must be selected') {
+        searchStatus.value = ''
+      }
+    }, 2000)
+    return
+  }
+  
   // If everything is currently selected, clicking a filter should select only that one
   if (everythingSelected.value) {
     // Deselect all
@@ -568,10 +588,11 @@ const toggleFilterType = (type) => {
 // Toggle everything on/off
 const toggleEverything = () => {
   if (everythingSelected.value) {
-    // If everything is selected, deselect all
-    includeTypes.camps = false
-    includeTypes.art = false
-    includeTypes.events = false
+    // If everything is selected, select only main content types
+    // (Never deselect all filters)
+    includeTypes.camps = true
+    includeTypes.art = true
+    includeTypes.events = true
     includeTypes.infrastructure = false
     includeTypes.notes = false
   } else {
@@ -943,6 +964,17 @@ const getPluralizedEntityType = (type) => {
 // Scroll to top of results
 const scrollToTop = () => {
   window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+// Ensure at least one filter is selected
+const ensureAtLeastOneFilter = () => {
+  if (!hasAtLeastOneFilter.value) {
+    // Default to camps, art, and events (the main content types)
+    includeTypes.camps = true
+    includeTypes.art = true
+    includeTypes.events = true
+    saveFilterPreferences()
+  }
 }
 </script>
 
