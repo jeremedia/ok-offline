@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ok-offline-v23'; // Smart PWA detection
+const CACHE_NAME = 'ok-offline-v24'; // Version link to reset page
 const urlsToCache = [
   // Core app files
   '/',

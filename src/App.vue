@@ -116,7 +116,7 @@
               <span class="menu-icon">⚙️</span>
               <span class="menu-text">Settings</span>
             </button>
-            <div class="menu-version">v3.15.2</div>
+            <router-link to="/reset" class="menu-version">v{{ appVersion }}</router-link>
           </div>
         </div>
       </div>
@@ -211,9 +211,13 @@ import WelcomeScreen from './components/WelcomeScreen.vue'
 import GuidedTour from './components/GuidedTour.vue'
 import BottomNav from './components/BottomNav.vue'
 import { setToastRef } from './composables/useToast'
+import packageJson from '../package.json'
 
 const route = useRoute()
 const router = useRouter()
+
+// Get app version from package.json
+const appVersion = packageJson.version
 
 // Toast notification ref
 const toastRef = ref(null)
@@ -1144,12 +1148,20 @@ footer {
 }
 
 .menu-version {
+  display: block;
   text-align: center;
   color: var(--color-gold);
   font-size: 0.875rem;
   margin-top: 1rem;
   padding-top: 1rem;
   border-top: 1px solid #444;
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+
+.menu-version:hover {
+  opacity: 0.7;
+  text-decoration: underline;
 }
 
 /* Menu transitions */
