@@ -159,15 +159,113 @@ Track version history through:
 - Commit history with version bump commits
 - In-app release notes (Settings → About → View Release Notes)
 
+## Release Preparation Workflow
+
+### Before Creating Your PR
+
+1. **Verify Clean Working Directory**
+   ```bash
+   git status  # Should show only your feature changes
+   # If you have unrelated changes:
+   git stash save "Unrelated work"
+   ```
+
+2. **Update Release Documentation**
+   ```bash
+   # Update CHANGELOG.md with your changes
+   # Categories: Added, Fixed, Changed, Technical
+   
+   # Update src/components/settings/AboutSettings.vue
+   # Add new release entry to releaseNotes array
+   ```
+
+3. **Increment Service Worker Cache** (CRITICAL!)
+   ```bash
+   # Edit public/sw.js
+   # Change: const CACHE_NAME = 'ok-offline-v18';
+   # To:     const CACHE_NAME = 'ok-offline-v19'; // Your feature name
+   ```
+
+4. **Test Production Build**
+   ```bash
+   npm run build
+   npm run preview
+   # Test your feature in production mode
+   # Verify service worker updates properly
+   ```
+
+### Creating the Pull Request
+
+#### Option 1: All-in-One PR (Recommended)
+```bash
+# Include everything in one commit
+git add -A
+git commit -m "feat: Add your feature with release notes"
+gh pr create --title "feat: Your feature" --body "
+## Summary
+- Feature implementation
+- Release notes updated
+- Service worker cache bumped to vXX
+
+Closes #issue-number
+"
+```
+
+#### Option 2: Feature First, Release After
+```bash
+# 1. Create feature PR with just implementation
+gh pr create --title "feat: Your feature"
+gh pr merge --merge
+
+# 2. After merge, update release docs
+git checkout main && git pull
+# Update CHANGELOG.md, AboutSettings.vue, sw.js
+git commit -m "chore: Release vX.X.X"
+git push origin main
+```
+
+## Common Pitfalls to Avoid
+
+### 1. Forgetting Service Worker Cache Version
+- **Impact**: Users won't get updates (especially Safari)
+- **Solution**: Always increment in `public/sw.js`
+- **Format**: `ok-offline-vXX` (increment number)
+
+### 2. Mixed Uncommitted Changes
+- **Example**: OpenGraph changes mixed with custom entries
+- **Solution**: Use `git stash` before creating PRs
+- **Recovery**: `git stash pop` after PR is merged
+
+### 3. Release Notes Timing
+- **Problem**: Updating notes before version is determined
+- **Solution**: Either include in PR or wait for auto-version
+
+### 4. Complex Git Workflows
+- **Avoid**: Cherry-picking between branches
+- **Avoid**: Updating release notes on feature branch after PR creation
+- **Use**: Clean, linear history with feature branches
+
 ## Best Practices
 
 1. **Use feature branches** for all development work
 2. **Only merge to main** when ready to deploy
-3. **Use conventional commits** for the merge commit
-4. **Test thoroughly** on feature branch before merging
-5. **Update CHANGELOG.md** before merging major features
-6. **Keep main branch deployable** at all times
-7. **Review changes** before merging to main
+3. **Use conventional commits** for automatic versioning
+4. **Test production build** before creating PR
+5. **Update all release docs together** (CHANGELOG + AboutSettings + sw.js)
+6. **Keep main branch clean** - no uncommitted changes
+7. **Review the deployment** after merge
+
+### Release Documentation Files
+- `CHANGELOG.md` - User-facing change log
+- `src/components/settings/AboutSettings.vue` - In-app release notes
+- `public/sw.js` - Service worker cache version (CRITICAL!)
+
+### Post-Release Verification
+1. Check GitHub Actions for successful deployment
+2. Visit https://offline.oknotok.com
+3. Open DevTools > Application > Service Workers
+4. Verify new cache version is active
+5. Check Settings > About for new version number
 
 ## Checking Current Version
 

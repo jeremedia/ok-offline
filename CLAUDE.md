@@ -756,16 +756,83 @@ Maintain release history in `CHANGELOG.md`:
    - Update release notes in SettingsView.vue
    - Consider using `scripts/parse-changelog.js` for automation
 
+### Release Workflow Best Practices
+
+Based on experience, there are two recommended approaches for releases:
+
+#### Approach A: All-in-One PR (Recommended)
+Include everything in your feature branch before creating the PR:
+1. Feature implementation code
+2. Updated CHANGELOG.md
+3. Updated AboutSettings.vue release notes
+4. Incremented service worker cache version
+5. Any related documentation updates
+
+**Benefits**: Single PR review, atomic deployment, no post-merge cleanup
+
+```bash
+# On feature branch
+git add -A
+git commit -m "feat: Add custom entries with release notes"
+gh pr create --title "feat: Add custom entries feature"
+# After approval
+gh pr merge --merge --delete-branch
+```
+
+#### Approach B: Post-Merge Release Updates
+Merge feature first, then update release notes:
+1. Create and merge feature PR with just the implementation
+2. After merge, create a separate commit for release updates
+3. Push release updates directly to main
+
+**Benefits**: Clean feature PRs, coordinated multi-feature releases
+
+```bash
+# After feature PR is merged
+git checkout main && git pull
+# Update CHANGELOG.md, AboutSettings.vue, sw.js
+git add -A
+git commit -m "chore: Release v3.15.0 with custom entries feature"
+git push origin main
+```
+
+### Common Release Pitfalls & Solutions
+
+#### Uncommitted Changes from Other Work
+**Problem**: OpenGraph changes mixed with custom entries feature
+**Solution**: Always check `git status` before creating PRs. Stash or commit unrelated changes separately.
+
+```bash
+# Before creating PR
+git status  # Check for uncommitted changes
+git stash   # If unrelated changes exist
+# ... create and merge PR ...
+git stash pop  # Restore changes after
+```
+
+#### Git Workflow Confusion
+**Problem**: Complex cherry-picking and branch switching
+**Solution**: Keep main branch clean, use feature branches consistently
+
+#### Service Worker Cache Versioning
+**Critical**: MUST increment `CACHE_NAME` in `public/sw.js` for EVERY release
+```javascript
+// Before: const CACHE_NAME = 'ok-offline-v18';
+// After:  const CACHE_NAME = 'ok-offline-v19'; // Custom entries feature
+```
+
 ### Deployment Checklist
 Before pushing to main:
+- [ ] Ensure main branch is clean (`git status`)
 - [ ] Test locally with `npm run build && npm run preview`
-- [ ] Update CHANGELOG.md if adding features
-- [ ] **Update release notes in AboutSettings.vue** - The release notes are hardcoded in `src/components/settings/AboutSettings.vue` in the `releaseNotes` array. Copy the content from CHANGELOG.md and format it according to the existing structure with `added`, `fixed`, `changed`, and `technical` arrays.
-- [ ] **Increment service worker cache version** in `public/sw.js` (e.g., `ok-offline-v4` → `ok-offline-v5`)
+- [ ] Update CHANGELOG.md following [Keep a Changelog](https://keepachangelog.com/) format
+- [ ] **Update release notes in AboutSettings.vue** - The release notes are hardcoded in `src/components/settings/AboutSettings.vue` in the `releaseNotes` array
+- [ ] **Increment service worker cache version** in `public/sw.js` (e.g., `ok-offline-v18` → `ok-offline-v19`)
 - [ ] Use conventional commit messages for proper versioning
-- [ ] Check GitHub Actions after push for deployment status
+- [ ] Create comprehensive PR description linking to issues
+- [ ] After merge, verify GitHub Actions deployment succeeds
 
-**Important**: Always bump the service worker cache version for each release. Safari and other browsers aggressively cache service workers, and without a version bump, users may not receive the latest updates.
+**Important**: Safari and other browsers aggressively cache service workers. Without incrementing the cache version, users won't receive updates.
 
 ## Contributing
 
