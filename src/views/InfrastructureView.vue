@@ -279,7 +279,7 @@ onMounted(() => {
 }
 
 .intro-content p:first-child {
-  margin-top: 0;
+margin-top: 0;
 }
 
 .intro-content p:last-child {
