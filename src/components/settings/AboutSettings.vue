@@ -158,6 +158,45 @@ onMounted(() => {
 // Release notes data
 const releaseNotes = [
   {
+    version: '3.17.0',
+    date: '2025-07-30',
+    added: [
+      '🔍 Enhanced Search UI - Comprehensive improvements to search interface and user experience',
+      '🏛️ Infrastructure search type with full search and sort capabilities',
+      '🎯 "Everything" filter with smart toggle behavior for intuitive filter selection',
+      '💾 Persistent filter preferences automatically saved and restored',
+      '📊 Total items searched count displayed alongside results for better context',
+      '⚡ Auto-submit search when page loads with query parameter for shareable searches',
+      '🔄 Auto-rerun search when changing between Keyword/Semantic/Smart modes',
+      '💬 Dynamic placeholder text reflecting current filter selection',
+      '🎯 Auto-focus search input when empty for better user experience',
+      '🎨 Collapsible search options panel with horizontal button group layout',
+      '📱 Mobile-optimized icon-only filter buttons with proper touch targets',
+      '🧩 Decomposed search UI into logical, reusable components'
+    ],
+    fixed: [
+      '🔄 Fixed loading spinner CSS conflict causing entire container to rotate',
+      '🌈 Corrected HDR screen color issues by reducing red brightness by 25%',
+      '🎨 Updated all border colors to match new dark red theme',
+      '🧹 Removed redundant cache status messages and excess spacing',
+      '⚙️ Fixed v-model prop binding errors in search components',
+      '📐 Cleaned up search interface padding and margin inconsistencies'
+    ],
+    changed: [
+      '🏗️ Modular search component architecture for better maintainability',
+      '🚀 Changed Smart search icon from lightning bolt to rocket ship',
+      '🔤 Uppercased all button text for consistent design language',
+      '🎨 Implemented CSS variables for consistent dark red theming'
+    ],
+    technical: [
+      '🧩 Created SearchInput.vue, UnifiedSearchBar.vue, and SearchOptions.vue components',
+      '🎨 CSS variables for consistent color theming across components',
+      '📱 Responsive design with separate mobile and desktop layouts',
+      '💾 LocalStorage integration for persistent user preferences',
+      '🧠 Smart toggle logic for intuitive filter interactions'
+    ]
+  },
+  {
     version: '3.16.0',
     date: '2025-07-30',
     added: [

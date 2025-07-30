@@ -62,17 +62,15 @@ const searchModes = {
     icon: '🧠',
     description: 'AI-powered understanding of meaning and context',
     tooltip: 'Find results by meaning, not just keywords (requires internet)',
-    disabled: false,
-    badge: 'NEW'
+    disabled: false
   },
   smart: {
     value: 'smart',
     label: 'Smart',
-    icon: '⚡',
+    icon: '🚀',
     description: 'Best of both worlds - combines keyword and semantic search',
     tooltip: 'Hybrid search for best results (requires internet)',
-    disabled: false,
-    badge: 'BETA'
+    disabled: false
   }
 }
 
@@ -127,10 +125,11 @@ const selectMode = (mode) => {
 .mode-btn {
   flex: 1;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  gap: 4px;
-  padding: 12px 8px;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
   border: 1px solid #444;
   border-right: none;
   background: #2a2a2a;
@@ -139,7 +138,8 @@ const selectMode = (mode) => {
   transition: all 0.2s ease;
   font-size: 14px;
   position: relative;
-  min-height: 64px;
+  min-height: 44px;
+  text-transform: uppercase;
 }
 
 .mode-btn:first-child {
@@ -152,16 +152,16 @@ const selectMode = (mode) => {
 }
 
 .mode-btn:hover:not(.disabled):not(.active) {
-  background: rgba(139, 0, 0, 0.1);
-  border-color: #8B0000;
+  background: rgba(104, 0, 0, 0.1);
+  border-color: var(--color-dark-red);
   color: #fff;
   z-index: 1;
 }
 
 .mode-btn.active {
-  background: #8B0000;
+  background: var(--color-dark-red);
   color: white;
-  border-color: #8B0000;
+  border-color: var(--color-dark-red);
   z-index: 2;
 }
 
@@ -200,7 +200,7 @@ const selectMode = (mode) => {
 
 .mode-btn.active .mode-badge {
   background: rgba(255, 255, 255, 0.9);
-  color: #8B0000;
+  color: var(--color-dark-red);
 }
 
 .mode-description {
@@ -217,16 +217,17 @@ const selectMode = (mode) => {
 /* Mobile optimizations */
 @media (max-width: 600px) {
   .mode-btn {
-    padding: 10px 6px;
-    min-height: 56px;
+    padding: 10px 8px;
+    min-height: 44px;
+    gap: 6px;
   }
   
   .mode-icon {
-    font-size: 16px;
+    font-size: 18px;
   }
   
   .mode-label {
-    font-size: 11px;
+    font-size: 12px;
   }
   
   .mode-badge {
