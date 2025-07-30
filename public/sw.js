@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ok-offline-v24'; // Version link to reset page
+const CACHE_NAME = 'ok-offline-v25'; // Enhanced search UI improvements
 const urlsToCache = [
   // Core app files
   '/',

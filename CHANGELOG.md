@@ -7,6 +7,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Enhanced Search UI** - Comprehensive improvements to search interface and user experience
+  - Infrastructure search type with search and sort capabilities
+  - "Everything" filter with smart toggle behavior (selects only clicked item when all selected)
+  - Persistent filter preferences saved in localStorage and restored on page load
+  - Total items searched count displayed alongside results ("20 results of 432 found in 2,847 items")
+  - Auto-submit search functionality when page loads with query parameter
+  - Auto-rerun search when changing between Keyword/Semantic/Smart modes
+  - Dynamic placeholder text reflecting selected filters ("Search everything..." or "Search camps and art...")
+  - Auto-focus search input when empty on page load
+  - Subtle inner shadow styling for search input fields
+  - Collapsible search options panel matching infrastructure-intro style
+  - Horizontal button group layout for mode and filter controls
+  - Mobile-optimized icon-only filter buttons with proper touch targets
+  - Decomposed search UI into logical, reusable components
+
+### Fixed
+- **Search Interface** - Multiple UI and functionality improvements
+  - Fixed loading spinner CSS conflict causing entire container to rotate
+  - Corrected HDR screen color issues by reducing red brightness by 25%
+  - Updated all border colors to match new dark red theme
+  - Removed redundant "Results from cache" status message
+  - Fixed v-model prop binding errors in SearchOptions component
+  - Removed excess padding and margins from search interface elements
+  - Cleaned up search modes info styling and spacing
+
+### Changed
+- **Search Architecture** - Modular component design for better maintainability
+  - Created SearchInput.vue for mobile search input handling
+  - Created UnifiedSearchBar.vue for desktop search experience  
+  - Created SearchOptions.vue for collapsible mode and filter controls
+  - Updated SearchModeSelector.vue with new dark red color variables
+  - Implemented CSS variables for consistent dark red theming
+  - Changed Smart search icon from ⚡ to 🚀 for better visual distinction
+  - Uppercased all button text for consistent design language
+
+### Technical
+- **Component Architecture** - Clean separation of concerns and improved code organization
+  - Modular search components with proper event emission patterns
+  - CSS variables for consistent color theming across components
+  - Responsive design with separate mobile and desktop layouts
+  - LocalStorage integration for persistent user preferences
+  - Smart toggle logic for filter interactions
+
 ## [3.16.0] - 2025-07-30
 
 ### Added
