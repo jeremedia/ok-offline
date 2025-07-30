@@ -158,6 +158,25 @@ onMounted(() => {
 // Release notes data
 const releaseNotes = [
   {
+    version: '3.18.0',
+    date: '2025-07-30',
+    added: [
+      '🔍 Interactive Entity Discovery - Click entity tags to explore related content',
+      '📊 Entity tags show global counts (e.g., "music (411)")',
+      '🎯 Smart sorting by relevance in current search results',
+      '🔥 Popular Entities section with trending discovery tags',
+      '📈 Entity Breakdown showing counts by type',
+      '🎨 Clean entity search UI with accurate result counts',
+      '🔗 Shareable entity search URLs (?entity=music)',
+      '⬆️ Smooth scroll-to-top on new searches'
+    ],
+    fixed: [
+      '🚫 Search mode changes no longer disable all filters',
+      '✅ At least one filter always remains selected',
+      '💾 Filter preferences persist across mode changes'
+    ]
+  },
+  {
     version: '3.17.0',
     date: '2025-07-30',
     added: [

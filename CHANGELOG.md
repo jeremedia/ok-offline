@@ -8,6 +8,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Interactive Entity Discovery** - Transform static entity tags into a powerful discovery system
+  - Click any entity tag in search results to find all related camps, art, and events
+  - Entity tags display global counts showing total occurrences (e.g., "music (411)")
+  - Smart sorting by relevance - most frequent entities in current results appear first
+  - Popular Entities section with trending tags for quick discovery
+  - Entity Breakdown showing counts across all entity types
+  - Clean entity search UI with "Top 20 of 1,387 Music Themes" header
+  - URL state management for shareable entity searches (?entity=music)
+  - Support for both old and new API entity formats
+  - Visual feedback with dark theme compatible colors
+  - Smooth scroll-to-top when initiating new searches
+
 - **Enhanced Search UI** - Comprehensive improvements to search interface and user experience
   - Infrastructure search type with search and sort capabilities
   - "Everything" filter with smart toggle behavior (selects only clicked item when all selected)
@@ -24,6 +36,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Decomposed search UI into logical, reusable components
 
 ### Fixed
+- **Search Mode Filter Bug** - Fixed critical issue where changing search modes disabled all filters
+  - Removed code that deselected all filters when switching between keyword/semantic/smart modes
+  - Added validation to ensure at least one filter is always selected
+  - Prevents deselecting the last active filter with clear user feedback
+  - Filters now properly persist across search mode changes
+  
 - **Search Interface** - Multiple UI and functionality improvements
   - Fixed loading spinner CSS conflict causing entire container to rotate
   - Corrected HDR screen color issues by reducing red brightness by 25%
