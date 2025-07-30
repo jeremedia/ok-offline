@@ -1,6 +1,6 @@
 <template>
   <section id="search-section" class="view">
-    <div class="search-header">
+    <div class="search-header" :class="{ 'entity-search-active': entitySearchContext }">
       <!-- Mobile: Search input -->
       <div class="mobile-search-layout">
         <SearchInput
@@ -54,7 +54,7 @@
         <div class="loading-spinner"></div>
         <span>{{ loadingMessage }}</span>
       </div>
-      <div v-else-if="!searchQuery" class="hint">
+      <div v-else-if="!searchQuery && !entitySearchContext" class="hint">
         <div class="search-modes-info">
           <div class="mode-info">
             <div class="mode-icon">🔍</div>
@@ -72,6 +72,86 @@
             <p>Best of both - hybrid results</p>
           </div>
         </div>
+        
+        <div v-if="Object.keys(popularEntities).length > 0" class="popular-entities">
+          <h4>🔥 Popular Entities:</h4>
+          
+          <div v-if="popularEntities.theme && Object.keys(popularEntities.theme).length > 0" class="popular-section">
+            <h5>Themes</h5>
+            <div class="popular-tags">
+              <button 
+                v-for="(count, entity) in popularEntities.theme"
+                :key="`theme-${entity}`"
+                class="popular-entity-tag entity-theme"
+                @click="handleEntityClick({ type: 'theme', value: entity })"
+                :title="`${count} items tagged with: ${entity}`"
+              >
+                {{ entity }} <span class="popular-count">({{ count }})</span>
+              </button>
+            </div>
+          </div>
+          
+          <div v-if="popularEntities.activity && Object.keys(popularEntities.activity).length > 0" class="popular-section">
+            <h5>Activities</h5>
+            <div class="popular-tags">
+              <button 
+                v-for="(count, entity) in popularEntities.activity"
+                :key="`activity-${entity}`"
+                class="popular-entity-tag entity-activity"
+                @click="handleEntityClick({ type: 'activity', value: entity })"
+                :title="`${count} items tagged with: ${entity}`"
+              >
+                {{ entity }} <span class="popular-count">({{ count }})</span>
+              </button>
+            </div>
+          </div>
+          
+          <div v-if="popularEntities.location && Object.keys(popularEntities.location).length > 0" class="popular-section">
+            <h5>Locations</h5>
+            <div class="popular-tags">
+              <button 
+                v-for="(count, entity) in popularEntities.location"
+                :key="`location-${entity}`"
+                class="popular-entity-tag entity-location"
+                @click="handleEntityClick({ type: 'location', value: entity })"
+                :title="`${count} items tagged with: ${entity}`"
+              >
+                {{ entity }} <span class="popular-count">({{ count }})</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="entity-stats">
+          <h4>📊 Entity Breakdown:</h4>
+          <div class="entity-stats-grid">
+            <div class="entity-stat">
+              <span class="entity-tag entity-activity">activity</span>
+              <span class="entity-count">{{ entityCounts.activity?.toLocaleString() || '13,925' }}</span>
+            </div>
+            <div class="entity-stat">
+              <span class="entity-tag entity-theme">theme</span>
+              <span class="entity-count">{{ entityCounts.theme?.toLocaleString() || '13,437' }}</span>
+            </div>
+            <div class="entity-stat">
+              <span class="entity-tag entity-item_type">item_type</span>
+              <span class="entity-count">{{ entityCounts.item_type?.toLocaleString() || '5,359' }}</span>
+            </div>
+            <div class="entity-stat">
+              <span class="entity-tag entity-location">location</span>
+              <span class="entity-count">{{ entityCounts.location?.toLocaleString() || '2,654' }}</span>
+            </div>
+            <div class="entity-stat">
+              <span class="entity-tag entity-person">person</span>
+              <span class="entity-count">{{ entityCounts.person?.toLocaleString() || '2,069' }}</span>
+            </div>
+            <div class="entity-stat">
+              <span class="entity-tag entity-time">time</span>
+              <span class="entity-count">{{ entityCounts.time?.toLocaleString() || '1,547' }}</span>
+            </div>
+          </div>
+        </div>
+        
         <p class="start-typing">Start typing to search across all camps, art installations, and events.</p>
       </div>
       <div v-else-if="results.length === 0 && !loading" class="no-results">
@@ -80,10 +160,23 @@
       </div>
       <div v-else class="results-list">
         <div class="results-header">
-          <span>{{ displayedResults.length }} results of {{ results.length }} found{{ totalItemsSearched > 0 ? ` in ${totalItemsSearched.toLocaleString()} items` : '' }}</span>
-          <span v-if="searchMode !== 'keyword'" class="search-mode-badge">
-            {{ searchModeLabels[searchMode] }}
-          </span>
+          <div v-if="entitySearchContext" class="entity-search-context">
+            <span class="entity-search-label">
+              Top {{ Math.min(displayedResults.length, 20) }} of {{ entitySearchTotal.toLocaleString() }} 
+              <strong style="text-transform: capitalize;">{{ entitySearchContext }}</strong>
+              {{ ' ' }}
+              <span style="text-transform: capitalize;">{{ getPluralizedEntityType(entitySearchType) }}</span>
+            </span>
+            <button @click="clearEntitySearch" class="clear-entity-btn" title="Return to regular search">
+              ✕
+            </button>
+          </div>
+          <div v-else class="regular-search-header">
+            <span>{{ displayedResults.length }} results of {{ results.length }} found{{ totalItemsSearched > 0 ? ` in ${totalItemsSearched.toLocaleString()} items` : '' }}</span>
+            <span v-if="searchMode !== 'keyword'" class="search-mode-badge">
+              {{ searchModeLabels[searchMode] }}
+            </span>
+          </div>
         </div>
         
         <div class="results-items">
@@ -95,6 +188,7 @@
             :year="year"
             @navigate="navigateToDetail"
             @toggle-favorite="toggleItemFavorite"
+            @entity-click="handleEntityClick"
           />
         </div>
         
@@ -147,6 +241,11 @@ const fromCache = ref(false)
 const showSuggestions = ref(true)
 const showModeDescription = ref(false)
 const totalItemsSearched = ref(0)
+const entitySearchContext = ref('')
+const entitySearchType = ref('')
+const entitySearchTotal = ref(0)
+const entityCounts = ref({})
+const popularEntities = ref({})
 
 const includeTypes = reactive({
   camps: true,
@@ -264,6 +363,51 @@ const loadFilterPreferences = () => {
   }
 }
 
+// Fetch entity counts from API
+const fetchEntityCounts = async () => {
+  if (!isOnline.value) return
+  
+  try {
+    const response = await fetch(`${import.meta.env.DEV ? 'http://localhost:3555' : 'https://offline.oknotok.com'}/api/v1/search/entity_counts?year=${year.value}`)
+    if (response.ok) {
+      const data = await response.json()
+      entityCounts.value = data.entity_type_counts || {}
+    }
+  } catch (error) {
+    console.warn('Failed to fetch entity counts:', error)
+  }
+}
+
+// Fetch popular entities for suggestions
+const fetchPopularEntities = async () => {
+  if (!isOnline.value) return
+  
+  try {
+    // Fetch popular themes, activities, and locations
+    const [themeRes, activityRes, locationRes] = await Promise.all([
+      fetch(`${import.meta.env.DEV ? 'http://localhost:3555' : 'https://offline.oknotok.com'}/api/v1/search/entity_counts?entity_type=theme&limit=8&year=${year.value}`),
+      fetch(`${import.meta.env.DEV ? 'http://localhost:3555' : 'https://offline.oknotok.com'}/api/v1/search/entity_counts?entity_type=activity&limit=6&year=${year.value}`),
+      fetch(`${import.meta.env.DEV ? 'http://localhost:3555' : 'https://offline.oknotok.com'}/api/v1/search/entity_counts?entity_type=location&limit=4&year=${year.value}`)
+    ])
+    
+    if (themeRes.ok && activityRes.ok && locationRes.ok) {
+      const [themeData, activityData, locationData] = await Promise.all([
+        themeRes.json(),
+        activityRes.json(),
+        locationRes.json()
+      ])
+      
+      popularEntities.value = {
+        theme: themeData.popular_entities || {},
+        activity: activityData.popular_entities || {},
+        location: locationData.popular_entities || {}
+      }
+    }
+  } catch (error) {
+    console.warn('Failed to fetch popular entities:', error)
+  }
+}
+
 // Initialize component
 onMounted(async () => {
   // Load filter preferences
@@ -272,6 +416,14 @@ onMounted(async () => {
   // Check for URL parameters first
   if (route.query.q) {
     searchQuery.value = route.query.q
+  }
+  
+  if (route.query.entity) {
+    // Handle entity search from URL
+    entitySearchContext.value = route.query.entity
+    searchQuery.value = `entity: ${route.query.entity}`
+    await handleEntityClick({ type: 'unknown', value: route.query.entity })
+    return
   }
   
   if (route.query.mode && ['keyword', 'semantic', 'smart'].includes(route.query.mode)) {
@@ -284,12 +436,15 @@ onMounted(async () => {
   
   showSuggestions.value = searchPreferences.get().enableSemanticSearch !== false
   
-  // Check if vector search is available
+  // Check if vector search is available and fetch entity counts
   if (isOnline.value) {
     const available = await isVectorSearchAvailable()
     if (!available) {
       searchStatus.value = 'AI search temporarily unavailable'
     }
+    
+    // Fetch entity counts and popular entities for dynamic display
+    await Promise.all([fetchEntityCounts(), fetchPopularEntities()])
   }
   
   // If we have a query from URL, perform search
@@ -465,6 +620,8 @@ const performSearch = async () => {
     return
   }
   
+  scrollToTop()
+  
   const query = searchQuery.value.trim()
   loading.value = true
   loadingMessage.value = searchMode.value === 'keyword' 
@@ -582,20 +739,21 @@ const performSearch = async () => {
       let apiResults
       
       if (searchMode.value === 'semantic') {
-        const response = await vectorSearch(
-          query, 
-          typesToSearch.value, 
-          parseInt(year.value)
-        )
+        const response = await vectorSearch(query, {
+          year: parseInt(year.value),
+          types: typesToSearch.value,
+          limit: 20,
+          threshold: 0.7
+        })
         apiResults = response.results
         fromCache.value = response.cached || false
         searchExecutionTime.value = response.execution_time
       } else if (searchMode.value === 'smart') {
-        const response = await hybridSearch(
-          query, 
-          typesToSearch.value, 
-          parseInt(year.value)
-        )
+        const response = await hybridSearch(query, {
+          year: parseInt(year.value),
+          types: typesToSearch.value,
+          limit: 20
+        })
         apiResults = response.results
         fromCache.value = response.cached || false
         searchExecutionTime.value = response.execution_time
@@ -663,6 +821,129 @@ const toggleItemFavorite = async (item) => {
 const loadMore = () => {
   currentPage.value++
 }
+
+// Handle entity click from SearchResultItem
+const handleEntityClick = async ({ type, value }) => {
+  if (!isOnline.value) {
+    searchStatus.value = 'Entity search requires internet connection'
+    return
+  }
+  
+  scrollToTop()
+  
+  // Set entity search context
+  entitySearchContext.value = value
+  entitySearchType.value = type
+  
+  // Set search query to show entity context
+  searchQuery.value = `entity: ${value}`
+  
+  // Perform entity search
+  loading.value = true
+  loadingMessage.value = 'Finding related items...'
+  results.value = []
+  currentPage.value = 1
+  totalItemsSearched.value = 0
+  
+  try {
+    console.log('Starting entity search for:', value, 'with options:', {
+      year: parseInt(year.value),
+      types: typesToSearch.value,
+      limit: 50
+    })
+    
+    const response = await entitySearch([value], {
+      year: parseInt(year.value),
+      types: ['camp', 'art', 'event'], // Always search all types for entity discovery
+      limit: 50
+    })
+    
+    results.value = response.results || []
+    searchStatus.value = response.cached ? 'Cached results' : ''
+    
+    // Try to get the global count and type from the first result's entities
+    if (response.results?.length > 0) {
+      const firstResult = response.results[0]
+      if (firstResult.entities) {
+        const matchingEntity = firstResult.entities.find(e => 
+          (e.entity_value || e[1]) === value
+        )
+        if (matchingEntity) {
+          // Use global_count if available, otherwise fall back to response.total
+          entitySearchTotal.value = matchingEntity.global_count || response.total || response.results?.length || 0
+          
+          // Update type if it was unknown
+          if (entitySearchType.value === 'unknown') {
+            entitySearchType.value = matchingEntity.entity_type || matchingEntity[0] || 'unknown'
+          }
+        } else {
+          // Fallback if we can't find the matching entity
+          entitySearchTotal.value = response.total || response.results?.length || 0
+        }
+      } else {
+        // Fallback if no entities in results
+        entitySearchTotal.value = response.total || response.results?.length || 0
+      }
+    } else {
+      // Fallback if no results
+      entitySearchTotal.value = response.total || 0
+    }
+    
+    console.log('Entity search state after update:', {
+      entitySearchContext: entitySearchContext.value,
+      resultsLength: results.value.length,
+      searchQuery: searchQuery.value
+    })
+    
+    // Update URL to show entity search
+    router.replace({
+      path: route.path,
+      query: { entity: value }
+    })
+    
+  } catch (error) {
+    console.error('Entity search error:', error)
+    searchStatus.value = `Entity search error: ${error.message}`
+    results.value = []
+  } finally {
+    loading.value = false
+  }
+}
+
+// Clear entity search and return to regular search
+const clearEntitySearch = () => {
+  entitySearchContext.value = ''
+  entitySearchType.value = ''
+  entitySearchTotal.value = 0
+  searchQuery.value = ''
+  results.value = []
+  searchStatus.value = ''
+  
+  // Clear URL parameters
+  router.replace({
+    path: route.path,
+    query: {}
+  })
+}
+
+// Get pluralized entity type name
+const getPluralizedEntityType = (type) => {
+  const plurals = {
+    theme: 'themes',
+    activity: 'activities',
+    location: 'locations',
+    person: 'people',
+    time: 'times',
+    item_type: 'items',
+    unknown: 'items'  // Default to 'items' for unknown types
+  }
+  return plurals[type] || 'items'
+}
+
+// Scroll to top of results
+const scrollToTop = () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
 </script>
 
 <style scoped>
@@ -678,6 +959,10 @@ const loadMore = () => {
   max-width: 800px;
   margin-left: auto;
   margin-right: auto;
+}
+
+.search-header.entity-search-active {
+  display: none;
 }
 
 /* Mobile/Desktop layout switching */
@@ -802,6 +1087,117 @@ const loadMore = () => {
   color: #999;
 }
 
+.entity-stats {
+  margin: 2rem 0 1.5rem 0;
+  text-align: center;
+}
+
+.entity-stats h4 {
+  margin: 0 0 1rem 0;
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.entity-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.entity-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.entity-stat:hover {
+  border-color: rgba(139, 0, 0, 0.3);
+  background: rgba(139, 0, 0, 0.05);
+}
+
+.entity-stats .entity-stat .entity-tag {
+  text-transform: uppercase !important;
+  font-weight: bold !important;
+}
+
+.entity-count {
+  font-size: 0.85rem;
+  color: #ccc;
+  font-weight: 500;
+}
+
+.popular-entities {
+  margin: 2rem 0 1.5rem 0;
+  text-align: center;
+}
+
+.popular-entities h4 {
+  margin: 0 0 1rem 0;
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.popular-section {
+  margin-bottom: 1.5rem;
+}
+
+.popular-section h5 {
+  margin: 0 0 0.5rem 0;
+  color: var(--color-gold);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.popular-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.popular-entity-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 16px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: var(--color-dark-red);
+  color: white;
+  outline: none;
+  border: 1px solid var(--color-dark-red);
+}
+
+.popular-entity-tag:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(139, 0, 0, 0.4);
+  background: var(--color-dark-red-original);
+  border-color: var(--color-dark-red-original);
+}
+
+.popular-count {
+  font-size: 0.75rem;
+  opacity: 0.8;
+  font-weight: 400;
+}
+
 .start-typing {
   font-size: 1.1rem;
   color: #999; /* Better contrast */
@@ -826,10 +1222,55 @@ const loadMore = () => {
 }
 
 .results-header {
+  margin-bottom: 1rem;
+}
+
+.entity-search-context {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 1rem;
+  gap: 0.75rem;
+  background: rgba(139, 0, 0, 0.1);
+  border: 1px solid rgba(139, 0, 0, 0.3);
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.entity-search-label {
+  color: #ff8a95;
+  font-size: 0.9rem;
+}
+
+.entity-search-label strong {
+  color: #ff6b6b;
+}
+
+.clear-entity-btn {
+  background: none;
+  border: none;
+  color: #ff6b6b;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px;
+  border-radius: 3px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  min-height: 24px;
+}
+
+.clear-entity-btn:hover {
+  background: rgba(139, 0, 0, 0.2);
+  color: #fff;
+}
+
+.regular-search-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   color: #999;
   font-size: 0.9rem;
 }
@@ -907,6 +1348,40 @@ const loadMore = () => {
     flex-direction: column;
     align-items: center;
     gap: 0.5rem;
+  }
+  
+  .entity-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+  
+  .entity-stat {
+    padding: 0.5rem;
+  }
+  
+  .entity-stats h4 {
+    font-size: 1rem;
+  }
+  
+  .popular-entities h4 {
+    font-size: 1rem;
+  }
+  
+  .popular-section h5 {
+    font-size: 0.8rem;
+  }
+  
+  .popular-tags {
+    gap: 0.3rem;
+  }
+  
+  .popular-entity-tag {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.8rem;
+  }
+  
+  .popular-count {
+    font-size: 0.7rem;
   }
 }
 </style>

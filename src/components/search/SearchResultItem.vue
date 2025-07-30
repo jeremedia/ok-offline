@@ -31,17 +31,17 @@
       <!-- Enhanced metadata for vector search results -->
       <div v-if="result.entities && result.entities.length > 0" class="result-entities">
         <div class="entity-tags">
-          <span 
-            v-for="[type, value] in result.entities.slice(0, 3)"
-            :key="`${type}-${value}`"
+          <button 
+            v-for="entity in sortedEntities"
+            :key="`${entity.entity_type || entity[0]}-${entity.entity_value || entity[1]}`"
             class="entity-tag"
-            :class="`entity-${type}`"
+            :class="`entity-${entity.entity_type || entity[0]}`"
+            @click.stop="handleEntityClick(entity.entity_type || entity[0], entity.entity_value || entity[1])"
+            :title="getEntityTooltip(entity)"
           >
-            {{ value }}
-          </span>
-          <span v-if="result.entities.length > 3" class="entity-more">
-            +{{ result.entities.length - 3 }} more
-          </span>
+            {{ entity.entity_value || entity[1] }}
+            <span v-if="entity.global_count" class="entity-count">({{ entity.global_count }})</span>
+          </button>
         </div>
       </div>
     </div>
@@ -78,7 +78,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['navigate', 'toggleFavorite'])
+const emit = defineEmits(['navigate', 'toggleFavorite', 'entityClick'])
 
 const typeIcons = {
   camp: '🏠',
@@ -114,6 +114,52 @@ const displayLocation = computed(() => {
   }
   return location
 })
+
+const sortedEntities = computed(() => {
+  if (!props.result.entities || props.result.entities.length === 0) {
+    return []
+  }
+  
+  // Handle both old format (array of [type, value] pairs) and new format (objects)
+  const entities = [...props.result.entities]
+  
+  // Check if entities are in new object format
+  if (entities[0] && typeof entities[0] === 'object' && 'entity_value' in entities[0]) {
+    // Sort by result_frequency (descending), then by global_count (descending)
+    const sorted = entities.sort((a, b) => {
+      const freqDiff = (b.result_frequency || 0) - (a.result_frequency || 0)
+      if (freqDiff !== 0) return freqDiff
+      return (b.global_count || 0) - (a.global_count || 0)
+    })
+    
+    return sorted
+  }
+  
+  // Old format - return as is (no frequency data to sort by)
+  return entities
+})
+
+const getEntityTooltip = (entity) => {
+  const value = entity.entity_value || entity[1]
+  const globalCount = entity.global_count
+  const resultCount = entity.result_frequency
+  
+  let tooltip = `Click to see all items with: ${value}`
+  
+  if (globalCount) {
+    tooltip += ` (${globalCount} total)`
+  }
+  
+  if (resultCount && resultCount > 1) {
+    tooltip += ` - Appears in ${resultCount} of these results`
+  }
+  
+  return tooltip
+}
+
+const handleEntityClick = (type, value) => {
+  emit('entityClick', { type, value })
+}
 </script>
 
 <style scoped>
@@ -242,31 +288,82 @@ const displayLocation = computed(() => {
   font-size: 11px;
   font-weight: 500;
   text-transform: capitalize;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: none;
+  outline: none;
 }
 
 .entity-location {
-  background: #e3f2fd;
-  color: #1976d2;
+  background: rgba(139, 0, 0, 0.15);
+  color: #ff6b6b;
+  border: 1px solid rgba(139, 0, 0, 0.3);
 }
 
 .entity-activity {
-  background: #f3e5f5;
-  color: #7b1fa2;
+  background: rgba(139, 0, 0, 0.12);
+  color: #ffb3ba;
+  border: 1px solid rgba(139, 0, 0, 0.25);
 }
 
 .entity-theme {
-  background: #e8f5e8;
-  color: #388e3c;
+  background: rgba(139, 0, 0, 0.18);
+  color: #ff8a95;
+  border: 1px solid rgba(139, 0, 0, 0.35);
 }
 
 .entity-time {
-  background: #fff3e0;
-  color: #f57c00;
+  background: rgba(139, 0, 0, 0.10);
+  color: #ffc1cc;
+  border: 1px solid rgba(139, 0, 0, 0.20);
 }
 
 .entity-person {
-  background: #fce4ec;
-  color: #c2185b;
+  background: rgba(139, 0, 0, 0.20);
+  color: #ff7782;
+  border: 1px solid rgba(139, 0, 0, 0.40);
+}
+
+.entity-item_type {
+  background: rgba(139, 0, 0, 0.14);
+  color: #ffaab3;
+  border: 1px solid rgba(139, 0, 0, 0.28);
+}
+
+/* Entity hover states */
+.entity-tag:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(139, 0, 0, 0.3);
+}
+
+.entity-location:hover {
+  background: rgba(139, 0, 0, 0.25);
+  border-color: rgba(139, 0, 0, 0.5);
+}
+
+.entity-activity:hover {
+  background: rgba(139, 0, 0, 0.22);
+  border-color: rgba(139, 0, 0, 0.45);
+}
+
+.entity-theme:hover {
+  background: rgba(139, 0, 0, 0.28);
+  border-color: rgba(139, 0, 0, 0.55);
+}
+
+.entity-time:hover {
+  background: rgba(139, 0, 0, 0.20);
+  border-color: rgba(139, 0, 0, 0.40);
+}
+
+.entity-person:hover {
+  background: rgba(139, 0, 0, 0.30);
+  border-color: rgba(139, 0, 0, 0.60);
+}
+
+.entity-item_type:hover {
+  background: rgba(139, 0, 0, 0.24);
+  border-color: rgba(139, 0, 0, 0.48);
 }
 
 .entity-more {
@@ -274,6 +371,13 @@ const displayLocation = computed(() => {
   font-size: 11px;
   font-style: italic;
   padding: 2px 6px;
+}
+
+.entity-tag .entity-count {
+  font-size: 10px;
+  opacity: 0.7;
+  margin-left: 2px;
+  font-weight: normal;
 }
 
 /* Search mode indicator styles removed per user request */
