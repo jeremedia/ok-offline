@@ -90,6 +90,24 @@
 
 <style scoped>
 /* Component-specific styles */
+.feature-section ul {
+  margin-left: 0;
+  padding-left: 0;
+  list-style: none;
+}
+
+.feature-section li {
+  position: relative;
+  padding-left: 1.25rem;
+}
+
+.feature-section li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: var(--color-gold);
+}
+
 .keyboard-shortcuts table {
   width: 100%;
   border-collapse: collapse;

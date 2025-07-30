@@ -76,7 +76,7 @@
         <div class="mobile-menu-content">
           <!-- Year Selector -->
           <div class="menu-section">
-            <label for="mobile-year-selector" class="menu-label">Year</label>
+            <label for="mobile-year-selector" class="menu-label">YEAR</label>
             <select id="mobile-year-selector" v-model="selectedYear" @change="onYearChange" class="menu-select">
               <option value="2023">2023</option>
               <option value="2024">2024</option>
@@ -104,14 +104,19 @@
           <!-- Settings & Info -->
           <div class="menu-section">
             <h4 class="menu-section-title">SETTINGS & INFO</h4>
-            <button @click="navigateFromMenu('settings')" class="menu-nav-btn">
-              <span class="menu-icon">⚙️</span>
-              <span class="menu-text">Settings</span>
-            </button>
             <button @click="navigateFromMenu('about')" class="menu-nav-btn">
               <span class="menu-icon">📱</span>
               <span class="menu-text">About</span>
             </button>
+            <button @click="navigateFromMenu('features')" class="menu-nav-btn">
+              <span class="menu-icon">✨</span>
+              <span class="menu-text">Features</span>
+            </button>
+            <button @click="navigateFromMenu('settings')" class="menu-nav-btn">
+              <span class="menu-icon">⚙️</span>
+              <span class="menu-text">Settings</span>
+            </button>
+            <div class="menu-version">v3.15.2</div>
           </div>
         </div>
       </div>
@@ -401,15 +406,24 @@ const navigateToDataSync = () => {
 const toggleMobileMenu = () => {
   showMobileMenu.value = !showMobileMenu.value
   if (showMobileMenu.value) {
-    document.body.style.overflow = 'hidden'
+    // Use nextTick to ensure DOM is updated before setting overflow
+    nextTick(() => {
+      document.body.style.overflow = 'hidden'
+      document.body.style.position = 'fixed'
+      document.body.style.width = '100%'
+    })
   } else {
     document.body.style.overflow = ''
+    document.body.style.position = ''
+    document.body.style.width = ''
   }
 }
 
 const closeMobileMenu = () => {
   showMobileMenu.value = false
   document.body.style.overflow = ''
+  document.body.style.position = ''
+  document.body.style.width = ''
 }
 
 const navigateFromMenu = (destination) => {
@@ -430,6 +444,9 @@ const navigateFromMenu = (destination) => {
       break
     case 'about':
       router.push('/settings/about')
+      break
+    case 'features':
+      router.push('/settings/features')
       break
   }
 }
@@ -706,16 +723,17 @@ footer {
 /* ===== MOBILE ACTION BUTTONS (UNIFIED SYSTEM) ===== */
 .mobile-actions {
   display: flex;
-  gap: 0.5rem;
+  gap: 0;
 }
 
 .mobile-action-btn {
   background: #444;
   border: 1px solid #555;
   color: #ccc;
-  width: 44px;  /* Touch-friendly minimum */
+  min-width: 44px;  /* Touch-friendly minimum */
   height: 44px; /* Touch-friendly minimum */
-  border-radius: 8px;
+  padding: 0 12px; /* Add horizontal padding */
+  border-radius: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -723,12 +741,27 @@ footer {
   cursor: pointer;
   transition: all 0.2s ease;
   -webkit-tap-highlight-color: transparent;
+  position: relative;
+}
+
+/* First button (search) */
+.mobile-action-btn:first-child {
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+  border-right: none;
+}
+
+/* Last button (hamburger) */
+.mobile-action-btn:last-child {
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
 }
 
 .mobile-action-btn:hover {
   background: #8B0000;
   color: #fff;
   border-color: #8B0000;
+  z-index: 1;
 }
 
 .mobile-action-btn:active {
@@ -740,6 +773,8 @@ footer {
 /* Hamburger button specific styles */
 .hamburger-btn {
   font-size: 36px;
+  line-height: 1;
+  padding-bottom: 4px; /* Adjust for visual centering */
 }
 
 /* ===== FOOTER UNIFIED DESIGN ===== */
@@ -986,6 +1021,7 @@ footer {
   margin: 0;
   color: #fff;
   font-size: 1.2rem;
+  padding-left: 0.5rem;
 }
 
 .close-menu-btn {
@@ -1016,9 +1052,8 @@ footer {
 }
 
 .menu-section {
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #444;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.75rem;
 }
 
 .menu-section:last-child {
@@ -1027,7 +1062,7 @@ footer {
 
 .menu-label {
   display: block;
-  color: #999;
+  color: var(--color-gold);
   font-size: 0.875rem;
   margin-bottom: 0.5rem;
   text-transform: uppercase;
@@ -1036,13 +1071,19 @@ footer {
 
 .menu-select {
   width: 100%;
-  padding: 0.75rem;
+  padding: 0.875rem 1rem;
   background: #333;
   border: 1px solid #444;
   border-radius: 4px;
   color: #fff;
   font-size: 1rem;
   cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.menu-select:hover {
+  background: #444;
+  border-color: var(--color-dark-red);
 }
 
 .menu-section-title {
@@ -1061,18 +1102,34 @@ footer {
   padding: 0.875rem 1rem;
   background: #333;
   border: 1px solid #444;
-  border-radius: 4px;
+  border-radius: 0;
   color: #ccc;
   cursor: pointer;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0;
   transition: all 0.2s ease;
   text-align: left;
+  border-top: 0;
+}
+
+/* First button in each section */
+.menu-section .menu-nav-btn:first-of-type {
+  border-top: 1px solid #444;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+}
+
+/* Last button in each section */
+.menu-section .menu-nav-btn:last-of-type {
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
 }
 
 .menu-nav-btn:hover {
   background: var(--color-dark-red);
   color: #fff;
   border-color: var(--color-dark-red);
+  z-index: 1;
+  position: relative;
 }
 
 .menu-icon {
@@ -1084,6 +1141,15 @@ footer {
 .menu-text {
   font-size: 1rem;
   flex: 1;
+}
+
+.menu-version {
+  text-align: center;
+  color: var(--color-gold);
+  font-size: 0.875rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #444;
 }
 
 /* Menu transitions */

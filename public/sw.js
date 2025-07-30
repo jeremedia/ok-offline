@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ok-offline-v20'; // Infrastructure navigation feature
+const CACHE_NAME = 'ok-offline-v21'; // Mobile navigation overhaul
 const urlsToCache = [
   // Core app files
   '/',

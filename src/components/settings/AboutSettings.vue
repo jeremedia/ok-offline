@@ -167,15 +167,23 @@ const releaseNotes = [
       '🗂️ Organized by category: Civic Structures, City Services, Commerce, and Infrastructure',
       '📑 Tabbed detail views with Overview, History, Operations, Legal, and Fun Facts',
       '🗺️ Mini-map integration showing infrastructure locations',
-      '🔗 Links to official Burning Man resources for each project',
-      '📱 Mobile-responsive design with optimized layouts'
+      '📱 Mobile Navigation Overhaul - Complete redesign for better user experience',
+      '☰ Hamburger menu with slide-out panel accessing all navigation options',
+      '🎨 Unified design system with golden accents and button groups',
+      '📊 Bottom navigation bar redesigned with tab-style active states',
+      '✨ Settings panel improvements with Features link and better contrast'
+    ],
+    fixed: [
+      '📜 Mobile menu scroll lock fixed using nextTick for reliable behavior',
+      '⚡ Hamburger icon vertical centering corrected',
+      '🔗 All settings panel links changed to gold for better contrast'
     ],
     technical: [
       '🏗️ New infrastructure data service and static JSON data structure',
       '🎨 Created InfrastructureView and InfrastructureDetailView components',
-      '🧩 InfrastructureCard and InfrastructureHero UI components',
-      '🔍 Search and category filtering functionality',
-      '📏 Distance-based sorting when location services enabled'
+      '📱 Mobile menu state management with Vue 3 Composition API',
+      '🎯 Touch targets optimized at 44px minimum',
+      '🌈 CSS variables for consistent theming (--color-gold)'
     ]
   },
   {
@@ -559,6 +567,54 @@ const releaseNotes = [
 .build-time {
   font-size: 0.8rem;
   color: #666;
+}
+
+/* Link styling */
+.about-section a {
+  color: var(--color-gold);
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.about-section a:hover {
+  text-decoration: underline;
+  opacity: 0.9;
+}
+
+/* List styling */
+.about-section ul,
+.about-section ol {
+  margin-left: 0;
+  padding-left: 0;
+  list-style: none;
+}
+
+.about-section li {
+  position: relative;
+  padding-left: 1.25rem;
+}
+
+.about-section ul li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: var(--color-gold);
+}
+
+.about-section ol {
+  counter-reset: item;
+}
+
+.about-section ol li {
+  counter-increment: item;
+}
+
+.about-section ol li::before {
+  content: counter(item) ".";
+  position: absolute;
+  left: 0;
+  color: var(--color-gold);
+  font-weight: 600;
 }
 
 /* Modal Styles */

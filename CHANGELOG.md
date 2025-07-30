@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.16.0] - 2025-07-30
+
 ### Added
 - **Infrastructure Navigation Section** - New INFRA main navigation featuring comprehensive information about all core Burning Man organization projects
   - 13 infrastructure projects documented with historical context, civic purpose, and operations
@@ -31,11 +33,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Dark theme styling with proper form field appearance
   - Validation for required fields, email addresses, and URLs
   - Custom entry notice in forms explaining local storage
+- **Mobile Navigation Overhaul** - Complete redesign of mobile navigation for better UX
+  - Hamburger menu (≡) replacing settings icon with slide-out panel
+  - Access to all missing navigation items: Infrastructure, Weather, Search, Year selector
+  - Smooth animations with overlay and background scroll prevention
+  - Button group pattern for search and hamburger buttons
+  - Golden accent colors throughout menu (YEAR label, bullets, links)
+  - Integrated button groups with no padding between sections
+  - Version display at bottom of Settings & Info section
+  - Features link added to Settings & Info (ordered: About, Features, Settings)
+  - Touch-optimized with 44px minimum touch targets
+  - iOS PWA safe area handling
+- **Bottom Navigation Redesign** - Unified design system for mobile tab bar
+  - Background color matched to top header (#333)
+  - Tab treatment matching infrastructure detail view styling
+  - Active items use full red background instead of top border
+  - Hover states with subtle red tint
+  - Uppercase text with increased font weight and letter spacing
+  - Improved visual hierarchy and contrast
 
 ### Fixed
 - **Form Styling** - Applied dark theme styling to all form inputs including slotted content
 - **Data Persistence** - Fixed DataCloneError when saving Vue reactive objects to IndexedDB
 - **Visual Alignment** - Properly centered pencil icon with "CUSTOM ENTRY" badge text
+- **Mobile Menu Scroll Lock** - Fixed body scroll prevention on subsequent menu opens using nextTick
+- **Hamburger Icon Centering** - Corrected vertical alignment with line-height adjustment
+- **Link Contrast** - Changed all settings panel links from dark red to gold for better readability
 
 ### Changed
 - **List View Behavior** - Small filtered groups (≤5 items) now auto-open for better discoverability

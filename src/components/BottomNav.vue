@@ -79,8 +79,8 @@ const isActive = (view) => {
   bottom: 0;
   left: 0;
   right: 0;
-  background: #1a1a1a;
-  border-top: 1px solid #333;
+  background: #333;
+  border-top: 1px solid #444;
   display: flex;
   justify-content: space-around;
   align-items: center;
@@ -102,12 +102,18 @@ const isActive = (view) => {
   padding: 8px 4px;
   background: none;
   border: none;
-  color: #999;
+  color: #ccc;
   cursor: pointer;
   min-height: 44px;
   transition: all 0.2s ease;
   position: relative;
   font-family: 'Berkeley Mono', monospace;
+  text-transform: uppercase;
+}
+
+.nav-item:hover {
+  background: rgba(139, 0, 0, 0.1);
+  color: #fff;
 }
 
 .nav-item:active {
@@ -115,18 +121,12 @@ const isActive = (view) => {
 }
 
 .nav-item.active {
+  background: #8B0000;
   color: #fff;
-  background: none;
 }
 
 .nav-item.active::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 10%;
-  right: 10%;
-  height: 2px;
-  background: #8B0000;
+  display: none;
 }
 
 .nav-icon {
@@ -136,7 +136,8 @@ const isActive = (view) => {
 
 .nav-label {
   font-size: 11px;
-  font-weight: 500;
+  font-weight: 600;
+  letter-spacing: 0.05em;
 }
 
 /* Haptic feedback on supported devices */

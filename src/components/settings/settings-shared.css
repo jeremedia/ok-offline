@@ -65,13 +65,14 @@
 
 /* Links */
 .tab-content a {
-  color: #8B0000;
+  color: var(--color-gold);
   text-decoration: none;
   transition: all 0.2s ease;
 }
 
 .tab-content a:hover {
   text-decoration: underline;
+  opacity: 0.9;
 }
 
 /* Primary buttons */
