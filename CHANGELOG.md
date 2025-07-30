@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Custom Entries Feature** - Create and manage custom camps, art, and events
+  - Floating action button (+) on list views for easy access to add custom entries
+  - Dedicated forms for each type (camps, art, events) with appropriate fields
+  - Dual-mode location picker supporting both intersection selection and GPS coordinates
+  - Visual indicators (✏️ pencil icon) to distinguish custom entries from official data
+  - Custom entries persist through API data syncs and refreshes
+  - Auto-open functionality for filtered groups containing 5 or fewer items
+  - Reusable form component architecture with slot-based customization
+  - Full mobile optimization with responsive design
+  - Dark theme styling with proper form field appearance
+  - Validation for required fields, email addresses, and URLs
+  - Custom entry notice in forms explaining local storage
+
+### Fixed
+- **Form Styling** - Applied dark theme styling to all form inputs including slotted content
+- **Data Persistence** - Fixed DataCloneError when saving Vue reactive objects to IndexedDB
+- **Visual Alignment** - Properly centered pencil icon with "CUSTOM ENTRY" badge text
+
+### Changed
+- **List View Behavior** - Small filtered groups (≤5 items) now auto-open for better discoverability
+- **Storage Service** - Modified to preserve custom entries during API data syncs
+
+### Technical
+- Created `customEntries.js` service for CRUD operations on custom data
+- Implemented `FloatingActionButton.vue` component with scroll-aware hiding
+- Built `FormModal.vue` as base modal component with escape key handling
+- Developed `LocationPicker.vue` with intersection/GPS dual mode support
+- Used CSS `:deep()` selectors to style slotted form content
+- Custom entry IDs follow pattern: `custom-{type}-{timestamp}-{random}`
+
 ## [3.12.0] - 2025-07-29
 
 ### Added

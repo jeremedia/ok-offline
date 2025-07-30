@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ok-offline-v18'; // Claude prompts viewer feature
+const CACHE_NAME = 'ok-offline-v19'; // Custom entries feature
 const urlsToCache = [
   // Core app files
   '/',
