@@ -2,13 +2,6 @@
   <div class="infrastructure-detail" v-if="item">
     <!-- Hero Section -->
     <InfrastructureHero :item="item" />
-    
-    <!-- Navigation -->
-    <div class="detail-nav">
-      <button @click="goBack" class="back-btn">
-        ← Back to Infrastructure
-      </button>
-    </div>
 
     <!-- Content Tabs -->
     <div class="content-tabs">
@@ -44,7 +37,9 @@
 
           <!-- Location Map -->
           <div class="location-section" v-if="item.coordinates">
-            <h4>Location</h4>
+            <h4>Location{{ item.locations && item.locations.length > 1 ? 's' : '' }}</h4>
+            <p v-if="!item.locations || item.locations.length === 0" class="location-coords">{{ formatCoordinates(item.coordinates) }}</p>
+            <p v-else class="location-count">{{ item.locations.length }} locations throughout the city</p>
             <div class="mini-map" ref="mapContainer"></div>
           </div>
         </div>
@@ -116,6 +111,13 @@
         </a>
       </div>
     </div>
+
+    <!-- Back Button -->
+    <div class="back-nav">
+      <button @click="goBack" class="back-btn">
+        ← Back to Infrastructure
+      </button>
+    </div>
   </div>
 
   <!-- Not Found -->
@@ -129,7 +131,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick, onUnmounted } from 'vue'
+import { ref, onMounted, nextTick, onUnmounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import L from 'leaflet'
 import InfrastructureHero from '../components/infrastructure/InfrastructureHero.vue'
@@ -169,8 +171,21 @@ const goBack = () => {
   router.push(`/${props.year}/infrastructure`)
 }
 
+const formatCoordinates = (coords) => {
+  if (!coords || coords.length !== 2) return ''
+  const lat = coords[0].toFixed(6)
+  const lon = coords[1].toFixed(6)
+  return `${lat}°N, ${lon}°W`
+}
+
 const initMap = async () => {
   if (!item.value?.coordinates || !mapContainer.value) return
+  
+  // Remove existing map if any
+  if (map) {
+    map.remove()
+    map = null
+  }
   
   await nextTick()
   
@@ -188,20 +203,69 @@ const initMap = async () => {
     opacity: 0.6
   }).addTo(map)
 
-  // Add marker
-  const icon = L.divIcon({
-    html: `<div style="font-size: 24px;">${item.value.icon}</div>`,
-    iconSize: [30, 30],
-    className: 'infrastructure-map-marker'
-  })
+  // Check if this item has multiple locations
+  if (item.value.locations && item.value.locations.length > 0) {
+    // Create a feature group to hold all markers
+    const markersGroup = L.featureGroup()
+    
+    // Add markers for each location
+    item.value.locations.forEach(location => {
+      // For perimeter points, use numbered emojis
+      let iconContent = item.value.icon
+      if (item.value.id === 'perimeter' && location.name) {
+        const pointNumber = location.name.match(/Point (\d)/)?.[1]
+        if (pointNumber) {
+          const numberEmojis = ['', '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣']
+          iconContent = numberEmojis[parseInt(pointNumber)] || iconContent
+        }
+      }
+      
+      const icon = L.divIcon({
+        html: `<div style="font-size: 20px;">${iconContent}</div>`,
+        iconSize: [30, 30],
+        className: 'infrastructure-map-marker'
+      })
+      
+      const marker = L.marker(location.coordinates, { icon })
+        .bindPopup(`<strong>${location.name}</strong>${location.address ? '<br>' + location.address : ''}${location.notes ? '<br><em>' + location.notes + '</em>' : ''}`)
+      
+      // Add click handler to zoom to location
+      marker.on('click', () => {
+        map.setView(location.coordinates, 16, { animate: true })
+      })
+      
+      // Add popup close handler to zoom back out
+      marker.on('popupclose', () => {
+        map.fitBounds(markersGroup.getBounds().pad(0.1), { animate: true })
+      })
+      
+      markersGroup.addLayer(marker)
+    })
+    
+    // Add all markers to map
+    markersGroup.addTo(map)
+    
+    // Fit map bounds to show all markers
+    map.fitBounds(markersGroup.getBounds().pad(0.1))
+  } else {
+    // Single location - use original code
+    const icon = L.divIcon({
+      html: `<div style="font-size: 24px;">${item.value.icon}</div>`,
+      iconSize: [30, 30],
+      className: 'infrastructure-map-marker'
+    })
 
-  L.marker(item.value.coordinates, { icon })
-    .addTo(map)
-    .bindPopup(item.value.name)
+    L.marker(item.value.coordinates, { icon })
+      .addTo(map)
+      .bindPopup(item.value.name)
+  }
 }
 
 // Lifecycle
 onMounted(() => {
+  // Scroll to top
+  window.scrollTo(0, 0)
+  
   // Load infrastructure data
   item.value = getInfrastructureById(props.id)
   
@@ -216,17 +280,27 @@ onUnmounted(() => {
     map.remove()
   }
 })
+
+// Watch for tab changes
+watch(activeTab, async (newTab) => {
+  if (newTab === 'overview' && item.value?.coordinates) {
+    await nextTick()
+    initMap()
+  }
+})
 </script>
 
 <style scoped>
 .infrastructure-detail {
   max-width: 900px;
+  width: 100%;
   margin: 0 auto;
   padding: 1rem;
 }
 
-.detail-nav {
-  margin-bottom: 1.5rem;
+.back-nav {
+  margin-top: 2rem;
+  margin-bottom: 1rem;
 }
 
 .back-btn {
@@ -267,6 +341,8 @@ onUnmounted(() => {
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
+  text-transform: uppercase;
+  font-size: 0.875rem;
 }
 
 .tab-btn:hover {
@@ -281,6 +357,7 @@ onUnmounted(() => {
 
 .tab-content {
   padding: 2rem;
+  max-width: none;
 }
 
 .content-text {
@@ -299,10 +376,21 @@ onUnmounted(() => {
   margin-bottom: 1rem;
 }
 
-.quick-facts ul,
+.quick-facts h4 {
+  margin-top: 1.5rem;
+}
+
+.quick-facts ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
 .fun-facts {
   list-style: none;
   padding: 0;
+  margin-left: 0;
+  margin-bottom: 0;
 }
 
 .quick-facts li,
@@ -312,15 +400,27 @@ onUnmounted(() => {
   color: #ddd;
 }
 
+.quick-facts li:first-child {
+  padding-top: 0;
+}
+
 .quick-facts li:before,
 .fun-facts li:before {
   content: "→ ";
-  color: #8B0000;
+  color: var(--color-gold);
   font-weight: bold;
+}
+
+.location-coords,
+.location-count {
+  color: #ddd;
+  margin: 0.5rem 0;
+  font-family: 'Berkeley Mono', monospace;
 }
 
 .mini-map {
   height: 300px;
+  width: 100%;
   border-radius: 4px;
   overflow: hidden;
   margin-top: 1rem;
@@ -340,7 +440,7 @@ onUnmounted(() => {
 
 .timeline-item .year {
   font-weight: bold;
-  color: #8B0000;
+  color: var(--color-gold);
   min-width: 60px;
 }
 
@@ -352,6 +452,14 @@ onUnmounted(() => {
 .civic-purpose,
 .operations {
   margin-bottom: 2rem;
+}
+
+.operations:last-child {
+  margin-bottom: 0;
+}
+
+.operations p:last-child {
+  margin-bottom: 0;
 }
 
 /* Legal styles */
@@ -378,6 +486,7 @@ onUnmounted(() => {
 
 .related-links h3 {
   color: #fff;
+  margin-top: 0;
   margin-bottom: 1rem;
 }
 
@@ -388,13 +497,13 @@ onUnmounted(() => {
 }
 
 .related-link {
-  color: #8B0000;
+  color: var(--color-gold);
   text-decoration: none;
   transition: color 0.2s ease;
 }
 
 .related-link:hover {
-  color: #ff0000;
+  color: #fff;
   text-decoration: underline;
 }
 

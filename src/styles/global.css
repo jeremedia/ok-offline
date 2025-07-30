@@ -1,3 +1,9 @@
+/* CSS Variables */
+:root {
+  --color-gold: #FFD700;
+  --color-dark-red: #8B0000;
+}
+
 /* Global box-sizing fix */
 *, *::before, *::after {
   box-sizing: border-box;

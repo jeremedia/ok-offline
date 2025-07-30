@@ -1,7 +1,7 @@
 <template>
   <div class="infrastructure-hero">
     <div class="hero-content">
-      <div class="hero-icon">{{ item.icon }}</div>
+      <div class="hero-icon" @click="goToInfrastructure" title="Back to Infrastructure">{{ item.icon }}</div>
       <div class="hero-info">
         <h1 class="hero-title">{{ item.name }}</h1>
         <p class="hero-category">{{ getCategoryDisplay(item.category) }}</p>
@@ -11,6 +11,7 @@
 </template>
 
 <script setup>
+import { useRouter, useRoute } from 'vue-router'
 import { getCategoryDisplayName } from '../../services/infrastructure'
 
 const props = defineProps({
@@ -20,9 +21,16 @@ const props = defineProps({
   }
 })
 
+const router = useRouter()
+const route = useRoute()
+
 // Methods
 const getCategoryDisplay = (category) => {
   return getCategoryDisplayName(category)
+}
+
+const goToInfrastructure = () => {
+  router.push(`/${route.params.year}/infrastructure`)
 }
 </script>
 
@@ -52,6 +60,13 @@ const getCategoryDisplay = (category) => {
   justify-content: center;
   border-radius: 50%;
   flex-shrink: 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.hero-icon:hover {
+  background: #a00000;
+  transform: scale(1.05);
 }
 
 .hero-info {
@@ -65,7 +80,7 @@ const getCategoryDisplay = (category) => {
 }
 
 .hero-category {
-  color: #8B0000;
+  color: var(--color-gold);
   font-size: 1.1rem;
   margin: 0;
   text-transform: uppercase;
