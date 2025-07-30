@@ -14,6 +14,8 @@ import DustForecastView from './views/DustForecastView.vue'
 import ResetView from './views/ResetView.vue'
 import NotFound from './views/NotFound.vue'
 import PromptsView from './views/PromptsView.vue'
+import InfrastructureView from './views/InfrastructureView.vue'
+import InfrastructureDetailView from './views/InfrastructureDetailView.vue'
 
 // Import CSS
 import './styles/fonts.css'
@@ -70,6 +72,18 @@ const routes = [
     name: 'event-detail',
     component: DetailView,
     props: route => ({ year: route.params.year, type: 'event', id: route.params.id })
+  },
+  {
+    path: '/:year/infrastructure',
+    name: 'infrastructure',
+    component: InfrastructureView,
+    props: true
+  },
+  {
+    path: '/:year/infrastructure/:id',
+    name: 'infrastructure-detail',
+    component: InfrastructureDetailView,
+    props: true
   },
   {
     path: '/settings',

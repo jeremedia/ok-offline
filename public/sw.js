@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ok-offline-v19'; // Custom entries feature
+const CACHE_NAME = 'ok-offline-v20'; // Infrastructure navigation feature
 const urlsToCache = [
   // Core app files
   '/',
