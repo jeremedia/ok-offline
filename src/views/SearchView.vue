@@ -76,11 +76,11 @@
       </div>
       <div v-else-if="results.length === 0 && !loading" class="no-results">
         <p>No results found for "{{ searchQuery }}"</p>
-        <p class="suggestion">Try different keywords or use a different search mode.</p>
+        <p class="suggestion">Try different keywords, adjust filters above, or try Semantic/Smart search modes.</p>
       </div>
       <div v-else class="results-list">
         <div class="results-header">
-          <span>{{ displayedResults.length }} results found{{ totalItemsSearched > 0 ? ` from ${totalItemsSearched.toLocaleString()} items` : '' }}</span>
+          <span>{{ displayedResults.length }} results of {{ results.length }} found{{ totalItemsSearched > 0 ? ` in ${totalItemsSearched.toLocaleString()} items` : '' }}</span>
           <span v-if="searchMode !== 'keyword'" class="search-mode-badge">
             {{ searchModeLabels[searchMode] }}
           </span>
@@ -90,7 +90,7 @@
           <SearchResultItem
             v-for="(item, index) in displayedResults"
             :key="`${item.type}-${item.uid || item.id}-${index}`"
-            :item="item"
+            :result="item"
             :searchMode="searchMode"
             :year="year"
             @navigate="navigateToDetail"
@@ -613,7 +613,7 @@ const performSearch = async () => {
       searchStatus.value = ''
     }
     
-    results.value = searchResults
+    results.value = searchResults.filter(item => item && item.type)
     
     // Update URL with search query
     updateURL()
@@ -642,6 +642,8 @@ const navigateToDetail = (item) => {
     router.push(`/${year.value}/events/${item.uid}`)
   } else if (item.type === 'infrastructure') {
     router.push(`/${year.value}/infrastructure/${item.id}`)
+  } else if (item.type === 'camp') {
+    router.push(`/${year.value}/camps/${item.uid}`)
   } else {
     router.push(`/${year.value}/${item.type}/${item.uid}`)
   }
@@ -672,7 +674,7 @@ const loadMore = () => {
 }
 
 .search-header {
-  margin-bottom: 2rem;
+  margin-bottom: 0;
   max-width: 800px;
   margin-left: auto;
   margin-right: auto;
@@ -699,7 +701,7 @@ const loadMore = () => {
 
 /* Search status */
 .search-status {
-  margin-top: 0.5rem;
+  margin-top: 1rem;
   font-size: 0.875rem;
   text-align: center;
 }
@@ -754,23 +756,22 @@ const loadMore = () => {
 
 .hint {
   text-align: center;
-  padding: 2rem;
+  padding: 0 0 1rem 0;
   color: #999;
 }
 
 .search-modes-info {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-  padding: 1.5rem;
-  background: rgba(0, 0, 0, 0.3);
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
   border-radius: 8px;
 }
 
 .mode-info {
   text-align: center;
-  padding: 1.5rem;
+  padding: 1rem; /* 16px - follows 8px grid */
   background: #2a2a2a;
   border: 1px solid #444;
   border-radius: 8px;
@@ -803,7 +804,7 @@ const loadMore = () => {
 
 .start-typing {
   font-size: 1.1rem;
-  color: #666;
+  color: #999; /* Better contrast */
 }
 
 .no-results {
@@ -826,11 +827,9 @@ const loadMore = () => {
 
 .results-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid #333;
   color: #999;
   font-size: 0.9rem;
 }
@@ -879,13 +878,13 @@ const loadMore = () => {
   }
   
   .search-header {
-    margin-bottom: 1rem;
+    margin-bottom: 0;
   }
   
   .search-modes-info {
     grid-template-columns: 1fr;
     gap: 1rem;
-    padding: 1rem;
+    padding: 0;
   }
   
   .mode-info {
@@ -906,7 +905,7 @@ const loadMore = () => {
   
   .results-header {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
     gap: 0.5rem;
   }
 }

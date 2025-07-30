@@ -2,7 +2,7 @@
   <div class="search-result-item" @click="$emit('navigate', result)">
     <div class="result-header">
       <span class="result-type">{{ typeIcons[result.type] }}</span>
-      <h3 class="result-title">{{ getItemName(result.item) }}</h3>
+      <h3 class="result-title">{{ getItemName(result) }}</h3>
       <div class="result-actions">
         <div v-if="showSimilarityScore && result.similarity_score" class="similarity-score">
           <span class="score-label">Match:</span>
@@ -20,12 +20,12 @@
     </div>
     
     <div class="result-content">
-      <div v-if="getItemLocation(result.item)" class="result-location">
-        📍 {{ getItemLocation(result.item) }}
+      <div class="result-location">
+        📍 {{ displayLocation }}
       </div>
       
-      <div v-if="result.item.description" class="result-description">
-        {{ truncateDescription(result.item.description) }}
+      <div v-if="result.description" class="result-description">
+        {{ truncateDescription(result.description) }}
       </div>
       
       <!-- Enhanced metadata for vector search results -->
@@ -53,6 +53,7 @@
 <script setup>
 import { computed, defineEmits, defineProps } from 'vue'
 import { getItemName, getItemLocation } from '../../utils.js'
+import { canShowLocations } from '../../stores/globalState.js'
 
 const props = defineProps({
   result: {
@@ -70,6 +71,10 @@ const props = defineProps({
   maxDescriptionLength: {
     type: Number,
     default: 150
+  },
+  year: {
+    type: String,
+    default: '2025'
   }
 })
 
@@ -97,6 +102,18 @@ const truncateDescription = (description) => {
   if (description.length <= props.maxDescriptionLength) return description
   return description.substring(0, props.maxDescriptionLength) + '...'
 }
+
+const displayLocation = computed(() => {
+  const location = getItemLocation(props.result)
+  if (!location || location === 'Unknown location') {
+    // Check if locations are hidden for this year
+    if (!canShowLocations(props.year)) {
+      return 'Location Unreleased'
+    }
+    return 'Unknown location'
+  }
+  return location
+})
 </script>
 
 <style scoped>
@@ -104,7 +121,7 @@ const truncateDescription = (description) => {
   background: #2a2a2a;
   border: 1px solid #444;
   border-radius: 8px;
-  padding: 16px;
+  padding: 8px 16px 16px 16px;
   margin-bottom: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -137,6 +154,8 @@ const truncateDescription = (description) => {
   font-weight: 600;
   color: #fff;
   line-height: 1.3;
+  display: flex;
+  align-items: center;
 }
 
 .result-actions {
@@ -148,23 +167,20 @@ const truncateDescription = (description) => {
 
 .similarity-score {
   display: flex;
-  flex-direction: column;
   align-items: center;
+  gap: 0.25rem;
   font-size: 11px;
-  color: #666;
+  color: var(--color-gold);
+  font-weight: bold;
+  text-transform: uppercase;
 }
 
 .score-label {
-  font-weight: 500;
-  margin-bottom: 1px;
+  font-weight: bold;
 }
 
 .score-value {
   font-weight: bold;
-  color: #8B0000;
-  padding: 2px 6px;
-  background: rgba(139, 0, 0, 0.1);
-  border-radius: 10px;
 }
 
 .favorite-btn {
@@ -265,7 +281,7 @@ const truncateDescription = (description) => {
 /* Mobile optimizations */
 @media (max-width: 600px) {
   .search-result-item {
-    padding: 12px;
+    padding: 6px 12px 12px 12px;
     margin-bottom: 8px;
   }
   

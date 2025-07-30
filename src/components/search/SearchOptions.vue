@@ -1,16 +1,17 @@
 <template>
   <div class="search-options-container" :class="{ collapsed: isCollapsed }">
     <div class="options-header" @click="toggleCollapse">
-      <h4>Search Options</h4>
       <button 
         class="collapse-btn"
         :aria-label="isCollapsed ? 'Expand search options' : 'Collapse search options'"
       >
-        {{ isCollapsed ? '▼' : '▲' }}
+        {{ isCollapsed ? '▶' : '▼' }}
       </button>
+      <h4>Options</h4>
     </div>
     
-    <div v-show="!isCollapsed" class="options-content">
+    <transition name="slide-down">
+      <div v-show="!isCollapsed" class="options-content">
       <!-- Combined horizontal button group -->
       <div class="options-button-group">
         <!-- Search Mode Buttons -->
@@ -28,9 +29,6 @@
           </button>
         </div>
         
-        <!-- Divider -->
-        <div class="button-divider"></div>
-        
         <!-- Filter Buttons -->
         <div class="filter-button-group">
           <button
@@ -39,7 +37,7 @@
             @click="$emit('toggleEverything')"
           >
             <span class="desktop-label">Search Everything</span>
-            <span class="mobile-label">Everything</span>
+            <span class="mobile-label">ALL</span>
           </button>
           <button
             v-for="type in filterTypes"
@@ -54,7 +52,8 @@
           </button>
         </div>
       </div>
-    </div>
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -159,7 +158,7 @@ onMounted(() => {
 .options-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   padding: 0.75rem 1rem;
   background: #2a2a2a;
   border-bottom: 1px solid #444;
@@ -173,8 +172,9 @@ onMounted(() => {
 
 .options-header h4 {
   margin: 0;
-  color: var(--color-gold);
+  color: #fff;
   font-size: 0.8rem;
+  font-weight: bold;
   text-transform: uppercase;
   letter-spacing: 0.02em;
   line-height: 1.3;
@@ -187,9 +187,10 @@ onMounted(() => {
   font-size: 0.875rem;
   cursor: pointer;
   padding: 0.25rem 0.5rem;
-  margin-left: 0.5rem;
+  margin-right: 0.5rem;
   border-radius: 4px;
   transition: all 0.2s ease;
+  transform-origin: center;
 }
 
 .options-header .collapse-btn:hover {
@@ -197,25 +198,46 @@ onMounted(() => {
   color: #fff;
 }
 
+/* Slide down transition */
+.slide-down-enter-active,
+.slide-down-leave-active {
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.slide-down-enter-from,
+.slide-down-leave-to {
+  max-height: 0;
+  opacity: 0;
+}
+
+.slide-down-enter-to,
+.slide-down-leave-from {
+  max-height: 200px;
+  opacity: 1;
+}
+
 .options-content {
-  padding: 1rem;
+  padding: 0;
 }
 
 /* Horizontal button group layout */
 .options-button-group {
   display: flex;
-  gap: 1rem;
+  gap: 0;
   align-items: center;
   width: 100%;
   flex-wrap: wrap;
+  margin: 0;
+  padding: 0;
 }
 
 .mode-buttons {
   display: flex;
   gap: 0;
-  border: 1px solid #555;
-  border-radius: 8px;
+  border-bottom: 1px solid #555;
   overflow: hidden;
+  width: 100%;
 }
 
 .mode-btn {
@@ -233,6 +255,7 @@ onMounted(() => {
   font-size: 0.875rem;
   min-height: 44px;
   text-transform: uppercase;
+  flex: 1;
 }
 
 .mode-btn:last-child {
@@ -262,19 +285,11 @@ onMounted(() => {
   font-size: 0.875rem;
 }
 
-.button-divider {
-  width: 1px;
-  height: 30px;
-  background: #555;
-  flex-shrink: 0;
-}
 
 /* Filter buttons */
 .filter-button-group {
   display: flex;
   gap: 0;
-  border: 1px solid #555;
-  border-radius: 8px;
   overflow: hidden;
   width: 100%;
 }
@@ -347,12 +362,12 @@ onMounted(() => {
   }
   
   .options-content {
-    padding: 0.75rem;
+    padding: 0;
   }
   
   .options-button-group {
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 0;
   }
   
   .mode-buttons,
@@ -360,13 +375,11 @@ onMounted(() => {
     width: 100%;
   }
   
-  .button-divider {
-    display: none;
-  }
   
   .mode-btn {
     padding: 0.625rem 0.75rem;
     font-size: 0.8rem;
+    gap: 0.25rem; /* Add spacing between icon and text */
   }
   
   .mode-icon {
@@ -389,7 +402,7 @@ onMounted(() => {
     flex: 1;
     width: auto;
     min-width: 44px;
-    padding: 0;
+    padding: 0.75rem; /* Make buttons square with proper padding */
     border-right: 1px solid #555;
     justify-content: center;
     gap: 0;
