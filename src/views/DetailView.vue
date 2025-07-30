@@ -11,6 +11,10 @@
         >
           {{ isFavorited ? '★' : '☆' }}
         </button>
+        <span v-if="item.isCustom" class="custom-badge">
+          <span class="badge-icon">✏️</span>
+          <span class="badge-text">CUSTOM ENTRY</span>
+        </span>
       </h2>
 
       <div id="detail-info">
@@ -24,6 +28,10 @@
           >
             {{ isFavorited ? '★' : '☆' }}
           </button>
+          <span v-if="item.isCustom" class="custom-badge">
+          <span class="badge-icon">✏️</span>
+          <span class="badge-text">CUSTOM ENTRY</span>
+        </span>
         </h2>
         
         <div class="detail-field" v-if="item.description">
@@ -707,6 +715,36 @@ h2 {
 
 .favorite-btn-detail.active {
   color: #FFD700;
+}
+
+.custom-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 1rem;
+  padding: 0.375rem 0.875rem;
+  background: #8B0000;
+  color: #fff;
+  font-weight: 600;
+  border-radius: 20px;
+  vertical-align: middle;
+  line-height: 1;
+}
+
+.badge-icon {
+  font-size: 1rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  margin-right: 0.375rem;
+}
+
+.badge-text {
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  line-height: 1;
+  display: flex;
+  align-items: center;
 }
 
 .visit-tracking {

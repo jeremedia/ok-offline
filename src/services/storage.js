@@ -7,7 +7,7 @@ let db = null
 /**
  * Open the IndexedDB database
  */
-function openDb() {
+export function openDb() {
   return new Promise((resolve, reject) => {
     if (db) {
       resolve(db)
@@ -62,7 +62,7 @@ export async function saveToCache(type, year, items) {
     console.log(`Saving ${items.length} ${type}s for year ${year} to cache`)
     const database = await openDb()
     
-    // First transaction: delete old items
+    // First transaction: delete old non-custom items
     const deleteTx = database.transaction(type, 'readwrite')
     const deleteStore = deleteTx.objectStore(type)
     
@@ -76,8 +76,11 @@ export async function saveToCache(type, year, items) {
         deleteRequest.onsuccess = (e) => {
           const cursor = e.target.result
           if (cursor) {
-            deleteStore.delete(cursor.primaryKey)
-            deletedCount++
+            // Only delete non-custom entries
+            if (!cursor.value.isCustom) {
+              deleteStore.delete(cursor.primaryKey)
+              deletedCount++
+            }
             cursor.continue()
           } else {
             // No more items to delete
