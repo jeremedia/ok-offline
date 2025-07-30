@@ -1,7 +1,7 @@
 <template>
   <button 
     class="fab"
-    :class="{ 'fab-hidden': hidden }"
+    :class="{ 'fab-hidden': hidden, 'fab-pwa': isPWA }"
     @click="$emit('click')"
     :aria-label="label"
   >
@@ -10,7 +10,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 
 const props = defineProps({
   icon: {
@@ -24,6 +24,14 @@ const props = defineProps({
 })
 
 const hidden = ref(false)
+
+// Detect if running as PWA
+const isPWA = computed(() => {
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+  const isIOSPWA = window.navigator.standalone === true
+  const isAndroidPWA = window.matchMedia('(display-mode: fullscreen)').matches
+  return isStandalone || isIOSPWA || isAndroidPWA
+})
 let lastScrollY = window.scrollY
 let scrollTimeout = null
 
@@ -65,7 +73,7 @@ onUnmounted(() => {
 <style scoped>
 .fab {
   position: fixed;
-  bottom: calc(84px + env(safe-area-inset-bottom)); /* Above bottom nav with new padding */
+  bottom: calc(70px + env(safe-area-inset-bottom)); /* Above bottom nav */
   right: 16px;
   width: 56px;
   height: 56px;
@@ -102,6 +110,11 @@ onUnmounted(() => {
 .fab-icon {
   font-size: 28px;
   line-height: 1;
+}
+
+/* Additional positioning for PWA */
+.fab-pwa {
+  bottom: calc(84px + env(safe-area-inset-bottom)); /* Account for extra PWA padding */
 }
 
 /* Tablet and desktop adjustments */

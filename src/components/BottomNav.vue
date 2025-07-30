@@ -1,5 +1,5 @@
 <template>
-  <nav class="bottom-nav" v-if="isMobile">
+  <nav class="bottom-nav" :class="{ 'bottom-nav-pwa': isPWA }" v-if="isMobile">
     <button 
       v-for="item in navItems" 
       :key="item.route"
@@ -14,7 +14,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 const props = defineProps({
@@ -26,6 +26,18 @@ const props = defineProps({
 
 const route = useRoute()
 const router = useRouter()
+
+// Detect if running as PWA
+const isPWA = computed(() => {
+  // Check if running in standalone mode (PWA)
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+  // Check iOS specific PWA detection
+  const isIOSPWA = window.navigator.standalone === true
+  // Check if launched from home screen on Android
+  const isAndroidPWA = window.matchMedia('(display-mode: fullscreen)').matches
+  
+  return isStandalone || isIOSPWA || isAndroidPWA
+})
 
 // Check if device is truly mobile (phone, not tablet)
 const checkIfMobile = () => {
@@ -85,11 +97,16 @@ const isActive = (view) => {
   justify-content: space-around;
   align-items: center;
   padding: 0;
-  padding-bottom: calc(14px + env(safe-area-inset-bottom, 0));
+  padding-bottom: env(safe-area-inset-bottom, 0);
   z-index: 2000;
   height: 60px;
   /* Extend background into safe area */
   box-sizing: content-box;
+}
+
+/* Additional padding only for PWA */
+.bottom-nav-pwa {
+  padding-bottom: calc(14px + env(safe-area-inset-bottom, 0));
 }
 
 .nav-item {
