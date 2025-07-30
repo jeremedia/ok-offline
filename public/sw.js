@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ok-offline-v22'; // iOS PWA safe area fixes
+const CACHE_NAME = 'ok-offline-v23'; // Smart PWA detection
 const urlsToCache = [
   // Core app files
   '/',
