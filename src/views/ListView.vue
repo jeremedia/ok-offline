@@ -66,6 +66,7 @@
               <span class="item-content">
                 <strong>
                   {{ getItemName(item) }}
+                  <span v-if="item.isCustom" class="custom-indicator" title="Custom Entry">✏️</span>
                   <span v-if="hasBeenVisited(item)" class="visited-badge">✓</span>
                 </strong>
                 <small>
@@ -143,6 +144,30 @@
       </li>
     </ul>
     </template>
+    <FloatingActionButton 
+      v-if="!loading && !error"
+      :icon="'+'"
+      :label="`Add custom ${props.type}`"
+      @click="openCustomForm"
+    />
+    <CustomCampForm 
+      v-if="props.type === 'camp'"
+      v-model="showCustomForm"
+      :year="props.year"
+      @saved="handleCustomSaved"
+    />
+    <CustomArtForm 
+      v-if="props.type === 'art'"
+      v-model="showCustomForm"
+      :year="props.year"
+      @saved="handleCustomSaved"
+    />
+    <CustomEventForm 
+      v-if="props.type === 'event'"
+      v-model="showCustomForm"
+      :year="props.year"
+      @saved="handleCustomSaved"
+    />
   </section>
   </PullToRefresh>
 </template>
@@ -152,6 +177,7 @@ import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getItemName, getItemLocation, extractClockPosition, extractAvenue, clockPositionToNumber, getSector, formatEventTime, isHappeningNow, getNextOccurrence } from '../utils'
 import { getFromCache } from '../services/storage'
+import { getCombinedData } from '../services/customEntries'
 import { isFavorite, toggleFavorite, getFavorites } from '../services/favorites'
 import { useGeolocation } from '../composables/useGeolocation'
 import { getVisitInfo } from '../services/visits'
@@ -162,6 +188,10 @@ import LoadingSpinner from '../components/LoadingSpinner.vue'
 import SyncDialog from '../components/SyncDialog.vue'
 import PullToRefresh from '../components/PullToRefresh.vue'
 import ListControls from '../components/ListControls.vue'
+import FloatingActionButton from '../components/FloatingActionButton.vue'
+import CustomCampForm from '../components/forms/CustomCampForm.vue'
+import CustomArtForm from '../components/forms/CustomArtForm.vue'
+import CustomEventForm from '../components/forms/CustomEventForm.vue'
 
 const props = defineProps(['type', 'year'])
 const router = useRouter()
@@ -176,6 +206,7 @@ const sortBy = ref('name')
 const searchQuery = ref('')
 const selectedId = computed(() => route.params.id)
 const syncStatus = ref('Checking for data...')
+const showCustomForm = ref(false)
 
 const availableSectors = ['2:00-3:00', '3:00-4:00', '4:30-5:30', '5:30-6:30', '6:30-7:30', '7:30-8:30', '8:30-10:00']
 const selectedSectors = ref([...availableSectors]) // All selected by default
@@ -496,6 +527,20 @@ const groupedItems = computed(() => {
     }
   })
   
+  // Auto-open groups with 5 or fewer items when filtering is active
+  const isFiltering = searchQuery.value.trim() || 
+                     selectedSectors.value.length < availableSectors.length ||
+                     (props.type === 'event' && selectedEventTypes.value.length < availableEventTypes.value.length) ||
+                     showFavoritesOnly.value
+  
+  if (isFiltering) {
+    Object.keys(groups).forEach(groupName => {
+      if (groups[groupName].length <= 5) {
+        collapsedGroups.value[groupName] = false // Auto-open small filtered groups
+      }
+    })
+  }
+  
   return groups
 })
 
@@ -514,14 +559,14 @@ const loadData = async () => {
   console.log(`ListView loadData called for type: ${props.type}, year: ${props.year}`)
   
   try {
-    // Only load from cache, never fetch from API
-    const cachedItems = await getFromCache(props.type, props.year)
+    // Load combined data (API + custom entries)
+    const combinedItems = await getCombinedData(props.type, props.year)
     
-    console.log(`Cache returned ${cachedItems?.length || 0} items for ${props.type}`)
+    console.log(`Combined data returned ${combinedItems?.length || 0} items for ${props.type}`)
     
-    if (cachedItems && cachedItems.length > 0) {
-      console.log(`Using cached data for ${props.type}s ${props.year}`)
-      items.value = cachedItems
+    if (combinedItems && combinedItems.length > 0) {
+      console.log(`Using combined data for ${props.type}s ${props.year}`)
+      items.value = combinedItems
       
       // Update event type counts if we're loading events
       if (props.type === 'event') {
@@ -546,6 +591,16 @@ const loadData = async () => {
 const selectItem = (item) => {
   console.log(`Full ${props.type} data:`, item)
   router.push(`/${props.year}/${props.type}s/${item.uid}`)
+}
+
+const openCustomForm = () => {
+  showCustomForm.value = true
+}
+
+const handleCustomSaved = async (uid) => {
+  // Reload data to include the new custom entry
+  await loadData()
+  showSuccess(`Custom ${props.type} added successfully!`)
 }
 
 const favoriteCount = computed(() => {
@@ -782,6 +837,12 @@ watch(() => [props.type, props.year], () => {
   color: #228B22;
   font-size: 0.9em;
   margin-left: 0.5rem;
+}
+
+.custom-indicator {
+  font-size: 0.9em;
+  margin-left: 0.25rem;
+  vertical-align: middle;
 }
 
 @media (max-width: 768px) {
