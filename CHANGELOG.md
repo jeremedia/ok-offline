@@ -8,6 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Infrastructure Navigation Section** - New INFRA main navigation featuring comprehensive information about all core Burning Man organization projects
+  - 13 infrastructure projects documented with historical context, civic purpose, and operations
+  - Educational content for both new and experienced burners
+  - Detailed pages for: The Man, Temple, Center Camp, Airport, Medical Services, Rangers, DPW, Arctica, DMZ, Hell Station, Facilities, Perimeter, and Placement
+  - Interactive cards with icons and category organization
+  - Tabbed detail views with Overview, History, Operations, Legal, and Fun Facts sections
+  - Mini-map integration showing infrastructure locations
+  - Related links to official Burning Man resources
+  - Mobile-responsive design with single-column layout on small screens
+  - Search functionality across all infrastructure items
+  - Distance-based sorting when location services enabled
 - **Custom Entries Feature** - Create and manage custom camps, art, and events
   - Floating action button (+) on list views for easy access to add custom entries
   - Dedicated forms for each type (camps, art, events) with appropriate fields

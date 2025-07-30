@@ -158,8 +158,29 @@ onMounted(() => {
 // Release notes data
 const releaseNotes = [
   {
-    version: '3.15.0',
+    version: '3.16.0',
     date: '2025-07-30',
+    added: [
+      '🏛️ Infrastructure Navigation - New INFRA section with comprehensive information about core Burning Man projects',
+      '📚 13 infrastructure projects documented with historical context and civic purpose',
+      '🎓 Educational content for both new and experienced burners',
+      '🗂️ Organized by category: Civic Structures, City Services, Commerce, and Infrastructure',
+      '📑 Tabbed detail views with Overview, History, Operations, Legal, and Fun Facts',
+      '🗺️ Mini-map integration showing infrastructure locations',
+      '🔗 Links to official Burning Man resources for each project',
+      '📱 Mobile-responsive design with optimized layouts'
+    ],
+    technical: [
+      '🏗️ New infrastructure data service and static JSON data structure',
+      '🎨 Created InfrastructureView and InfrastructureDetailView components',
+      '🧩 InfrastructureCard and InfrastructureHero UI components',
+      '🔍 Search and category filtering functionality',
+      '📏 Distance-based sorting when location services enabled'
+    ]
+  },
+  {
+    version: '3.15.0',
+    date: '2025-07-29',
     added: [
       '✏️ Custom Entries - Create and manage your own camps, art, and events',
       '➕ Floating action button on list views for quick access to add custom entries',

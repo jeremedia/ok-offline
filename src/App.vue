@@ -29,6 +29,7 @@
             <button @click="navigate('camps')" :class="['nav-btn', { active: isActive('camps') }]">CAMPS</button>
             <button @click="navigate('art')" :class="['nav-btn', { active: isActive('art') }]">ART</button>
             <button @click="navigate('events')" :class="['nav-btn', { active: isActive('events') }]">EVENTS</button>
+            <button @click="navigate('infrastructure')" :class="['nav-btn', { active: isActive('infrastructure') }]">INFRA</button>
             <button @click="navigate('schedule')" :class="['nav-btn', { active: isActive('schedule') }]">SCHEDULE</button>
             <button @click="navigateToDust" :class="['nav-btn', { active: isActive('dust') }]">DUST</button>
           </nav>

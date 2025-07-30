@@ -1,0 +1,394 @@
+{
+  "infrastructure": [
+    {
+      "id": "the-man",
+      "name": "The Man",
+      "icon": "🔥",
+      "category": "civic",
+      "coordinates": [40.786958, -119.202994],
+      "shortDescription": "The heart of Black Rock City - our iconic effigy stands as the central gathering point and symbolic center of the temporary metropolis.",
+      "history": "Since 1986, when Larry Harvey and Jerry James built the first 8-foot tall wooden Man on Baker Beach in San Francisco, The Man has evolved into a towering 105-foot structure that serves as the spiritual and geographic center of Black Rock City. What began as a spontaneous act of radical self-expression among friends has become the focal point for 80,000+ participants.",
+      "civicPurpose": "The Man serves multiple civic functions: as the city's primary landmark for navigation, the central gathering space for community events, and the symbolic heart that unites all participants. Its base houses art installations and provides shade during the day, while at night it becomes a beacon visible from everywhere in the city.",
+      "legalContext": "The Man is a permitted temporary structure under the Bureau of Land Management's Special Recreation Permit for Burning Man. It must comply with specific height restrictions, structural engineering requirements, and safety protocols. The burn event itself requires coordination with BLM, local fire departments, and adherence to strict perimeter and safety regulations.",
+      "operations": "Built by the Department of Public Works (DPW) over several months, The Man requires a team of skilled builders, riggers, electricians, and pyrotechnicians. The structure is designed to burn safely and completely, with extensive planning for crowd control, fire safety perimeters, and emergency response. Post-burn cleanup ensures complete removal of all materials.",
+      "timeline": [
+        {"year": 1986, "event": "First Man burned on Baker Beach, San Francisco"},
+        {"year": 1990, "event": "Moved to Black Rock Desert"},
+        {"year": 1992, "event": "First Man with neon lighting"},
+        {"year": 2007, "event": "Man burned early by arsonist, rebuilt in 24 hours"},
+        {"year": 2014, "event": "Tallest Man ever at 105 feet"}
+      ],
+      "didYouKnow": [
+        "The Man's arms change position during the week, traditionally raising on Friday night",
+        "The structure contains over 2,000 LED lights and 4 miles of EL wire",
+        "It takes approximately 20 minutes for The Man to completely burn",
+        "The wooden structure is built from recycled lumber when possible",
+        "The Man's base design changes every year, reflecting the annual art theme"
+      ],
+      "relatedLinks": [
+        {"title": "Official Man Base Design", "url": "https://burningman.org/event/preparation/man-base/"},
+        {"title": "The Man Through History", "url": "https://journal.burningman.org/man-through-the-years/"}
+      ]
+    },
+    {
+      "id": "temple",
+      "name": "The Temple",
+      "icon": "🏛",
+      "category": "civic",
+      "coordinates": [40.791815152314989, -119.19662192527863],
+      "shortDescription": "A sacred space for grief, remembrance, and healing - the Temple provides a quiet sanctuary for contemplation and honoring lost loved ones.",
+      "history": "The Temple tradition began in 2000 with David Best's 'Temple of the Mind.' Originally created to honor a friend killed in a motorcycle accident, it quickly became a place where participants could grieve and remember. Each year, a new artist creates a unique Temple design, but the purpose remains constant: providing space for mourning, reflection, and release.",
+      "civicPurpose": "The Temple serves as Black Rock City's spiritual center, offering a quiet space contrasting with the festival atmosphere. Participants leave photos, letters, and mementos honoring deceased loved ones. The Temple burn on Sunday night is a solemn ceremony of collective mourning and release, one of the most emotionally powerful moments of the event.",
+      "legalContext": "Like The Man, the Temple requires BLM permits and must meet structural safety requirements. However, it has additional considerations: maintaining a respectful perimeter, managing the more solemn burn ceremony, and ensuring appropriate crowd control for a contemplative rather than celebratory event.",
+      "operations": "Temple construction involves the selected artist team and volunteers who understand the sacred nature of the project. Special protocols exist for maintaining the space: no amplified sound nearby, dedicated Temple Guardians who help maintain appropriate atmosphere, and careful handling of personal mementos left by participants.",
+      "timeline": [
+        {"year": 2000, "event": "First Temple by David Best"},
+        {"year": 2001, "event": "Temple of Tears honors 9/11 victims"},
+        {"year": 2012, "event": "Temple of Juno reaches 150 feet"},
+        {"year": 2019, "event": "Temple by Geordie Van Der Bosch"},
+        {"year": 2023, "event": "Temple of the Heart"}
+      ],
+      "didYouKnow": [
+        "The Temple traditionally burns on Sunday night in near silence",
+        "Temple Guardians volunteer to maintain the sacred space 24/7",
+        "Many participants consider the Temple burn more meaningful than The Man burn",
+        "The Temple receives no amplified sound or music out of respect",
+        "Thousands of personal items are burned with the Temple each year"
+      ],
+      "relatedLinks": [
+        {"title": "Temple History", "url": "https://templeguardians.burningman.org/temple-history/"},
+        {"title": "Temple Guidelines", "url": "https://burningman.org/event/participate/temple/"}
+      ]
+    },
+    {
+      "id": "center-camp",
+      "name": "Center Camp",
+      "icon": "⛺",
+      "category": "civic",
+      "coordinates": [40.78108859485657, -119.210735421],
+      "shortDescription": "The only location in Black Rock City where commerce occurs - Center Camp Cafe serves coffee and tea while providing a massive covered community space.",
+      "history": "Center Camp evolved from early Burning Man's need for a central community gathering space. As the event grew, it became the one exception to the gift economy, selling coffee and tea to support its operations. The iconic geodesic structure has hosted countless performances, workshops, and chance encounters that define the Burning Man experience.",
+      "civicPurpose": "Center Camp serves as the city's living room - a massive shaded area where participants can escape the sun, enjoy performances, meet friends, or simply people-watch. The cafe provides the only commercial transaction allowed in Black Rock City, with proceeds supporting Center Camp operations and programming.",
+      "legalContext": "Center Camp Cafe operates under a special agreement within the event's permit, being the sole authorized vendor. Nevada health department regulations govern food service operations, and the structure must meet specific safety codes for public assembly spaces.",
+      "operations": "Run by a dedicated team of staff and volunteers, Center Camp operates nearly 24 hours a day. The cafe requires commercial kitchen facilities, health permits, and a complex supply chain for ice, coffee, and tea. The performance areas are programmed throughout the week with a diverse array of acts.",
+      "timeline": [
+        {"year": 1993, "event": "First central camp established"},
+        {"year": 1997, "event": "Cafe operations begin"},
+        {"year": 2003, "event": "Current geodesic dome design introduced"},
+        {"year": 2011, "event": "Major structural improvements"},
+        {"year": 2019, "event": "Last year before COVID hiatus"}
+      ],
+      "didYouKnow": [
+        "Center Camp is approximately 47,000 square feet",
+        "The cafe serves over 100,000 cups of coffee during the event",
+        "All cafe proceeds go back into Center Camp operations",
+        "The space hosts over 100 scheduled performances",
+        "Ice sales at Center Camp ended in 2019, moved to Arctica locations"
+      ],
+      "relatedLinks": [
+        {"title": "Center Camp History", "url": "https://journal.burningman.org/center-camp/"},
+        {"title": "Cafe Information", "url": "https://burningman.org/event/preparation/playa-living/commerce/"}
+      ]
+    },
+    {
+      "id": "airport",
+      "name": "Black Rock City Airport",
+      "icon": "✈️",
+      "category": "infrastructure",
+      "coordinates": [40.764261391285487, -119.205226911],
+      "shortDescription": "A temporary FAA-recognized airport (88NV) that operates for one week, handling everything from ultralights to corporate jets.",
+      "history": "Black Rock City Municipal Airport began informally in the early 1990s when pilots started flying to the event. It became an official temporary FAA-designated airport in 1997. The airport has grown from a simple dirt strip to a complex operation handling hundreds of aircraft movements during the event.",
+      "civicPurpose": "The airport serves multiple functions: enabling participant access for those flying in, providing scenic flights over the city, supporting emergency medical evacuations, and hosting aviation-themed camps and art. It represents Burning Man's commitment to radical inclusion by providing alternative access methods.",
+      "legalContext": "Operating under FAA Part 139 regulations for temporary airports, 88NV must meet strict safety standards. Pilots require special briefings about playa conditions, dust devils, and density altitude. The airport coordinates with the FAA, Nevada DOT, and BLM for permits and safety compliance.",
+      "operations": "Volunteer air traffic controllers, ground crews, and safety officers run 24-hour operations during the event. The airport features a 7,000-foot runway, pilot briefing area, tie-down spaces, and fuel services. Special procedures manage dust mitigation, night operations, and integration with the city's infrastructure.",
+      "timeline": [
+        {"year": 1991, "event": "First aircraft land on playa"},
+        {"year": 1997, "event": "FAA designation as 88NV"},
+        {"year": 2000, "event": "Formal airport operations established"},
+        {"year": 2010, "event": "Record 500+ aircraft movements"},
+        {"year": 2022, "event": "New runway marking system"}
+      ],
+      "didYouKnow": [
+        "The airport code 88NV is only active one week per year",
+        "Pilots must complete a special playa briefing before landing",
+        "The runway is marked with cones that are moved daily",
+        "Scenic flights must maintain 1000-foot minimum altitude",
+        "The airport has its own city within Black Rock City"
+      ],
+      "relatedLinks": [
+        {"title": "Airport Information", "url": "https://burningman.org/event/participate/airport/"},
+        {"title": "Pilot Briefing", "url": "https://brcairport.org/"}
+      ]
+    },
+    {
+      "id": "medical",
+      "name": "Emergency Medical Services",
+      "icon": "🏥",
+      "category": "services",
+      "coordinates": [40.780065841922166, -119.20676566604881],
+      "shortDescription": "A comprehensive emergency medical system including Rampart medical facility and three emergency stations providing 24/7 care.",
+      "history": "Medical services evolved from volunteer EMTs in the early years to today's sophisticated system. Rampart, named after the 1970s TV show 'Emergency!', became the main medical facility. The addition of neighborhood stations reflects the city's growth and the need for rapid response across the expanded footprint.",
+      "civicPurpose": "ESD (Emergency Services Department) provides free emergency medical care to all participants. Services range from treating dehydration and minor injuries to managing serious trauma and medical emergencies. The medical team handles over 3,000 patient visits during the event week.",
+      "legalContext": "Medical services operate under Nevada state medical protocols and licenses. Volunteer physicians, nurses, and EMTs must have current credentials. The operation coordinates with Pershing General Hospital in Lovelock and maintains helicopter evacuation capabilities for serious cases.",
+      "operations": "Four facilities operate 24/7: Rampart (main facility at 5:45 & Esplanade) and Stations 3, 6, and 9. Each is staffed by volunteer medical professionals and equipped for emergency care. Radio dispatch coordinates responses, and dedicated ambulances provide transport.",
+      "timeline": [
+        {"year": 1990, "event": "First organized medical team"},
+        {"year": 1995, "event": "Rampart facility established"},
+        {"year": 2004, "event": "Neighborhood stations added"},
+        {"year": 2013, "event": "Mental health services integrated"},
+        {"year": 2019, "event": "Expanded to current four-facility model"}
+      ],
+      "didYouKnow": [
+        "Medical volunteers include doctors, nurses, EMTs, and mental health counselors",
+        "Rampart has a fully equipped emergency room and pharmacy",
+        "The team practices wilderness medicine due to remote location",
+        "Medical services are completely free to all participants",
+        "Helicopter evacuations average 5-10 per event"
+      ],
+      "relatedLinks": [
+        {"title": "ESD Information", "url": "https://burningman.org/event/preparation/health-and-safety/medical/"},
+        {"title": "Volunteer with ESD", "url": "https://esd.burningman.org/"}
+      ]
+    },
+    {
+      "id": "rangers",
+      "name": "Black Rock Rangers",
+      "icon": "🎯",
+      "category": "services",
+      "coordinates": [40.783641284089448, -119.21150356651343],
+      "shortDescription": "Burning Man's non-confrontational community mediators and emergency responders, recognizable by their khaki shirts and helpful demeanor.",
+      "history": "The Rangers evolved from the 'Dangers Rangers' in 1992, originally focused on fire safety. As the event grew, their role expanded to community mediation, emergency response, and serving as a liaison with law enforcement. The Rangers embody Burning Man's principle of Communal Effort.",
+      "civicPurpose": "Rangers serve as the primary point of contact for participants needing help. They mediate disputes, assist in emergencies, reunite lost participants, and provide information. Their non-confrontational approach and community-based model has influenced festival safety practices worldwide.",
+      "legalContext": "Rangers operate under Burning Man's permit but are not law enforcement. They work closely with BLM Rangers and Pershing County Sheriff's Office. Their role is clearly defined: community mediators who can't detain or arrest but can facilitate law enforcement contact when necessary.",
+      "operations": "Over 800 volunteer Rangers work from headquarters at 5:45 & Esplanade, Berlin Station at 9:00 & Berlin, and roving patrols. They operate 24/7 with radio dispatch, shift briefings, and specialized teams including LEAL (Law Enforcement Agency Liaison) and Green Dot (mental health) Rangers.",
+      "timeline": [
+        {"year": 1992, "event": "Danger Rangers formed"},
+        {"year": 1996, "event": "Formal Ranger training begins"},
+        {"year": 2004, "event": "Berlin outpost established"},
+        {"year": 2011, "event": "Green Dot Rangers added"},
+        {"year": 2020, "event": "Virtual Ranger training developed"}
+      ],
+      "didYouKnow": [
+        "Rangers volunteer minimum 42 hours during the event",
+        "The khaki uniform helps participants identify Rangers",
+        "Ranger training includes mediation and emergency response",
+        "'FMRL' (Find My Ranger Lover) helps Rangers coordinate",
+        "Rangers have their own radio call signs and protocols"
+      ],
+      "relatedLinks": [
+        {"title": "About Rangers", "url": "https://rangers.burningman.org/"},
+        {"title": "Ranger Handbook", "url": "https://rangers.burningman.org/ranger-resources/"}
+      ]
+    },
+    {
+      "id": "dpw",
+      "name": "Department of Public Works",
+      "icon": "🔧",
+      "category": "services",
+      "coordinates": [40.786689374807742, -119.22021666922616],
+      "shortDescription": "The backbone of Black Rock City - DPW builds, maintains, and removes the entire city infrastructure over several months.",
+      "history": "DPW emerged in 1998 from the need for organized city building. What started as a ragtag crew of volunteers has evolved into a sophisticated operation employing both paid seasonal staff and volunteers. The DPW work ethic and culture has become legendary within the Burning Man community.",
+      "civicPurpose": "DPW literally builds Black Rock City from nothing and returns it to nothing. They survey and stake the city grid, build major structures, install infrastructure, maintain roads, manage heavy equipment, and ensure complete restoration of the playa post-event.",
+      "legalContext": "DPW operations must comply with BLM land use stipulations, OSHA safety regulations, and environmental restoration requirements. The Leave No Trace standard is legally binding, requiring complete removal of all evidence of the city.",
+      "operations": "Working from April through October, DPW crews include surveyors, heavy equipment operators, builders, electricians, and restoration specialists. The Depot at 5:30 & G serves as headquarters with equipment yards, workshops, and crew facilities. Post-event restoration can take months.",
+      "timeline": [
+        {"year": 1998, "event": "DPW officially formed"},
+        {"year": 2000, "event": "Year-round crew established"},
+        {"year": 2007, "event": "GPS city survey implemented"},
+        {"year": 2012, "event": "Depot facilities expanded"},
+        {"year": 2019, "event": "Largest city footprint built"}
+      ],
+      "didYouKnow": [
+        "DPW starts work in April for the August/September event",
+        "The crew includes both paid staff and volunteers",
+        "City survey uses sub-inch GPS accuracy",
+        "DPW removes every trace, including glitter and feathers",
+        "The motto 'You are not DPW' is a cultural touchstone"
+      ],
+      "relatedLinks": [
+        {"title": "DPW Information", "url": "https://burningman.org/event/volunteering/teams/dpw/"},
+        {"title": "City Building Process", "url": "https://journal.burningman.org/building-black-rock-city/"}
+      ]
+    },
+    {
+      "id": "arctica",
+      "name": "Arctica Ice Sales",
+      "icon": "🧊",
+      "category": "commerce",
+      "coordinates": [40.781994283666222, -119.21188689559813],
+      "shortDescription": "The only other commercial service besides Center Camp Cafe - Arctica provides ice sales at three locations throughout the city.",
+      "history": "Ice sales began at Center Camp but expanded to multiple locations as the city grew. Arctica was created to manage ice distribution more efficiently, with locations strategically placed to serve different sectors of the city. The service is essential for food safety and medical needs in the desert heat.",
+      "civicPurpose": "Arctica provides a critical service in the desert environment where temperatures regularly exceed 100°F. Ice is essential for food preservation, medical needs, and preventing heat-related illnesses. The three locations ensure reasonable access from any camp in the city.",
+      "legalContext": "As a commercial operation within Burning Man, Arctica operates under special permit provisions. Nevada health codes govern ice storage and distribution. All proceeds go to Burning Man Project to support the event's infrastructure.",
+      "operations": "Three locations operate daily: Arctica Center Camp (9:00 & Center Camp), Ice Cubed at 3:00 & Center Camp, and Ice Nine at 9:00 & G. Each location receives daily refrigerated truck deliveries. Sales are cash-only with specific hours to manage demand and traffic.",
+      "timeline": [
+        {"year": 1997, "event": "Ice sales begin at Center Camp"},
+        {"year": 2003, "event": "First satellite ice location"},
+        {"year": 2014, "event": "Three-location model established"},
+        {"year": 2019, "event": "Ice removed from Center Camp"},
+        {"year": 2022, "event": "Current Arctica configuration"}
+      ],
+      "didYouKnow": [
+        "Arctica sells over 750,000 pounds of ice during the event",
+        "Ice is delivered daily in refrigerated trucks",
+        "Each location has specific sales hours to manage crowds",
+        "Crushed and block ice are both available",
+        "Many camps assign 'ice runs' as a daily duty"
+      ],
+      "relatedLinks": [
+        {"title": "Ice Sales Info", "url": "https://burningman.org/event/preparation/playa-living/commerce-ice/"},
+        {"title": "Arctica Locations", "url": "https://burningman.org/event/preparation/playa-living/"}
+      ]
+    },
+    {
+      "id": "dmz",
+      "name": "Deep Playa Music Zone",
+      "icon": "🎵",
+      "category": "infrastructure",
+      "coordinates": [40.801877800966253, -119.19912198324673],
+      "shortDescription": "A designated area in deep playa for large sound systems and art cars to play amplified music without disturbing the city.",
+      "history": "The DMZ was created to balance Burning Man's sound policies with participants' desire for large-scale music experiences. Located far from camping areas, it allows sound camps and art cars to play at volumes that would violate city noise limits, creating a destination for late-night dancing.",
+      "civicPurpose": "DMZ provides a compromise between Burning Man's quiet camping areas and the desire for amplified music. It concentrates loud sound away from sleeping areas while creating a unique deep playa destination that encourages exploration beyond the city streets.",
+      "legalContext": "Sound levels in the main city are regulated by BLM permits and Nevada noise ordinances. The DMZ's remote location allows higher decibel levels while maintaining compliance. Sound camps must still register and follow specific guidelines even in the DMZ.",
+      "operations": "Located approximately half a mile beyond the Temple, the DMZ operates primarily at night. Art cars and mobile sound systems gather to create impromptu parties. No permanent structures are built; the zone is defined by GPS coordinates and marked by minimal signage.",
+      "timeline": [
+        {"year": 2006, "event": "DMZ concept introduced"},
+        {"year": 2008, "event": "Formal location established"},
+        {"year": 2013, "event": "Size expanded due to popularity"},
+        {"year": 2017, "event": "Guidelines clarified"},
+        {"year": 2023, "event": "Post-COVID return"}
+      ],
+      "didYouKnow": [
+        "The DMZ is approximately 1 mile from the nearest camps",
+        "Sound can be played 24/7 in the DMZ",
+        "Many famous DJs play surprise sets in the DMZ",
+        "The area has no services - bring everything you need",
+        "Finding the DMZ at night has become its own adventure"
+      ],
+      "relatedLinks": [
+        {"title": "Sound Policies", "url": "https://burningman.org/event/preparation/playa-living/sound-systems/"},
+        {"title": "DMZ Guidelines", "url": "https://burningman.org/event/black-rock-city-guide/"}
+      ]
+    },
+    {
+      "id": "hell-station",
+      "name": "Hell Station",
+      "icon": "⛽",
+      "category": "infrastructure",
+      "coordinates": [40.803639907073524, -119.20864863758413],
+      "shortDescription": "The refueling depot for mutant vehicles and heavy equipment operating on the playa.",
+      "history": "Hell Station emerged from the practical need to fuel the hundreds of mutant vehicles and art cars that roam Black Rock City. Named for its remote location and harsh working conditions, it became an essential service for keeping the mobile art fleet operational throughout the event.",
+      "civicPurpose": "Hell Station enables the operation of mutant vehicles, art cars, and heavy equipment that define Burning Man's mobile art culture. Without accessible fuel, many of the event's most iconic moving artworks couldn't operate, limiting the participatory experience.",
+      "legalContext": "Fuel storage and dispensing must comply with strict environmental and safety regulations. The station operates under hazardous materials permits, with containment systems, spill response plans, and trained operators meeting state and federal requirements.",
+      "operations": "Located in deep playa for safety, Hell Station operates specific hours with trained volunteers. Vehicles must be registered mutant vehicles or official equipment. Safety protocols include fire suppression systems, spill containment, and strict no-smoking policies.",
+      "timeline": [
+        {"year": 2001, "event": "First organized fuel depot"},
+        {"year": 2005, "event": "Hell Station name adopted"},
+        {"year": 2010, "event": "Current location established"},
+        {"year": 2015, "event": "Expanded capacity added"},
+        {"year": 2022, "event": "New safety systems installed"}
+      ],
+      "didYouKnow": [
+        "Hell Station pumps over 10,000 gallons during the event",
+        "Only registered mutant vehicles can purchase fuel",
+        "The station is staffed by specially trained volunteers",
+        "Fuel prices are set to cover costs only",
+        "Many art cars plan elaborate 'fuel runs' as performances"
+      ],
+      "relatedLinks": [
+        {"title": "Mutant Vehicle Guide", "url": "https://burningman.org/event/participate/mutant-vehicles/"},
+        {"title": "Fuel Information", "url": "https://burningman.org/event/preparation/"}
+      ]
+    },
+    {
+      "id": "facilities",
+      "name": "Sanitation Facilities",
+      "icon": "🚽",
+      "category": "infrastructure",
+      "coordinates": [40.787, -119.206],
+      "shortDescription": "Over 1,500 portable toilets strategically placed throughout the city, serviced multiple times daily.",
+      "history": "Sanitation management has evolved from basic portable toilets to a sophisticated system handling the waste of 80,000 people in a Leave No Trace environment. The infamous 'porto-potties' have become a defining feature of the Burning Man experience, inspiring both dread and creative decoration.",
+      "civicPurpose": "Proper sanitation is critical for public health and environmental protection in a city of 80,000. The facility placement, service schedule, and maintenance ensure hygiene standards while protecting the playa's delicate ecosystem from contamination.",
+      "legalContext": "Sanitation services must meet Nevada health department standards and BLM environmental requirements. The contract includes strict service schedules, waste disposal protocols, and contingency plans for system failures. Leave No Trace principles are legally binding.",
+      "operations": "United Site Services provides over 1,500 units serviced by a fleet of pump trucks making continuous rounds. Units are strategically placed based on population density, with higher concentrations near Center Camp and along main streets. Service runs 24/7 during peak times.",
+      "timeline": [
+        {"year": 1990, "event": "First portable toilets arrive"},
+        {"year": 1997, "event": "Professional service contract"},
+        {"year": 2006, "event": "1,000+ units deployed"},
+        {"year": 2014, "event": "GPS tracking for service"},
+        {"year": 2019, "event": "1,500+ units standard"}
+      ],
+      "didYouKnow": [
+        "Each toilet is serviced at least once daily",
+        "The 'blue room' is Burner slang for porta-potties",
+        "Some camps create elaborate toilet decorations",
+        "Toilet placement follows specific city planning guidelines",
+        "The service trucks drive over 1,000 miles during the event"
+      ],
+      "relatedLinks": [
+        {"title": "Playa Living", "url": "https://burningman.org/event/preparation/playa-living/"},
+        {"title": "LNT Guidelines", "url": "https://burningman.org/event/preparation/leaving-no-trace/"}
+      ]
+    },
+    {
+      "id": "perimeter",
+      "name": "Perimeter & Trash Fence",
+      "icon": "1️⃣",
+      "category": "infrastructure",
+      "coordinates": [40.783393446220742, -119.23273810046453],
+      "shortDescription": "The pentagon-shaped fence defining Black Rock City's boundaries, with entry points and 24/7 monitoring.",
+      "history": "The perimeter fence became necessary as Burning Man grew, both for participant safety and to control access. The pentagon shape was chosen for its symbolic significance and practical benefits. The fence prevents participants from getting lost in the vast playa while defining the event space.",
+      "civicPurpose": "The perimeter serves multiple functions: preventing disoriented participants from wandering into the desert, controlling event access, defining the city limits for law enforcement jurisdiction, and catching MOOP (Matter Out Of Place) blown by wind.",
+      "legalContext": "The fence is required by BLM permits to define the event boundary and control access. It establishes the permit area's limits and helps ensure only ticketed participants enter. The pentagon points are GPS-surveyed for exact placement each year.",
+      "operations": "DPW installs miles of orange safety fence in a pentagon pattern with five points. Perimeter roads allow vehicle patrols. Gate staff control access at entry points. Post-event, crews walk the entire fence line collecting accumulated MOOP.",
+      "timeline": [
+        {"year": 1996, "event": "First perimeter fence"},
+        {"year": 1999, "event": "Pentagon shape adopted"},
+        {"year": 2004, "event": "Current size established"},
+        {"year": 2011, "event": "GPS surveying standard"},
+        {"year": 2019, "event": "Largest perimeter ever"}
+      ],
+      "didYouKnow": [
+        "The perimeter is approximately 9 miles long",
+        "The pentagon shape has five numbered points for navigation",
+        "The fence catches tons of MOOP during wind events",
+        "Walking the perimeter is a popular challenge",
+        "The fence is completely removed and the area restored post-event"
+      ],
+      "relatedLinks": [
+        {"title": "City Map", "url": "https://burningman.org/event/preparation/black-rock-city-guide/"},
+        {"title": "Gate Information", "url": "https://burningman.org/event/participate/volunteering/teams/gate-perimeter-exodus/"}
+      ]
+    },
+    {
+      "id": "placement",
+      "name": "Camp Placement",
+      "icon": "🏕️",
+      "category": "services",
+      "coordinates": [40.782, -119.207],
+      "shortDescription": "The team responsible for organizing and placing theme camps throughout Black Rock City's streets.",
+      "history": "As Burning Man grew from anarchic camping to an organized city, the Placement team emerged to manage camp locations. They balance community needs, infrastructure requirements, and the desire to create diverse neighborhoods while maintaining the city's unique character.",
+      "civicPurpose": "Placement creates Black Rock City's neighborhoods by thoughtfully positioning theme camps. They consider sound levels, interactivity, infrastructure needs, and community dynamics to build a functional city that encourages exploration and discovery.",
+      "legalContext": "Placement works within the constraints of the BLM permit, which specifies density limits, emergency access requirements, and sound zones. They must ensure fire lanes, coordinate with emergency services, and comply with accessibility requirements.",
+      "operations": "Working year-round, Placement reviews camp applications, creates the city map, and manages on-playa registration. During build week, they mark camp boundaries and resolve disputes. The team balances returning camps' preferences with space for new camps.",
+      "timeline": [
+        {"year": 1996, "event": "First organized placement"},
+        {"year": 2000, "event": "Formal application process"},
+        {"year": 2008, "event": "Online placement system"},
+        {"year": 2014, "event": "Sound mapping integrated"},
+        {"year": 2023, "event": "Post-COVID replanning"}
+      ],
+      "didYouKnow": [
+        "Placement juggles over 1,500 theme camp applications",
+        "The team creates themed neighborhoods and sound zones",
+        "Camp placement considers emergency vehicle access",
+        "Returning camps don't automatically get the same spot",
+        "Placement volunteers work year-round on city planning"
+      ],
+      "relatedLinks": [
+        {"title": "Theme Camp Guidelines", "url": "https://burningman.org/event/participate/volunteering/teams/theme-camp-support/"},
+        {"title": "Placement FAQ", "url": "https://burningman.org/event/participate/camps/placement/"}
+      ]
+    }
+  ]
+}
