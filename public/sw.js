@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ok-offline-v25'; // Enhanced search UI improvements
+const CACHE_NAME = 'ok-offline-v26'; // Interactive entity discovery
 const urlsToCache = [
   // Core app files
   '/',
