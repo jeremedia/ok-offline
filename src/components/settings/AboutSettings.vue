@@ -158,6 +158,35 @@ onMounted(() => {
 // Release notes data
 const releaseNotes = [
   {
+    version: '3.15.0',
+    date: '2025-07-30',
+    added: [
+      '✏️ Custom Entries - Create and manage your own camps, art, and events',
+      '➕ Floating action button on list views for quick access to add custom entries',
+      '📍 Dual-mode location picker supporting both intersection selection and GPS coordinates',
+      '🎨 Dedicated forms for each type with appropriate fields and validation',
+      '💾 Custom entries persist through API data syncs and refreshes',
+      '👁️ Visual indicators (pencil icon) distinguish custom entries from official data',
+      '📂 Auto-open for filtered groups with 5 or fewer items',
+      '📱 Full mobile optimization with responsive forms and touch-friendly controls'
+    ],
+    fixed: [
+      '🎨 Dark theme styling applied to all form inputs including slotted content',
+      '💾 Fixed DataCloneError when saving Vue reactive objects to IndexedDB',
+      '🎯 Properly centered pencil icon with "CUSTOM ENTRY" badge text'
+    ],
+    changed: [
+      '📋 List view automatically opens small filtered groups for better discoverability',
+      '🔧 Storage service modified to preserve custom entries during data syncs'
+    ],
+    technical: [
+      '🏗️ Reusable form component architecture with slot-based customization',
+      '🎨 CSS :deep() selectors for styling slotted form content',
+      '🆔 Custom entry IDs follow pattern: custom-{type}-{timestamp}-{random}',
+      '📦 New services: customEntries.js, FloatingActionButton.vue, FormModal.vue, LocationPicker.vue'
+    ]
+  },
+  {
     version: '3.13.4',
     date: '2025-07-29',
     added: [
