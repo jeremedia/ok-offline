@@ -85,11 +85,11 @@ const isActive = (view) => {
   justify-content: space-around;
   align-items: center;
   padding: 0;
+  padding-bottom: calc(14px + env(safe-area-inset-bottom, 0));
   z-index: 2000;
-  /* Height includes safe area */
-  height: calc(60px + env(safe-area-inset-bottom, 0));
-  /* Padding for the content, not the container */
-  padding-bottom: env(safe-area-inset-bottom, 0);
+  height: 60px;
+  /* Extend background into safe area */
+  box-sizing: content-box;
 }
 
 .nav-item {

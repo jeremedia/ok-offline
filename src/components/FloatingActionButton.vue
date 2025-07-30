@@ -65,7 +65,7 @@ onUnmounted(() => {
 <style scoped>
 .fab {
   position: fixed;
-  bottom: calc(70px + env(safe-area-inset-bottom)); /* Above bottom nav */
+  bottom: calc(84px + env(safe-area-inset-bottom)); /* Above bottom nav with new padding */
   right: 16px;
   width: 56px;
   height: 56px;
