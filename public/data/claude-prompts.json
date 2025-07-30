@@ -1,5 +1,461 @@
 [
   {
+    "timestamp": "2025-07-30T16:01:52.460Z",
+    "prompt": "review the release documentation carefully, think it through, make a release plan, and release!",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T16:01:04.814Z",
+    "prompt": "looks great! update the gh issue with this excellent change",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T15:58:27.235Z",
+    "prompt": "much better. Ok, let's give the same treatment to the bottom tab bar. Make the bottom bar have the same bg color as the top bar. Give the icons the same tab treatment found in the infrastructure detail view.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T15:55:51.276Z",
+    "prompt": "They appear tall, more height than width. Give them some interal padding.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T15:54:19.629Z",
+    "prompt": "Make the search and hamburger menu a button group.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T15:53:19.636Z",
+    "prompt": "Great! Update this issue with our progress.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T15:52:14.605Z",
+    "prompt": "Make all of the links in the About panel to use the gold-color. In general our dark red is too low contrast for characters/text. ",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T15:49:41.874Z",
+    "prompt": "make the bullets use our gold-color css variable. The about panel needs the same list style adjustment",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T15:48:07.151Z",
+    "prompt": "Great! Looks good. Looking at the feature settings panel, remove the left padding/margin on the feature list ul elements.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T15:46:38.772Z",
+    "prompt": "hmm make it .75",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T15:45:56.005Z",
+    "prompt": "Great, you can halve the spacing between sections.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T15:44:45.517Z",
+    "prompt": "Looks great, thank you. Let's make the slide-over section buttons \"button groups\" with no padding and integrated borders.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T15:42:33.394Z",
+    "prompt": "Changes to Setting & Info: Add Features with a link to Features setting panel. Order: About, Features, Settings. Add in yellow text last the current version.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T15:39:23.301Z",
+    "prompt": "The prevention of body scroll works the first time the menu is opened, but not subsequent",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T15:33:24.278Z",
+    "prompt": "Couple of notes: MENU needs padding to line up with all slide-over conetnt. Make YEAR yollow and. The border is not requred between sections.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T15:29:36.215Z",
+    "prompt": "Amazing! Update the gh issue.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T15:18:22.658Z",
+    "prompt": "Look great on my iphone! A few notes: the background scrolling needs to be disabled when the slide-out is displayed. Make Menu text uppercase. Halve the paddings/margin in the slide-out header. Make More Sections text simple More. Change Dust Forcast to Weather. Remove Map Settings. Swap the order of the hamburger button with search. Double the hamburger icon size. Think about these and give me a plan indicating they are understandable.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T15:03:40.083Z",
+    "prompt": "Do that work in that sequence! Update the gh with our findings and plan and commence!",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T14:59:53.700Z",
+    "prompt": "Given this, ideas? My first thought is to leave the bottom nav as-is (it needs bottom padding, overlaps with swipe bar in PWA mode on iOS) and turn the settings menu into a hamburger menu with the remaining missing nav options and establish a pattern for additional items.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T14:56:56.539Z",
+    "prompt": "take and read another screenshot, I navigated through the onboarding for you.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T14:55:49.670Z",
+    "prompt": "What navigation options are available on mobile vs. desktop?",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T14:52:55.967Z",
+    "prompt": "you should start a new session, active session cant' adjust the viewport size it seems.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T14:50:32.721Z",
+    "prompt": "First I'd like you to re-read docs/development/UI_UX_GUIDELINES.md and then carefully think and look at the current mobile top and bottom navbars. I'm curious to understand what you can see is \"done\" and what remains to \"do\". I'll then provide what I see and we'll merge those and get to work.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T14:48:11.755Z",
+    "prompt": "No, lets make a new github issue \"mobile-nav-work\" and a new branch for that work. There's some stuff to do.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T14:36:40.044Z",
+    "prompt": "That seems logical, but did you actually implement that?",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T14:35:38.657Z",
+    "prompt": "I see the update! How do I navigate to the infra section on mobile?",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T14:33:46.248Z",
+    "prompt": "what version should I see the in UI when the build completes?",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T14:32:53.944Z",
+    "prompt": "go ahead and accept the pull request via the gh cli",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T14:25:48.234Z",
+    "prompt": "A PR has been created? How do incorporate the changes we made this morning into the PR?",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T14:22:42.450Z",
+    "prompt": "great, much more legible. Update the gh issues with our progress.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T14:18:58.050Z",
+    "prompt": "The red arrows in lists should also be our --color-gold.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T14:16:28.663Z",
+    "prompt": "same with the learn more links. Make the yellow we're using a global css variable.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T14:15:28.442Z",
+    "prompt": "The red used for .hero-category is too low contrast to read and should be the yellow used in the collapseable headers.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T14:10:16.346Z",
+    "prompt": ".quick-facts h4 should have a top margin and the first li in the .quick-facts ul should have no top padding",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T14:07:49.060Z",
+    "prompt": "remove the left margin on the .quick-facts ul",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T13:45:39.623Z",
+    "prompt": "Looks good! Thank you. The page needs to scroll to the top when a users selects an infro project. ",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T13:43:26.812Z",
+    "prompt": "hmm, I think I have a better idea. Remove the \"Essential services and structures that make Black Rock City possible\" header and make the collapsable header Essential services and structures that make Black Rock City possible and have it collapsed by default. Otherwise looks odd on phone, the primary device used for this app.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T13:37:08.751Z",
+    "prompt": "Make introduction collapseable with a header labled Thoughts on Infrastructure. Follow the collapseable header styling of the main Map panels.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T13:29:51.684Z",
+    "prompt": "Yes, #1 glad you like it.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T12:57:55.601Z",
+    "prompt": "Looks good! When a user clicks a map location icon the map zooms and the pop-up is shown. Add zooming out to fit all icons when the selected icon's popup is closed.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T12:47:22.754Z",
+    "prompt": "make clicking the .hero-icon return to the /2025/infrastructure index. The Station 9  medical station is not placed on the map correctly.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T12:44:27.956Z",
+    "prompt": "Great! Make the icons for the perimeter fence match their designations as points 1 through 5.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T12:38:48.552Z",
+    "prompt": "I can see the multiple locations, but they are very much not in the right locations. Are you still going to place them correctly? The are shown correctly on the main map.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T12:29:40.456Z",
+    "prompt": "Medical, Rangers, and Artica have three each. All of those should be shown and the map should fit all three by default. When a user taps one the map zooms to that location. Portos have many, but showing them all with icons shouldn't be a problem. There is no \"porto\" HQ. Same with Perimeter points, just show them all with the map fitting, which will show the whole city.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T12:25:46.560Z",
+    "prompt": "Great, thank you. I see the change. OK, this is tougher one and you'll to think this through step-by-step. Some infra projects have multiple locations. Artica, Emergency Medical Services, Black Rock Rangers, Portos, and Perimeter points. What approach would be most helpful to app users?",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T12:21:52.128Z",
+    "prompt": "max-width: 800px; is shown the brower dev tools for .tab-content",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T12:20:41.469Z",
+    "prompt": "remove the max-width from .tab-content.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T12:18:53.734Z",
+    "prompt": "The map should be 100% width or centered in its parent",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T12:17:14.793Z",
+    "prompt": "The map does not re-appear when you return to Overview tab from other tabs.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T12:09:08.660Z",
+    "prompt": "Move the <- Back to Infrastructure button to below the \"Learn More\" box\". Hell Station is missing it's location, though there is a header. The location is available. Make sure the final <p> in operations has no bottom margin.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T12:06:13.045Z",
+    "prompt": "Make each tab's label uppercase. Remove the left and bottom margin from the FUN FACTS ul. remove the top margin from the .related-links h3.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T12:04:47.016Z",
+    "prompt": "Looks very good! Have styling notes this morning: don't check anything in until we've gone through them all, ok?",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T03:37:43.099Z",
+    "prompt": "had to restart the session, please continue! ",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T03:37:06.782Z",
+    "prompt": "<local-command-stdout>(no content)</local-command-stdout>",
+    "session": "3281d7b9-e42e-427e-b0b9-52a595f0bd40",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T03:36:01.759Z",
+    "prompt": "Great plan! Make a new gh plan detailing the plan and how to implement each stage. Create a feature branch and do the work in that branch. Use Playwright to test the new feature and it you know it works and looks excellent. Once it's complete follow the release procedure and push it live! Be sure to include instructions to update the issue as you complete required work step-by-step. The issue is your context for this and future sessions to ensure dev success.",
+    "session": "3281d7b9-e42e-427e-b0b9-52a595f0bd40",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T03:30:50.194Z",
+    "prompt": "is the main branch now clean?",
+    "session": "0612c512-0867-4142-9624-048ad9987952",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/project-management",
+    "version": "1.0.62"
+  },
+  {
+    "timestamp": "2025-07-30T03:30:27.105Z",
+    "prompt": "great. make a plan to add an \"INFRA\" main nav option. the Infra route provides information on all of the core Burning Man org projects that make the city possible. The projects are in the selected lines. Each item show be shown in a list on the main infra page, with each linking to a detail page for each. Research the 2025 burn and the historical context, the civic purpose, and legal reality of each project written for the education of new and experienced burners. This is a major new and important feature. Think deeply about it and make a great plan on how to implement. Each BM project is a sub-project of serious effort for you to document and share in this app!",
+    "session": "3281d7b9-e42e-427e-b0b9-52a595f0bd40",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem",
+    "version": "1.0.63"
+  },
+  {
     "timestamp": "2025-07-30T03:24:15.003Z",
     "prompt": "great, please check this new changes in",
     "session": "0612c512-0867-4142-9624-048ad9987952",
