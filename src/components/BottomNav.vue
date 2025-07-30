@@ -86,9 +86,9 @@ const isActive = (view) => {
   align-items: center;
   padding: 0;
   z-index: 2000;
-  height: 60px;
-  
-  /* Safe area for modern phones */
+  /* Height includes safe area */
+  height: calc(60px + env(safe-area-inset-bottom, 0));
+  /* Padding for the content, not the container */
   padding-bottom: env(safe-area-inset-bottom, 0);
 }
 

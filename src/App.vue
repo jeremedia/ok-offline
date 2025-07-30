@@ -48,15 +48,79 @@
         
         <!-- Mobile Actions -->
         <div class="mobile-actions" v-if="isMobile">
+          <button @click="toggleMobileMenu" class="mobile-action-btn" aria-label="Menu">
+            ≡
+          </button>
           <button @click="navigate('search')" class="mobile-action-btn" aria-label="Search">
             🔍
-          </button>
-          <button @click="navigateToSettings" class="mobile-action-btn" aria-label="Settings">
-            ⚙️
           </button>
         </div>
       </div>
     </header>
+    
+    <!-- Mobile Menu Overlay -->
+    <transition name="menu-overlay">
+      <div v-if="showMobileMenu" class="mobile-menu-overlay" @click="closeMobileMenu"></div>
+    </transition>
+    
+    <!-- Mobile Menu -->
+    <transition name="menu-slide">
+      <div v-if="showMobileMenu" class="mobile-menu">
+        <div class="mobile-menu-header">
+          <h3>Menu</h3>
+          <button @click="closeMobileMenu" class="close-menu-btn" aria-label="Close menu">
+            ✕
+          </button>
+        </div>
+        
+        <div class="mobile-menu-content">
+          <!-- Year Selector -->
+          <div class="menu-section">
+            <label for="mobile-year-selector" class="menu-label">Year</label>
+            <select id="mobile-year-selector" v-model="selectedYear" @change="onYearChange" class="menu-select">
+              <option value="2023">2023</option>
+              <option value="2024">2024</option>
+              <option value="2025">2025</option>
+            </select>
+          </div>
+          
+          <!-- Additional Navigation -->
+          <div class="menu-section">
+            <h4 class="menu-section-title">More Sections</h4>
+            <button @click="navigateFromMenu('infrastructure')" class="menu-nav-btn">
+              <span class="menu-icon">🏛️</span>
+              <span class="menu-text">Infrastructure</span>
+            </button>
+            <button @click="navigateFromMenu('dust')" class="menu-nav-btn">
+              <span class="menu-icon">🌪️</span>
+              <span class="menu-text">Dust Forecast</span>
+            </button>
+            <button @click="navigateFromMenu('search')" class="menu-nav-btn">
+              <span class="menu-icon">🔍</span>
+              <span class="menu-text">Search</span>
+            </button>
+          </div>
+          
+          <!-- Settings & Info -->
+          <div class="menu-section">
+            <h4 class="menu-section-title">Settings & Info</h4>
+            <button @click="navigateFromMenu('settings')" class="menu-nav-btn">
+              <span class="menu-icon">⚙️</span>
+              <span class="menu-text">Settings</span>
+            </button>
+            <button @click="navigateFromMenu('map-settings')" class="menu-nav-btn">
+              <span class="menu-icon">📊</span>
+              <span class="menu-text">Map Settings</span>
+            </button>
+            <button @click="navigateFromMenu('about')" class="menu-nav-btn">
+              <span class="menu-icon">📱</span>
+              <span class="menu-text">About</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </transition>
+    
     <main :class="{ 
       'has-bottom-nav': isMobile,
       'map-view': $route.name === 'map'
@@ -166,6 +230,7 @@ const checkIfMobile = () => {
 }
 
 const isMobile = ref(checkIfMobile())
+const showMobileMenu = ref(false)
 
 // Enable keyboard shortcuts - disabled for now
 // useKeyboardShortcuts()
@@ -334,6 +399,40 @@ const navigateToDust = () => {
 
 const navigateToDataSync = () => {
   router.push('/settings/data_sync')
+}
+
+// Mobile menu methods
+const toggleMobileMenu = () => {
+  showMobileMenu.value = !showMobileMenu.value
+}
+
+const closeMobileMenu = () => {
+  showMobileMenu.value = false
+}
+
+const navigateFromMenu = (destination) => {
+  closeMobileMenu()
+  
+  switch(destination) {
+    case 'infrastructure':
+      router.push(`/${selectedYear.value}/infrastructure`)
+      break
+    case 'dust':
+      router.push('/dust')
+      break
+    case 'search':
+      router.push(`/${selectedYear.value}/search`)
+      break
+    case 'settings':
+      router.push('/settings')
+      break
+    case 'map-settings':
+      router.push('/settings/map')
+      break
+    case 'about':
+      router.push('/settings/about')
+      break
+  }
 }
 </script>
 
@@ -842,5 +941,165 @@ footer {
   .nav-item {
     min-height: 40px;
   }
+}
+
+/* ===== MOBILE MENU STYLES ===== */
+.mobile-menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 2998;
+}
+
+.mobile-menu {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 280px;
+  max-width: 85vw;
+  background: #2a2a2a;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.3);
+  z-index: 2999;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.mobile-menu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  background: #333;
+  border-bottom: 1px solid #444;
+}
+
+.mobile-menu-header h3 {
+  margin: 0;
+  color: #fff;
+  font-size: 1.2rem;
+}
+
+.close-menu-btn {
+  background: none;
+  border: none;
+  color: #ccc;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.close-menu-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.mobile-menu-content {
+  flex: 1;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.menu-section {
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #444;
+}
+
+.menu-section:last-child {
+  border-bottom: none;
+}
+
+.menu-label {
+  display: block;
+  color: #999;
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.menu-select {
+  width: 100%;
+  padding: 0.75rem;
+  background: #333;
+  border: 1px solid #444;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.menu-section-title {
+  color: var(--color-gold);
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 1rem 0;
+}
+
+.menu-nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  padding: 0.875rem 1rem;
+  background: #333;
+  border: 1px solid #444;
+  border-radius: 4px;
+  color: #ccc;
+  cursor: pointer;
+  margin-bottom: 0.5rem;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.menu-nav-btn:hover {
+  background: var(--color-dark-red);
+  color: #fff;
+  border-color: var(--color-dark-red);
+}
+
+.menu-icon {
+  font-size: 1.25rem;
+  width: 24px;
+  text-align: center;
+}
+
+.menu-text {
+  font-size: 1rem;
+  flex: 1;
+}
+
+/* Menu transitions */
+.menu-overlay-enter-active,
+.menu-overlay-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.menu-overlay-enter-from,
+.menu-overlay-leave-to {
+  opacity: 0;
+}
+
+.menu-slide-enter-active,
+.menu-slide-leave-active {
+  transition: transform 0.3s ease;
+}
+
+.menu-slide-enter-from,
+.menu-slide-leave-to {
+  transform: translateX(100%);
 }
 </style>
