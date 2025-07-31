@@ -2,6 +2,9 @@ import { createApp, nextTick } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import App from './App.vue'
 
+// Initialize theme system
+import { initializeTheme } from './services/themeService'
+
 // Import views
 import MapView from './views/MapView.vue'
 import ListView from './views/ListView.vue'
@@ -170,6 +173,9 @@ const router = createRouter({
   history: createWebHistory(),
   routes
 })
+
+// Initialize theme before creating app
+initializeTheme()
 
 const app = createApp(App)
 app.use(router)

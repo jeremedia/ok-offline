@@ -14,6 +14,7 @@
     <!-- Tab Components -->
     <AboutSettings v-if="activeTab === 'ABOUT'" :showReleaseNotes="showReleaseNotes" />
     <DataSyncSettings v-if="activeTab === 'DATA SYNC'" />
+    <AppearanceSettings v-if="activeTab === 'APPEARANCE'" />
     <FeaturesSettings v-if="activeTab === 'FEATURES'" />
     <MapsSettings v-if="activeTab === 'MAPS'" />
     <ImplementationSettings v-if="activeTab === 'IMPLEMENTATION'" />
@@ -29,6 +30,7 @@ import { useRoute, useRouter } from 'vue-router'
 // Import all settings components
 import AboutSettings from '../components/settings/AboutSettings.vue'
 import DataSyncSettings from '../components/settings/DataSyncSettings.vue'
+import AppearanceSettings from '../components/settings/AppearanceSettings.vue'
 import FeaturesSettings from '../components/settings/FeaturesSettings.vue'
 import MapsSettings from '../components/settings/MapsSettings.vue'
 import ImplementationSettings from '../components/settings/ImplementationSettings.vue'
@@ -46,7 +48,7 @@ const route = useRoute()
 const router = useRouter()
 
 // Tab management
-const tabs = ['ABOUT', 'DATA SYNC', 'FEATURES', 'MAPS', 'IMPLEMENTATION', 'FEEDBACK', 'EMERGENCY']
+const tabs = ['ABOUT', 'DATA SYNC', 'APPEARANCE', 'FEATURES', 'MAPS', 'IMPLEMENTATION', 'FEEDBACK', 'EMERGENCY']
 
 // Mobile-friendly tab labels
 const mobileTabLabels = {
