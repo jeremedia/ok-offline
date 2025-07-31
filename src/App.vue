@@ -1154,7 +1154,7 @@ footer {
   font-size: 0.875rem;
   margin-top: 1rem;
   padding-top: 1rem;
-  border-top: 1px solid #444;
+  border-top: 1px solid var(--color-bg-input);
   text-decoration: none;
   transition: opacity 0.2s ease;
 }

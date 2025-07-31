@@ -760,8 +760,8 @@ watch(() => props.id, async () => {
 
 <style scoped>
 #detail-section {
-  background: #1a1a1a;
-  color: #fff;
+  background: var(--color-bg-base);
+  color: var(--color-text-primary);
   padding: 0;
   height: 100%;
   display: flex;
@@ -808,7 +808,7 @@ watch(() => props.id, async () => {
 }
 
 #detail-map-container {
-  background-color: #000000 !important;
+  background-color: var(--color-bg-base) !important;
   position: relative !important;
   flex-shrink: 0;
   height: 300px; /* Fixed height on mobile */
@@ -816,7 +816,7 @@ watch(() => props.id, async () => {
   flex-direction: column;
   overflow: hidden;
   box-sizing: border-box;
-  border: 1px solid #444 !important;
+  border: 1px solid var(--color-bg-input) !important;
   border-radius: 8px;
   padding: 0 !important; /* Override external padding */
   top: auto !important; /* Override sticky positioning */
@@ -863,7 +863,7 @@ watch(() => props.id, async () => {
 }
 
 .detail-field .value {
-  color: #fff;
+  color: var(--color-text-primary);
   line-height: 1.5;
 }
 
@@ -877,13 +877,13 @@ watch(() => props.id, async () => {
 }
 
 .event {
-  background: #2a2a2a;
-  border: 1px solid #444;
-  color: #fff;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-bg-input);
+  color: var(--color-text-primary);
 }
 
 .event-type {
-  color: #ccc;
+  color: var(--color-text-secondary);
   font-style: normal !important; /* Remove italics */
   font-weight: bold;
   margin-left: 0;
@@ -892,13 +892,13 @@ watch(() => props.id, async () => {
 
 /* Event title link styling */
 .event-title-link {
-  color: #fff;
+  color: var(--color-text-primary);
   text-decoration: none;
   transition: color 0.2s ease;
 }
 
 .event-title-link:hover {
-  color: #ff6666;
+  color: var(--color-error);
   text-decoration: underline;
 }
 
@@ -910,7 +910,7 @@ watch(() => props.id, async () => {
   align-items: center;
   background: rgba(0, 0, 0, 0.8);
   flex-shrink: 0;
-  border-top: 1px solid #444; /* Only top border */
+  border-top: 1px solid var(--color-bg-input); /* Only top border */
   border-radius: 0; /* Remove radius since container handles it */
 }
 
@@ -923,9 +923,9 @@ watch(() => props.id, async () => {
 
 /* Zoom buttons */
 .zoom-btn {
-  background: #2a2a2a;
-  color: #fff;
-  border: 1px solid #444;
+  background: var(--color-bg-elevated);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-bg-input);
   border-radius: 4px;
   width: 32px;
   height: 32px;
@@ -940,8 +940,8 @@ watch(() => props.id, async () => {
 }
 
 .zoom-btn:hover:not(:disabled) {
-  background: #8B0000;
-  border-color: #8B0000;
+  background: var(--color-primary);
+  border-color: var(--color-primary);
 }
 
 .zoom-btn:disabled {
@@ -951,7 +951,7 @@ watch(() => props.id, async () => {
 
 /* Zoom level display */
 .zoom-level {
-  color: #fff;
+  color: var(--color-text-primary);
   font-size: 1rem;
   font-weight: bold;
   min-width: 20px;
@@ -969,7 +969,7 @@ watch(() => props.id, async () => {
 }
 
 .open-in-map-link:hover {
-  color: #FFF;
+  color: var(--color-text-primary);
   text-decoration: underline;
 }
 
@@ -980,28 +980,28 @@ watch(() => props.id, async () => {
   margin: 0 !important; /* Override global margin */
   margin-bottom: 0 !important; /* Remove gap between items */
   border: none !important; /* Remove all borders first */
-  border-left: 1px solid #444 !important;
-  border-right: 1px solid #444 !important;
+  border-left: 1px solid var(--color-bg-input) !important;
+  border-right: 1px solid var(--color-bg-input) !important;
   border-radius: 0 !important; /* Remove radius from all items */
-  background: #1a1a1a;
+  background: var(--color-bg-base);
   transition: background-color 0.2s;
 }
 
 /* Alternate background colors */
 .camp-events .event-item:nth-child(even) {
-  background: rgb(54, 10, 10); /* color(srgb 0.21 0.0388 0.0388) converted to RGB */
+  background: var(--color-primary-darker);
 }
 
 /* First item gets top border and radius */
 .camp-events .event-item:first-child {
-  border-top: 1px solid #444 !important;
+  border-top: 1px solid var(--color-bg-input) !important;
   border-top-left-radius: 8px !important;
   border-top-right-radius: 8px !important;
 }
 
 /* Last item gets bottom border and radius */
 .camp-events .event-item:last-child {
-  border-bottom: 1px solid #444 !important;
+  border-bottom: 1px solid var(--color-bg-input) !important;
   border-bottom-left-radius: 8px !important;
   border-bottom-right-radius: 8px !important;
   margin-bottom: 0 !important;
@@ -1009,7 +1009,7 @@ watch(() => props.id, async () => {
 
 /* Add separator between items */
 .camp-events .event-item:not(:last-child) {
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid var(--color-bg-header);
 }
 
 /* Hover effect removed per user request */
@@ -1073,16 +1073,16 @@ h2 {
   font-size: 3rem;
   cursor: pointer;
   padding: 0.2rem 0.5rem;
-  color: #666;
+  color: var(--color-text-disabled);
   transition: color 0.2s;
 }
 
 .favorite-btn-detail:hover {
-  color: #FFD700;
+  color: var(--color-accent);
 }
 
 .favorite-btn-detail.active {
-  color: #FFD700;
+  color: var(--color-accent);
 }
 
 .custom-badge {
@@ -1091,8 +1091,8 @@ h2 {
   justify-content: center;
   margin-left: 1rem;
   padding: 0.375rem 0.875rem;
-  background: #8B0000;
-  color: #fff;
+  background: var(--color-primary);
+  color: var(--color-text-primary);
   font-weight: 600;
   border-radius: 20px;
   vertical-align: middle;
@@ -1118,9 +1118,9 @@ h2 {
 .visit-tracking {
   margin-top: 1rem;
   padding: 16px; /* 2x 8px rhythm */
-  background: #2a2a2a;
+  background: var(--color-bg-elevated);
   border-radius: 8px;
-  border: 1px solid #333;
+  border: 1px solid var(--color-bg-header);
 }
 
 .visit-tracking h3 {
@@ -1129,7 +1129,7 @@ h2 {
 }
 
 .visit-info {
-  background: #2a2a2a;
+  background: var(--color-bg-elevated);
   padding: 1rem;
   border-radius: 4px;
   margin-bottom: 1rem;
@@ -1137,13 +1137,13 @@ h2 {
 
 .visit-info p {
   margin: 0.5rem 0;
-  color: #ccc;
+  color: var(--color-text-secondary);
 }
 
 .visit-button {
-  background: #2a2a2a;
-  color: #ccc;
-  border: 1px solid #444;
+  background: var(--color-bg-elevated);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-bg-input);
   padding: 0.75rem;
   border-radius: 4px;
   cursor: pointer;
@@ -1152,13 +1152,13 @@ h2 {
 }
 
 .visit-button:hover {
-  background: #8B0000;
-  color: #fff;
+  background: var(--color-primary);
+  color: var(--color-text-primary);
 }
 
 .visit-button.visited {
-  background: #228B22;
-  color: #fff;
+  background: var(--color-success);
+  color: var(--color-text-primary);
 }
 
 .notes-section {
@@ -1166,7 +1166,7 @@ h2 {
 }
 
 .notes-section h4 {
-  color: #ccc;
+  color: var(--color-text-secondary);
   margin-bottom: 0.75rem;
   font-size: 1rem;
   text-transform: uppercase;
@@ -1178,9 +1178,9 @@ h2 {
   width: 100%;
   min-height: 100px;
   max-width: 100%;
-  background: #2a2a2a;
-  color: #fff;
-  border: 1px solid #444;
+  background: var(--color-bg-elevated);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-bg-input);
   border-radius: 4px;
   padding: 0.75rem;
   font-family: inherit;
@@ -1191,11 +1191,11 @@ h2 {
 
 .notes-textarea:focus {
   outline: none;
-  border-color: #8B0000;
+  border-color: var(--color-primary);
 }
 
 .notes-textarea::placeholder {
-  color: #666;
+  color: var(--color-text-disabled);
 }
 
 .event-times {
@@ -1215,12 +1215,12 @@ h2 {
 .occurrence-item small {
   font-size: 1rem !important; /* Same size as description */
   font-weight: normal !important; /* Same weight as description */
-  color: #fff !important; /* Make it stand out */
+  color: var(--color-text-primary) !important; /* Make it stand out */
 }
 
 .schedule-btn {
-  background: #2a2a2a;
-  border: 1px solid #444;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-bg-input);
   border-radius: 4px;
   padding: 0.25rem 0.5rem;
   cursor: pointer;
@@ -1229,38 +1229,38 @@ h2 {
 }
 
 .schedule-btn:hover {
-  background: #8B0000;
-  border-color: #8B0000;
+  background: var(--color-primary);
+  border-color: var(--color-primary);
 }
 
 .schedule-btn.scheduled {
-  background: #228B22;
-  border-color: #228B22;
+  background: var(--color-success);
+  border-color: var(--color-success);
 }
 
 .schedule-btn.scheduled:hover {
-  background: #8B0000;
-  border-color: #8B0000;
+  background: var(--color-primary);
+  border-color: var(--color-primary);
 }
 
 .camp-link {
-  color: #90CAF9;
+  color: var(--color-info);
   text-decoration: none;
   transition: color 0.2s;
 }
 
 .camp-link:hover {
-  color: #64B5F6;
+  color: var(--color-info);
   text-decoration: underline;
 }
 
 /* Custom map styling */
 #detail-map-container {
-  background-color: #000000;
+  background-color: var(--color-bg-base);
 }
 
 #detail-map {
-  background-color: #000000;
+  background-color: var(--color-bg-base);
   width: 100%;
   flex: 1;
   min-height: 0;
@@ -1269,7 +1269,7 @@ h2 {
 
 /* Style the Leaflet container background */
 :deep(.leaflet-container) {
-  background-color: #000000;
+  background-color: var(--color-bg-base);
 }
 
 /* Hide all Leaflet controls */
@@ -1285,10 +1285,10 @@ h2 {
 :deep(.street-label) {
   background: none;
   border: none;
-  color: #FFFFFF;
+  color: var(--color-text-primary);
   font-weight: bold;
   font-size: 12px;
-  text-shadow: 1px 1px 2px #000000, -1px -1px 2px #000000;
+  text-shadow: 1px 1px 2px var(--color-bg-base), -1px -1px 2px var(--color-bg-base);
   white-space: nowrap;
   pointer-events: none;
   text-align: center;
@@ -1305,8 +1305,8 @@ h2 {
 }
 
 :deep(.leaflet-popup-content-wrapper) {
-  background: #2a2a2a;
-  border: 1px solid #444;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-bg-input);
   border-radius: 4px;
   box-shadow: 0 3px 14px rgba(0,0,0,0.8);
   padding: 0;
@@ -1315,7 +1315,7 @@ h2 {
 :deep(.leaflet-popup-content) {
   margin: 0;
   padding: 16px;
-  color: #fff;
+  color: var(--color-text-primary);
   font-family: 'Berkeley Mono', monospace;
   font-size: 0.9rem;
   line-height: 1.5;
@@ -1323,7 +1323,7 @@ h2 {
 }
 
 :deep(.leaflet-popup-content strong) {
-  color: #fff;
+  color: var(--color-text-primary);
   font-weight: bold;
   font-size: 1rem;
   display: block;
@@ -1331,7 +1331,7 @@ h2 {
 }
 
 :deep(.leaflet-popup-content em) {
-  color: #ccc;
+  color: var(--color-text-secondary);
   font-style: normal;
   font-size: 0.85rem;
 }
@@ -1341,7 +1341,7 @@ h2 {
 }
 
 :deep(.leaflet-popup-close-button) {
-  color: #ccc !important;
+  color: var(--color-text-secondary) !important;
   font-size: 20px !important;
   font-weight: normal !important;
   line-height: 20px !important;
@@ -1354,7 +1354,7 @@ h2 {
 }
 
 :deep(.leaflet-popup-close-button:hover) {
-  color: #fff !important;
+  color: var(--color-text-primary) !important;
 }
 
 /* Custom marker styling */
@@ -1365,7 +1365,7 @@ h2 {
 
 :deep(.detail-marker .marker-icon) {
   background: rgba(139, 0, 0, 0.9);
-  border: 2px solid #FFD700;
+  border: 2px solid var(--color-accent);
   border-radius: 50%;
   width: 30px;
   height: 30px;

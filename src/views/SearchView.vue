@@ -981,8 +981,8 @@ const ensureAtLeastOneFilter = () => {
 <style scoped>
 .view {
   padding: 1rem;
-  color: #f0f0f0;
-  background: #1a1a1a;
+  color: var(--color-text-primary);
+  background: var(--color-bg-base);
   min-height: 100vh;
 }
 
@@ -1029,12 +1029,12 @@ const ensureAtLeastOneFilter = () => {
 }
 
 .status-error {
-  color: #ff6b6b;
+  color: var(--color-error);
   background: rgba(255, 107, 107, 0.1);
 }
 
 .status-offline {
-  color: #ffd93d;
+  color: var(--color-warning);
   background: rgba(255, 217, 61, 0.1);
 }
 
@@ -1060,8 +1060,8 @@ const ensureAtLeastOneFilter = () => {
 .loading-spinner {
   width: 32px;
   height: 32px;
-  border: 3px solid #333;
-  border-top: 3px solid #680000;
+  border: 3px solid var(--color-bg-header);
+  border-top: 3px solid var(--color-primary-dark);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -1074,7 +1074,7 @@ const ensureAtLeastOneFilter = () => {
 .hint {
   text-align: center;
   padding: 0 0 1rem 0;
-  color: #999;
+  color: var(--color-text-muted);
 }
 
 .search-modes-info {
@@ -1089,15 +1089,15 @@ const ensureAtLeastOneFilter = () => {
 .mode-info {
   text-align: center;
   padding: 1rem; /* 16px - follows 8px grid */
-  background: #2a2a2a;
-  border: 1px solid #444;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-bg-input);
   border-radius: 8px;
   transition: all 0.2s ease;
 }
 
 @media (min-width: 601px) {
   .mode-info:hover {
-    border-color: #680000 !important;
+    border-color: var(--color-primary-dark) !important;
     background: rgba(104, 0, 0, 0.1);
   }
 }
@@ -1110,13 +1110,13 @@ const ensureAtLeastOneFilter = () => {
 .mode-info h3 {
   margin: 0.5rem 0;
   font-size: 1.1rem;
-  color: #fff;
+  color: var(--color-text-primary);
 }
 
 .mode-info p {
   margin: 0;
   font-size: 0.9rem;
-  color: #999;
+  color: var(--color-text-muted);
 }
 
 .entity-stats {
@@ -1126,7 +1126,7 @@ const ensureAtLeastOneFilter = () => {
 
 .entity-stats h4 {
   margin: 0 0 1rem 0;
-  color: #fff;
+  color: var(--color-text-primary);
   font-size: 1.1rem;
   font-weight: 600;
 }
@@ -1145,8 +1145,8 @@ const ensureAtLeastOneFilter = () => {
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem;
-  background: #2a2a2a;
-  border: 1px solid #444;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-bg-input);
   border-radius: 6px;
   transition: all 0.2s ease;
 }
@@ -1163,7 +1163,7 @@ const ensureAtLeastOneFilter = () => {
 
 .entity-count {
   font-size: 0.85rem;
-  color: #ccc;
+  color: var(--color-text-secondary);
   font-weight: 500;
 }
 
@@ -1174,7 +1174,7 @@ const ensureAtLeastOneFilter = () => {
 
 .popular-entities h4 {
   margin: 0 0 1rem 0;
-  color: #fff;
+  color: var(--color-text-primary);
   font-size: 1.1rem;
   font-weight: 600;
 }
@@ -1232,7 +1232,7 @@ const ensureAtLeastOneFilter = () => {
 
 .start-typing {
   font-size: 1.1rem;
-  color: #999; /* Better contrast */
+  color: var(--color-text-muted); /* Better contrast */
 }
 
 .no-results {
@@ -1245,7 +1245,7 @@ const ensureAtLeastOneFilter = () => {
 }
 
 .suggestion {
-  color: #999;
+  color: var(--color-text-muted);
   font-size: 0.9rem;
 }
 
@@ -1270,18 +1270,18 @@ const ensureAtLeastOneFilter = () => {
 }
 
 .entity-search-label {
-  color: #ff8a95;
+  color: var(--color-error);
   font-size: 0.9rem;
 }
 
 .entity-search-label strong {
-  color: #ff6b6b;
+  color: var(--color-error);
 }
 
 .clear-entity-btn {
   background: none;
   border: none;
-  color: #ff6b6b;
+  color: var(--color-error);
   cursor: pointer;
   font-size: 16px;
   padding: 4px;
@@ -1296,14 +1296,14 @@ const ensureAtLeastOneFilter = () => {
 
 .clear-entity-btn:hover {
   background: rgba(139, 0, 0, 0.2);
-  color: #fff;
+  color: var(--color-text-primary);
 }
 
 .regular-search-header {
   display: flex;
   justify-content: center;
   align-items: center;
-  color: #999;
+  color: var(--color-text-muted);
   font-size: 0.9rem;
 }
 
