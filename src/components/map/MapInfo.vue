@@ -123,8 +123,8 @@ const isDragging = ref(false)
 
 // Position state - positioned on bottom right by default
 const position = reactive({
-  x: window.innerWidth - 270,  // 250px width + 20px margin
-  y: window.innerHeight - 420  // Approximate height + margin from bottom
+  x: 200,  // Will be adjusted on mount based on container
+  y: 200   // Will be adjusted on mount based on container
 })
 
 // Drag state
@@ -213,13 +213,21 @@ onMounted(() => {
       } catch (e) {
         console.error('Failed to load info position:', e)
         // Reset to default bottom-right position
-        position.x = window.innerWidth - 270
-        position.y = window.innerHeight - 420
+        const mapContainer = infoEl.value?.closest('#map-section')
+        if (mapContainer) {
+          const mapRect = mapContainer.getBoundingClientRect()
+          position.x = mapRect.width - 270
+          position.y = mapRect.height - 420
+        }
       }
     } else {
       // No saved position, set default bottom-right
-      position.x = window.innerWidth - 270
-      position.y = window.innerHeight - 420
+      const mapContainer = infoEl.value?.closest('#map-section')
+      if (mapContainer) {
+        const mapRect = mapContainer.getBoundingClientRect()
+        position.x = mapRect.width - 270
+        position.y = mapRect.height - 420
+      }
     }
   }
 })
@@ -240,8 +248,12 @@ const toggleCollapse = () => {
         constrainToViewport()
       } catch (e) {
         // If no saved position, use default bottom-right
-        position.x = window.innerWidth - 270
-        position.y = window.innerHeight - 420
+        const mapContainer = infoEl.value?.closest('#map-section')
+        if (mapContainer) {
+          const mapRect = mapContainer.getBoundingClientRect()
+          position.x = mapRect.width - 270
+          position.y = mapRect.height - 420
+        }
       }
     }
   }
@@ -320,8 +332,13 @@ const constrainToViewport = () => {
   if (!infoEl.value) return
   
   const rect = infoEl.value.getBoundingClientRect()
-  const maxX = window.innerWidth - rect.width - 10
-  const maxY = window.innerHeight - rect.height - 10
+  // Get the parent map container bounds
+  const mapContainer = infoEl.value.closest('#map-section')
+  if (!mapContainer) return
+  
+  const mapRect = mapContainer.getBoundingClientRect()
+  const maxX = mapRect.width - rect.width - 10
+  const maxY = mapRect.height - rect.height - 10
   
   position.x = Math.max(10, Math.min(position.x, maxX))
   position.y = Math.max(10, Math.min(position.y, maxY))
@@ -333,7 +350,7 @@ window.addEventListener('resize', constrainToViewport)
 
 <style scoped>
 .map-info {
-  position: fixed;
+  position: absolute;
   z-index: 999; /* Slightly lower than legend */
   background: var(--color-background-secondary-alpha-95);
   padding: 0;
@@ -480,7 +497,7 @@ window.addEventListener('resize', constrainToViewport)
 /* Mobile styles */
 @media (max-width: 600px) {
   .map-info {
-    position: fixed;
+    position: absolute;
     right: 10px !important;
     bottom: 20px !important;
     left: auto !important;

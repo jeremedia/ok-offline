@@ -94,16 +94,40 @@ const navItems = [
 ]
 
 const navigate = (path) => {
-  router.push(`/${path}`)
+  // Special routes that don't need year
+  if (path === 'dust') {
+    router.push('/dust')
+  } else {
+    router.push(`/${props.selectedYear}/${path}`)
+  }
 }
 
 const isActive = (path) => {
-  const currentPath = route.path.split('/')[1]
-  if (path === 'map' && currentPath === '') return true
-  if (path === 'camps' && currentPath === '2025' && route.path.includes('camps')) return true
-  if (path === 'art' && currentPath === '2025' && route.path.includes('art')) return true
-  if (path === 'events' && currentPath === '2025' && route.path.includes('events')) return true
-  return currentPath === path
+  // Special handling for dust route
+  if (path === 'dust') {
+    return route.path === '/dust'
+  }
+  
+  // For year-based routes, check both list and detail views
+  const routeName = route.name
+  
+  // Handle detail views by checking if the route name starts with the path
+  if (routeName) {
+    // For camps, art, events - check if we're on the list or detail view
+    if (['camps', 'art', 'events'].includes(path)) {
+      return routeName === path || routeName === `${path.slice(0, -1)}-detail`
+    }
+    
+    // For infrastructure, handle both list and detail
+    if (path === 'infrastructure') {
+      return routeName === 'infrastructure' || routeName === 'infrastructure-detail'
+    }
+    
+    // For other routes, exact match
+    return routeName === path
+  }
+  
+  return false
 }
 </script>
 

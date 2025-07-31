@@ -80,7 +80,13 @@ const handleYearChange = (event) => {
 }
 
 const navigateTo = (route) => {
-  router.push(`/${route}`)
+  // Routes that don't need year
+  if (['dust', 'settings'].includes(route)) {
+    router.push(`/${route}`)
+  } else {
+    // Routes that need year (infrastructure, search, etc)
+    router.push(`/${props.selectedYear}/${route}`)
+  }
   emit('close')
 }
 </script>

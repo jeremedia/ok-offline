@@ -328,203 +328,9 @@ const onThemeChange = () => {
 }
 </script>
 
-<style>
-/* Global styles for map view header/footer spacing */
-@media (min-width: 600px) {
-  main.map-view .view {
-    top: 67px !important;
-    bottom: 222px !important;
-  }
-}
-</style>
 
 <style scoped>
-/* ===== HEADER BASE STYLES ===== */
-header {
-  padding: 0;
-  background: var(--color-bg-header);
-  border-bottom: 1px solid var(--color-border-medium);
-}
-
-.header-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  padding: 0.75rem 1rem;
-  gap: 1rem;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-/* ===== DESKTOP NAVIGATION SECTION ===== */
-.nav-section {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  flex: 1;
-}
-
-.year-selector-group {
-  display: flex;
-  align-items: center;
-}
-
-.unified-select {
-  background-color: var(--color-bg-input);
-  color: var(--color-text-secondary);
-  border: 1px solid var(--color-border-heavy);
-  padding: 0.5rem 2rem 0.5rem 0.75rem;
-  border-radius: 4px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23666666' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-  background-position: right 0.5rem center;
-  background-repeat: no-repeat;
-  background-size: 1.25rem;
-}
-
-.unified-select:hover {
-  background-color: var(--color-bg-hover);
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23333333' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-  background-position: right 0.5rem center;
-  background-repeat: no-repeat;
-  background-size: 1.25rem;
-  color: var(--color-text-primary);
-  border-color: var(--color-primary);
-}
-
-.unified-select:focus {
-  outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px var(--color-primary-alpha-20);
-}
-
-.main-nav {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-/* ===== UNIFIED BUTTON SYSTEM ===== */
-.nav-btn {
-  background: transparent;
-  color: var(--color-text-secondary);
-  border: 1px solid transparent;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-}
-
-.nav-btn:hover {
-  background: var(--color-primary);
-  color: var(--color-text-inverse);
-  border-color: var(--color-primary);
-}
-
-.nav-btn.active {
-  background: var(--color-primary);
-  color: var(--color-text-inverse);
-  border-color: var(--color-primary);
-}
-
-/* ===== APP TITLE ===== */
-.app-title-section {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-shrink: 0;
-}
-
-.app-title {
-  cursor: pointer;
-  transition: color 0.2s;
-  margin: 0;
-  flex-shrink: 0;
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: var(--color-text-primary);
-}
-
-.app-title:hover {
-  color: var(--color-primary);
-}
-
-.status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--color-success);
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  flex-shrink: 0;
-}
-
-.status-dot.offline {
-  background: var(--color-error);
-}
-
-.status-dot:hover {
-  transform: scale(1.2);
-  box-shadow: 0 0 8px var(--color-success-glow);
-}
-
-.status-dot.offline:hover {
-  box-shadow: 0 0 8px var(--color-error-glow);
-}
-
-/* ===== STATUS SECTION ===== */
-.status-section {
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
-}
-
-.status-indicator {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.25rem;
-  padding: 0.5rem;
-  background: var(--color-bg-input-alpha-50);
-  border-radius: 4px;
-  border: 1px solid var(--color-border-heavy);
-}
-
-.status-primary {
-  display: flex;
-  align-items: center;
-}
-
-.status-secondary {
-  display: flex;
-  align-items: center;
-}
-
-.online-status {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  color: var(--color-success);
-  font-size: 0.85rem;
-  font-weight: 500;
-}
-
-.online-status.offline {
-  color: var(--color-error);
-}
-
-.last-sync {
-  color: var(--color-text-muted);
-  font-size: 0.75rem;
-}
-
+/* ===== APP LAYOUT STYLES ===== */
 /* Full-screen PWA layout */
 .app-container {
   height: 100vh;
@@ -547,205 +353,8 @@ main.has-bottom-nav {
 
 /* Special handling for map view */
 main.map-view {
-  overflow: hidden; /* Prevent scrolling on map view */
-}
-
-main.map-view .view {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-}
-
-/* Desktop map view should account for header/footer */
-@media (min-width: 600px) {
-  main.map-view .view {
-    top: 67px; /* Account for header height */
-    left: 0;
-    right: 0;
-    bottom: 222px; /* Account for footer height */
-  }
-}
-
-/* Ensure header and footer are above map */
-header {
   position: relative;
-  z-index: 10;
-  flex-shrink: 0; /* Don't shrink */
-}
-
-footer {
-  position: relative;
-  z-index: 10;
-  flex-shrink: 0; /* Don't shrink */
-}
-
-/* ===== MOBILE HEADER ENHANCEMENTS ===== */
-.mobile-header {
-  position: sticky;
-  top: 0;
-  z-index: 2000;
-  background: var(--color-bg-header);
-  border-bottom: 1px solid var(--color-border-medium);
-  box-shadow: 0 2px 4px var(--color-shadow-light);
-}
-
-.mobile-header .header-row {
-  padding: 0.75rem 1rem;
-  gap: 0.75rem;
-  max-width: none; /* Full width on mobile */
-}
-
-.mobile-header .app-title {
-  font-size: 1.2rem;
-  font-weight: bold;
-  color: var(--color-text-primary);
-  flex: 1;
-  text-align: center;
-}
-
-.mobile-header .status-indicator {
-  display: none;
-}
-
-/* ===== MOBILE ACTION BUTTONS (UNIFIED SYSTEM) ===== */
-.mobile-actions {
-  display: flex;
-  gap: 0;
-}
-
-.mobile-action-btn {
-  background: var(--color-bg-input);
-  border: 1px solid var(--color-border-heavy);
-  color: var(--color-text-secondary);
-  min-width: 44px;  /* Touch-friendly minimum */
-  height: 44px; /* Touch-friendly minimum */
-  padding: 0 12px; /* Add horizontal padding */
-  border-radius: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  -webkit-tap-highlight-color: transparent;
-  position: relative;
-}
-
-/* First button (search) */
-.mobile-action-btn:first-child {
-  border-top-left-radius: 8px;
-  border-bottom-left-radius: 8px;
-  border-right: none;
-}
-
-/* Last button (hamburger) */
-.mobile-action-btn:last-child {
-  border-top-right-radius: 8px;
-  border-bottom-right-radius: 8px;
-}
-
-.mobile-action-btn:hover {
-  background: var(--color-primary);
-  color: var(--color-text-primary);
-  border-color: var(--color-primary);
-  z-index: 1;
-}
-
-.mobile-action-btn:active {
-  transform: scale(0.95);
-  background: var(--color-primary);
-  color: var(--color-text-primary);
-}
-
-/* Hamburger button specific styles */
-.hamburger-btn {
-  font-size: 36px;
-  line-height: 1;
-  padding-bottom: 4px; /* Adjust for visual centering */
-}
-
-/* ===== FOOTER UNIFIED DESIGN ===== */
-footer {
-  background: var(--color-bg-header);
-  border-top: 1px solid var(--color-border-medium);
-  flex-shrink: 0; /* Don't shrink */
-  height: 60px; /* Match header height */
-}
-
-.footer-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.footer-controls {
-  display: flex;
-  align-items: center;
-  gap: 2rem;
-}
-
-.footer-controls .theme-selector-group {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.footer-controls .theme-selector-group label {
-  color: var(--color-text-secondary);
-  font-size: 0.9rem;
-  font-weight: 500;
-}
-
-.reset-btn {
-  background: var(--color-bg-input);
-  color: var(--color-text-secondary);
-  border: 1px solid var(--color-border-medium);
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.2s;
-  white-space: nowrap;
-}
-
-.reset-btn:hover {
-  background: var(--color-error);
-  color: var(--color-text-primary);
-  border-color: var(--color-error);
-}
-
-/* Removed old footer styles - new simplified footer */
-
-/* Utility class for hiding elements */
-/* Removed d-none - footer should always be visible */
-
-@media (max-width: 600px) {
-  .header-row {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-  }
-  
-  .app-title {
-    order: 1;
-    text-align: left;
-    margin: 0;
-  }
-  
-  nav {
-    display: none; /* Hidden on mobile since we have bottom nav */
-  }
-  
-  /* Mobile footer: compact and accessible */
-  .mobile-footer {
-    display: block;
-  }
+  overflow: hidden;
 }
 
 /* Landscape mode adjustments */
@@ -754,211 +363,50 @@ footer {
     padding-bottom: calc(50px + env(safe-area-inset-bottom, 0));
   }
   
-  .bottom-nav {
-    height: 50px;
-  }
-  
-  .nav-item {
-    min-height: 40px;
-  }
+  /* Bottom nav styles in BottomNav.vue component */
 }
+</style>
 
-/* ===== MOBILE MENU STYLES ===== */
-.mobile-menu-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: var(--color-overlay-dark);
-  z-index: 2998;
-}
-
-.mobile-menu {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: 280px;
-  max-width: 85vw;
-  background: var(--color-bg-elevated);
-  box-shadow: -2px 0 8px var(--color-shadow-medium);
-  z-index: 2999;
+<style scoped>
+/* ===== APP LAYOUT STYLES ===== */
+/* Full-screen PWA layout */
+.app-container {
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
+  overflow: hidden; /* Prevent body scrolling */
 }
 
-.mobile-menu-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.5rem;
-  background: var(--color-bg-header);
-  border-bottom: 1px solid var(--color-border-medium);
-}
-
-.mobile-menu-header h3 {
-  margin: 0;
-  color: var(--color-text-primary);
-  font-size: 1.2rem;
-  padding-left: 0.5rem;
-}
-
-.close-menu-btn {
-  background: none;
-  border: none;
-  color: var(--color-text-secondary);
-  font-size: 1.5rem;
-  cursor: pointer;
-  padding: 0.5rem;
-  width: 44px;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
-  transition: all 0.2s ease;
-}
-
-.close-menu-btn:hover {
-  background: var(--color-white-alpha-10);
-  color: var(--color-text-primary);
-}
-
-.mobile-menu-content {
-  flex: 1;
-  padding: 1rem;
-  overflow-y: auto;
-}
-
-.menu-section {
-  margin-bottom: 0.75rem;
-  padding-bottom: 0.75rem;
-}
-
-.menu-section:last-child {
-  border-bottom: none;
-}
-
-.menu-label {
-  display: block;
-  color: var(--color-accent);
-  font-size: 0.875rem;
-  margin-bottom: 0.5rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.menu-select {
-  width: 100%;
-  padding: 0.875rem 2.5rem 0.875rem 1rem;
-  background: var(--color-bg-header);
-  border: 1px solid var(--color-border-medium);
-  border-radius: 4px;
-  color: var(--color-text-primary);
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.menu-select:hover {
-  background: var(--color-bg-input);
-  border-color: var(--color-primary);
-}
-
-.menu-section-title {
-  color: var(--color-accent);
-  font-size: 0.875rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin: 0 0 1rem 0;
-}
-
-.menu-nav-btn {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  width: 100%;
-  padding: 0.875rem 1rem;
-  background: var(--color-bg-header);
-  border: 1px solid var(--color-border-medium);
-  border-radius: 0;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  margin-bottom: 0;
-  transition: all 0.2s ease;
-  text-align: left;
-  border-top: 0;
-}
-
-/* First button in each section */
-.menu-section .menu-nav-btn:first-of-type {
-  border-top: 1px solid var(--color-border-medium);
-  border-top-left-radius: 4px;
-  border-top-right-radius: 4px;
-}
-
-/* Last button in each section */
-.menu-section .menu-nav-btn:last-of-type {
-  border-bottom-left-radius: 4px;
-  border-bottom-right-radius: 4px;
-}
-
-.menu-nav-btn:hover {
-  background: var(--color-primary);
-  color: var(--color-text-primary);
-  border-color: var(--color-primary);
-  z-index: 1;
+main {
+  flex: 1 1 auto; /* Grow and shrink, take remaining space */
+  overflow: hidden; /* Let individual views manage their own scrolling */
   position: relative;
+  min-height: 0; /* Important for nested flex containers */
 }
 
-.menu-icon {
-  font-size: 1.25rem;
-  width: 24px;
-  text-align: center;
+main.has-bottom-nav {
+  /* Account for bottom nav height + safe area */
+  padding-bottom: calc(60px + env(safe-area-inset-bottom, 0));
 }
 
-.menu-text {
-  font-size: 1rem;
-  flex: 1;
+/* Special handling for map view */
+main.map-view {
+  position: relative;
+  overflow: hidden;
 }
 
-.menu-version {
-  display: block;
-  text-align: center;
-  color: var(--color-accent);
-  font-size: 0.875rem;
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--color-bg-input);
-  text-decoration: none;
-  transition: opacity 0.2s ease;
+/* Header and footer styles moved to component files */
+
+/* Component-specific styles moved to individual component files */
+
+/* Landscape mode adjustments */
+@media (max-width: 600px) and (orientation: landscape) {
+  main.has-bottom-nav {
+    padding-bottom: calc(50px + env(safe-area-inset-bottom, 0));
+  }
+  
+  /* Bottom nav styles in BottomNav.vue component */
 }
 
-.menu-version:hover {
-  opacity: 0.7;
-  text-decoration: underline;
-}
-
-/* Menu transitions */
-.menu-overlay-enter-active,
-.menu-overlay-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.menu-overlay-enter-from,
-.menu-overlay-leave-to {
-  opacity: 0;
-}
-
-.menu-slide-enter-active,
-.menu-slide-leave-active {
-  transition: transform 0.3s ease;
-}
-
-.menu-slide-enter-from,
-.menu-slide-leave-to {
-  transform: translateX(100%);
-}
+/* Mobile menu styles moved to MobileMenu.vue component */
 </style>
