@@ -158,6 +158,45 @@ onMounted(() => {
 // Release notes data
 const releaseNotes = [
   {
+    version: '3.21.0',
+    date: '2025-07-31',
+    added: [
+      '🏕️ Collapsible CAMP EVENTS - Lazy-loading events section with event count display',
+      '🔢 Shows "CAMP EVENTS (20)" format with expand/collapse functionality',
+      '⚡ Only loads events when expanded for better performance',
+      '💾 Remembers open/closed state per camp using localStorage',
+      '🗺️ Detail View Map Polish - Fixed scroll conflicts and added proper orientation',
+      '🔄 Added -45° rotation for Burning Man orientation (gate at bottom)',
+      '🔍 Manual zoom controls (+/-) that maintain marker centering',
+      '📐 Enhanced Layout - Grouped related fields on single lines',
+      '🎨 Added item type icons to headers (🏕️ camps, 🎨 art, 🎪 events)',
+      '📱 Responsive flexbox layout with optimized mobile display'
+    ],
+    fixed: [
+      '🐛 Fixed scroll wheel zoom conflicts with page scrolling',
+      '📍 Fixed event location display to show host camp location',
+      '🚫 Removed hover background color on camp event items'
+    ]
+  },
+  {
+    version: '3.20.0',
+    date: '2025-07-31',
+    added: [
+      '🔍 Interactive Entity Discovery - Click entity tags to find related content',
+      '📊 Entity tags show global counts (e.g., "music (411)")',
+      '🎯 Smart sorting by relevance - most frequent entities first',
+      '🌟 Popular Entities section with trending tags',
+      '📈 Entity Breakdown showing counts across all types',
+      '🔗 URL state management for shareable entity searches',
+      '🏗️ Infrastructure search type with search and sort capabilities',
+      '✅ "Everything" filter with smart toggle behavior',
+      '💾 Persistent filter preferences saved in localStorage',
+      '📝 Total items searched count display',
+      '🔄 Auto-submit and auto-rerun search functionality',
+      '💬 Dynamic placeholder text reflecting selected filters'
+    ]
+  },
+  {
     version: '3.19.0',
     date: '2025-07-31',
     added: [
