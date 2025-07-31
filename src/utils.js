@@ -1,3 +1,5 @@
+import { shouldShowLocation } from './stores/globalState'
+
 export function getItemName(item) {
   return item.name || item.title || item.camp || item.artist || 'Unnamed'
 }
@@ -37,6 +39,11 @@ async function getLocationFromCache(type, id, year) {
 }
 
 export function getItemLocation(item) {
+  // Check if we should show location based on global state
+  if (!shouldShowLocation(item)) {
+    return 'Location Not Released'
+  }
+  
   // Check for enriched location first (for events)
   if (item.enriched_location) return item.enriched_location
   
@@ -63,7 +70,7 @@ export function getItemLocation(item) {
     }
   }
   
-  return 'Unknown location'
+  return 'Unknown Location'
 }
 
 // New async version for events

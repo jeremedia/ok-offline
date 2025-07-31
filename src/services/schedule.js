@@ -2,6 +2,8 @@
  * Schedule management service for personal event scheduling
  */
 
+import { getItemLocation } from '../utils'
+
 const SCHEDULE_KEY = 'bm_schedule'
 
 /**
@@ -33,7 +35,7 @@ export function addEventToSchedule(event, occurrence) {
       scheduleId: Date.now() + Math.random(), // Unique ID for this scheduled instance
       eventId: event.uid,
       title: event.title,
-      location: event.enriched_location || event.other_location || 'Unknown location',
+      location: getItemLocation(event),
       startTime: occurrence.start_time,
       endTime: occurrence.end_time,
       eventType: event.event_type?.label || 'Event',

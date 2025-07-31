@@ -590,7 +590,9 @@ const loadData = async () => {
 
 const selectItem = (item) => {
   console.log(`Full ${props.type} data:`, item)
-  router.push(`/${props.year}/${props.type}s/${item.uid}`)
+  // Handle pluralization correctly - art stays as 'art', not 'arts'
+  const routeType = props.type === 'art' ? 'art' : `${props.type}s`
+  router.push(`/${props.year}/${routeType}/${item.uid}`)
 }
 
 const openCustomForm = () => {
@@ -658,7 +660,7 @@ const loadFavorites = () => {
 const getItemDistance = (item) => {
   if (!userLocation.value) return null
   const location = getItemLocation(item)
-  if (!location || location === 'Unknown location') return null
+  if (!location || location === 'Unknown Location' || location === 'Location Not Released') return null
   
   const distance = getDistanceTo(location)
   return distance?.formatted || null

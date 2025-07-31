@@ -105,14 +105,8 @@ const truncateDescription = (description) => {
 
 const displayLocation = computed(() => {
   const location = getItemLocation(props.result)
-  if (!location || location === 'Unknown location') {
-    // Check if locations are hidden for this year
-    if (!canShowLocations(props.year)) {
-      return 'Location Unreleased'
-    }
-    return 'Unknown location'
-  }
-  return location
+  // getItemLocation now handles the Location Not Released check internally
+  return location || 'Unknown Location'
 })
 
 const sortedEntities = computed(() => {

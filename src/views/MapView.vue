@@ -854,7 +854,7 @@ const updateMarkers = () => {
 
 const addMarker = (item, type, icon) => {
   const location = getItemLocation(item)
-  if (!location || location === 'Unknown location') return
+  if (!location || location === 'Unknown Location' || location === 'Location Not Released') return
   
   const coords = brcAddressToLatLon(location)
   if (!coords) return
@@ -1167,13 +1167,11 @@ const applyRotation = () => {
 
 <style scoped>
 #map-section {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
   width: 100%;
   height: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
 #map {

@@ -538,7 +538,7 @@ const initMap = async () => {
   
   
   // Only try to geocode if we're allowed to show locations
-  if (canShow && locationString && locationString !== 'Unknown location') {
+  if (canShow && locationString && locationString !== 'Unknown Location' && locationString !== 'Location Not Released') {
     coords = brcAddressToLatLon(locationString)
   }
   
