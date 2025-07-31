@@ -53,8 +53,8 @@ html, body {
   padding: 0;
   height: 100%;
   font-family: 'Berkeley Mono', monospace;
-  background: #1a1a1a;
-  color: #ccc;
+  background: var(--color-bg-base);
+  color: var(--color-text-secondary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -65,8 +65,8 @@ button {
 }
 
 header {
-  background-color: #333;
-  color: white;
+  background-color: var(--color-bg-header);
+  color: var(--color-text-primary);
   padding: 0.75rem 1rem;
   display: flex;
   flex-wrap: wrap;
@@ -88,8 +88,8 @@ nav {
 }
 
 nav button, nav select {
-  background: #555;
-  color: #fff;
+  background: var(--color-bg-hover);
+  color: var(--color-text-primary);
   border: none;
   padding: 0.5rem 1rem;
   border-radius: 4px;
@@ -101,7 +101,7 @@ nav button, nav select {
 }
 
 nav button:hover, nav select:hover {
-  background: #8B0000;
+  background: var(--color-primary);
 }
 
 nav select {
@@ -128,8 +128,8 @@ main {
 
 #list-controls {
   padding: 1rem;
-  background: #2a2a2a;
-  border-bottom: 1px solid #444;
+  background: var(--color-bg-elevated);
+  border-bottom: 1px solid var(--color-border-medium);
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -142,10 +142,10 @@ main {
 
 #list-controls select {
   padding: 0.25rem 0.5rem;
-  border: 1px solid #555;
+  border: 1px solid var(--color-border-heavy);
   border-radius: 4px;
-  background: #444;
-  color: #fff;
+  background: var(--color-bg-input);
+  color: var(--color-text-primary);
   font-family: 'Berkeley Mono', monospace;
   font-size: 0.875rem;
 }
@@ -160,18 +160,18 @@ main {
 
 #items-list li {
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid #444;
+  border-bottom: 1px solid var(--color-border-medium);
   font-size: 0.875rem;
 }
 
 #items-list li:hover {
-  background-color: #8B0000;
+  background-color: var(--color-primary);
   cursor: pointer;
 }
 
 #items-list li.highlighted {
-  background-color: #5a0000;
-  border-left: 4px solid #8B0000;
+  background-color: var(--color-primary-darker);
+  border-left: 4px solid var(--color-primary);
   padding-left: calc(1rem - 4px);
 }
 
@@ -182,7 +182,7 @@ main {
 }
 
 #items-list li small {
-  color: #999;
+  color: var(--color-text-muted);
   font-size: 0.75rem;
   font-style: italic;
 }
@@ -196,8 +196,8 @@ main {
 }
 
 #back-to-list {
-  background: #555;
-  color: #fff;
+  background: var(--color-bg-hover);
+  color: var(--color-text-primary);
   border: none;
   padding: 8px 16px; /* 1x and 2x 8px rhythm */
   border-radius: 4px;
@@ -207,7 +207,7 @@ main {
 }
 
 #back-to-list:hover {
-  background: #8B0000;
+  background: var(--color-primary);
 }
 
 #detail-content {
@@ -230,7 +230,7 @@ main {
 #detail-info h2 {
   margin-top: 0;
   margin-bottom: 24px; /* 3x 8px rhythm */
-  color: #fff;
+  color: var(--color-text-primary);
   font-size: 2rem; /* Bigger heading for better hierarchy */
   font-weight: 600;
   padding: 0;
@@ -239,14 +239,14 @@ main {
 #detail-info .detail-field {
   margin-bottom: 16px; /* 2x 8px rhythm */
   padding: 16px; /* 2x 8px rhythm */
-  background: #2a2a2a;
+  background: var(--color-bg-elevated);
   border-radius: 8px;
-  border: 1px solid #333;
+  border: 1px solid var(--color-border-light);
 }
 
 #detail-info .detail-field label {
   font-weight: 600;
-  color: #ccc;
+  color: var(--color-text-secondary);
   display: block;
   margin-bottom: 0.5rem;
   font-size: 1rem;
@@ -255,14 +255,14 @@ main {
 }
 
 #detail-info .detail-field .value {
-  color: #fff;
+  color: var(--color-text-primary);
 }
 
 #detail-map-container {
-  background: #2a2a2a;
+  background: var(--color-bg-elevated);
   border-radius: 8px;
   padding: 16px; /* 2x 8px rhythm */
-  border: 1px solid #333;
+  border: 1px solid var(--color-border-light);
   position: sticky;
   top: 24px; /* 3x 8px rhythm */
   height: fit-content;
@@ -274,7 +274,7 @@ main {
   width: 100%;
   border-radius: 4px;
   overflow: hidden;
-  border: 1px solid #444;
+  border: 1px solid var(--color-border-medium);
 }
 
 /* Responsive layout */
@@ -312,14 +312,14 @@ main {
   gap: 0.5rem;
   padding: 0;
   font-weight: 600;
-  color: #ccc;
+  color: var(--color-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-size: 1rem;
 }
 
 .camp-events-section .events-header:hover {
-  color: #fff;
+  color: var(--color-text-primary);
 }
 
 .camp-events-section .expand-icon {
@@ -334,7 +334,7 @@ main {
 
 .camp-events-section .loading-events,
 .camp-events-section .no-events {
-  color: #999;
+  color: var(--color-text-muted);
   font-style: italic;
   padding: 1rem 0;
 }
@@ -348,8 +348,8 @@ main {
 .camp-events li {
   margin-bottom: 16px; /* 2x 8px rhythm */
   padding: 16px; /* 2x 8px rhythm */
-  background: #1a1a1a;
-  border: 1px solid #444;
+  background: var(--color-bg-base);
+  border: 1px solid var(--color-border-medium);
   border-radius: 8px;
   transition: all 0.2s ease;
 }
@@ -362,11 +362,11 @@ main {
   display: block;
   margin-bottom: 0.5rem;
   font-size: 1.1rem;
-  color: #fff;
+  color: var(--color-text-primary);
 }
 
 .event-type {
-  color: #999;
+  color: var(--color-text-muted);
   font-size: 0.875rem;
   font-style: italic;
   margin-left: 0.5rem;
@@ -376,18 +376,18 @@ main {
   font-size: 0.875rem;
   margin: 0.75rem 0;
   line-height: 1.5;
-  color: #ccc;
+  color: var(--color-text-secondary);
 }
 
 .event-times {
   margin-top: 0.75rem;
   padding-top: 0.75rem;
-  border-top: 1px solid #333;
+  border-top: 1px solid var(--color-border-light);
 }
 
 .event-times small {
   display: inline-block;
-  color: #999;
+  color: var(--color-text-muted);
   font-size: 0.75rem;
   margin-right: 0.5rem;
 }
@@ -416,10 +416,10 @@ main {
 
 /* Visit tracking section */
 .visit-tracking {
-  background: #2a2a2a;
+  background: var(--color-bg-elevated);
   border-radius: 8px;
   padding: 16px; /* 2x 8px rhythm */
-  border: 1px solid #333;
+  border: 1px solid var(--color-border-light);
   margin-top: 24px; /* 3x 8px rhythm */
 }
 
@@ -427,6 +427,6 @@ footer {
   text-align: center;
   padding: 0.5rem;
   font-size: 0.75rem;
-  color: #999;
-  background: #2a2a2a;
+  color: var(--color-text-muted);
+  background: var(--color-bg-elevated);
 }

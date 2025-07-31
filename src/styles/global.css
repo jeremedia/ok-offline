@@ -1,5 +1,68 @@
-/* CSS Variables */
+/* CSS Variables - OKNOTOK Theme (Default) */
 :root {
+  /* Primary Brand Colors */
+  --color-primary: #8B0000;              /* OKNOTOK red */
+  --color-primary-dark: #680000;         /* Darker red variant */
+  --color-primary-darker: #5a0000;       /* Even darker for deep shadows */
+  --color-accent: #FFD700;               /* OKNOTOK gold */
+  --color-accent-dark: #DAA520;          /* Darker gold for hover */
+  
+  /* Background Colors - Dark Theme */
+  --color-bg-base: #1a1a1a;              /* Main app background */
+  --color-bg-elevated: #2a2a2a;          /* Cards, elevated surfaces */
+  --color-bg-header: #333;               /* Headers, navigation */
+  --color-bg-input: #444;                /* Form inputs, selects */
+  --color-bg-hover: #555;                /* Hover states */
+  --color-bg-active: #666;               /* Active/selected states */
+  
+  /* Text Colors */
+  --color-text-primary: #fff;            /* Primary text, headings */
+  --color-text-secondary: #ccc;          /* Body text */
+  --color-text-muted: #999;              /* Muted, secondary info */
+  --color-text-disabled: #666;           /* Disabled states */
+  --color-text-inverse: #1a1a1a;        /* Text on light backgrounds */
+  
+  /* Border Colors */
+  --color-border-light: #333;            /* Subtle borders */
+  --color-border-medium: #444;           /* Standard borders */
+  --color-border-heavy: #555;            /* Emphasized borders */
+  --color-border-focus: var(--color-primary);  /* Focus borders */
+  
+  /* Status Colors */
+  --color-success: #4CAF50;              /* Success states */
+  --color-error: #f44336;                /* Error states */
+  --color-warning: #ff9800;              /* Warning states */
+  --color-info: #2196f3;                 /* Info states */
+  
+  /* Interactive States */
+  --color-link: var(--color-accent);
+  --color-link-hover: #fff;
+  --color-focus-ring: var(--color-primary);
+  --color-selection-bg: var(--color-primary);
+  --color-selection-text: #fff;
+  
+  /* Component-Specific Colors */
+  --color-nav-bg: var(--color-bg-header);
+  --color-nav-hover: var(--color-primary);
+  --color-card-bg: var(--color-bg-elevated);
+  --color-modal-overlay: rgba(0, 0, 0, 0.7);
+  
+  /* Map Colors */
+  --color-map-control-bg: var(--color-bg-elevated);
+  --color-map-control-border: var(--color-border-medium);
+  --color-map-marker-camp: var(--color-primary);
+  --color-map-marker-art: var(--color-accent);
+  --color-map-marker-event: #ff6b6b;
+  
+  /* Schedule Colors */
+  --color-schedule-conflict: #ff6b6b;
+  --color-schedule-grid: var(--color-border-light);
+  
+  /* Special Effects */
+  --color-glow: var(--color-accent);
+  --color-shadow: rgba(0, 0, 0, 0.5);
+  
+  /* Legacy Support - Will be removed after full migration */
   --color-gold: #FFD700;
   --color-dark-red: #680000;
   --color-dark-red-original: #8B0000;
@@ -15,8 +78,8 @@ html, body {
   padding: 0;
   height: 100%;
   font-family: 'Berkeley Mono', monospace;
-  background: #1a1a1a;
-  color: #ccc;
+  background: var(--color-bg-base);
+  color: var(--color-text-secondary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -36,8 +99,8 @@ main {
 
 /* Header styles from old style.css */
 header {
-  background-color: #333;
-  color: white;
+  background-color: var(--color-bg-header);
+  color: var(--color-text-primary);
   padding: 0.75rem 1rem;
   display: flex;
   flex-wrap: wrap;
@@ -59,8 +122,8 @@ nav {
 }
 
 nav button, nav select {
-  background: #555;
-  color: #fff;
+  background: var(--color-bg-hover);
+  color: var(--color-text-primary);
   border: none;
   padding: 0.5rem 1rem;
   border-radius: 4px;
@@ -72,7 +135,7 @@ nav button, nav select {
 }
 
 nav button:hover, nav select:hover {
-  background: var(--color-dark-red);
+  background: var(--color-primary);
 }
 
 nav select {
@@ -98,8 +161,8 @@ main {
   flex: 1;
   overflow-y: auto;
   padding: 1rem;
-  background: #f5f5f5;
-  color: #333;
+  background: var(--color-bg-base);
+  color: var(--color-text-secondary);
 }
 
 /* Buttons and Controls */
@@ -116,30 +179,30 @@ button:disabled {
 
 /* Item styles */
 .item-card {
-  background: white;
+  background: var(--color-bg-elevated);
   margin-bottom: 1rem;
   padding: 1rem;
   border-radius: 4px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-  border: 1px solid #ddd;
+  box-shadow: 0 1px 3px var(--color-shadow);
+  border: 1px solid var(--color-border-medium);
 }
 
 .item-card h3 {
   margin-top: 0;
   font-size: 1.1rem;
-  color: var(--color-dark-red);
+  color: var(--color-primary);
 }
 
 .item-type {
   font-size: 0.75rem;
-  color: #666;
+  color: var(--color-text-disabled);
   text-transform: uppercase;
   font-weight: bold;
   letter-spacing: 0.05em;
 }
 
 .item-location {
-  color: #555;
+  color: var(--color-text-muted);
   font-size: 0.9rem;
   margin-top: 0.25rem;
 }
@@ -147,15 +210,15 @@ button:disabled {
 /* Filter and Search controls */
 .filter-controls {
   padding: 1rem;
-  background: #e5e5e5;
-  border-bottom: 1px solid #ccc;
+  background: var(--color-bg-elevated);
+  border-bottom: 1px solid var(--color-border-medium);
 }
 
 .filter-controls input[type="text"] {
   width: 100%;
   padding: 0.5rem;
   font-size: 1rem;
-  border: 1px solid #ccc;
+  border: 1px solid var(--color-border-medium);
   border-radius: 4px;
   font-family: 'Berkeley Mono', monospace;
 }
@@ -168,17 +231,17 @@ button:disabled {
 }
 
 .settings-group {
-  background: white;
+  background: var(--color-bg-elevated);
   margin-bottom: 1rem;
   padding: 1rem;
   border-radius: 4px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 3px var(--color-shadow);
 }
 
 .settings-group h2 {
   margin-top: 0;
   font-size: 1.2rem;
-  color: var(--color-dark-red);
+  color: var(--color-primary);
 }
 
 /* Form styles */
@@ -196,7 +259,7 @@ button:focus,
 input:focus,
 select:focus,
 textarea:focus {
-  outline: 2px solid var(--color-dark-red);
+  outline: 2px solid var(--color-focus-ring);
   outline-offset: 2px;
 }
 
@@ -205,8 +268,8 @@ textarea:focus {
   display: inline-block;
   width: 20px;
   height: 20px;
-  border: 3px solid #f3f3f3;
-  border-top: 3px solid var(--color-dark-red);
+  border: 3px solid var(--color-border-light);
+  border-top: 3px solid var(--color-primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -226,11 +289,11 @@ textarea:focus {
 }
 
 .status-indicator.online {
-  background-color: #4CAF50;
+  background-color: var(--color-success);
 }
 
 .status-indicator.offline {
-  background-color: #f44336;
+  background-color: var(--color-error);
 }
 
 /* Mobile-specific adjustments */
