@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ok-offline-v26'; // Interactive entity discovery
+const CACHE_NAME = 'ok-offline-v27'; // PWA icon system overhaul
 const urlsToCache = [
   // Core app files
   '/',

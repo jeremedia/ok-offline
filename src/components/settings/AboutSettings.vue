@@ -158,6 +158,26 @@ onMounted(() => {
 // Release notes data
 const releaseNotes = [
   {
+    version: '3.19.0',
+    date: '2025-07-31',
+    added: [
+      '🎨 PWA Icon System Overhaul - Complete redesign of all app icons using AI',
+      '🤖 Implemented gpt-image-1 model with OpenAI Responses API',
+      '🔴 Uses OKNOTOK logo as reference for consistent branding',
+      '📱 Generated new app icons in all sizes (16x16 to 1024x1024)',
+      '🏜️ Desert/playa themed background textures on all icons',
+      '📸 New social media preview images with dark theme',
+      '👁️ IconViewer component at /icon_viewer to display all assets',
+      '📋 Shows icon usage, sizes, and meta tag examples'
+    ],
+    changed: [
+      '🔧 Modernized generate-pwa-images.js to use OpenAI SDK',
+      '🖼️ Added image reference capability for brand consistency',
+      '🎯 Support for both gpt-image-1 and dall-e-3 models',
+      '⚡ Better error handling and progress feedback'
+    ]
+  },
+  {
     version: '3.18.0',
     date: '2025-07-30',
     added: [
