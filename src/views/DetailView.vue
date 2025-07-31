@@ -1,25 +1,9 @@
 <template>
   <section id="detail-section" class="view">
     <div id="detail-content" v-if="item">
-      <!-- Mobile title - shown above map on mobile -->
-      <h2 class="detail-title mobile-title">
-        {{ getItemName(item) }}
-        <button 
-          @click="handleToggleFavorite"
-          class="favorite-btn-detail"
-          :class="{ active: isFavorited }"
-        >
-          {{ isFavorited ? '★' : '☆' }}
-        </button>
-        <span v-if="item.isCustom" class="custom-badge">
-          <span class="badge-icon">✏️</span>
-          <span class="badge-text">CUSTOM ENTRY</span>
-        </span>
-      </h2>
-
-      <div id="detail-info">
-        <!-- Desktop title - hidden on mobile -->
-        <h2 class="detail-title desktop-title">
+      <!-- Header - full width on desktop, follows mobile order -->
+      <div class="detail-header">
+        <h2 class="detail-title">
           {{ getItemName(item) }}
           <button 
             @click="handleToggleFavorite"
@@ -29,10 +13,16 @@
             {{ isFavorited ? '★' : '☆' }}
           </button>
           <span v-if="item.isCustom" class="custom-badge">
-          <span class="badge-icon">✏️</span>
-          <span class="badge-text">CUSTOM ENTRY</span>
-        </span>
+            <span class="badge-icon">✏️</span>
+            <span class="badge-text">CUSTOM ENTRY</span>
+          </span>
         </h2>
+      </div>
+
+      <!-- Desktop two-column layout wrapper -->
+      <div class="detail-columns">
+        <!-- Column 1: Item details -->
+        <div id="detail-info">
         
         <div class="detail-field" v-if="item.description">
           <label>Description</label>
@@ -176,22 +166,24 @@
 
         <button id="back-to-list" @click="goBack">← Back to List</button>
 
-      </div>
-      
-      <div id="detail-map-container">
-        <div id="detail-map" ref="mapContainer"></div>
-        <div class="map-controls">
-          <div class="zoom-controls">
-            <button @click="handleZoomOut" class="zoom-btn" :disabled="currentZoom <= 10">−</button>
-            <span class="zoom-level">{{ currentZoom }}</span>
-            <button @click="handleZoomIn" class="zoom-btn" :disabled="currentZoom >= 18">+</button>
+        </div>
+        
+        <!-- Column 2: Map -->
+        <div id="detail-map-container">
+          <div id="detail-map" ref="mapContainer"></div>
+          <div class="map-controls">
+            <div class="zoom-controls">
+              <button @click="handleZoomOut" class="zoom-btn" :disabled="currentZoom <= 10">−</button>
+              <span class="zoom-level">{{ currentZoom }}</span>
+              <button @click="handleZoomIn" class="zoom-btn" :disabled="currentZoom >= 18">+</button>
+            </div>
+            <router-link 
+              :to="`/${props.year}/map?focus=${props.type}_${props.id}`" 
+              class="open-in-map-link"
+            >
+              Open in map →
+            </router-link>
           </div>
-          <router-link 
-            :to="`/${props.year}/map?focus=${props.type}_${props.id}`" 
-            class="open-in-map-link"
-          >
-            Open in map →
-          </router-link>
         </div>
       </div>
     </div>
@@ -678,14 +670,79 @@ watch(() => props.id, async () => {
 #detail-section {
   background: #1a1a1a;
   color: #fff;
+  padding: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
-h2 {
-  color: #fff;
+#detail-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  gap: 0;
 }
+
+/* Header styling - full width */
+.detail-header {
+  padding: 0 16px;
+  flex-shrink: 0;
+}
+
+.detail-title {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+/* Mobile layout - stacked columns */
+.detail-columns {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+#detail-info {
+  padding: 16px;
+  overflow-y: auto;
+  flex: 1;
+  box-sizing: border-box;
+}
+
+#detail-map-container {
+  background-color: #000000;
+  position: relative;
+  flex-shrink: 0;
+  height: 300px; /* Fixed height on mobile */
+}
+
+/* Desktop layout - side by side columns */
+@media (min-width: 768px) {
+  .detail-columns {
+    flex-direction: row;
+    gap: 0;
+  }
+  
+  #detail-info {
+    flex: 1;
+    width: 50%;
+    padding: 24px;
+  }
+  
+  #detail-map-container {
+    flex: 1;
+    width: 50%;
+    height: auto;
+  }
+}
+
 
 .detail-field label {
-  color: #ccc;
+  color: var(--color-gold, #FFD700);
   font-weight: 600;
   font-size: 1rem;
   text-transform: uppercase;
@@ -697,11 +754,12 @@ h2 {
 }
 
 .detail-field a {
-  color: #ff6666;
+  color: var(--color-gold, #FFD700);
 }
 
 .detail-field a:hover {
-  color: #ff9999;
+  color: #fff;
+  text-decoration: underline;
 }
 
 .event {
@@ -732,10 +790,14 @@ h2 {
 
 /* Map controls container */
 .map-controls {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  right: 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 8px;
+  z-index: 1000;
 }
 
 /* Zoom controls container */
@@ -859,30 +921,6 @@ h2 {
   gap: 1rem;
 }
 
-/* Hide mobile title on desktop */
-.mobile-title {
-  display: none;
-}
-
-/* Show desktop title */
-.desktop-title {
-  display: flex;
-}
-
-@media (max-width: 768px) {
-  /* Show mobile title */
-  .mobile-title {
-    display: flex;
-    order: -2; /* Ensure it's before the map */
-    margin: 0;
-    font-size: 1.5rem;
-  }
-  
-  /* Hide desktop title */
-  .desktop-title {
-    display: none;
-  }
-}
 
 .favorite-btn-detail {
   background: none;
@@ -1083,6 +1121,8 @@ h2 {
 
 #detail-map {
   background-color: #000000;
+  width: 100%;
+  height: 100%;
 }
 
 /* Style the Leaflet container background */
