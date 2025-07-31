@@ -499,9 +499,9 @@ header {
 }
 
 .unified-select {
-  background: #444;
-  color: #ccc;
-  border: 1px solid #555;
+  background: var(--color-bg-input);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border-heavy);
   padding: 0.5rem 0.75rem;
   border-radius: 4px;
   font-size: 0.9rem;
@@ -510,14 +510,14 @@ header {
 }
 
 .unified-select:hover {
-  background: #555;
-  color: #fff;
-  border-color: #8B0000;
+  background: var(--color-bg-hover);
+  color: var(--color-text-primary);
+  border-color: var(--color-primary);
 }
 
 .unified-select:focus {
   outline: none;
-  border-color: #8B0000;
+  border-color: var(--color-primary);
   box-shadow: 0 0 0 2px rgba(139, 0, 0, 0.2);
 }
 
@@ -1076,18 +1076,18 @@ footer {
 .menu-select {
   width: 100%;
   padding: 0.875rem 1rem;
-  background: #333;
-  border: 1px solid #444;
+  background: var(--color-bg-header);
+  border: 1px solid var(--color-border-medium);
   border-radius: 4px;
-  color: #fff;
+  color: var(--color-text-primary);
   font-size: 1rem;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .menu-select:hover {
-  background: #444;
-  border-color: var(--color-dark-red);
+  background: var(--color-bg-input);
+  border-color: var(--color-primary);
 }
 
 .menu-section-title {
@@ -1104,10 +1104,10 @@ footer {
   gap: 1rem;
   width: 100%;
   padding: 0.875rem 1rem;
-  background: #333;
-  border: 1px solid #444;
+  background: var(--color-bg-header);
+  border: 1px solid var(--color-border-medium);
   border-radius: 0;
-  color: #ccc;
+  color: var(--color-text-secondary);
   cursor: pointer;
   margin-bottom: 0;
   transition: all 0.2s ease;
@@ -1117,7 +1117,7 @@ footer {
 
 /* First button in each section */
 .menu-section .menu-nav-btn:first-of-type {
-  border-top: 1px solid #444;
+  border-top: 1px solid var(--color-border-medium);
   border-top-left-radius: 4px;
   border-top-right-radius: 4px;
 }
@@ -1129,9 +1129,9 @@ footer {
 }
 
 .menu-nav-btn:hover {
-  background: var(--color-dark-red);
-  color: #fff;
-  border-color: var(--color-dark-red);
+  background: var(--color-primary);
+  color: var(--color-text-primary);
+  border-color: var(--color-primary);
   z-index: 1;
   position: relative;
 }
