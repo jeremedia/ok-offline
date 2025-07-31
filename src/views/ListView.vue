@@ -740,6 +740,13 @@ watch(() => [props.type, props.year], () => {
   list-style: none;
 }
 
+/* Mobile: Add padding for bottom nav */
+@media (max-width: 600px) {
+  #items-list {
+    padding-bottom: calc(60px + 1rem + env(safe-area-inset-bottom, 0));
+  }
+}
+
 /* Ensure ListControls doesn't scroll */
 .list-view-container > :deep(.list-controls) {
   flex-shrink: 0;

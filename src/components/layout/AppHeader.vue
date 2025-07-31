@@ -277,10 +277,11 @@ header {
   background: var(--color-bg-header);
   border-bottom: 1px solid var(--color-border-medium);
   box-shadow: 0 2px 4px var(--color-shadow-light);
+  padding: 0.5rem 1rem; /* Reduced padding for mobile */
 }
 
 .mobile-header .header-row {
-  padding: 0.75rem 1rem;
+  padding: 0; /* Remove double padding */
   gap: 0.75rem;
   max-width: none;
 }

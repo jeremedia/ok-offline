@@ -346,10 +346,7 @@ main {
   min-height: 0; /* Important for nested flex containers */
 }
 
-main.has-bottom-nav {
-  /* Account for bottom nav height + safe area */
-  padding-bottom: calc(60px + env(safe-area-inset-bottom, 0));
-}
+/* Bottom nav spacing handled by views themselves */
 
 /* Special handling for map view */
 main.map-view {
@@ -357,56 +354,5 @@ main.map-view {
   overflow: hidden;
 }
 
-/* Landscape mode adjustments */
-@media (max-width: 600px) and (orientation: landscape) {
-  main.has-bottom-nav {
-    padding-bottom: calc(50px + env(safe-area-inset-bottom, 0));
-  }
-  
-  /* Bottom nav styles in BottomNav.vue component */
-}
-</style>
-
-<style scoped>
-/* ===== APP LAYOUT STYLES ===== */
-/* Full-screen PWA layout */
-.app-container {
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden; /* Prevent body scrolling */
-}
-
-main {
-  flex: 1 1 auto; /* Grow and shrink, take remaining space */
-  overflow: hidden; /* Let individual views manage their own scrolling */
-  position: relative;
-  min-height: 0; /* Important for nested flex containers */
-}
-
-main.has-bottom-nav {
-  /* Account for bottom nav height + safe area */
-  padding-bottom: calc(60px + env(safe-area-inset-bottom, 0));
-}
-
-/* Special handling for map view */
-main.map-view {
-  position: relative;
-  overflow: hidden;
-}
-
-/* Header and footer styles moved to component files */
-
-/* Component-specific styles moved to individual component files */
-
-/* Landscape mode adjustments */
-@media (max-width: 600px) and (orientation: landscape) {
-  main.has-bottom-nav {
-    padding-bottom: calc(50px + env(safe-area-inset-bottom, 0));
-  }
-  
-  /* Bottom nav styles in BottomNav.vue component */
-}
-
-/* Mobile menu styles moved to MobileMenu.vue component */
+/* Landscape mode adjustments moved to component files */
 </style>
