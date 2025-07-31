@@ -1,5 +1,6 @@
 <template>
-  <section id="map-section" class="view">
+  <div class="view-container">
+    <section id="map-section" class="view">
     <!-- Mobile Controls -->
     <button 
       v-if="isMobile" 
@@ -52,7 +53,8 @@
       :markerStats="markerStats"
       :layerStatus="layerStatus"
     />
-  </section>
+    </section>
+  </div>
 </template>
 
 <script setup>
@@ -1166,6 +1168,12 @@ const applyRotation = () => {
 </script>
 
 <style scoped>
+.view-container {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
 #map-section {
   width: 100%;
   height: 100%;
