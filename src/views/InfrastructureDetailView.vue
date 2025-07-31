@@ -1,5 +1,6 @@
 <template>
-  <div class="infrastructure-detail" v-if="item">
+  <div class="view-container">
+    <div class="infrastructure-detail" v-if="item">
     <!-- Hero Section -->
     <InfrastructureHero :item="item" />
 
@@ -118,15 +119,16 @@
         ← Back to Infrastructure
       </button>
     </div>
-  </div>
+    </div>
 
-  <!-- Not Found -->
-  <div v-else class="not-found">
-    <h2>Infrastructure Not Found</h2>
-    <p>The requested infrastructure item could not be found.</p>
-    <button @click="goBack" class="back-btn">
-      ← Back to Infrastructure
-    </button>
+    <!-- Not Found -->
+    <div v-else class="not-found">
+      <h2>Infrastructure Not Found</h2>
+      <p>The requested infrastructure item could not be found.</p>
+      <button @click="goBack" class="back-btn">
+        ← Back to Infrastructure
+      </button>
+    </div>
   </div>
 </template>
 
@@ -291,11 +293,19 @@ watch(activeTab, async (newTab) => {
 </script>
 
 <style scoped>
+.view-container {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
 .infrastructure-detail {
   max-width: 900px;
   width: 100%;
   margin: 0 auto;
   padding: 1rem;
+  min-height: 100%;
 }
 
 .back-nav {
@@ -319,46 +329,7 @@ watch(activeTab, async (newTab) => {
   color: var(--color-text-primary);
 }
 
-.content-tabs {
-  background: var(--color-bg-elevated);
-  border-radius: 8px;
-  overflow: hidden;
-  margin-bottom: 2rem;
-}
-
-.tab-buttons {
-  display: flex;
-  border-bottom: 1px solid var(--color-border);
-  overflow-x: auto;
-}
-
-.tab-btn {
-  flex: 1;
-  padding: 1rem;
-  background: none;
-  border: none;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-  text-transform: uppercase;
-  font-size: 0.875rem;
-}
-
-.tab-btn:hover {
-  background: var(--color-bg-header);
-  color: var(--color-text-primary);
-}
-
-.tab-btn.active {
-  background: var(--color-primary);
-  color: var(--color-text-inverse);
-}
-
-.tab-content {
-  padding: 2rem;
-  max-width: none;
-}
+/* Tab styles now handled globally */
 
 .content-text {
   line-height: 1.6;
@@ -529,13 +500,7 @@ watch(activeTab, async (newTab) => {
     padding: 0.5rem;
   }
   
-  .tab-content {
-    padding: 1rem;
-  }
-  
-  .tab-buttons {
-    -webkit-overflow-scrolling: touch;
-  }
+  /* Mobile tab styles now handled globally */
   
   .mini-map {
     height: 200px;

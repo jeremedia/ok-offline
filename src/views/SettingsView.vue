@@ -1,26 +1,32 @@
 <template>
-  <section id="settings-section" class="view">
-    <div class="settings-tabs">
-      <button 
-        v-for="tab in getVisibleTabs()" 
-        :key="tab"
-        @click="setActiveTab(tab)"
-        :class="['tab-button', { active: activeTab === tab }]"
-      >
-        {{ getTabLabel(tab) }}
-      </button>
-    </div>
+  <div class="view-container">
+    <section id="settings-section" class="view">
+      <div class="content-tabs">
+        <div class="tab-buttons">
+          <button 
+            v-for="tab in getVisibleTabs()" 
+            :key="tab"
+            @click="setActiveTab(tab)"
+            :class="['tab-btn', { active: activeTab === tab }]"
+          >
+            {{ getTabLabel(tab) }}
+          </button>
+        </div>
 
-    <!-- Tab Components -->
-    <AboutSettings v-if="activeTab === 'ABOUT'" :showReleaseNotes="showReleaseNotes" />
-    <DataSyncSettings v-if="activeTab === 'DATA SYNC'" />
-    <AppearanceSettings v-if="activeTab === 'APPEARANCE'" />
-    <FeaturesSettings v-if="activeTab === 'FEATURES'" />
-    <MapsSettings v-if="activeTab === 'MAPS'" />
-    <ImplementationSettings v-if="activeTab === 'IMPLEMENTATION'" />
-    <FeedbackSettings v-if="activeTab === 'FEEDBACK'" />
-    <EmergencySettings v-if="activeTab === 'EMERGENCY'" />
-  </section>
+        <div class="tab-content">
+          <!-- Tab Components -->
+          <AboutSettings v-if="activeTab === 'ABOUT'" :showReleaseNotes="showReleaseNotes" />
+          <DataSyncSettings v-if="activeTab === 'DATA SYNC'" />
+          <AppearanceSettings v-if="activeTab === 'APPEARANCE'" />
+          <FeaturesSettings v-if="activeTab === 'FEATURES'" />
+          <MapsSettings v-if="activeTab === 'MAPS'" />
+          <ImplementationSettings v-if="activeTab === 'IMPLEMENTATION'" />
+          <FeedbackSettings v-if="activeTab === 'FEEDBACK'" />
+          <EmergencySettings v-if="activeTab === 'EMERGENCY'" />
+        </div>
+      </div>
+    </section>
+  </div>
 </template>
 
 <script setup>
@@ -137,6 +143,78 @@ const setActiveTab = (tab) => {
 </script>
 
 <style>
+/* Global tab styles - shared across all components */
+.content-tabs {
+  background: var(--color-bg-elevated);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.tab-buttons {
+  display: flex;
+  border-bottom: 1px solid var(--color-border);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 1rem;
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  text-transform: uppercase;
+  font-size: 0.875rem;
+  font-family: 'Berkeley Mono', monospace;
+}
+
+.tab-btn:hover {
+  background: var(--color-bg-header);
+  color: var(--color-text-primary);
+}
+
+.tab-btn.active {
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+
+.tab-content {
+  padding: 16px;
+  max-width: none;
+  animation: fadeIn 0.3s;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Mobile tab adjustments */
+@media (max-width: 600px) {
+  .tab-content {
+    padding: 16px;
+  }
+  
+  .tab-btn {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.75rem;
+    min-height: 44px;
+  }
+  
+  .tab-buttons::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .tab-buttons {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+}
+
 /* Global settings font */
 #settings-section {
   font-family: 'Berkeley Mono', monospace;
@@ -144,141 +222,41 @@ const setActiveTab = (tab) => {
 </style>
 
 <style scoped>
+.view-container {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
 #settings-section {
   padding: 1rem;
   max-width: 1000px;
   margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-height: calc(100vh - 120px); /* Account for header and tab nav */
-}
-
-.settings-tabs {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 2rem;
-  border-bottom: 2px solid var(--color-border);
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  /* Safari fixes - force container height */
-  min-height: 44px;
-  height: auto;
-  flex-shrink: 0;
-  overflow-y: hidden;
-}
-
-.tab-button {
-  background: none;
-  border: none;
-  color: var(--color-text-muted);
-  cursor: pointer;
-  padding: 1rem 1.5rem;
-  font-size: 1rem;
-  font-family: 'Berkeley Mono', monospace;
-  white-space: nowrap;
-  transition: all 0.2s;
-  position: relative;
-  border-bottom: 3px solid transparent;
-  margin-bottom: -2px;
-  text-transform: uppercase;
-}
-
-.tab-button:hover {
-  color: var(--color-text-secondary);
-}
-
-.tab-button.active {
-  color: var(--color-text-primary);
-  border-bottom-color: var(--color-primary);
-}
-
-/* Base tab content styles */
-:deep(.tab-content) {
-  animation: fadeIn 0.3s;
+  min-height: 100%;
   font-family: 'Berkeley Mono', monospace;
 }
 
-:deep(.tab-content h2) {
-  color: var(--color-text-primary);
-  margin: 0 0 1.5rem 0;
+/* Ensure tab content has proper width */
+:deep(.settings-component) {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  box-sizing: border-box;
 }
 
-:deep(.tab-content h3) {
-  color: var(--color-text-primary);
-  margin-bottom: 1rem;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-/* Mobile responsive */
-@media (max-width: 768px) {
+/* Hide h2 headers on mobile - tab context is sufficient */
+@media (max-width: 600px) {
   #settings-section {
     padding: 0.5rem;
   }
-}
-
-/* Mobile optimized horizontal tabs */
-@media (max-width: 600px) {
-  #settings-section {
-    padding: 0 1rem; /* Content padding only */
-    max-width: 100vw; /* Ensure container doesn't exceed viewport */
-    overflow-x: hidden; /* Prevent horizontal scroll */
-    box-sizing: border-box;
-  }
   
-  .settings-tabs {
-    gap: 0.25rem;
-    margin-bottom: 1.5rem;
-    padding: 0 1rem;
-    min-height: 44px;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    /* Hide scrollbar but keep functionality */
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    /* Ensure tabs align left and scroll properly */
-    justify-content: flex-start;
-    width: 100%;
-  }
-  
-  /* Ensure all tab content respects mobile boundaries */
-  :deep(.tab-content) {
+  :deep(.settings-component) {
     max-width: 100%;
-    box-sizing: border-box;
-    overflow-x: hidden;
   }
   
-  /* Hide h2 headers on mobile - tab context is sufficient */
   :deep(.tab-content h2) {
     display: none;
-  }
-  
-  /* Remove top margin from first paragraph in about section */
-  :deep(.about-section p:first-child) {
-    margin-top: 0;
-  }
-  
-  /* Remove bottom margin from last ul in about section */
-  :deep(.about-section ul:last-child) {
-    margin-bottom: 0;
-  }
-  
-  .settings-tabs::-webkit-scrollbar {
-    display: none;
-  }
-  
-  .tab-button {
-    padding: 0.75rem 0.75rem;
-    font-size: 0.8rem;
-    min-height: 44px;
-    min-width: max-content; /* Ensure buttons don't shrink */
-    white-space: nowrap;
-    flex-shrink: 0; /* Prevent shrinking */
-    flex-grow: 0; /* Prevent growing */
   }
 }
 </style>

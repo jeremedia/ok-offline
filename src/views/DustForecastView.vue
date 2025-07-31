@@ -1,5 +1,6 @@
 <template>
-  <section id="dust-forecast-section" class="view">
+  <div class="view-container">
+    <section id="dust-forecast-section" class="view">
     <div class="header-row">
       <h2>🌪️ Playa Weather & Dust</h2>
       <div class="header-actions">
@@ -218,7 +219,8 @@
         </small>
       </div>
     </div>
-  </section>
+    </section>
+  </div>
 </template>
 
 <script setup>
@@ -396,10 +398,18 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+.view-container {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
 #dust-forecast-section {
   padding: 1rem;
   max-width: 1000px;
   margin: 0 auto;
+  min-height: 100%;
 }
 
 .header-row {
