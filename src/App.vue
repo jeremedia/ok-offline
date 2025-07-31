@@ -137,70 +137,23 @@
       <router-view :year="selectedYear"></router-view>
     </main>
     <BottomNav v-if="!showOnboarding && !showTour" :year="selectedYear" />
-    <footer class="d-none" :class="{ 'mobile-footer': isMobile }" v-if="!isMobile || (isMobile && $route.name !== 'map')">
+    <footer>
       <div class="footer-content">
-        <!-- Mobile Footer: Compact Single Row -->
-        <div class="footer-mobile d-none" v-if="isMobile">
-          <div class="footer-brand">
-            <span class="footer-title">OK-OFFLINE</span>
-            <span class="footer-version">v{{ $route.meta?.version || '3.0.0' }}</span>
-          </div>
-          <div class="footer-links">
-            <button @click="navigateToSettings" class="footer-link-btn">
-              ⚙️ Settings
-            </button>
-          </div>
-        </div>
-        
-        <!-- Desktop Footer: Multi-Column Professional Layout -->
-        <!-- Disabled for evaluation of need -->
-        <div class="footer-desktop d-none" v-else>
-          <div class="footer-section footer-brand-section">
-            <h3 class="footer-brand-title">OK-OFFLINE</h3>
-            <p class="footer-description">
-              Offline-first guide for Burning Man participants
-            </p>
-            <div class="footer-version-info">
-              <span>Version {{ $route.meta?.version || '3.0.0' }}</span>
-              <span class="footer-sync-status" v-if="lastSyncTime">
-                Last sync: {{ formatLastSync }}
-              </span>
-            </div>
+        <div class="footer-controls">
+          <!-- Theme Selector -->
+          <div class="theme-selector-group">
+            <label for="footer-theme-selector">Theme:</label>
+            <select id="footer-theme-selector" v-model="selectedTheme" @change="onThemeChange" class="unified-select">
+              <option v-for="theme in availableThemes" :key="theme.id" :value="theme.id">
+                {{ theme.name }}
+              </option>
+            </select>
           </div>
           
-          <div class="footer-section footer-data-section">
-            <h4 class="footer-section-title">Data Sources</h4>
-            <ul class="footer-links-list">
-              <li>Burning Man Public API</li>
-              <li>Innovate GIS Data</li>
-              <li>Apple WeatherKit</li>
-            </ul>
-          </div>
-          
-          <div class="footer-section footer-legal-section">
-            <h4 class="footer-section-title">Information</h4>
-            <ul class="footer-links-list">
-              <li>
-                <button @click="navigateToSettings" class="footer-link-btn">
-                  Settings & Sync
-                </button>
-              </li>
-              <li>
-                <a href="https://innovate.burningman.org" target="_blank" class="footer-external-link">
-                  Terms of Service
-                </a>
-              </li>
-            </ul>
-          </div>
-          
-          <div class="footer-section footer-creator-section">
-            <h4 class="footer-section-title">Brought to you by</h4>
-            <p class="footer-creator">
-              <a href="/2025/camps/a1XVI000009ssUT2AY" class="footer-camp-link">
-                <span class="footer-brand-tag">Mr. OK of OKNOTOK</span>
-              </a>
-            </p>
-          </div>
+          <!-- Reset Button -->
+          <button @click="navigateToReset" class="reset-btn">
+            🔄 Reset App
+          </button>
         </div>
       </div>
     </footer>
@@ -419,6 +372,10 @@ const navigateToDust = () => {
 
 const navigateToDataSync = () => {
   router.push('/settings/data_sync')
+}
+
+const navigateToReset = () => {
+  router.push('/reset')
 }
 
 // Mobile menu methods
@@ -674,17 +631,19 @@ header {
   font-size: 0.75rem;
 }
 
-/* Mobile-specific styles */
+/* Full-screen PWA layout */
 .app-container {
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow: hidden; /* Prevent body scrolling */
 }
 
 main {
-  flex: 1;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+  flex: 1 1 auto; /* Grow and shrink, take remaining space */
+  overflow: hidden; /* Let individual views manage their own scrolling */
+  position: relative;
+  min-height: 0; /* Important for nested flex containers */
 }
 
 main.has-bottom-nav {
@@ -719,11 +678,13 @@ main.map-view .view {
 header {
   position: relative;
   z-index: 10;
+  flex-shrink: 0; /* Don't shrink */
 }
 
 footer {
   position: relative;
   z-index: 10;
+  flex-shrink: 0; /* Don't shrink */
 }
 
 /* ===== MOBILE HEADER ENHANCEMENTS ===== */
@@ -815,168 +776,60 @@ footer {
 footer {
   background: var(--color-bg-header);
   border-top: 1px solid var(--color-border-medium);
-  margin-top: auto;
+  flex-shrink: 0; /* Don't shrink */
+  height: 60px; /* Match header height */
 }
 
 .footer-content {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 1rem;
-}
-
-/* ===== MOBILE FOOTER ===== */
-.footer-mobile {
+  padding: 0;
+  height: 100%;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0.75rem 0;
-  gap: 1rem;
+  justify-content: center;
 }
 
-.footer-brand {
+.footer-controls {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.footer-controls .theme-selector-group {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
-.footer-title {
-  font-weight: bold;
-  color: var(--color-text-primary);
+.footer-controls .theme-selector-group label {
+  color: var(--color-text-secondary);
   font-size: 0.9rem;
+  font-weight: 500;
 }
 
-.footer-version {
-  font-size: 0.75rem;
-  color: var(--color-text-muted);
-  background: var(--color-bg-input);
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-}
-
-.footer-links {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.footer-link-btn {
+.reset-btn {
   background: var(--color-bg-input);
   color: var(--color-text-secondary);
-  border: 1px solid var(--color-border-heavy);
-  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--color-border-medium);
+  padding: 0.5rem 1rem;
   border-radius: 4px;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s;
   white-space: nowrap;
 }
 
-.footer-link-btn:hover,
-.footer-link-btn:active {
-  background: var(--color-primary);
+.reset-btn:hover {
+  background: var(--color-error);
   color: var(--color-text-primary);
-  border-color: var(--color-primary);
+  border-color: var(--color-error);
 }
 
-/* ===== DESKTOP FOOTER ===== */
-.footer-desktop {
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr;
-  gap: 2rem;
-  padding: 2rem 0;
-}
-
-.footer-section {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.footer-brand-title {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: var(--color-text-primary);
-  margin: 0;
-}
-
-.footer-description {
-  color: var(--color-text-secondary);
-  font-size: 0.9rem;
-  line-height: 1.4;
-  margin: 0;
-}
-
-.footer-version-info {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  font-size: 0.8rem;
-  color: var(--color-text-muted);
-}
-
-.footer-sync-status {
-  color: var(--color-text-muted);
-}
-
-.footer-section-title {
-  font-size: 1rem;
-  font-weight: bold;
-  color: var(--color-text-primary);
-  margin: 0 0 0.5rem 0;
-}
-
-.footer-links-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.footer-links-list li {
-  font-size: 0.9rem;
-  color: var(--color-text-secondary);
-}
-
-.footer-external-link {
-  color: var(--color-text-secondary);
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
-
-.footer-external-link:hover {
-  color: var(--color-primary);
-}
-
-.footer-creator {
-  font-size: 0.9rem;
-  color: var(--color-text-secondary);
-  margin: 0;
-  line-height: 1.4;
-}
-
-.footer-brand-tag {
-  color: var(--color-primary);
-  font-weight: bold;
-}
-
-.footer-camp-link {
-  text-decoration: none;
-  transition: opacity 0.2s ease;
-}
-
-.footer-camp-link:hover {
-  opacity: 0.8;
-}
-
-.footer-camp-link:hover .footer-brand-tag {
-  color: var(--color-error);
-}
+/* Removed old footer styles - new simplified footer */
 
 /* Utility class for hiding elements */
-.d-none {
-  display: none !important;
-}
+/* Removed d-none - footer should always be visible */
 
 @media (max-width: 600px) {
   .header-row {

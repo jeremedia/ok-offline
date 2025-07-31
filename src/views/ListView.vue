@@ -1,6 +1,6 @@
 <template>
   <PullToRefresh @refresh="handleRefresh">
-  <section id="list-section" class="view list-view-container">
+  <section id="list-section" class="list-view-container">
     <SyncDialog 
       :show="showSyncDialog"
       :title="`Syncing ${props.type}s`"
@@ -727,6 +727,21 @@ watch(() => [props.type, props.year], () => {
 </script>
 
 <style scoped>
+/* Make the items list scrollable */
+#items-list {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  min-height: 0; /* Important for flex containers */
+  padding: 0 0 1rem 0; /* Add bottom padding for last items */
+  margin: 0;
+  list-style: none;
+}
+
+/* Ensure ListControls doesn't scroll */
+.list-view-container > :deep(.list-controls) {
+  flex-shrink: 0;
+}
 
 .section-header {
   background-color: var(--color-bg-elevated);
@@ -916,12 +931,12 @@ watch(() => [props.type, props.year], () => {
 }
 
 .list-view-container {
-  /* Container for sticky positioning within main scroll area */
-  min-height: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   max-width: 1000px;
   margin: 0 auto;
   width: 100%;
+  overflow: hidden; /* Prevent outer scrolling */
 }
 </style>
