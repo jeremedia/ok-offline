@@ -5,6 +5,15 @@ let currentYear = 2025;
 
 // Cache for loaded GIS data (per year)
 const gisDataCache = {
+  2023: {
+    streetLines: null,
+    trashFence: null,
+    cpns: null,
+    plazas: null,
+    cityBlocks: null,
+    toilets: null,
+    streetOutlines: null,
+  },
   2024: {
     streetLines: null,
     trashFence: null,
@@ -88,16 +97,35 @@ export async function loadAllGISData(year = currentYear) {
   console.log(`Loading GIS data for year ${year}...`);
   
   try {
-    // Load files with different naming conventions
-    const fileNames = year === 2024 ? {
-      streetLines: 'Street_Lines.geojson',
-      trashFence: 'Trash_Fence.geojson',
-      cpns: 'CPNs.geojson',
-      plazas: 'Plazas.geojson',
-      cityBlocks: 'City_Blocks.geojson',
-      toilets: null, // No toilets data for 2024
-      streetOutlines: null // No street outlines for 2024
-    } : {
+    // Check if GIS data exists for this year
+    if (year === 2023) {
+      console.log(`No GIS data available for year ${year}, using 2024 data as fallback`);
+      // For 2023, copy 2024 data as a fallback
+      const data2024 = await loadAllGISData(2024);
+      if (data2024) {
+        yearCache.streetLines = data2024.streetLines;
+        yearCache.trashFence = data2024.trashFence;
+        yearCache.cpns = data2024.cpns;
+        yearCache.plazas = data2024.plazas;
+        yearCache.cityBlocks = data2024.cityBlocks;
+        yearCache.toilets = data2024.toilets;
+        yearCache.streetOutlines = data2024.streetOutlines;
+        
+        // Mark as loaded for 2023
+        if (data2024.streetLines) loadingState.loadedLayers.add('2023-streetLines');
+        if (data2024.trashFence) loadingState.loadedLayers.add('2023-trashFence');
+        if (data2024.cpns) loadingState.loadedLayers.add('2023-cpns');
+        if (data2024.plazas) loadingState.loadedLayers.add('2023-plazas');
+        if (data2024.cityBlocks) loadingState.loadedLayers.add('2023-cityBlocks');
+        if (data2024.toilets) loadingState.loadedLayers.add('2023-toilets');
+        if (data2024.streetOutlines) loadingState.loadedLayers.add('2023-streetOutlines');
+      }
+      loadingState.isLoading = false;
+      return yearCache;
+    }
+    
+    // Load files with consistent naming conventions (all years use lowercase with underscores)
+    const fileNames = {
       streetLines: 'street_lines.geojson',
       trashFence: 'trash_fence.geojson',
       cpns: 'cpns.geojson',
