@@ -180,12 +180,19 @@
       
       <div id="detail-map-container">
         <div id="detail-map" ref="mapContainer"></div>
-        <router-link 
-          :to="`/${props.year}/map?focus=${props.type}_${props.id}`" 
-          class="open-in-map-link"
-        >
-          Open in map →
-        </router-link>
+        <div class="map-controls">
+          <div class="zoom-controls">
+            <button @click="handleZoomOut" class="zoom-btn" :disabled="currentZoom <= 10">−</button>
+            <span class="zoom-level">{{ currentZoom }}</span>
+            <button @click="handleZoomIn" class="zoom-btn" :disabled="currentZoom >= 18">+</button>
+          </div>
+          <router-link 
+            :to="`/${props.year}/map?focus=${props.type}_${props.id}`" 
+            class="open-in-map-link"
+          >
+            Open in map →
+          </router-link>
+        </div>
       </div>
     </div>
     <div v-else-if="loading">Loading...</div>
@@ -219,6 +226,7 @@ import { recordVisit, getVisitInfo, saveItemNotes, getItemNotes } from '../servi
 import { addEventToSchedule, removeEventFromSchedule, isEventScheduled } from '../services/schedule'
 import { useAutoSync } from '../composables/useAutoSync'
 import SyncDialog from '../components/SyncDialog.vue'
+import { canShowLocations } from '../stores/globalState'
 
 const props = defineProps(['type', 'year', 'id'])
 const router = useRouter()
@@ -232,15 +240,30 @@ const campEvents = ref([])
 const isFavorited = ref(false)
 const visitInfo = ref(null)
 const notes = ref('')
+const currentZoom = ref(15) // Default zoom level
 const scheduledOccurrences = ref(new Map()) // Track which occurrences are scheduled
 const syncStatus = ref('Checking for data...')
 let detailMap = null
 let detailMarker = null
 let streetLayer = null
 let streetLabels = []
+let streetGeoJsonData = null // Store the GeoJSON data for re-rendering labels
 
 const goBack = () => {
   router.push(`/${props.year}/${props.type}s`)
+}
+
+// Zoom control handlers
+const handleZoomIn = () => {
+  if (detailMap && currentZoom.value < 18) {
+    detailMap.zoomIn()
+  }
+}
+
+const handleZoomOut = () => {
+  if (detailMap && currentZoom.value > 10) {
+    detailMap.zoomOut()
+  }
 }
 
 // Event navigation now handled by router-link
@@ -353,11 +376,19 @@ const loadItem = async () => {
 const initMap = async () => {
   if (!mapContainer.value || !item.value) return
   
+  // Get saved zoom level for this specific item
+  const savedZoomKey = `detailZoom_${props.type}_${props.id}`
+  const savedZoom = localStorage.getItem(savedZoomKey)
+  const initialZoom = savedZoom ? parseInt(savedZoom) : 15 // Default to 15 if not saved
+  
+  // Update currentZoom to match saved/initial zoom
+  currentZoom.value = initialZoom
+  
   if (!detailMap) {
     detailMap = L.map(mapContainer.value, {
       center: BRC_CENTER,
-      zoom: 17, // Perfect zoom level for camp detail
-      zoomControl: true, // Keep zoom controls enabled
+      zoom: initialZoom,
+      zoomControl: false, // Disable default zoom controls
       dragging: false, // Disable dragging
       touchZoom: false, // Disable touch zoom
       scrollWheelZoom: false, // Disable scroll zoom
@@ -367,9 +398,17 @@ const initMap = async () => {
       tap: false // Disable tap interactions
     })
     
-    // Log zoom changes
+    // Track zoom changes and update street labels
     detailMap.on('zoomend', () => {
-      console.log('Current zoom level:', detailMap.getZoom())
+      currentZoom.value = detailMap.getZoom()
+      console.log('Current zoom level:', currentZoom.value)
+      
+      // Save zoom level for this specific item
+      const zoomKey = `detailZoom_${props.type}_${props.id}`
+      localStorage.setItem(zoomKey, currentZoom.value.toString())
+      
+      // Update street labels based on zoom level
+      updateStreetLabels()
     })
     
     // No basemap - we'll use a solid background color instead
@@ -380,86 +419,183 @@ const initMap = async () => {
     detailMap.removeLayer(detailMarker)
   }
   
+  // Always set the correct year for GIS data and initialize it
+  // This ensures streets are shown even when camp locations aren't available (e.g., 2025)
+  setGISYear(parseInt(props.year))
+  
+  // Initialize GIS data to show streets
+  try {
+    await initializeGISData()
+    console.log('GIS data initialized for year:', props.year)
+    
+    // Add street layer to show correct year's streets
+    if (streetLayer) {
+      detailMap.removeLayer(streetLayer)
+    }
+    
+    // Remove existing street labels
+    streetLabels.forEach(label => detailMap.removeLayer(label))
+    streetLabels = []
+    
+    const streetData = getStreetLines()
+    console.log('Street data loaded:', streetData ? 'Yes' : 'No', streetData)
+    if (streetData) {
+      streetGeoJsonData = streetData // Store for re-rendering labels
+      streetLayer = L.geoJSON(streetData, {
+        style: (feature) => {
+          // Custom red styling for all streets
+          return {
+            color: '#FF0000',  // Red color
+            weight: 2,         // Thinner lines for detail view
+            opacity: 0.8
+          }
+        },
+        onEachFeature: (feature, layer) => {
+          // Street labels will be added by updateStreetLabels() based on zoom level
+        }
+      }).addTo(detailMap)
+      console.log('Added street layer for year:', props.year)
+      
+      // Add street labels based on current zoom level
+      updateStreetLabels()
+    } else {
+      console.warn('No street data available for year:', props.year)
+      // Add a simple circle to show the general area if no streets are available
+      const circle = L.circle(BRC_CENTER, {
+        color: '#FF0000',
+        fillColor: '#FF0000',
+        fillOpacity: 0.1,
+        radius: 2000, // 2000 meter radius for BRC
+        weight: 1
+      }).addTo(detailMap)
+    }
+  } catch (err) {
+    console.warn('Failed to initialize GIS data:', err)
+    // Add a simple circle to show the general area if GIS fails
+    const circle = L.circle(BRC_CENTER, {
+      color: '#FF0000',
+      fillColor: '#FF0000',
+      fillOpacity: 0.1,
+      radius: 2000, // 2000 meter radius for BRC
+      weight: 1
+    }).addTo(detailMap)
+  }
+  
+  // Check if we can show locations for this year
+  const canShow = canShowLocations(props.year)
+  
   // Try to get location
   const locationString = getItemLocation(item.value)
   let coords = null
   
-  if (locationString && locationString !== 'Unknown location') {
-    // Set the correct year for GIS data and initialize it
-    setGISYear(parseInt(props.year))
-    
-    // Initialize GIS data to enable intersection finding
-    try {
-      await initializeGISData()
-      console.log('GIS data initialized for year:', props.year)
-      
-      // Add street layer to show correct year's streets
-      if (streetLayer) {
-        detailMap.removeLayer(streetLayer)
-      }
-      
-      // Remove existing street labels
-      streetLabels.forEach(label => detailMap.removeLayer(label))
-      streetLabels = []
-      
-      const streetData = getStreetLines()
-      if (streetData) {
-        streetLayer = L.geoJSON(streetData, {
-          style: (feature) => {
-            // Custom red styling for all streets
-            return {
-              color: '#FF0000',  // Red color
-              weight: 4,         // Thicker lines
-              opacity: 1
-            }
-          },
-          onEachFeature: (feature, layer) => {
-            // Add street name labels
-            if (feature.properties && feature.properties.name) {
-              const streetName = feature.properties.name
-              const center = layer.getBounds().getCenter()
-              
-              // Create a divIcon for the label
-              const label = L.divIcon({
-                className: 'street-label',
-                html: `<div>${streetName}</div>`,
-                iconSize: [100, 20],
-                iconAnchor: [50, 10]
-              })
-              
-              // Add label marker at the center of the street segment
-              const labelMarker = L.marker(center, { icon: label }).addTo(detailMap)
-              streetLabels.push(labelMarker)
-            }
-          }
-        }).addTo(detailMap)
-        console.log('Added street layer for year:', props.year)
-      }
-    } catch (err) {
-      console.warn('Failed to initialize GIS data:', err)
-    }
-    
+  // Only try to geocode if we're allowed to show locations
+  if (canShow && locationString && locationString !== 'Unknown location') {
     coords = brcAddressToLatLon(locationString)
   }
   
+  // Create custom marker icon that works offline
+  const markerIcon = L.divIcon({
+    className: 'detail-marker',
+    html: '<div class="marker-icon">📍</div>',
+    iconSize: [30, 30],
+    iconAnchor: [15, 30], // Bottom center of the pin
+    popupAnchor: [0, -30] // Above the pin
+  })
+  
   if (coords) {
     // Show actual location
-    console.log('Setting view to coords:', coords, 'with zoom 17')
-    detailMap.setView(coords, 17)
-    detailMarker = L.marker(coords).addTo(detailMap)
+    console.log('Setting view to coords:', coords, 'with zoom', detailMap.getZoom())
+    detailMap.setView(coords, detailMap.getZoom())
+    detailMarker = L.marker(coords, { icon: markerIcon }).addTo(detailMap)
     detailMarker.bindPopup(`
       <strong>${getItemName(item.value)}</strong><br>
       <em>${locationString}</em>
     `).openPopup()
   } else {
-    // Show center with note if no location
-    console.log('No coords, setting view to BRC_CENTER with zoom 17')
-    detailMap.setView(BRC_CENTER, 17)
-    detailMarker = L.marker(BRC_CENTER).addTo(detailMap)
-    detailMarker.bindPopup('Black Rock City Center<br><em>Camp location not available</em>').openPopup()
+    // Show at Golden Spike (center) with note about location
+    // Use zoom 14 for items without location
+    const noLocationZoom = 14
+    console.log('No coords, setting view to BRC_CENTER with zoom', noLocationZoom)
+    detailMap.setView(BRC_CENTER, noLocationZoom)
+    detailMarker = L.marker(BRC_CENTER, { icon: markerIcon }).addTo(detailMap)
+    
+    // Determine the item type for the message
+    const itemType = props.type.charAt(0).toUpperCase() + props.type.slice(1)
+    
+    // Different message based on whether locations are hidden by policy or just not available
+    const locationMessage = !canShow 
+      ? `${itemType} location not yet released`
+      : `${itemType} location not available`
+    
+    detailMarker.bindPopup(`
+      <strong>${getItemName(item.value)}</strong><br>
+      <em>${locationMessage}</em>
+    `).openPopup()
   }
   
   setTimeout(() => detailMap.invalidateSize(), 100)
+}
+
+// Update street labels based on zoom level
+const updateStreetLabels = () => {
+  if (!detailMap || !streetGeoJsonData) return
+  
+  // Remove existing street labels
+  streetLabels.forEach(label => detailMap.removeLayer(label))
+  streetLabels = []
+  
+  const zoom = detailMap.getZoom()
+  
+  // Don't show any labels at zoom 14 and below
+  if (zoom <= 14) {
+    return
+  }
+  
+  // Re-add labels with appropriate text based on zoom
+  streetGeoJsonData.features.forEach(feature => {
+    if (feature.properties && feature.properties.name) {
+      let streetName = feature.properties.name
+      const originalName = streetName
+      
+      // Format avenue names to be shorter (e.g., "3:00" -> "3")
+      streetName = streetName.replace(/(\d+):00/g, '$1')
+      
+      // At zoom 15 and smaller, show only first letter
+      if (zoom <= 15) {
+        streetName = streetName.charAt(0)
+      }
+      
+      // Get the center of the street segment
+      const coords = feature.geometry.coordinates
+      let lat, lon
+      
+      if (feature.geometry.type === 'LineString' && coords.length > 0) {
+        // Get the middle point of the line
+        const midIndex = Math.floor(coords.length / 2)
+        lon = coords[midIndex][0]
+        lat = coords[midIndex][1]
+      } else if (feature.geometry.type === 'MultiLineString' && coords.length > 0 && coords[0].length > 0) {
+        // For MultiLineString, use the first line's middle point
+        const midIndex = Math.floor(coords[0].length / 2)
+        lon = coords[0][midIndex][0]
+        lat = coords[0][midIndex][1]
+      } else {
+        return // Skip if we can't get coordinates
+      }
+      
+      // Create a divIcon for the label
+      const label = L.divIcon({
+        className: 'street-label',
+        html: `<div>${streetName}</div>`,
+        iconSize: [100, 20],
+        iconAnchor: [50, 10]
+      })
+      
+      // Add label marker at the center of the street segment
+      const labelMarker = L.marker([lat, lon], { icon: label }).addTo(detailMap)
+      streetLabels.push(labelMarker)
+    }
+  })
 }
 
 // Format event time
@@ -594,12 +730,61 @@ h2 {
   text-decoration: underline;
 }
 
+/* Map controls container */
+.map-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+}
+
+/* Zoom controls container */
+.zoom-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Zoom buttons */
+.zoom-btn {
+  background: #2a2a2a;
+  color: #fff;
+  border: 1px solid #444;
+  border-radius: 4px;
+  width: 32px;
+  height: 32px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.zoom-btn:hover:not(:disabled) {
+  background: #8B0000;
+  border-color: #8B0000;
+}
+
+.zoom-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Zoom level display */
+.zoom-level {
+  color: #fff;
+  font-size: 1rem;
+  font-weight: bold;
+  min-width: 20px;
+  text-align: center;
+}
+
 /* Open in map link styling */
 .open-in-map-link {
-  display: block;
-  text-align: right;
-  margin-top: 8px;
-  color: #8B0000;
+  color: var(--color-gold, #FFD700);
   text-decoration: none;
   font-size: 0.9rem;
   font-weight: bold;
@@ -608,7 +793,7 @@ h2 {
 }
 
 .open-in-map-link:hover {
-  color: #FF4444;
+  color: #FFF;
   text-decoration: underline;
 }
 
@@ -905,8 +1090,12 @@ h2 {
   background-color: #000000;
 }
 
-/* Hide attribution since we're not using basemap */
+/* Hide all Leaflet controls */
 :deep(.leaflet-control-attribution) {
+  display: none;
+}
+
+:deep(.leaflet-control-container) {
   display: none;
 }
 
@@ -926,5 +1115,82 @@ h2 {
 :deep(.street-label div) {
   text-align: center;
   width: 100%;
+}
+
+/* Leaflet popup styling to match theme */
+:deep(.leaflet-popup) {
+  margin-bottom: 20px;
+}
+
+:deep(.leaflet-popup-content-wrapper) {
+  background: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: 4px;
+  box-shadow: 0 3px 14px rgba(0,0,0,0.8);
+  padding: 0;
+}
+
+:deep(.leaflet-popup-content) {
+  margin: 0;
+  padding: 16px;
+  color: #fff;
+  font-family: 'Berkeley Mono', monospace;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  min-width: 200px;
+}
+
+:deep(.leaflet-popup-content strong) {
+  color: #fff;
+  font-weight: bold;
+  font-size: 1rem;
+  display: block;
+  margin-bottom: 4px;
+}
+
+:deep(.leaflet-popup-content em) {
+  color: #ccc;
+  font-style: normal;
+  font-size: 0.85rem;
+}
+
+:deep(.leaflet-popup-tip-container) {
+  display: none; /* Hide the arrow tip */
+}
+
+:deep(.leaflet-popup-close-button) {
+  color: #ccc !important;
+  font-size: 20px !important;
+  font-weight: normal !important;
+  line-height: 20px !important;
+  padding: 4px 4px 0 0 !important;
+  text-align: center !important;
+  width: 20px !important;
+  height: 20px !important;
+  background: none !important;
+  border: none !important;
+}
+
+:deep(.leaflet-popup-close-button:hover) {
+  color: #fff !important;
+}
+
+/* Custom marker styling */
+:deep(.detail-marker) {
+  background: none;
+  border: none;
+}
+
+:deep(.detail-marker .marker-icon) {
+  background: rgba(139, 0, 0, 0.9);
+  border: 2px solid #FFD700;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.5);
 }
 </style>
