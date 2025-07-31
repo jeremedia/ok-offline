@@ -1,5 +1,1245 @@
 [
   {
+    "timestamp": "2025-07-31T01:20:51.115Z",
+    "prompt": "The minimap for years with location data (2024 and 2023) the streets aren't drawing.",
+    "session": "0d2df5a2-7bc3-469b-9c00-19f11938e16d",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.64"
+  },
+  {
+    "timestamp": "2025-07-31T01:17:55.631Z",
+    "prompt": "merge it!",
+    "session": "0d2df5a2-7bc3-469b-9c00-19f11938e16d",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.64"
+  },
+  {
+    "timestamp": "2025-07-31T01:15:29.123Z",
+    "prompt": "Looks great! check in the changes and update the gh issue",
+    "session": "0d2df5a2-7bc3-469b-9c00-19f11938e16d",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.64"
+  },
+  {
+    "timestamp": "2025-07-31T01:13:02.765Z",
+    "prompt": "Style the popup to match our theme. read frontend/docs/development/UI_UX_GUIDELINES.md and make the changes. The map pin doesn't show when offline and it's not matching the current theme. Ideas?",
+    "session": "0d2df5a2-7bc3-469b-9c00-19f11938e16d",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.64"
+  },
+  {
+    "timestamp": "2025-07-31T01:11:05.853Z",
+    "prompt": "Make the default zoom for items with no location 14",
+    "session": "0d2df5a2-7bc3-469b-9c00-19f11938e16d",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.64"
+  },
+  {
+    "timestamp": "2025-07-31T01:09:54.618Z",
+    "prompt": "what's the remaing leaflet control? North? remove it.",
+    "session": "0d2df5a2-7bc3-469b-9c00-19f11938e16d",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.64"
+  },
+  {
+    "timestamp": "2025-07-31T01:07:59.974Z",
+    "prompt": "Looks good! remove the leaflet zoom controls and add + and - buttons to the left and right of the zoom level number and remove the zoom: label.",
+    "session": "0d2df5a2-7bc3-469b-9c00-19f11938e16d",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.64"
+  },
+  {
+    "timestamp": "2025-07-31T01:01:45.816Z",
+    "prompt": "see globalState.js to determine if location can be displayed even if available in data. ",
+    "session": "0d2df5a2-7bc3-469b-9c00-19f11938e16d",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.64"
+  },
+  {
+    "timestamp": "2025-07-31T01:00:23.125Z",
+    "prompt": "Make the default zoom level for a map detail item 15. Don't change the tooltip camp name when location not available. don't say \"camp location not availble\" if the location has not been released. Say \"{Camp|Art|Event} location not yet released\". Still \"locate\" items with no location at Golden Spike.",
+    "session": "0d2df5a2-7bc3-469b-9c00-19f11938e16d",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.64"
+  },
+  {
+    "timestamp": "2025-07-31T00:57:34.889Z",
+    "prompt": "Great. Just hide all labels starting at 14. No way to make them useful.",
+    "session": "0d2df5a2-7bc3-469b-9c00-19f11938e16d",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.64"
+  },
+  {
+    "timestamp": "2025-07-31T00:56:00.695Z",
+    "prompt": "Remember a users zoom level per detail view.",
+    "session": "0d2df5a2-7bc3-469b-9c00-19f11938e16d",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.64"
+  },
+  {
+    "timestamp": "2025-07-31T00:55:03.627Z",
+    "prompt": "Only level fourteen: no street labels or avenue clock labels, NONE, except: show street labels (letters), on 2:00, 6:00, and 10:00",
+    "session": "0d2df5a2-7bc3-469b-9c00-19f11938e16d",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.64"
+  },
+  {
+    "timestamp": "2025-07-31T00:53:05.561Z",
+    "prompt": "don't show letters, street labels, on 2:00, 6:00, and 10:00. Your showing clock labels so its 2 2 2 2 2. ",
+    "session": "0d2df5a2-7bc3-469b-9c00-19f11938e16d",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.64"
+  },
+  {
+    "timestamp": "2025-07-31T00:51:04.686Z",
+    "prompt": "At level 14 only draw street letters at 2:00, 6:00, and 10:00",
+    "session": "0d2df5a2-7bc3-469b-9c00-19f11938e16d",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.64"
+  },
+  {
+    "timestamp": "2025-07-31T00:48:37.871Z",
+    "prompt": "At level 14 zoom only draw letters or numbers on \"whole\" numbers like \"2:00\" but not \"2:30\". At 13 and bekiw no longer draw street labels. Does leaflet have any built-in tools for managing what's reasonable to draw at different zoom levels?",
+    "session": "0d2df5a2-7bc3-469b-9c00-19f11938e16d",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.64"
+  },
+  {
+    "timestamp": "2025-07-31T00:40:23.377Z",
+    "prompt": "It's showing. Show Streets by the first letter at zoom 15 and smaller. Show avenues as short as possible (3 instead of 3:00) ",
+    "session": "0d2df5a2-7bc3-469b-9c00-19f11938e16d",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.64"
+  },
+  {
+    "timestamp": "2025-07-31T00:36:35.466Z",
+    "prompt": "Add display of current zoom level to map below map in the same area as Open In Map, but aligned left.",
+    "session": "0d2df5a2-7bc3-469b-9c00-19f11938e16d",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.64"
+  },
+  {
+    "timestamp": "2025-07-31T00:29:46.633Z",
+    "prompt": "2025 locations are not available yet, but the map should draw like 2024",
+    "session": "0d2df5a2-7bc3-469b-9c00-19f11938e16d",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.64"
+  },
+  {
+    "timestamp": "2025-07-31T00:27:29.724Z",
+    "prompt": "http://100.104.170.10:8005/2024/camps/a1XVI000002CNuC2AW I am seeing lines and street names! awesome. it may be year releated.",
+    "session": "0d2df5a2-7bc3-469b-9c00-19f11938e16d",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.64"
+  },
+  {
+    "timestamp": "2025-07-31T00:21:41.133Z",
+    "prompt": "Great. I see it. The map is showing only black. By previous design the map was meant to show only our street outlines and the item's location. Now it's showing the item pin but the map behind it is pure black with no streets or anything else.",
+    "session": "0d2df5a2-7bc3-469b-9c00-19f11938e16d",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.64"
+  },
+  {
+    "timestamp": "2025-07-31T00:19:12.039Z",
+    "prompt": "The map in the .detail-map-container div... first make the \"OPEN IN MAP ->\" our gold-color",
+    "session": "0d2df5a2-7bc3-469b-9c00-19f11938e16d",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.64"
+  },
+  {
+    "timestamp": "2025-07-31T00:16:55.280Z",
+    "prompt": "great make a new branch chore-detail-view-polish and a github issue for it. we're going to start with polshing the detail view's map experience.",
+    "session": "0d2df5a2-7bc3-469b-9c00-19f11938e16d",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.64"
+  },
+  {
+    "timestamp": "2025-07-31T00:04:45.553Z",
+    "prompt": "when you run the server like that it never returns.",
+    "session": "0d2df5a2-7bc3-469b-9c00-19f11938e16d",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.64"
+  },
+  {
+    "timestamp": "2025-07-31T00:03:21.443Z",
+    "prompt": "great! read and think about the release process and carefully perfrom each step and release these great new icons!",
+    "session": "0d2df5a2-7bc3-469b-9c00-19f11938e16d",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.64"
+  },
+  {
+    "timestamp": "2025-07-31T00:01:37.915Z",
+    "prompt": "check these changes into chore:icon-updates branch and create a gh issue describing the changes made and future use",
+    "session": "0d2df5a2-7bc3-469b-9c00-19f11938e16d",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.64"
+  },
+  {
+    "timestamp": "2025-07-31T00:00:44.452Z",
+    "prompt": "Great! what branch are we on?",
+    "session": "0d2df5a2-7bc3-469b-9c00-19f11938e16d",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.64"
+  },
+  {
+    "timestamp": "2025-07-30T23:56:26.642Z",
+    "prompt": "great. make a new app view at /icon_viewer that shows all of these icons and there name and use",
+    "session": "0d2df5a2-7bc3-469b-9c00-19f11938e16d",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.64"
+  },
+  {
+    "timestamp": "2025-07-30T23:54:45.361Z",
+    "prompt": "you made all of the current ones with a script, the script you rewote I guess?",
+    "session": "0d2df5a2-7bc3-469b-9c00-19f11938e16d",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.64"
+  },
+  {
+    "timestamp": "2025-07-30T23:53:52.209Z",
+    "prompt": "only new icon I see is frontend/public/images/icon-1024.png",
+    "session": "0d2df5a2-7bc3-469b-9c00-19f11938e16d",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.64"
+  },
+  {
+    "timestamp": "2025-07-30T23:48:51.457Z",
+    "prompt": "run node generate-pwa-images.js",
+    "session": "0d2df5a2-7bc3-469b-9c00-19f11938e16d",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.64"
+  },
+  {
+    "timestamp": "2025-07-30T23:46:54.057Z",
+    "prompt": "use the repsonses api to provide an exisiting images to use as reference: frontend/public/images/og-default.png and api/public/ok_logos/oknotok_circle_mark.png Look at the images yourself and update the prompts. The goal is to use the logo for the icons. ",
+    "session": "0d2df5a2-7bc3-469b-9c00-19f11938e16d",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem",
+    "version": "1.0.64"
+  },
+  {
+    "timestamp": "2025-07-30T23:39:37.169Z",
+    "prompt": "great!",
+    "session": "9c50443f-ebd9-4098-9677-d4f595c1f6dc",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T23:37:53.877Z",
+    "prompt": "approve and merge it via the gh CLI, I've tested it.",
+    "session": "9c50443f-ebd9-4098-9677-d4f595c1f6dc",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T23:34:57.048Z",
+    "prompt": "no all of the PWA images were generated with a call to the Open AI API: frontend/public/images/icon-1024.png",
+    "session": "0612c512-0867-4142-9624-048ad9987952",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend-theme-temple",
+    "version": "1.0.62"
+  },
+  {
+    "timestamp": "2025-07-30T23:34:14.575Z",
+    "prompt": "what script was used to generate the icon images?",
+    "session": "0612c512-0867-4142-9624-048ad9987952",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend-theme-temple",
+    "version": "1.0.62"
+  },
+  {
+    "timestamp": "2025-07-30T23:32:29.529Z",
+    "prompt": "review the prodcedures carefully first, think about each step in the release.",
+    "session": "9c50443f-ebd9-4098-9677-d4f595c1f6dc",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T23:31:48.150Z",
+    "prompt": "Great! Please follow the release procedure and release this work!",
+    "session": "9c50443f-ebd9-4098-9677-d4f595c1f6dc",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T23:29:53.022Z",
+    "prompt": "Great, let's update the issue and check in the code.",
+    "session": "9c50443f-ebd9-4098-9677-d4f595c1f6dc",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T22:49:07.883Z",
+    "prompt": "it's definitely almost there. need to fix a bug in general search UI. Whenever a user selects a search mode (keyword, semantic, or smart) all of the search filters are disabled. think about why this happens and plan a fix, but also plan to resolve preventing this state generally. There's no use-case for all filters to be disabled as far as I can see? think about it. make a plan.",
+    "session": "9c50443f-ebd9-4098-9677-d4f595c1f6dc",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T22:44:13.171Z",
+    "prompt": "Great! Update this branch's gh issue with our progress and check in any new stuff!",
+    "session": "9c50443f-ebd9-4098-9677-d4f595c1f6dc",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T22:42:16.503Z",
+    "prompt": "Still seeing the search return number, not the global number. For example: Top 20 of 50 camp items where the tag reads Camp (1387)",
+    "session": "9c50443f-ebd9-4098-9677-d4f595c1f6dc",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T22:37:45.055Z",
+    "prompt": "The top Top 20 of 50 camp items should show the global count. When you load from a url you get headings like Top 20 of 50 camp unknowns",
+    "session": "9c50443f-ebd9-4098-9677-d4f595c1f6dc",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T22:34:35.595Z",
+    "prompt": "  📊 Two Different Counts Explained\n\n  1. result_count: How many times the entity appears in the current search results\n    - Limited by your search limit (20, 50, etc.)\n    - Shows relevance to current search\n  2. global_count: How many times the entity appears in the entire database\n    - The true total count across all data\n    - Shows overall popularity\n\n  💡 For Your UI\n\n  You can now choose which count to display:\n  - For search refinement: Use result_count (\"8 results with 'party'\")\n  - For popularity indicators: Use global_count (\"party\" appears in 314 items total)\n  - For both: \"party (8 in results / 314 total)\"\n",
+    "session": "9c50443f-ebd9-4098-9677-d4f595c1f6dc",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T22:32:49.189Z",
+    "prompt": " Cache Cleared Successfully\n\n  The frontend will now consistently see the new entity format:\n\n  Old format (cached):\n  [\"activity\", \"music\"]\n\n  New format (current):\n  {\n    \"entity_type\": \"activity\",\n    \"entity_value\": \"music\",\n    \"result_frequency\": 10,\n    \"global_count\": 411\n  }\n\n  All API responses will now include:\n  - Entity objects with counts (not arrays)\n  - entity_tag_summary for result-set statistics\n  - Consistent sorting by frequency\n\n",
+    "session": "9c50443f-ebd9-4098-9677-d4f595c1f6dc",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T22:29:41.476Z",
+    "prompt": "Can you add the number of each label to the .entity-tag ? They don't seem to displayed in order from most common to least.",
+    "session": "9c50443f-ebd9-4098-9677-d4f595c1f6dc",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T22:16:06.726Z",
+    "prompt": "make the scroll view scroll to the top when a new search is performed",
+    "session": "9c50443f-ebd9-4098-9677-d4f595c1f6dc",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T22:15:15.562Z",
+    "prompt": "need a space been name and type",
+    "session": "9c50443f-ebd9-4098-9677-d4f595c1f6dc",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T22:14:22.791Z",
+    "prompt": "Top 20 of 20 {entity_name} locations ... and make both capitalized ",
+    "session": "9c50443f-ebd9-4098-9677-d4f595c1f6dc",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T22:11:06.308Z",
+    "prompt": "Make the entity search header read \"Top 20 of {entity_count} {pluarlized_enity_name}\"",
+    "session": "9c50443f-ebd9-4098-9677-d4f595c1f6dc",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T22:08:52.229Z",
+    "prompt": "The .search-header can be display-none during an entity search, just in the way.",
+    "session": "9c50443f-ebd9-4098-9677-d4f595c1f6dc",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T22:07:06.818Z",
+    "prompt": "its not working... no change in url and entity:undefined in search box",
+    "session": "9c50443f-ebd9-4098-9677-d4f595c1f6dc",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T22:06:10.233Z",
+    "prompt": "I'll check",
+    "session": "9c50443f-ebd9-4098-9677-d4f595c1f6dc",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T22:05:33.825Z",
+    "prompt": "great! now the popular tags need to work like the tags in results: update the url with search?entity=whatever",
+    "session": "9c50443f-ebd9-4098-9677-d4f595c1f6dc",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T22:02:54.061Z",
+    "prompt": ".popular-entity-tag needs that treatment as well.",
+    "session": "9c50443f-ebd9-4098-9677-d4f595c1f6dc",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T22:01:08.560Z",
+    "prompt": "Didn't see the css change. Think about it figure out why.",
+    "session": "9c50443f-ebd9-4098-9677-d4f595c1f6dc",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T21:56:31.795Z",
+    "prompt": "Make the entity title uppercase and bold.",
+    "session": "9c50443f-ebd9-4098-9677-d4f595c1f6dc",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T21:55:34.631Z",
+    "prompt": "I'm looking at it, very nice. make the section named Popular Entities and make the sections within have the gold-color css variable color. remove the max-width rule.",
+    "session": "9c50443f-ebd9-4098-9677-d4f595c1f6dc",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T21:52:51.787Z",
+    "prompt": "Move entity breakdown below popular discoveries. Give  popular discovery buttons the standard css variable red bg from global.css as is they have no bg",
+    "session": "9c50443f-ebd9-4098-9677-d4f595c1f6dc",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T21:35:33.985Z",
+    "prompt": "Make the search field show \"entity: {search term}\" so it doesn't look blank.",
+    "session": "9c50443f-ebd9-4098-9677-d4f595c1f6dc",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T21:29:32.008Z",
+    "prompt": "when you click an entity tag the browser url updates to http://100.104.170.10:8005/2025/search?entity=guided+meditation but the UI looks like a new blank search.",
+    "session": "9c50443f-ebd9-4098-9677-d4f595c1f6dc",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T21:27:56.646Z",
+    "prompt": "I did the search for you. you can navigate directly to this search: http://100.104.170.10:8005/2025/search?q=meditation+and+mindfulness&mode=semantic",
+    "session": "9c50443f-ebd9-4098-9677-d4f595c1f6dc",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T21:25:10.329Z",
+    "prompt": "Great! you'll get entity results now. continue.",
+    "session": "9c50443f-ebd9-4098-9677-d4f595c1f6dc",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T21:12:39.978Z",
+    "prompt": "here are entity stats. add them to the search page, shown with the .hint stuff  📊 Entity Breakdown:\n\n  - activity: 13,925 entities\n  - theme: 13,437 entities\n  - item_type: 5,359 entities\n  - location: 2,654 entities\n  - person: 2,069 entities\n  - time: 1,547 entities\n",
+    "session": "9c50443f-ebd9-4098-9677-d4f595c1f6dc",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T21:11:02.732Z",
+    "prompt": "I added item_type to the entity extraction. ",
+    "session": "9c50443f-ebd9-4098-9677-d4f595c1f6dc",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T21:10:26.404Z",
+    "prompt": "one second, I am adjusting API search results.",
+    "session": "9c50443f-ebd9-4098-9677-d4f595c1f6dc",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T21:10:15.343Z",
+    "prompt": "one second, adjust API search results.",
+    "session": "9c50443f-ebd9-4098-9677-d4f595c1f6dc",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T21:04:08.025Z",
+    "prompt": "give me a prompt I can use in a new session to get it started on entity feature",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T21:00:20.337Z",
+    "prompt": "you run something like it blocks forever. ",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T20:57:42.445Z",
+    "prompt": "I thought we were on the chore/styling-polish branch? That's what we need to push. Continue with that info.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T20:56:01.794Z",
+    "prompt": "lets push the contents of this branch live and then make the new branch and issue. please review the release documentation before you begin. We're trying to get it smoother. Think about all of the release steps carefully as you make them with the intent of making detailed analysis of the current process to faciliate improvement. ",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T20:53:52.005Z",
+    "prompt": "should we create an issue and new branch for this work?",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T20:52:36.136Z",
+    "prompt": "alright, lets think about what to do with entity search results. here are my issues: their color theme is wrong for the current dark theme and clicking them does nothing. Think about entity search usefulness overall and make a plan to put this data to work for particpant discovery.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T20:50:27.025Z",
+    "prompt": "and remove the bg color from .search-modes-info",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T20:49:50.656Z",
+    "prompt": "remove the top padding on .hint and remove both the padding and margin from .search-modes-info",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T20:49:38.282Z",
+    "prompt": "<local-command-stdout>Compacted. ctrl+r to see full summary</local-command-stdout>",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T20:42:53.294Z",
+    "prompt": "no it must have been closed by accident",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T20:42:20.424Z",
+    "prompt": "the issue you've been working on, related to the current branch",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T20:41:42.713Z",
+    "prompt": "great, update the gh issue with our progress",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T20:40:01.463Z",
+    "prompt": "the link on camps is wrong: /2025/camp/a1XVI000009ssUT2AY and should be /2025/camps/a1XVI000009ssUT2AY",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T20:34:39.087Z",
+    "prompt": "carefully examine and think about the elements nested with .result-header as they currently are not vertially aligned.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T20:32:43.864Z",
+    "prompt": "make the text bold and uppercase. make sure the text is vertically aligned in the header along with the favorite star to the right of score",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T20:31:07.174Z",
+    "prompt": "make the .similarity-score label and value inline and our gold-color css color",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T20:28:35.455Z",
+    "prompt": "Use \"Location Unreleased\" instead of \"Unknown Location\" if canShowLocations for selected year is false",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T20:24:10.438Z",
+    "prompt": "halve the top padding of .search-result-item",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T20:18:13.136Z",
+    "prompt": "mobile as well",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T20:17:36.062Z",
+    "prompt": "center the results line",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T20:16:40.733Z",
+    "prompt": "The results message doesn't include the total amount found. \"20 results found from 5,373 items\" should be \"20 results of 132 found in 5,373 items\" and not bottom border on that message.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T20:13:55.484Z",
+    "prompt": ".search-status needs the standard top padding",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T20:11:37.482Z",
+    "prompt": "remove the .search-header bottom margin",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T20:08:41.929Z",
+    "prompt": "you can remove the top margin, reduce to the same spacing as the search field and options collapse element.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T20:03:17.715Z",
+    "prompt": "remove the left and right padding from .hint",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T20:02:39.499Z",
+    "prompt": "animation is great, thanks. keep options text on the left, with the arrow.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T20:01:06.484Z",
+    "prompt": "move the collapse arrow to before options text. animate the open-close of the icon and contents.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T20:00:31.406Z",
+    "prompt": "the collapse arrow in front of options. animate the open-close.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T19:59:14.880Z",
+    "prompt": "Looks good! Make Search Options header text just \"Options\" and make the text bold and white.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T19:57:53.029Z",
+    "prompt": "looks correct on mobile! but not desktop. there's a gap between the control rows.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T19:56:53.379Z",
+    "prompt": "the desktop .mode-buttons are not flex-growing. there are now double borders. remove all top and bottom borders except for .mode-buttons bottom.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T19:55:01.027Z",
+    "prompt": "make sure you doing this in both the desktop and mobile styles",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T19:54:05.935Z",
+    "prompt": "remove the padding from .options-content. make the flex-column gap 0 for .options-button-group",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T19:51:40.347Z",
+    "prompt": "great. remove the margin/padding from .options-button-group and remove the left-right borders and relevant top-botom borders. ",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T19:50:01.451Z",
+    "prompt": "make the .mode-btn items flex grow to fill container equally",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T19:48:46.045Z",
+    "prompt": "This text was written before search was in its current state, please update: Try different keywords or use a different search mode.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T19:40:37.026Z",
+    "prompt": "check the console resolve the vue errors, they are the problem. Think about the changes you were making just recently. Use git diff to be certain. Ultrathink to unbreak it!",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T19:38:42.898Z",
+    "prompt": "Where did the \"no results\" message go? in the screenshot you just read (../../Downloads/search-ui-all-label-2025-07-30T19-37-28-858Z.png) there is a music with no displayed results and no zero results message.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T19:36:43.078Z",
+    "prompt": "In the search filter bar on mobile replace the everything label text with ALL",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T19:31:43.211Z",
+    "prompt": "can't change the viewport in the current session. but do check",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T19:30:14.591Z",
+    "prompt": "re-read docs/development/UI_UX_GUIDELINES.md and load http://100.104.170.10:8005/2025/search, take a screenshot, read the screenshot and think very carefully about what needs finished and/or improved.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T19:27:23.419Z",
+    "prompt": "<local-command-stdout>Compacted. ctrl+r to see full summary</local-command-stdout>",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T19:22:48.150Z",
+    "prompt": "update the gh issue with the current state of things",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T19:18:57.305Z",
+    "prompt": "make the contents of the collapse a horizontal button group. Make the collapse header the degault grey bg color.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T19:16:27.605Z",
+    "prompt": "[plugin:vite:vue] v-model cannot be used on a prop, because local prop bindings are not writable.\nUse a v-bind binding combined with a v-on listener that emits update:x event instead.\n/Users/jeremy/ok-offline-ecosystem/frontend/src/components/search/SearchOptions.vue:17:33\n15 |        <div class=\"mode-selector-section\">\n16 |          <SearchModeSelector \n17 |            v-model:selectedMode=\"searchMode\"\n   |                                   ^\n18 |            :isOnline=\"isOnline\"\n19 |            :showDescription=\"false\"\n",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T19:10:14.651Z",
+    "prompt": "The Keyword Semantic and Smart UI needs to be moved into the collapse as well. Make this easier to work with by decomposing the UI into logical components.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T19:03:29.246Z",
+    "prompt": "The search field should remain out of the collapseable. The collapse will the mode and filter controls.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T19:00:04.229Z",
+    "prompt": "I've got a another idea for search. Put the filter mode UI and search mode UI in a collapsable under the search field. Match the .infrastructure-intro collapse  style (minus the margins). ",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T18:56:16.857Z",
+    "prompt": "ok, document our changes in the gh  and check in code.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T18:52:14.394Z",
+    "prompt": "check for global styles are use important, no visual change.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T18:50:21.467Z",
+    "prompt": "great. we reduced the red brightness by 25%, we need to do the same for the border colors. They're now too bright.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T18:48:30.599Z",
+    "prompt": "add a subtle inner shader to the search field. Does auto-focus not work on iOS? works on desktop",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T18:46:28.482Z",
+    "prompt": "if the query field is empty on load focus it",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T18:44:49.377Z",
+    "prompt": "Update the placeholder text with text that refelects the current filter configuration. Search everything... or Search events and infra... or Search camps, events, and notes. you get the idea.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T18:42:56.056Z",
+    "prompt": "Remove the \"magic icon\" from search everything, not needed.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T18:41:03.134Z",
+    "prompt": "Yes, I mean filter mode.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T18:40:25.040Z",
+    "prompt": "Didn't quite get it, behavior appears unchanged. Try again, think about it step-by-step.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T18:38:52.976Z",
+    "prompt": "Great, I'm liking the change. I deal with the global styling update elsewhere. When search everything is enabled, make selecting a mode deselect all others.\n",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T18:31:40.974Z",
+    "prompt": "I meant 75% of original brightness. ",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T18:29:26.706Z",
+    "prompt": "Let's try a 50% darker red for the red-bg color for selected items. Very bright on HDR screens and makes text hard to read. Uppercase all button text.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T18:26:22.438Z",
+    "prompt": "make the mode-buttons in mobile show their icon in-line instead of above",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T18:25:07.588Z",
+    "prompt": "look great, make sure the mobile icon-only items also grow",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T18:22:50.694Z",
+    "prompt": "Make the Everything button Search Everything and make the filter options grow so the bar is 100% width. Align it left, not center.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T18:18:42.551Z",
+    "prompt": "I want to try something we might revert: git rid of the \"Search Everything\" header and move the search filter bar into that location.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T18:15:40.871Z",
+    "prompt": "Great! Document our work in the gh issue and check in the branch.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T18:14:27.260Z",
+    "prompt": "remove the bottom margin from .unified-search-form",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T18:08:01.732Z",
+    "prompt": "remove the Results from cache message, it's shown in found message.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T18:05:57.949Z",
+    "prompt": "The icon-only search filters need padding to make them squares.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T17:52:06.940Z",
+    "prompt": "review frontend/docs/development/UI_UX_GUIDELINES.md and look at the mobile view of search through that lens.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T17:43:06.133Z",
+    "prompt": "I'm looking into why the API isn't returning results. Making the spacing of the search view elements consistant. they vary considerably. Eliminate the extra horizontal margin/padding on the search mode descriptions.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T17:34:28.022Z",
+    "prompt": "this has nothing to do with the AI API. Or does it? Is Keyword local search only in Keyword mode, and Smart is server-side semantic AND keyword?",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T17:32:43.778Z",
+    "prompt": "Great! whew. Smart results are not returning anything, even though they returned items for keyword. Smart is Keyword+AI, correct?",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T17:30:42.091Z",
+    "prompt": "<div data-v-61d5b3d3=\"\" class=\"search-results\"><div data-v-61d5b3d3=\"\" class=\"loading\"><div data-v-61d5b3d3=\"\" class=\"loading-spinner\"></div><span data-v-61d5b3d3=\"\">AI is understanding your search...</span></div></div>",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T17:28:54.381Z",
+    "prompt": "make the search never complete temporarily and I'll be able to use the inspector to determine the class issue",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T17:26:24.540Z",
+    "prompt": "i can see it, it's defintely not fixed. think about it step-by-step the html and css issues are very clear.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T17:24:01.339Z",
+    "prompt": "great, please continue.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T17:23:29.301Z",
+    "prompt": "Great! It works! check out the loader for search, the whole thing rotating and not centered.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T17:20:43.531Z",
+    "prompt": "please think about this carefully because it does not re-run the search when a different type is selected. ",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T17:19:25.841Z",
+    "prompt": "ok, it should re-run if the user changes the search type.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T17:18:28.428Z",
+    "prompt": "When the search page is loaded with a non-empy query string the search should auto-submit",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T17:13:27.552Z",
+    "prompt": "Works great, thanks. Make sure the current configuration is saved in local storage and restored",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T17:11:16.650Z",
+    "prompt": "Add an Everything option as first option. It auto selects/deselects if anything is not toggled or if everything is toggled on. If clicked when toggled on it toggles everything off. If clicked when toggled off all items are toggled on.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T17:04:53.042Z",
+    "prompt": "great, create a new frontend worktree for a new content feature: detail pages for the selected year's event theme and temple design and philosphy of both.",
+    "session": "0612c512-0867-4142-9624-048ad9987952",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/project-management",
+    "version": "1.0.62"
+  },
+  {
+    "timestamp": "2025-07-30T16:59:35.618Z",
+    "prompt": "Change the lightning bolt in the information bubble as well. Make the search filters a horizontal button group. Include Notes as an option.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T16:57:29.629Z",
+    "prompt": "Disable search when there is no query.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T16:56:17.363Z",
+    "prompt": "The text in the search field needs to be vertially aligned. Make the button text uppercase. Choose another icon for Smart, lightning bolt too thin, hard to see.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T16:52:02.629Z",
+    "prompt": "on desktop, combine the keyword, semantic, and smart buttons with search field is a form group. Add a search button at end when the field is empty and make it a \"Clear\" button when it has query text. Clear should clear both the results and the field content.",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T16:48:29.158Z",
+    "prompt": "remove the new and beta badges from the search technique nav",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
+    "timestamp": "2025-07-30T16:47:44.109Z",
+    "prompt": "make a new chore branch - styling-polish",
+    "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
+    "branch": "feat/ultimate-map-experience",
+    "directory": "/Users/jeremy/ok-offline-ecosystem/frontend",
+    "version": "1.0.63"
+  },
+  {
     "timestamp": "2025-07-30T16:37:39.497Z",
     "prompt": "I can't get the update to load on PWA install on iOS. Make the app version in the slide-over link to /reset to help with troubleshooting.",
     "session": "c6e32a01-e7a7-4a33-9d60-fa8cafb06300",
