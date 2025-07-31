@@ -305,22 +305,22 @@ watch(activeTab, async (newTab) => {
 
 .back-btn {
   padding: 0.5rem 1rem;
-  background: #2a2a2a;
-  border: 1px solid #444;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
   border-radius: 4px;
-  color: #ccc;
+  color: var(--color-text-secondary);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .back-btn:hover {
-  background: #333;
-  border-color: #666;
-  color: #fff;
+  background: var(--color-bg-header);
+  border-color: var(--color-bg-active);
+  color: var(--color-text-primary);
 }
 
 .content-tabs {
-  background: #2a2a2a;
+  background: var(--color-bg-elevated);
   border-radius: 8px;
   overflow: hidden;
   margin-bottom: 2rem;
@@ -328,7 +328,7 @@ watch(activeTab, async (newTab) => {
 
 .tab-buttons {
   display: flex;
-  border-bottom: 1px solid #444;
+  border-bottom: 1px solid var(--color-border);
   overflow-x: auto;
 }
 
@@ -337,7 +337,7 @@ watch(activeTab, async (newTab) => {
   padding: 1rem;
   background: none;
   border: none;
-  color: #ccc;
+  color: var(--color-text-secondary);
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
@@ -346,13 +346,13 @@ watch(activeTab, async (newTab) => {
 }
 
 .tab-btn:hover {
-  background: #333;
-  color: #fff;
+  background: var(--color-bg-header);
+  color: var(--color-text-primary);
 }
 
 .tab-btn.active {
-  background: #8B0000;
-  color: #fff;
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
 }
 
 .tab-content {
@@ -362,7 +362,7 @@ watch(activeTab, async (newTab) => {
 
 .content-text {
   line-height: 1.6;
-  color: #ddd;
+  color: var(--color-text-secondary);
   margin-bottom: 1.5rem;
 }
 
@@ -372,7 +372,7 @@ watch(activeTab, async (newTab) => {
 .operations-content h3,
 .legal-content h3,
 .facts-content h3 {
-  color: #fff;
+  color: var(--color-text-primary);
   margin-bottom: 1rem;
 }
 
@@ -396,8 +396,8 @@ watch(activeTab, async (newTab) => {
 .quick-facts li,
 .fun-facts li {
   padding: 0.75rem 0;
-  border-bottom: 1px solid #333;
-  color: #ddd;
+  border-bottom: 1px solid var(--color-border-light);
+  color: var(--color-text-secondary);
 }
 
 .quick-facts li:first-child {
@@ -407,13 +407,13 @@ watch(activeTab, async (newTab) => {
 .quick-facts li:before,
 .fun-facts li:before {
   content: "→ ";
-  color: var(--color-gold);
+  color: var(--color-accent);
   font-weight: bold;
 }
 
 .location-coords,
 .location-count {
-  color: #ddd;
+  color: var(--color-text-secondary);
   margin: 0.5rem 0;
   font-family: 'Berkeley Mono', monospace;
 }
@@ -435,17 +435,17 @@ watch(activeTab, async (newTab) => {
   display: flex;
   gap: 1rem;
   padding: 0.75rem 0;
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid var(--color-border-light);
 }
 
 .timeline-item .year {
   font-weight: bold;
-  color: var(--color-gold);
+  color: var(--color-accent);
   min-width: 60px;
 }
 
 .timeline-item .event {
-  color: #ddd;
+  color: var(--color-text-secondary);
 }
 
 /* Operations styles */
@@ -464,28 +464,28 @@ watch(activeTab, async (newTab) => {
 
 /* Legal styles */
 .disclaimer {
-  background: #1a1a1a;
+  background: var(--color-bg-base);
   padding: 1rem;
   border-radius: 4px;
   margin-top: 2rem;
-  border: 1px solid #444;
+  border: 1px solid var(--color-border);
 }
 
 .disclaimer p {
   margin: 0;
-  color: #999;
+  color: var(--color-text-muted);
   font-size: 0.9em;
 }
 
 /* Related links */
 .related-links {
-  background: #2a2a2a;
+  background: var(--color-bg-elevated);
   padding: 1.5rem;
   border-radius: 8px;
 }
 
 .related-links h3 {
-  color: #fff;
+  color: var(--color-text-primary);
   margin-top: 0;
   margin-bottom: 1rem;
 }
@@ -497,13 +497,13 @@ watch(activeTab, async (newTab) => {
 }
 
 .related-link {
-  color: var(--color-gold);
+  color: var(--color-accent);
   text-decoration: none;
   transition: color 0.2s ease;
 }
 
 .related-link:hover {
-  color: #fff;
+  color: var(--color-text-primary);
   text-decoration: underline;
 }
 
@@ -514,12 +514,12 @@ watch(activeTab, async (newTab) => {
 }
 
 .not-found h2 {
-  color: #fff;
+  color: var(--color-text-primary);
   margin-bottom: 1rem;
 }
 
 .not-found p {
-  color: #999;
+  color: var(--color-text-muted);
   margin-bottom: 2rem;
 }
 

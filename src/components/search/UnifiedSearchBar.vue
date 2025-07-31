@@ -91,8 +91,8 @@ onMounted(() => {
   display: flex;
   align-items: stretch;
   gap: 0;
-  background: #2a2a2a;
-  border: 1px solid #555;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-heavy);
   border-radius: 8px;
   overflow: hidden;
   margin-bottom: 0.75rem;
@@ -108,30 +108,30 @@ onMounted(() => {
   padding: 0.75rem 1rem;
   background: transparent;
   border: none;
-  color: #fff;
+  color: var(--color-text-primary);
   font-size: 1rem;
   outline: none;
   height: 100%;
   display: flex;
   align-items: center;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: inset 0 2px 4px var(--color-shadow-light);
   transition: box-shadow 0.2s ease;
 }
 
 .search-input-unified::placeholder {
-  color: #999;
+  color: var(--color-text-muted);
 }
 
 .search-input-unified:focus {
-  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.3);
+  box-shadow: inset 0 2px 6px var(--color-shadow-medium);
 }
 
 .search-action-btn {
   padding: 0.75rem 1.5rem;
-  background: var(--color-dark-red);
+  background: var(--color-primary);
   border: none;
-  border-left: 1px solid #555;
-  color: #fff;
+  border-left: 1px solid var(--color-border-heavy);
+  color: var(--color-text-primary);
   cursor: pointer;
   font-size: 0.875rem;
   font-weight: 500;
@@ -141,7 +141,7 @@ onMounted(() => {
 }
 
 .search-action-btn:hover:not(.disabled) {
-  background: #7a0000;
+  background: var(--color-primary-dark);
 }
 
 .search-action-btn.disabled {

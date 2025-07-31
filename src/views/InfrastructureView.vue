@@ -207,15 +207,15 @@ onMounted(() => {
 .view-title {
   font-size: 2rem;
   margin-bottom: 0.5rem;
-  color: #fff;
+  color: var(--color-text-primary);
 }
 
 
 .infrastructure-intro {
   margin: 2rem auto;
-  background: rgba(0, 0, 0, 0.3);
+  background: var(--color-overlay-subtle);
   border-radius: 8px;
-  border: 1px solid #444;
+  border: 1px solid var(--color-border-medium);
   max-width: 800px;
   overflow: hidden;
 }
@@ -230,19 +230,19 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   padding: 0.75rem 1rem;
-  background: rgba(0, 0, 0, 0.3);
-  border-bottom: 1px solid #444;
+  background: var(--color-overlay-subtle);
+  border-bottom: 1px solid var(--color-border-medium);
   cursor: pointer;
   transition: background 0.2s ease;
 }
 
 .intro-header:hover {
-  background: rgba(0, 0, 0, 0.4);
+  background: var(--color-overlay-medium);
 }
 
 .intro-header h4 {
   margin: 0;
-  color: var(--color-gold);
+  color: var(--color-accent);
   font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.02em;
@@ -252,7 +252,7 @@ onMounted(() => {
 .intro-header .collapse-btn {
   background: none;
   border: none;
-  color: #ccc;
+  color: var(--color-text-secondary);
   font-size: 0.875rem;
   cursor: pointer;
   padding: 0.25rem 0.5rem;
@@ -262,8 +262,8 @@ onMounted(() => {
 }
 
 .intro-header .collapse-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
+  background: var(--color-overlay-light);
+  color: var(--color-text-primary);
 }
 
 .intro-content {
@@ -271,7 +271,7 @@ onMounted(() => {
 }
 
 .intro-content p {
-  color: #ddd;
+  color: var(--color-text-secondary);
   line-height: 1.8;
   margin-bottom: 1rem;
   text-align: justify;
@@ -295,15 +295,15 @@ margin-top: 0;
   width: 100%;
   padding: 0.75rem;
   font-size: 1rem;
-  background: #1a1a1a;
-  border: 1px solid #444;
+  background: var(--color-bg-base);
+  border: 1px solid var(--color-border-medium);
   border-radius: 4px;
-  color: #fff;
+  color: var(--color-text-primary);
 }
 
 .search-input:focus {
   outline: none;
-  border-color: #8B0000;
+  border-color: var(--color-primary);
 }
 
 .category-filters {
@@ -316,23 +316,23 @@ margin-top: 0;
 
 .category-btn {
   padding: 0.5rem 1rem;
-  background: #2a2a2a;
-  border: 1px solid #444;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-medium);
   border-radius: 4px;
-  color: #ccc;
+  color: var(--color-text-secondary);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .category-btn:hover {
-  background: #333;
-  border-color: #666;
+  background: var(--color-bg-header);
+  border-color: var(--color-bg-active);
 }
 
 .category-btn.active {
-  background: #8B0000;
-  border-color: #8B0000;
-  color: #fff;
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-text-primary);
 }
 
 .category-btn .count {
@@ -351,24 +351,24 @@ margin-top: 0;
 .empty-state {
   text-align: center;
   padding: 3rem;
-  color: #999;
+  color: var(--color-text-muted);
 }
 
 .sort-controls {
   position: fixed;
   bottom: 80px;
   right: 20px;
-  background: #2a2a2a;
+  background: var(--color-bg-elevated);
   padding: 1rem;
   border-radius: 4px;
-  border: 1px solid #444;
+  border: 1px solid var(--color-border-medium);
 }
 
 .sort-option {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #ccc;
+  color: var(--color-text-secondary);
   cursor: pointer;
 }
 

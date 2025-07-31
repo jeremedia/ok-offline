@@ -220,11 +220,11 @@ const formatCoordinates = (coords) => {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
-  color: #ccc;
+  color: var(--color-text-secondary);
 }
 
 .settings-content h1 {
-  color: #FFD700;
+  color: var(--color-accent);
   text-align: center;
   margin-bottom: 30px;
   font-size: 2.5em;
@@ -232,15 +232,15 @@ const formatCoordinates = (coords) => {
 
 .info-section {
   margin-bottom: 40px;
-  background: rgba(26, 26, 26, 0.9);
+  background: var(--color-background-secondary-alpha-90);
   border-radius: 8px;
   padding: 20px;
-  border: 1px solid #444;
+  border: 1px solid var(--color-border);
 }
 
 .info-section h2 {
-  color: #FFD700;
-  border-bottom: 2px solid #444;
+  color: var(--color-accent);
+  border-bottom: 2px solid var(--color-border);
   padding-bottom: 10px;
   margin-bottom: 20px;
 }
@@ -248,7 +248,7 @@ const formatCoordinates = (coords) => {
 .intro {
   font-size: 1.1em;
   margin-bottom: 20px;
-  color: #ddd;
+  color: var(--color-text-secondary);
 }
 
 .fact-grid, .data-sources, .tech-info {
@@ -259,19 +259,19 @@ const formatCoordinates = (coords) => {
 }
 
 .fact-card, .source-card, .tech-card {
-  background: rgba(40, 40, 40, 0.8);
+  background: var(--color-bg-elevated);
   border-radius: 6px;
   padding: 15px;
-  border: 1px solid #555;
+  border: 1px solid var(--color-border-heavy);
   transition: border-color 0.3s ease;
 }
 
 .fact-card:hover, .source-card:hover, .tech-card:hover {
-  border-color: #FFD700;
+  border-color: var(--color-accent);
 }
 
 .fact-card h3, .source-card h3, .tech-card h3 {
-  color: #FFD700;
+  color: var(--color-accent);
   margin-bottom: 10px;
   font-size: 1.1em;
 }
@@ -283,7 +283,7 @@ const formatCoordinates = (coords) => {
 
 .detail {
   font-size: 0.9em;
-  color: #aaa;
+  color: var(--color-text-muted);
   font-style: italic;
 }
 
@@ -294,8 +294,8 @@ const formatCoordinates = (coords) => {
 }
 
 .fun-fact {
-  background: rgba(40, 40, 40, 0.6);
-  border-left: 4px solid #FFD700;
+  background: var(--color-bg-input-alpha-50);
+  border-left: 4px solid var(--color-accent);
   padding: 15px;
   border-radius: 4px;
 }
@@ -308,7 +308,7 @@ const formatCoordinates = (coords) => {
 .loading-state {
   text-align: center;
   padding: 40px;
-  color: #aaa;
+  color: var(--color-text-muted);
 }
 
 @media (max-width: 768px) {

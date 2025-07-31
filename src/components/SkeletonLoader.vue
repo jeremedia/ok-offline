@@ -23,11 +23,11 @@ defineProps({
 
 .skeleton-item {
   padding: 1rem;
-  border-bottom: 1px solid #444;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .skeleton-line {
-  background: linear-gradient(90deg, #333 25%, #444 50%, #333 75%);
+  background: linear-gradient(90deg, var(--color-bg-header) 25%, var(--color-border) 50%, var(--color-bg-header) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: 4px;

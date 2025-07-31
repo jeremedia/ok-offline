@@ -93,7 +93,7 @@ onUnmounted(() => {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.8);
+  background-color: var(--color-modal-overlay);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -102,19 +102,19 @@ onUnmounted(() => {
 }
 
 .modal-container {
-  background-color: #2a2a2a;
+  background-color: var(--color-bg-elevated);
   border-radius: 8px;
   width: 100%;
   max-width: 600px;
   max-height: 90vh;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 4px 20px var(--color-overlay-dark);
 }
 
 .modal-header {
   padding: 1.5rem;
-  border-bottom: 1px solid #444;
+  border-bottom: 1px solid var(--color-border-medium);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -123,14 +123,14 @@ onUnmounted(() => {
 
 .modal-header h2 {
   margin: 0;
-  color: #fff;
+  color: var(--color-text-primary);
   font-size: 1.5rem;
 }
 
 .close-btn {
   background: none;
   border: none;
-  color: #999;
+  color: var(--color-text-muted);
   font-size: 2rem;
   line-height: 1;
   cursor: pointer;
@@ -144,7 +144,7 @@ onUnmounted(() => {
 }
 
 .close-btn:hover {
-  color: #fff;
+  color: var(--color-text-primary);
 }
 
 .modal-body {
@@ -155,7 +155,7 @@ onUnmounted(() => {
 
 .modal-footer {
   padding: 1.5rem;
-  border-top: 1px solid #444;
+  border-top: 1px solid var(--color-border-medium);
   display: flex;
   gap: 1rem;
   justify-content: flex-end;
@@ -173,28 +173,28 @@ onUnmounted(() => {
 }
 
 .btn-primary {
-  background-color: #8B0000;
-  color: white;
+  background-color: var(--color-primary);
+  color: var(--color-text-inverse);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background-color: #a00000;
+  background-color: var(--color-primary-dark);
 }
 
 .btn-primary:disabled {
-  background-color: #444;
-  color: #999;
+  background-color: var(--color-bg-input);
+  color: var(--color-text-muted);
   cursor: not-allowed;
 }
 
 .btn-secondary {
-  background-color: #444;
-  color: #ccc;
+  background-color: var(--color-bg-input);
+  color: var(--color-text-secondary);
 }
 
 .btn-secondary:hover {
-  background-color: #555;
-  color: #fff;
+  background-color: var(--color-bg-hover);
+  color: var(--color-text-primary);
 }
 
 /* Mobile adjustments */

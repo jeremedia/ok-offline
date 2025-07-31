@@ -2,11 +2,11 @@
   <div class="tab-content">
     <h2>Data Sync Settings</h2>
     
-    <div class="sync-all-container">
+    <div class="settings-section">
       <button 
         @click="syncAllYears" 
         :disabled="syncingAll"
-        class="sync-all-button"
+        class="primary-button"
       >
         {{ syncingAll ? 'Syncing All Years...' : 'Sync All Years' }}
       </button>
@@ -16,7 +16,7 @@
     </div>
     
     <div class="settings-content">
-      <div v-for="year in years" :key="year" class="year-section">
+      <div v-for="year in years" :key="year" class="settings-section">
         <h3>{{ year }} Data</h3>
         
         <div class="sync-status">
@@ -34,7 +34,7 @@
           <button 
             @click="syncYear(year)" 
             :disabled="syncing[year]"
-            class="sync-button"
+            class="primary-button"
           >
             {{ syncing[year] ? 'Syncing...' : 'Sync All Data' }}
           </button>
@@ -42,7 +42,7 @@
           <button 
             @click="clearYear(year)"
             :disabled="syncing[year]"
-            class="clear-button"
+            class="secondary-button"
             v-if="syncStatus[year] && hasData(year)"
           >
             Clear Data
@@ -57,7 +57,7 @@
     </div>
     
     <!-- Map Tiles Section -->
-    <div class="map-tiles-section">
+    <div class="settings-section">
       <h3>🗺️ Offline Map Tiles</h3>
       <div v-if="tileStats" class="tile-stats">
         <div class="stat-row">
@@ -87,7 +87,7 @@
         <button 
           @click="downloadTiles" 
           :disabled="downloadingTiles || (tileStats && tileStats.percentage >= 90)"
-          class="sync-button"
+          class="primary-button"
         >
           {{ downloadingTiles ? 'Downloading...' : 'Cache Map Tiles' }}
         </button>
@@ -95,14 +95,14 @@
         <button 
           @click="clearTiles"
           :disabled="downloadingTiles || !tileStats || tileStats.storedTiles === 0"
-          class="clear-button"
+          class="secondary-button"
         >
           Clear Tile Cache
         </button>
       </div>
     </div>
     
-    <div class="global-actions">
+    <div class="settings-section">
       <button @click="clearAllData" class="danger-button">
         Clear All Cached Data
       </button>
@@ -364,44 +364,16 @@ onMounted(async () => {
 })
 </script>
 
+<style>
+@import './settings-shared.css';
+</style>
+
 <style scoped>
-.sync-all-container {
-  margin-bottom: 2rem;
-  padding: 1rem;
-  background: #2a2a2a;
-  border-radius: 8px;
-}
-
-.sync-all-button {
-  background: #8B0000;
-  color: #fff;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: background 0.2s;
-}
-
-.sync-all-button:hover:not(:disabled) {
-  background: #a00000;
-}
-
-.sync-all-button:disabled {
-  background: #666;
-  cursor: not-allowed;
-}
+/* Custom styles specific to DataSyncSettings only */
 
 .sync-all-progress {
   margin-top: 0.5rem;
-  color: #999;
-}
-
-.year-section {
-  background: #2a2a2a;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-  border-radius: 8px;
+  color: var(--color-text-muted);
 }
 
 .sync-status {
@@ -416,58 +388,30 @@ onMounted(async () => {
   align-items: center;
 }
 
-.type-label {
-  font-weight: bold;
-  color: #ccc;
-}
-
-.count {
-  color: #fff;
-}
-
-.last-sync {
-  color: #999;
-  font-size: 0.9rem;
-}
-
-.never-synced {
-  color: #666;
-  font-style: italic;
-}
-
 .sync-actions {
   display: flex;
   gap: 1rem;
   margin-top: 1rem;
 }
 
-.sync-button {
-  background: #444;
-  color: #fff;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
+/* Enhanced progress bar with shimmer effect */
 .progress-bar {
   margin-top: 1rem;
   height: 24px;
-  background: #222;
+  background: var(--color-bg-base);
   border-radius: 12px;
   overflow: hidden;
   position: relative;
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
+  box-shadow: inset 0 2px 4px var(--color-shadow-medium);
 }
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #8B0000 0%, #a00000 50%, #8B0000 100%);
+  background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-primary-dark) 50%, var(--color-primary) 100%);
   background-size: 200% 100%;
   transition: width 0.3s ease;
   animation: shimmer 2s ease-in-out infinite;
-  box-shadow: 0 0 10px rgba(139, 0, 0, 0.5);
+  box-shadow: 0 0 10px var(--color-primary-alpha-20);
 }
 
 @keyframes shimmer {
@@ -480,27 +424,14 @@ onMounted(async () => {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  color: #fff;
+  color: var(--color-text-primary);
   font-size: 0.85rem;
   font-weight: 500;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  text-shadow: 0 1px 2px var(--color-overlay-dark);
   white-space: nowrap;
 }
 
-.map-tiles-section {
-  background: #2a2a2a;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-  border-radius: 8px;
-  margin-top: 1.5rem;
-}
-
-.map-tiles-section h3 {
-  margin-top: 0;
-  margin-bottom: 1rem;
-  color: #fff;
-}
-
+/* Tile statistics specific styling */
 .tile-stats {
   margin-bottom: 1rem;
 }
@@ -513,21 +444,21 @@ onMounted(async () => {
 }
 
 .stat-label {
-  color: #ccc;
+  color: var(--color-text-secondary);
   min-width: 120px;
 }
 
 .stat-value {
-  color: #fff;
+  color: var(--color-text-primary);
   font-weight: bold;
 }
 
 .stat-percentage {
-  color: #999;
+  color: var(--color-text-muted);
 }
 
 .loading-tiles {
-  color: #999;
+  color: var(--color-text-muted);
   font-style: italic;
   margin: 0;
 }
@@ -537,7 +468,7 @@ onMounted(async () => {
 }
 
 .download-message {
-  color: #FFD700;
+  color: var(--color-accent);
   font-weight: bold;
   margin-bottom: 0.5rem;
   animation: pulse 1.5s infinite;
@@ -555,15 +486,9 @@ onMounted(async () => {
   margin-top: 1rem;
 }
 
-.tile-actions .sync-button,
-.tile-actions .clear-button {
+.tile-actions .primary-button,
+.tile-actions .secondary-button {
   flex: 1;
-}
-
-.global-actions {
-  margin-top: 2rem;
-  padding-top: 2rem;
-  border-top: 1px solid #444;
 }
 
 /* Mobile responsive */

@@ -1,5 +1,5 @@
 <template>
-  <div class="settings-content">
+  <div class="tab-content">
     <h2>Appearance</h2>
     
     <div class="settings-section">
@@ -111,7 +111,7 @@ const selectTheme = (themeName) => {
 .theme-card:hover {
   border-color: var(--color-primary);
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 8px var(--color-shadow-medium);
 }
 
 .theme-card.active {
@@ -159,15 +159,15 @@ const selectTheme = (themeName) => {
   width: 85%;
 }
 
-/* Sparkle Pony Theme Preview */
+/* Sparkle Pony Theme Preview - Light "Barbie" Theme */
 .theme-preview-sparkle {
-  background: #1a0a2e;
+  background: #FFF0F5; /* Lavender Blush - light pink background */
 }
 
 .theme-preview-sparkle .preview-header {
   height: 30px;
-  background: #3d2f7f;
-  border-bottom: 1px solid #6b5b95;
+  background: #FFB6C1; /* Light Pink header */
+  border-bottom: 1px solid #FFCDD2;
 }
 
 .theme-preview-sparkle .preview-content {
@@ -176,19 +176,20 @@ const selectTheme = (themeName) => {
 
 .theme-preview-sparkle .preview-item {
   height: 20px;
-  background: #FF1493;
+  background: #FF1493; /* Deep Pink (primary) */
   margin-bottom: 0.5rem;
   border-radius: 2px;
 }
 
 .theme-preview-sparkle .preview-item:nth-child(2) {
-  background: #00CED1;
+  background: #FF00FF; /* Electric Magenta (accent) */
   width: 70%;
 }
 
 .theme-preview-sparkle .preview-item:nth-child(3) {
-  background: #2d1b69;
+  background: #FFFFFF; /* Pure White (elevated) */
   width: 85%;
+  border: 1px solid #FFE4E6; /* Light pink border for visibility */
 }
 
 /* Khaki Theme Preview */
@@ -223,15 +224,15 @@ const selectTheme = (themeName) => {
   width: 85%;
 }
 
-/* Mush Love Theme Preview */
+/* Mush Love Theme Preview - Toned Down Psychedelic */
 .theme-preview-mush {
-  background: #0a0a0a;
+  background: #0a0a0a; /* Near black base */
 }
 
 .theme-preview-mush .preview-header {
   height: 30px;
-  background: #2d0052;
-  border-bottom: 1px solid #7700ff;
+  background: #2d0052; /* Medium Purple header */
+  border-bottom: 1px solid #6A0DAD; /* Purple border (toned down) */
 }
 
 .theme-preview-mush .preview-content {
@@ -240,18 +241,18 @@ const selectTheme = (themeName) => {
 
 .theme-preview-mush .preview-item {
   height: 20px;
-  background: #8B008B;
+  background: #8B008B; /* Dark Magenta (primary) */
   margin-bottom: 0.5rem;
   border-radius: 2px;
 }
 
 .theme-preview-mush .preview-item:nth-child(2) {
-  background: #00FF00;
+  background: #39FF14; /* Electric Lime (toned down from pure green) */
   width: 70%;
 }
 
 .theme-preview-mush .preview-item:nth-child(3) {
-  background: #1a0033;
+  background: #1a0033; /* Dark Purple (elevated) */
   width: 85%;
 }
 
@@ -272,7 +273,7 @@ const selectTheme = (themeName) => {
   top: 1rem;
   right: 1rem;
   background: var(--color-primary);
-  color: var(--color-text-primary);
+  color: var(--color-text-inverse);
   padding: 0.25rem 0.75rem;
   border-radius: 4px;
   font-size: 0.875rem;

@@ -26,8 +26,8 @@ defineProps({
 .spinner {
   width: 40px;
   height: 40px;
-  border: 3px solid #333;
-  border-top-color: #8B0000;
+  border: 3px solid var(--color-bg-header);
+  border-top-color: var(--color-primary);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -40,7 +40,7 @@ defineProps({
 
 .loading-message {
   margin-top: 1rem;
-  color: #999;
+  color: var(--color-text-muted);
   font-size: 0.9rem;
 }
 </style>

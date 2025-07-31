@@ -158,6 +158,37 @@ onMounted(() => {
 // Release notes data
 const releaseNotes = [
   {
+    version: '3.22.0',
+    date: '2025-07-31',
+    added: [
+      '🎨 Complete Theme System Overhaul - Professional 4-theme design system',
+      '🎭 OKNOTOK Theme: Dark red/gold classic camp theme',
+      '💖 Sparkle Pony Theme: Light Barbie pink theme with magical colors',
+      '🏜️ Khaki Theme: Desert earth tones optimized for bright sunlight',
+      '🍄 Mush Love Theme: Dark psychedelic theme with electric lime accents',
+      '⚡ Dynamic theme switching with instant visual feedback',
+      '♿ Proper contrast ratios ensuring readability in all lighting conditions',
+      '🌈 Theme-aware overlays, shadows, and transparency effects'
+    ],
+    fixed: [
+      '🔧 Theme Contrast Issues - Resolved low contrast across all themes',
+      '✅ Tab buttons and search controls use proper textInverse colors',
+      '🎯 OKNOTOK theme uses white text on red backgrounds for readability',
+      '💡 Mush Love theme uses electric lime text on purple backgrounds',
+      '🎨 Eliminated all hardcoded color values for complete theme consistency',
+      '🔄 Replaced 25+ instances of hardcoded colors with theme variables',
+      '🌟 RGBA color values modernized to use theme-appropriate alpha values',
+      '📱 Select dropdown UI with modern SVG arrow and proper spacing',
+      '🎛️ Component style consistency across settings and search components'
+    ],
+    changed: [
+      '🏗️ Theme Architecture - Complete CSS variable system for maintainable theming',
+      '🎨 All components use semantic theme variables instead of hardcoded values',
+      '🌈 Background overlays adapt to light vs dark themes appropriately',
+      '⚙️ Interactive states (hover, active, focus) properly themed across all components'
+    ]
+  },
+  {
     version: '3.21.0',
     date: '2025-07-31',
     added: [
@@ -683,12 +714,12 @@ const releaseNotes = [
 /* Component-specific styles */
 .build-time {
   font-size: 0.8rem;
-  color: #666;
+  color: var(--color-text-disabled);
 }
 
 /* Link styling */
 .about-section a {
-  color: var(--color-gold);
+  color: var(--color-accent);
   text-decoration: none;
   transition: all 0.2s ease;
 }
@@ -715,7 +746,7 @@ const releaseNotes = [
   content: "•";
   position: absolute;
   left: 0;
-  color: var(--color-gold);
+  color: var(--color-accent);
 }
 
 .about-section ol {
@@ -730,7 +761,7 @@ const releaseNotes = [
   content: counter(item) ".";
   position: absolute;
   left: 0;
-  color: var(--color-gold);
+  color: var(--color-accent);
   font-weight: 600;
 }
 
@@ -741,7 +772,7 @@ const releaseNotes = [
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
+  background: var(--color-modal-overlay);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -750,14 +781,14 @@ const releaseNotes = [
 }
 
 .modal-content {
-  background: #1a1a1a;
+  background: var(--color-bg-base);
   border-radius: 8px;
   max-width: 800px;
   max-height: 90vh;
   width: 100%;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 4px 20px var(--color-overlay-dark);
 }
 
 .modal-header {
@@ -765,20 +796,20 @@ const releaseNotes = [
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem;
-  border-bottom: 1px solid #444;
+  border-bottom: 1px solid var(--color-border-medium);
 }
 
 .modal-header h2 {
   margin: 0 !important;
   padding: 0;
-  color: #fff;
+  color: var(--color-text-primary);
   line-height: 1.2;
 }
 
 .close-button {
   background: none;
   border: none;
-  color: #999;
+  color: var(--color-text-muted);
   font-size: 2rem;
   cursor: pointer;
   transition: color 0.2s;
@@ -789,7 +820,7 @@ const releaseNotes = [
 }
 
 .close-button:hover {
-  color: #fff;
+  color: var(--color-text-primary);
 }
 
 .modal-body {
@@ -801,7 +832,7 @@ const releaseNotes = [
 .release-section {
   margin-bottom: 2.5rem;
   padding-bottom: 2rem;
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid var(--color-border-light);
 }
 
 .release-section:last-child {
@@ -811,7 +842,7 @@ const releaseNotes = [
 }
 
 .release-section h3 {
-  color: #fff;
+  color: var(--color-text-primary);
   margin: 0 0 1.5rem 0;
   font-size: 1.2rem;
 }
@@ -821,7 +852,7 @@ const releaseNotes = [
 }
 
 .release-group h4 {
-  color: #ccc;
+  color: var(--color-text-secondary);
   margin: 0 0 0.75rem 0;
   font-size: 1rem;
 }
@@ -829,7 +860,7 @@ const releaseNotes = [
 .release-group ul {
   margin: 0;
   padding-left: 1.5rem;
-  color: #999;
+  color: var(--color-text-muted);
   line-height: 1.8;
 }
 
@@ -839,13 +870,13 @@ const releaseNotes = [
 
 /* Camp link styling */
 .camp-link {
-  color: #8B0000;
+  color: var(--color-primary);
   text-decoration: none;
   transition: color 0.2s ease;
 }
 
 .camp-link:hover {
-  color: #FF4444;
+  color: var(--color-error);
   text-decoration: underline;
 }
 </style>

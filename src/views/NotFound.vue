@@ -104,20 +104,20 @@ const goHome = () => {
 }
 
 h1 {
-  color: #FFD700;
+  color: var(--color-accent);
   font-size: 2rem;
   margin: 0 0 1rem 0;
 }
 
 .error-message {
-  color: #ccc;
+  color: var(--color-text-secondary);
   font-size: 1.2rem;
   margin: 0 0 2rem 0;
 }
 
 .current-path {
-  background: #2a2a2a;
-  border: 1px solid #444;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-medium);
   border-radius: 6px;
   padding: 1rem;
   margin-bottom: 2rem;
@@ -126,14 +126,14 @@ h1 {
 }
 
 .path-label {
-  color: #999;
+  color: var(--color-text-muted);
   display: block;
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
 }
 
 .current-path code {
-  color: #FFD700;
+  color: var(--color-accent);
   font-family: 'Berkeley Mono', monospace;
   font-size: 0.95rem;
 }
@@ -143,7 +143,7 @@ h1 {
 }
 
 .suggestions h3 {
-  color: #fff;
+  color: var(--color-text-primary);
   margin-bottom: 1.5rem;
   font-size: 1.1rem;
 }
@@ -160,18 +160,18 @@ h1 {
   align-items: center;
   gap: 1rem;
   padding: 1rem;
-  background: #2a2a2a;
-  border: 1px solid #444;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-medium);
   border-radius: 6px;
   text-decoration: none;
-  color: #fff;
+  color: var(--color-text-primary);
   text-align: left;
   transition: all 0.2s;
 }
 
 .link-card:hover {
-  background: #333;
-  border-color: #8B0000;
+  background: var(--color-bg-header);
+  border-color: var(--color-primary);
   transform: translateY(-2px);
 }
 
@@ -181,13 +181,13 @@ h1 {
 }
 
 .link-card strong {
-  color: #FFD700;
+  color: var(--color-accent);
   display: block;
   margin-bottom: 0.25rem;
 }
 
 .link-card p {
-  color: #ccc;
+  color: var(--color-text-secondary);
   margin: 0;
   font-size: 0.9rem;
 }
@@ -197,8 +197,8 @@ h1 {
 }
 
 .primary-button {
-  background: #8B0000;
-  color: #fff;
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
   border: none;
   padding: 0.75rem 1.5rem;
   border-radius: 4px;
@@ -208,7 +208,7 @@ h1 {
 }
 
 .primary-button:hover {
-  background: #a00;
+  background: var(--color-primary-dark);
 }
 
 /* Mobile responsiveness */

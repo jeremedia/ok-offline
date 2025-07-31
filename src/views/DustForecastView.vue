@@ -411,7 +411,7 @@ onUnmounted(() => {
 }
 
 h2 {
-  color: #ccc;
+  color: var(--color-text-secondary);
   margin: 0;
 }
 
@@ -421,9 +421,9 @@ h2 {
 }
 
 .refresh-btn {
-  background: #2a2a2a;
-  color: #ccc;
-  border: 1px solid #444;
+  background: var(--color-bg-elevated);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border-medium);
   padding: 0.5rem 1rem;
   border-radius: 4px;
   cursor: pointer;
@@ -432,8 +432,8 @@ h2 {
 }
 
 .refresh-btn:hover:not(:disabled) {
-  background: #8B0000;
-  color: #fff;
+  background: var(--color-primary);
+  color: var(--color-text-primary);
 }
 
 .refresh-btn:disabled {
@@ -451,8 +451,8 @@ h2 {
 }
 
 .error-message {
-  background: #2a1f1f;
-  border: 1px solid #ff4444;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-error);
   border-radius: 8px;
   padding: 1.5rem;
   text-align: center;
@@ -460,13 +460,13 @@ h2 {
 }
 
 .error-message p {
-  color: #ff6666;
+  color: var(--color-error);
   margin: 0 0 1rem 0;
 }
 
 .retry-btn {
-  background: #8B0000;
-  color: #fff;
+  background: var(--color-primary);
+  color: var(--color-text-primary);
   border: none;
   padding: 0.5rem 1rem;
   border-radius: 4px;
@@ -477,14 +477,14 @@ h2 {
 .loading-state {
   text-align: center;
   padding: 2rem;
-  color: #999;
+  color: var(--color-text-muted);
 }
 
 .loading-spinner {
   width: 40px;
   height: 40px;
-  border: 3px solid #444;
-  border-top: 3px solid #8B0000;
+  border: 3px solid var(--color-border-medium);
+  border-top: 3px solid var(--color-primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto 1rem;
@@ -499,35 +499,35 @@ h2 {
 .data-source {
   margin-top: 1rem;
   padding-top: 1rem;
-  border-top: 1px solid #333;
+  border-top: 1px solid var(--color-border-light);
   text-align: center;
 }
 
 .data-source small {
-  color: #999;
+  color: var(--color-text-muted);
   font-size: 0.8rem;
 }
 
 .apple-attribution {
   margin-top: 0.5rem;
   padding-top: 0.5rem;
-  border-top: 1px solid #333;
+  border-top: 1px solid var(--color-border-light);
   text-align: center;
 }
 
 .apple-attribution small {
-  color: #999;
+  color: var(--color-text-muted);
   font-size: 0.75rem;
 }
 
 .apple-attribution a {
-  color: #666;
+  color: var(--color-text-disabled);
   text-decoration: none;
   transition: color 0.2s;
 }
 
 .apple-attribution a:hover {
-  color: #999;
+  color: var(--color-text-muted);
   text-decoration: underline;
 }
 
@@ -535,41 +535,41 @@ h2 {
   margin-top: 2rem;
   padding: 1rem;
   text-align: center;
-  border-top: 1px solid #333;
-  background: #1a1a1a;
+  border-top: 1px solid var(--color-border-light);
+  background: var(--color-bg-base);
 }
 
 .global-attribution small {
-  color: #666;
+  color: var(--color-text-disabled);
   font-size: 0.75rem;
 }
 
 .global-attribution a {
-  color: #666;
+  color: var(--color-text-disabled);
   text-decoration: none;
   transition: color 0.2s;
 }
 
 .global-attribution a:hover {
-  color: #999;
+  color: var(--color-text-muted);
   text-decoration: underline;
 }
 
 .moon-phase-section {
-  background: #1a1a1a;
-  border: 1px solid #444;
+  background: var(--color-bg-base);
+  border: 1px solid var(--color-border-medium);
   border-radius: 8px;
   padding: 0 1.5rem 1.5rem 1.5rem;
   margin-top: 2rem;
 }
 
 .moon-phase-section h3 {
-  color: #fff;
+  color: var(--color-text-primary);
   margin: 1.5rem 0 1rem 0;
 }
 
 .moon-phase-card {
-  background: #2a2a2a;
+  background: var(--color-bg-elevated);
   border-radius: 8px;
   padding: 1.5rem;
 }
@@ -586,7 +586,7 @@ h2 {
 }
 
 .moon-display h4 {
-  color: #fff;
+  color: var(--color-text-primary);
   margin: 0;
   font-size: 1.25rem;
 }
@@ -601,24 +601,24 @@ h2 {
 .moon-time {
   text-align: center;
   padding: 0.75rem;
-  background: #333;
+  background: var(--color-bg-header);
   border-radius: 4px;
 }
 
 .moon-time label {
   display: block;
-  color: #999;
+  color: var(--color-text-muted);
   font-size: 0.9rem;
   margin-bottom: 0.25rem;
 }
 
 .moon-time span {
-  color: #fff;
+  color: var(--color-text-primary);
   font-weight: bold;
 }
 
 .moon-info {
-  color: #ccc;
+  color: var(--color-text-secondary);
   margin: 0;
   font-size: 0.9rem;
   line-height: 1.5;
@@ -626,12 +626,12 @@ h2 {
 }
 
 .moon-info strong {
-  color: #fff;
+  color: var(--color-text-primary);
 }
 
 .no-data-state {
-  background: #1a1a1a;
-  border: 1px solid #444;
+  background: var(--color-bg-base);
+  border: 1px solid var(--color-border-medium);
   border-radius: 8px;
   padding: 3rem 1.5rem;
   text-align: center;
@@ -649,12 +649,12 @@ h2 {
 }
 
 .no-data-state h3 {
-  color: #fff;
+  color: var(--color-text-primary);
   margin-bottom: 0.5rem;
 }
 
 .no-data-state p {
-  color: #999;
+  color: var(--color-text-muted);
   margin-bottom: 1.5rem;
 }
 
@@ -664,25 +664,25 @@ h2 {
 }
 
 .current-conditions {
-  background: #1a1a1a;
-  border: 1px solid #444;
+  background: var(--color-bg-base);
+  border: 1px solid var(--color-border-medium);
   border-radius: 8px;
   padding: 0 1.5rem 1.5rem 1.5rem;
 }
 
 .current-conditions h3 {
-  color: #fff;
+  color: var(--color-text-primary);
   margin: 1.5rem 0 0.5rem 0;
 }
 
 .current-date {
-  color: #999;
+  color: var(--color-text-muted);
   font-size: 0.9rem;
   margin-bottom: 1.5rem;
 }
 
 .condition-card {
-  background: #2a2a2a;
+  background: var(--color-bg-elevated);
   border-radius: 8px;
   padding: 1.5rem;
 }
@@ -699,16 +699,16 @@ h2 {
 }
 
 .dust-level h4 {
-  color: #fff;
+  color: var(--color-text-primary);
   margin: 0;
   font-size: 1.5rem;
 }
 
-.dust-level.clear { color: #4CAF50; }
-.dust-level.light { color: #FFC107; }
-.dust-level.moderate { color: #FF9800; }
-.dust-level.heavy { color: #FF5722; }
-.dust-level.whiteout { color: #F44336; }
+.dust-level.clear { color: var(--color-dust-clear); }
+.dust-level.light { color: var(--color-dust-light); }
+.dust-level.moderate { color: var(--color-dust-moderate); }
+.dust-level.heavy { color: var(--color-dust-heavy); }
+.dust-level.whiteout { color: var(--color-dust-whiteout); }
 
 .metrics {
   display: grid;
@@ -723,42 +723,42 @@ h2 {
 
 .metric label {
   display: block;
-  color: #999;
+  color: var(--color-text-muted);
   font-size: 0.9rem;
   margin-bottom: 0.25rem;
 }
 
 .metric span {
-  color: #fff;
+  color: var(--color-text-primary);
   font-size: 1.1rem;
   font-weight: bold;
 }
 
 .metric small {
   display: block;
-  color: #999;
+  color: var(--color-text-muted);
   font-size: 0.8rem;
   margin-top: 0.25rem;
 }
 
 .recommendation {
-  color: #ccc;
+  color: var(--color-text-secondary);
   text-align: center;
   margin: 0;
   padding: 1rem;
-  background: #333;
+  background: var(--color-bg-header);
   border-radius: 4px;
 }
 
 .forecast-days {
-  background: #1a1a1a;
-  border: 1px solid #444;
+  background: var(--color-bg-base);
+  border: 1px solid var(--color-border-medium);
   border-radius: 8px;
   padding: 0 1.5rem 1.5rem 1.5rem;
 }
 
 .forecast-days h3 {
-  color: #fff;
+  color: var(--color-text-primary);
   margin: 1.5rem 0 1rem 0;
 }
 
@@ -769,15 +769,15 @@ h2 {
 }
 
 .forecast-day {
-  background: #2a2a2a;
-  border: 1px solid #444;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-medium);
   border-radius: 8px;
   padding: 1rem;
   text-align: center;
 }
 
 .forecast-day h5 {
-  color: #fff;
+  color: var(--color-text-primary);
   margin: 0 0 0.5rem 0;
 }
 
@@ -788,12 +788,12 @@ h2 {
 }
 
 .forecast-level {
-  color: #ccc;
+  color: var(--color-text-secondary);
   margin: 0.5rem 0;
 }
 
 .forecast-day small {
-  color: #999;
+  color: var(--color-text-muted);
   display: block;
   margin-top: 0.25rem;
 }
@@ -806,12 +806,12 @@ h2 {
 }
 
 .temp-high {
-  color: #fff;
+  color: var(--color-text-primary);
   font-weight: bold;
 }
 
 .temp-low {
-  color: #999;
+  color: var(--color-text-muted);
 }
 
 .humidity {
@@ -819,14 +819,14 @@ h2 {
 }
 
 .dust-tips {
-  background: #1a1a1a;
-  border: 1px solid #444;
+  background: var(--color-bg-base);
+  border: 1px solid var(--color-border-medium);
   border-radius: 8px;
   padding: 0 1.5rem 1.5rem 1.5rem;
 }
 
 .dust-tips h3 {
-  color: #fff;
+  color: var(--color-text-primary);
   margin: 1.5rem 0 1rem 0;
 }
 
@@ -837,32 +837,32 @@ h2 {
 }
 
 .tip-card {
-  background: #2a2a2a;
-  border: 1px solid #444;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-medium);
   border-radius: 8px;
   padding: 1rem;
 }
 
 .tip-card h4 {
-  color: #fff;
+  color: var(--color-text-primary);
   margin: 0 0 0.5rem 0;
 }
 
 .tip-card p {
-  color: #ccc;
+  color: var(--color-text-secondary);
   margin: 0;
   font-size: 0.9rem;
 }
 
 .dust-scale {
-  background: #1a1a1a;
-  border: 1px solid #444;
+  background: var(--color-bg-base);
+  border: 1px solid var(--color-border-medium);
   border-radius: 8px;
   padding: 0 1.5rem 1.5rem 1.5rem;
 }
 
 .dust-scale h3 {
-  color: #fff;
+  color: var(--color-text-primary);
   margin: 1.5rem 0 1rem 0;
 }
 
@@ -876,7 +876,7 @@ h2 {
   grid-template-columns: 3rem 1fr 2fr;
   align-items: center;
   padding: 0.75rem;
-  background: #2a2a2a;
+  background: var(--color-bg-elevated);
   border-radius: 4px;
 }
 
@@ -885,19 +885,19 @@ h2 {
 }
 
 .scale-item strong {
-  color: #fff;
+  color: var(--color-text-primary);
 }
 
 .scale-item small {
-  color: #999;
+  color: var(--color-text-muted);
   text-align: right;
 }
 
-.scale-item.clear { border-left: 4px solid #4CAF50; }
-.scale-item.light { border-left: 4px solid #FFC107; }
-.scale-item.moderate { border-left: 4px solid #FF9800; }
-.scale-item.heavy { border-left: 4px solid #FF5722; }
-.scale-item.whiteout { border-left: 4px solid #F44336; }
+.scale-item.clear { border-left: 4px solid var(--color-dust-clear); }
+.scale-item.light { border-left: 4px solid var(--color-dust-light); }
+.scale-item.moderate { border-left: 4px solid var(--color-dust-moderate); }
+.scale-item.heavy { border-left: 4px solid var(--color-dust-heavy); }
+.scale-item.whiteout { border-left: 4px solid var(--color-dust-whiteout); }
 
 @media (max-width: 768px) {
   .header-row {

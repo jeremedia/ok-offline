@@ -106,6 +106,11 @@ const checkIfMobile = () => {
 const isMobile = ref(checkIfMobile())
 const year = computed(() => route.params.year || localStorage.getItem('selectedYear') || '2025')
 
+// Helper function to get CSS variable values for JavaScript
+const getCSSColor = (varName) => {
+  return getComputedStyle(document.documentElement).getPropertyValue(varName).trim()
+}
+
 // Consolidated map controls
 const mapControls = reactive({
   // Content controls
@@ -400,7 +405,7 @@ onMounted(async () => {
   
   // Set black background when basemap is off
   if (!mapControls.showBasemap) {
-    mapContainer.value.style.backgroundColor = '#000000'
+    mapContainer.value.style.backgroundColor = 'var(--color-background-primary)'
   }
   
   // Create offline-capable basemap layer
@@ -702,11 +707,11 @@ const addInfrastructureMarkers = () => {
           // Add the polygon
           const polygon = L.geoJSON(feature, {
             style: {
-              color: '#007BFF',
+              color: getCSSColor('--color-info'),
               weight: 2,
               opacity: 0.8,
               fillOpacity: 0.3,
-              fillColor: '#007BFF'
+              fillColor: getCSSColor('--color-info')
             }
           })
           
@@ -896,7 +901,7 @@ const updateGISLayers = () => {
           // Use custom red styling when basemap is off
           if (!mapControls.showBasemap) {
             return {
-              color: '#FF0000',
+              color: getCSSColor('--color-danger'),
               weight: 1,
               opacity: 1
             }
@@ -920,11 +925,11 @@ const updateGISLayers = () => {
     if (streetOutlinesData) {
       gisLayers.streetOutlines = L.geoJSON(streetOutlinesData, {
         style: {
-          color: '#FF0000',
+          color: getCSSColor('--color-danger'),
           weight: 2,
           opacity: 1,
           fillOpacity: 0.25,
-          fillColor: '#FF0000'
+          fillColor: getCSSColor('--color-danger')
         },
         onEachFeature: (feature, layer) => {
           if (feature.properties && feature.properties.name) {
@@ -962,11 +967,11 @@ const updateGISLayers = () => {
     if (plazaData) {
       gisLayers.plazas = L.geoJSON(plazaData, {
         style: {
-          color: '#6a0dad',
+          color: getCSSColor('--color-purple'),
           weight: 2,
           opacity: 0.8,
           fillOpacity: 0.3,
-          fillColor: '#6a0dad'
+          fillColor: getCSSColor('--color-purple')
         },
         onEachFeature: (feature, layer) => {
           if (feature.properties && feature.properties.Name) {
@@ -1110,7 +1115,7 @@ const toggleBasemap = () => {
     mapContainer.value.style.backgroundColor = ''
   } else {
     map.removeLayer(basemapLayer)
-    mapContainer.value.style.backgroundColor = '#000000'
+    mapContainer.value.style.backgroundColor = 'var(--color-background-primary)'
   }
   
   // Update GIS layers to apply correct styling
@@ -1204,15 +1209,15 @@ const applyRotation = () => {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: rgba(26, 26, 26, 0.9);
-  border: 1px solid #444;
-  color: #fff;
+  background: var(--color-background-secondary-alpha-90);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
   font-size: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 4px var(--color-overlay-light);
 }
 
 .map-controls-toggle:active {
@@ -1221,18 +1226,18 @@ const applyRotation = () => {
 
 /* Marker styles */
 :deep(.marker-icon) {
-  background: rgba(26, 26, 26, 0.9);
+  background: var(--color-background-secondary-alpha-90);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 16px;
-  border: 2px solid #fff;
+  border: 2px solid var(--color-text-primary);
 }
 
 :deep(.infrastructure-marker .marker-icon) {
-  background: rgba(139, 0, 0, 0.9);
-  border-color: #FFD700;
+  background: var(--color-primary-alpha-90);
+  border-color: var(--color-accent);
   font-size: 20px;
 }
 
@@ -1246,73 +1251,73 @@ const applyRotation = () => {
 }
 
 :deep(.cpn-marker .marker-icon) {
-  background: rgba(106, 13, 173, 0.9);
-  border-color: #fff;
+  background: var(--color-purple-alpha-90);
+  border-color: var(--color-text-primary);
   font-size: 14px;
 }
 
 :deep(.portal-marker .marker-icon) {
-  background: rgba(139, 0, 0, 0.9);
-  border-color: #FFD700;
+  background: var(--color-primary-alpha-90);
+  border-color: var(--color-accent);
   font-size: 18px;
-  box-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+  box-shadow: 0 0 8px var(--color-accent-alpha-50);
 }
 
 :deep(.toilet-marker .marker-icon) {
-  background: rgba(0, 123, 255, 0.9);
-  border-color: #fff;
+  background: var(--color-info-alpha-90);
+  border-color: var(--color-text-primary);
   font-size: 12px;
 }
 
 :deep(.camp-marker .marker-icon) {
-  background: rgba(34, 139, 34, 0.9);
+  background: var(--color-success-alpha-90);
 }
 
 :deep(.art-marker .marker-icon) {
-  background: rgba(106, 90, 205, 0.9);
+  background: var(--color-purple-alpha-90);
 }
 
 :deep(.event-marker .marker-icon) {
-  background: rgba(255, 140, 0, 0.9);
+  background: var(--color-warning-alpha-90);
 }
 
 :deep(.plaza-marker .marker-icon) {
-  background: rgba(106, 13, 173, 0.9);
+  background: var(--color-purple-alpha-90);
 }
 
 
 .loading-indicator {
   margin-top: 10px;
-  color: #FFD700;
+  color: var(--color-accent);
   font-size: 12px;
   text-align: center;
 }
 
 .error-indicator {
   margin-top: 10px;
-  color: #ff6b6b;
+  color: var(--color-error);
   font-size: 12px;
   text-align: center;
 }
 
 /* Popup styles */
 :deep(.map-popup) {
-  color: #333;
+  color: var(--color-text-secondary);
 }
 
 :deep(.map-popup .favorited) {
-  color: #FFD700;
+  color: var(--color-accent);
   margin-left: 5px;
 }
 
 
 /* Leaflet Popup Styling */
 :deep(.leaflet-popup-content-wrapper) {
-  background: rgba(26, 26, 26, 0.95);
-  color: #fff;
-  border: 1px solid #444;
+  background: var(--color-background-secondary-alpha-95);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
-  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 3px 14px var(--color-overlay-dark);
 }
 
 :deep(.leaflet-popup-content) {
@@ -1322,27 +1327,27 @@ const applyRotation = () => {
 }
 
 :deep(.leaflet-popup-tip) {
-  background: rgba(26, 26, 26, 0.95);
-  border: 1px solid #444;
-  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.4);
+  background: var(--color-background-secondary-alpha-95);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 3px 14px var(--color-overlay-dark);
 }
 
 :deep(.leaflet-popup-close-button) {
-  color: #999;
+  color: var(--color-text-muted);
   font-size: 20px;
   font-weight: normal;
   padding: 4px 8px;
 }
 
 :deep(.leaflet-popup-close-button:hover) {
-  color: #fff;
-  background: rgba(139, 0, 0, 0.3);
+  color: var(--color-text-primary);
+  background: var(--color-primary-alpha-30);
   border-radius: 4px;
 }
 
 /* Popup content styling */
 :deep(.map-popup) {
-  color: #fff;
+  color: var(--color-text-primary);
 }
 
 /* Infrastructure popup styling */
@@ -1361,14 +1366,14 @@ const applyRotation = () => {
 }
 
 :deep(.infrastructure-popup strong) {
-  color: #FFD700;
+  color: var(--color-accent);
   font-weight: bold;
   display: block;
   margin-bottom: 0.25rem;
 }
 
 :deep(.infrastructure-popup .description) {
-  color: #ccc;
+  color: var(--color-text-disabled);
   font-size: 0.8rem;
   line-height: 1.3;
   display: block;
@@ -1376,26 +1381,26 @@ const applyRotation = () => {
 }
 
 :deep(.map-popup strong) {
-  color: #FFD700;
+  color: var(--color-accent);
   font-size: 16px;
   display: block;
   margin-bottom: 4px;
 }
 
 :deep(.map-popup small) {
-  color: #ccc;
+  color: var(--color-text-disabled);
   font-size: 12px;
 }
 
 :deep(.map-popup .favorited) {
-  color: #FFD700;
+  color: var(--color-accent);
   font-size: 16px;
   margin-left: 8px;
 }
 
 /* Map background styling */
 #map {
-  background-color: #1a1a1a; /* Default dark background */
+  background-color: var(--color-background-secondary); /* Default dark background */
 }
 
 :deep(.leaflet-container) {

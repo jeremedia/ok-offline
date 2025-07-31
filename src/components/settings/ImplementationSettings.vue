@@ -110,13 +110,13 @@ Database: bm2025-db
 
 .implementation-section code {
   display: block;
-  background: #1a1a1a;
+  background: var(--color-bg-base);
   padding: 1rem;
   border-radius: 4px;
   font-family: 'Berkeley Mono', monospace;
   font-size: 0.9rem;
   white-space: pre-wrap;
-  color: #aaa;
+  color: var(--color-text-muted);
   overflow-x: auto;
 }
 </style>

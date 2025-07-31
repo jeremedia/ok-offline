@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ok-offline-v28'; // Detail view polish with collapsible events
+const CACHE_NAME = 'ok-offline-v29'; // Complete theme system overhaul with 4 themes
 const urlsToCache = [
   // Core app files
   '/',

@@ -75,8 +75,8 @@
 /* Component-specific styles */
 .maps-link {
   display: inline-block;
-  background: #8B0000;
-  color: #fff;
+  background: var(--color-primary);
+  color: var(--color-text-primary);
   padding: 0.75rem 1.5rem;
   border-radius: 4px;
   text-decoration: none;
@@ -86,13 +86,13 @@
 }
 
 .maps-link:hover {
-  background: #a00000;
+  background: var(--color-primary-dark);
   text-decoration: none;
 }
 
 .maps-info {
   margin-top: 1.5rem;
   padding-top: 1.5rem;
-  border-top: 1px solid #444;
+  border-top: 1px solid var(--color-border-medium);
 }
 </style>

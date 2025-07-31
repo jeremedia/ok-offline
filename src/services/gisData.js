@@ -304,33 +304,41 @@ function isPointInPolygon(x, y, polygon) {
   return inside;
 }
 
+// Helper function to get CSS variable values for JavaScript
+const getCSSColor = (varName) => {
+  if (typeof document !== 'undefined') {
+    return getComputedStyle(document.documentElement).getPropertyValue(varName).trim()
+  }
+  return varName // Fallback for server-side rendering
+}
+
 // Get GIS layer styles for Leaflet
 export const gisStyles = {
   streetLines: {
     radial: {
-      color: '#666666',
+      color: getCSSColor('--color-text-disabled'),
       weight: 2,
       opacity: 0.8
     },
     arc: {
-      color: '#888888',
+      color: getCSSColor('--color-text-muted'),
       weight: 2,
       opacity: 0.8
     }
   },
   trashFence: {
-    color: '#ff0000',
+    color: getCSSColor('--color-danger'),
     weight: 3,
     opacity: 0.8,
     fillOpacity: 0,
     dashArray: '10, 5'
   },
   cityBlocks: {
-    color: '#444444',
+    color: getCSSColor('--color-border'),
     weight: 1,
     opacity: 0.5,
     fillOpacity: 0.1,
-    fillColor: '#222222'
+    fillColor: getCSSColor('--color-bg-base')
   }
 };
 

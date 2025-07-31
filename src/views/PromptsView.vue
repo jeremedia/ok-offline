@@ -220,13 +220,13 @@ export default {
 }
 
 .header h1 {
-  color: #FFD700;
+  color: var(--color-accent);
   font-size: 2rem;
   margin: 0 0 0.5rem 0;
 }
 
 .stats {
-  color: #ccc;
+  color: var(--color-text-secondary);
   font-size: 1.2rem;
 }
 
@@ -242,18 +242,18 @@ export default {
   flex: 1;
   min-width: 300px;
   padding: 0.75rem 1rem;
-  border: 1px solid #444;
+  border: 1px solid var(--color-border);
   border-radius: 6px;
-  background: #2a2a2a;
-  color: #fff;
+  background: var(--color-bg-elevated);
+  color: var(--color-text-primary);
   font-size: 1rem;
   transition: all 0.2s;
 }
 
 .search-input:focus {
   outline: none;
-  border-color: #FFD700;
-  background: #333;
+  border-color: var(--color-accent);
+  background: var(--color-bg-header);
 }
 
 .actions {
@@ -263,18 +263,18 @@ export default {
 
 .btn {
   padding: 0.75rem 1.5rem;
-  border: 1px solid #444;
+  border: 1px solid var(--color-border);
   border-radius: 4px;
-  background: #2a2a2a;
-  color: #fff;
+  background: var(--color-bg-elevated);
+  color: var(--color-text-primary);
   cursor: pointer;
   font-size: 0.95rem;
   transition: all 0.2s;
 }
 
 .btn:hover:not(:disabled) {
-  background: #333;
-  border-color: #8B0000;
+  background: var(--color-bg-header);
+  border-color: var(--color-primary);
   transform: translateY(-2px);
 }
 
@@ -285,35 +285,35 @@ export default {
 
 .prompts-list {
   flex: 1;
-  background: #1a1a1a;
+  background: var(--color-bg-base);
   border-radius: 8px;
   padding: 1.5rem;
-  border: 1px solid #333;
+  border: 1px solid var(--color-border-light);
 }
 
 .loading, .error, .empty {
   text-align: center;
   padding: 3rem;
-  color: #ccc;
+  color: var(--color-text-secondary);
   font-size: 1.1rem;
 }
 
 .error {
-  color: #ff6b6b;
+  color: var(--color-schedule-conflict);
 }
 
 .prompt-item {
   margin-bottom: 1.5rem;
   padding: 1rem;
-  border: 1px solid #444;
+  border: 1px solid var(--color-border);
   border-radius: 6px;
-  background: #2a2a2a;
+  background: var(--color-bg-elevated);
   transition: all 0.2s;
 }
 
 .prompt-item:hover {
-  background: #333;
-  border-color: #555;
+  background: var(--color-bg-header);
+  border-color: var(--color-border-heavy);
 }
 
 .prompt-header {
@@ -322,11 +322,11 @@ export default {
   align-items: center;
   margin-bottom: 0.75rem;
   font-size: 0.85rem;
-  color: #999;
+  color: var(--color-text-muted);
 }
 
 .timestamp {
-  color: #FFD700;
+  color: var(--color-accent);
   font-weight: 500;
 }
 
@@ -338,14 +338,14 @@ export default {
 }
 
 .branch {
-  color: #8B0000;
+  color: var(--color-primary);
   font-weight: 500;
 }
 
 .directory {
   font-family: 'Berkeley Mono', monospace;
   font-size: 0.8rem;
-  color: #888;
+  color: var(--color-text-muted);
 }
 
 .copy-btn {
@@ -361,11 +361,11 @@ export default {
 
 .copy-btn:hover {
   opacity: 1;
-  background: #444;
+  background: var(--color-bg-input);
 }
 
 .prompt-content {
-  color: #fff;
+  color: var(--color-text-primary);
   font-size: 0.95rem;
   line-height: 1.6;
   white-space: pre-wrap;
@@ -380,11 +380,11 @@ export default {
   gap: 2rem;
   margin-top: 2rem;
   padding-top: 1.5rem;
-  border-top: 1px solid #444;
+  border-top: 1px solid var(--color-border);
 }
 
 .pagination span {
-  color: #ccc;
+  color: var(--color-text-secondary);
   font-size: 0.95rem;
 }
 

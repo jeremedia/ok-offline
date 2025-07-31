@@ -495,7 +495,7 @@ onMounted(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.95);
+  background: var(--color-overlay-dark);
   z-index: 10000;
   display: flex;
   align-items: center;
@@ -504,8 +504,8 @@ onMounted(() => {
 }
 
 .welcome-content {
-  background: #1a1a1a;
-  border: 2px solid #8B0000;
+  background: var(--color-bg-base);
+  border: 2px solid var(--color-primary);
   border-radius: 8px;
   max-width: 600px;
   width: 100%;
@@ -523,19 +523,19 @@ onMounted(() => {
   justify-content: center;
   padding: 16px;
   flex-shrink: 0;
-  border-bottom: 1px solid #333;
-  background: #1a1a1a;
+  border-bottom: 1px solid var(--color-bg-header);
+  background: var(--color-bg-base);
 }
 
 .welcome-header h1 {
-  color: #FFD700;
+  color: var(--color-accent);
   margin: 0;
   font-size: 2rem;
 }
 
 .tagline {
   display: none;
-  color: #ccc;
+  color: var(--color-text-secondary);
   margin: 0.5rem 0 0 0;
   font-size: 1.1rem;
 }
@@ -572,8 +572,8 @@ onMounted(() => {
 }
 
 .feature-card {
-  background: #2a2a2a;
-  border: 1px solid #444;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
   border-radius: 6px;
   padding: 1rem;
   text-align: center;
@@ -586,12 +586,12 @@ onMounted(() => {
 }
 
 .feature-card h3 {
-  color: #FFD700;
+  color: var(--color-accent);
   margin: 0.5rem 0;
 }
 
 .feature-card p {
-  color: #ccc;
+  color: var(--color-text-secondary);
   font-size: 0.9rem;
   margin: 0;
 }
@@ -611,7 +611,7 @@ onMounted(() => {
 }
 
 .completion h2 {
-  color: #FFD700;
+  color: var(--color-accent);
   margin: 0 0 1rem 0;
 }
 
@@ -620,15 +620,15 @@ onMounted(() => {
 }
 
 .location-notice {
-  background: #2a2a2a;
-  border: 1px solid #444;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
   border-radius: 6px;
   padding: 1rem;
   margin: 0 0 1.5rem 0;
 }
 
 .location-notice p {
-  color: #FFD700;
+  color: var(--color-accent);
   margin: 0;
   font-size: 0.95rem;
 }
@@ -649,18 +649,18 @@ onMounted(() => {
   align-items: center;
   gap: 1rem;
   padding: 1rem;
-  background: #2a2a2a;
-  border: 1px solid #444;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
   border-radius: 6px;
-  color: #fff;
+  color: var(--color-text-primary);
   text-align: left;
   cursor: pointer;
   transition: background-color 0.2s;
 }
 
 .action-card:hover {
-  background: #333;
-  border-color: #8B0000;
+  background: var(--color-bg-header);
+  border-color: var(--color-primary);
 }
 
 .action-icon {
@@ -669,13 +669,13 @@ onMounted(() => {
 }
 
 .action-card strong {
-  color: #FFD700;
+  color: var(--color-accent);
   display: block;
   margin-bottom: 0.25rem;
 }
 
 .action-card p {
-  color: #ccc;
+  color: var(--color-text-secondary);
   margin: 0;
   font-size: 0.9rem;
 }
@@ -685,7 +685,7 @@ onMounted(() => {
   align-items: center;
   gap: 0.5rem;
   margin: 0 0 1rem 0;
-  color: #ccc;
+  color: var(--color-text-secondary);
   cursor: pointer;
 }
 
@@ -696,8 +696,8 @@ onMounted(() => {
 .welcome-footer {
   flex-shrink: 0;
   padding: 16px 16px 48px 16px; /* Extra bottom padding for step indicator */
-  background: #1a1a1a;
-  border-top: 1px solid #333;
+  background: var(--color-bg-base);
+  border-top: 1px solid var(--color-bg-header);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -711,8 +711,8 @@ onMounted(() => {
 }
 
 .primary-button {
-  background: #8B0000;
-  color: #fff;
+  background: var(--color-primary);
+  color: var(--color-text-primary);
   border: none;
   padding: 0.75rem 1.5rem;
   border-radius: 4px;
@@ -722,18 +722,18 @@ onMounted(() => {
 }
 
 .primary-button:hover:not(:disabled) {
-  background: #a00;
+  background: var(--color-primary-hover);
 }
 
 .primary-button:disabled {
-  background: #555;
+  background: var(--color-bg-input);
   cursor: not-allowed;
 }
 
 .secondary-button {
   background: transparent;
-  color: #ccc;
-  border: 1px solid #444;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
   padding: 0.75rem 1.5rem;
   border-radius: 4px;
   cursor: pointer;
@@ -742,8 +742,8 @@ onMounted(() => {
 }
 
 .secondary-button:hover {
-  border-color: #8B0000;
-  color: #fff;
+  border-color: var(--color-primary);
+  color: var(--color-text-primary);
 }
 
 .step-indicator {
@@ -755,8 +755,8 @@ onMounted(() => {
   justify-content: center;
   gap: 0.5rem;
   padding: 0.75rem;
-  background: rgba(0, 0, 0, 0.8);
-  border-top: 1px solid #333;
+  background: var(--color-overlay-dark);
+  border-top: 1px solid var(--color-bg-header);
   backdrop-filter: blur(5px);
 }
 
@@ -764,16 +764,16 @@ onMounted(() => {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: #444;
+  background: var(--color-border);
   transition: background-color 0.2s;
 }
 
 .step-dot.active {
-  background: #8B0000;
+  background: var(--color-primary);
 }
 
 .step-dot.completed {
-  background: #FFD700;
+  background: var(--color-accent);
 }
 
 @media (max-width: 768px) {
@@ -822,16 +822,16 @@ onMounted(() => {
 }
 
 .step-content::-webkit-scrollbar-track {
-  background: #2a2a2a;
+  background: var(--color-bg-elevated);
 }
 
 .step-content::-webkit-scrollbar-thumb {
-  background: #666;
+  background: var(--color-text-disabled);
   border-radius: 4px;
 }
 
 .step-content::-webkit-scrollbar-thumb:hover {
-  background: #888;
+  background: var(--color-text-muted);
 }
 
 .final-actions {

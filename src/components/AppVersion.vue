@@ -10,6 +10,6 @@ const version = __APP_VERSION__
 .app-version {
   font-family: 'Berkeley Mono', monospace;
   font-size: 0.875rem;
-  color: #666;
+  color: var(--color-text-disabled);
 }
 </style>

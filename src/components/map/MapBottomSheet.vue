@@ -65,8 +65,8 @@ defineExpose({
   left: 0;
   right: 0;
   z-index: 1002;
-  background: #1a1a1a;
-  border-top: 1px solid #444;
+  background: var(--color-background-secondary);
+  border-top: 1px solid var(--color-border);
   border-radius: 16px 16px 0 0;
   transform: translateY(calc(100% - 60px));
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -86,20 +86,20 @@ defineExpose({
   display: flex;
   justify-content: center;
   align-items: center;
-  background: rgba(26, 26, 26, 0.95);
+  background: var(--color-background-secondary-alpha-95);
   border-radius: 16px 16px 0 0;
 }
 
 .handle-bar {
   width: 48px;
   height: 4px;
-  background: #666;
+  background: var(--color-text-secondary);
   border-radius: 2px;
   transition: background 0.2s ease;
 }
 
 .drag-handle:active .handle-bar {
-  background: #999;
+  background: var(--color-text-muted);
 }
 
 /* Sheet Content */
@@ -118,7 +118,7 @@ defineExpose({
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--color-overlay-medium);
   z-index: 1001;
   animation: fadeIn 0.3s ease;
 }

@@ -335,10 +335,10 @@ window.addEventListener('resize', constrainToViewport)
 .map-info {
   position: fixed;
   z-index: 999; /* Slightly lower than legend */
-  background: rgba(26, 26, 26, 0.95);
+  background: var(--color-background-secondary-alpha-95);
   padding: 0;
   border-radius: 8px;
-  border: 1px solid #444;
+  border: 1px solid var(--color-border);
   min-width: 250px;
   max-width: 300px;
   transition: opacity 0.2s ease, min-width 0.3s ease, max-width 0.3s ease;
@@ -363,7 +363,7 @@ window.addEventListener('resize', constrainToViewport)
   align-items: center;
   justify-content: space-between;
   padding: 0.5rem 0.75rem;
-  background: rgba(0, 0, 0, 0.3);
+  background: var(--color-overlay-light);
   border-radius: 8px 8px 0 0;
   cursor: move;
 }
@@ -375,7 +375,7 @@ window.addEventListener('resize', constrainToViewport)
 
 .info-header h4 {
   margin: 0;
-  color: #FFD700;
+  color: var(--color-accent);
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -384,7 +384,7 @@ window.addEventListener('resize', constrainToViewport)
 .collapse-btn {
   background: none;
   border: none;
-  color: #ccc;
+  color: var(--color-text-disabled);
   font-size: 0.625rem;
   cursor: pointer;
   padding: 0.25rem 0.5rem;
@@ -399,8 +399,8 @@ window.addEventListener('resize', constrainToViewport)
 }
 
 .collapse-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
+  background: var(--color-white-alpha-10);
+  color: var(--color-text-primary);
 }
 
 /* Info Content */
@@ -421,7 +421,7 @@ window.addEventListener('resize', constrainToViewport)
 
 .info-section h5 {
   margin: 0 0 0.5rem 0;
-  color: #FFD700;
+  color: var(--color-accent);
   font-size: 0.625rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -433,7 +433,7 @@ window.addEventListener('resize', constrainToViewport)
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 0.25rem;
-  color: #ccc;
+  color: var(--color-text-disabled);
 }
 
 .info-item:last-child {
@@ -441,13 +441,13 @@ window.addEventListener('resize', constrainToViewport)
 }
 
 .info-item .label {
-  color: #999;
+  color: var(--color-text-muted);
   margin-right: 0.5rem;
   flex-shrink: 0;
 }
 
 .info-item .value {
-  color: #fff;
+  color: var(--color-text-primary);
   text-align: right;
   word-break: break-word;
   font-family: 'Berkeley Mono', monospace;
@@ -464,17 +464,17 @@ window.addEventListener('resize', constrainToViewport)
 }
 
 .info-content::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--color-white-alpha-10);
   border-radius: 2px;
 }
 
 .info-content::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.3);
+  background: var(--color-white-alpha-30);
   border-radius: 2px;
 }
 
 .info-content::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.5);
+  background: var(--color-white-alpha-50);
 }
 
 /* Mobile styles */

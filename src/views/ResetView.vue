@@ -565,12 +565,12 @@ onMounted(async () => {
 }
 
 .reset-header h1 {
-  color: #FFD700;
+  color: var(--color-accent);
   margin-bottom: 0.5rem;
 }
 
 .reset-header p {
-  color: #ccc;
+  color: var(--color-text-secondary);
   font-size: 1.1rem;
 }
 
@@ -582,34 +582,34 @@ onMounted(async () => {
 }
 
 .reset-card {
-  background: #2a2a2a;
-  border: 1px solid #444;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   padding: 1.5rem;
   transition: border-color 0.2s;
 }
 
 .reset-card:hover {
-  border-color: #8B0000;
+  border-color: var(--color-primary);
 }
 
 .reset-card.danger {
-  border-color: #8B0000;
+  border-color: var(--color-primary);
 }
 
 .reset-card.danger:hover {
-  border-color: #a00;
-  background: rgba(139, 0, 0, 0.1);
+  border-color: var(--color-primary-hover);
+  background: var(--color-primary-alpha-10);
 }
 
 .reset-card h3 {
-  color: #FFD700;
+  color: var(--color-accent);
   margin: 0 0 0.5rem 0;
   font-size: 1.1rem;
 }
 
 .reset-card p {
-  color: #ccc;
+  color: var(--color-text-secondary);
   margin: 0 0 1rem 0;
   font-size: 0.9rem;
   line-height: 1.4;
@@ -632,43 +632,43 @@ onMounted(async () => {
 }
 
 .reset-btn.primary {
-  background: #8B0000;
-  color: #fff;
+  background: var(--color-primary);
+  color: var(--color-text-primary);
 }
 
 .reset-btn.primary:hover:not(:disabled) {
-  background: #a00;
+  background: var(--color-primary-hover);
 }
 
 .reset-btn.secondary {
-  background: #444;
-  color: #ccc;
+  background: var(--color-bg-input);
+  color: var(--color-text-secondary);
 }
 
 .reset-btn.secondary:hover:not(:disabled) {
-  background: #555;
-  color: #fff;
+  background: var(--color-bg-hover);
+  color: var(--color-text-primary);
 }
 
 .reset-btn.danger {
-  background: #8B0000;
-  color: #fff;
+  background: var(--color-primary);
+  color: var(--color-text-primary);
 }
 
 .reset-btn.danger:hover:not(:disabled) {
-  background: #a00;
+  background: var(--color-primary-hover);
 }
 
 .current-status {
-  background: #1a1a1a;
-  border: 1px solid #333;
+  background: var(--color-bg-base);
+  border: 1px solid var(--color-border-light);
   border-radius: 8px;
   padding: 1.5rem;
   margin-bottom: 2rem;
 }
 
 .current-status h3 {
-  color: #FFD700;
+  color: var(--color-accent);
   margin: 0 0 1rem 0;
 }
 
@@ -682,21 +682,21 @@ onMounted(async () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  color: #ccc;
+  color: var(--color-text-secondary);
 }
 
 .status-completed {
-  color: #4CAF50;
+  color: var(--color-success);
   font-weight: 500;
 }
 
 .status-pending {
-  color: #ff9800;
+  color: var(--color-warning);
   font-weight: 500;
 }
 
 .status-info {
-  color: #2196F3;
+  color: var(--color-info);
   font-weight: 500;
 }
 
@@ -717,27 +717,27 @@ onMounted(async () => {
 }
 
 .refresh-btn {
-  background: #444;
-  color: #ccc;
+  background: var(--color-bg-input);
+  color: var(--color-text-secondary);
 }
 
 .refresh-btn:hover:not(:disabled) {
-  background: #555;
-  color: #fff;
+  background: var(--color-bg-hover);
+  color: var(--color-text-primary);
 }
 
 .home-btn {
-  background: #8B0000;
-  color: #fff;
+  background: var(--color-primary);
+  color: var(--color-text-primary);
 }
 
 .home-btn:hover {
-  background: #a00;
+  background: var(--color-primary-hover);
 }
 
 .reset-log {
-  background: #1a1a1a;
-  border: 1px solid #333;
+  background: var(--color-bg-base);
+  border: 1px solid var(--color-border-light);
   border-radius: 8px;
   padding: 1.5rem;
 }
@@ -750,14 +750,14 @@ onMounted(async () => {
 }
 
 .log-header h3 {
-  color: #FFD700;
+  color: var(--color-accent);
   margin: 0;
 }
 
 .copy-logs-btn {
   padding: 0.5rem 1rem;
-  background: #444;
-  color: #ccc;
+  background: var(--color-bg-input);
+  color: var(--color-text-secondary);
   border: none;
   border-radius: 4px;
   cursor: pointer;
@@ -766,8 +766,8 @@ onMounted(async () => {
 }
 
 .copy-logs-btn:hover {
-  background: #555;
-  color: #fff;
+  background: var(--color-bg-hover);
+  color: var(--color-text-primary);
 }
 
 .log-entries {
@@ -787,34 +787,34 @@ onMounted(async () => {
 }
 
 .log-info {
-  background: rgba(33, 150, 243, 0.1);
-  border-left: 3px solid #2196F3;
+  background: var(--color-info-bg);
+  border-left: 3px solid var(--color-info);
 }
 
 .log-success {
-  background: rgba(76, 175, 80, 0.1);
-  border-left: 3px solid #4CAF50;
+  background: var(--color-success-alpha-10);
+  border-left: 3px solid var(--color-success);
 }
 
 .log-error {
-  background: rgba(244, 67, 54, 0.1);
-  border-left: 3px solid #f44336;
+  background: var(--color-error-alpha-10);
+  border-left: 3px solid var(--color-error);
 }
 
 .log-warning {
-  background: rgba(255, 152, 0, 0.1);
-  border-left: 3px solid #ff9800;
+  background: var(--color-warning-bg);
+  border-left: 3px solid var(--color-warning);
 }
 
 .log-time {
-  color: #999;
+  color: var(--color-text-muted);
   flex-shrink: 0;
   font-family: monospace;
   font-size: 0.8rem;
 }
 
 .log-message {
-  color: #ccc;
+  color: var(--color-text-secondary);
 }
 
 @media (max-width: 768px) {

@@ -324,7 +324,7 @@ main {
 
 .camp-events-section .expand-icon {
   font-size: 0.875rem;
-  color: var(--color-gold);
+  color: var(--color-accent);
   transition: transform 0.2s ease;
 }
 

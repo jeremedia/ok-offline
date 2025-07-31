@@ -323,7 +323,7 @@ onMounted(() => {
 <style scoped>
 /* Component-specific styles */
 .emergency-info {
-  border-color: #8B0000;
+  border-color: var(--color-primary);
 }
 
 .emergency-grid {
@@ -335,21 +335,21 @@ onMounted(() => {
 
 .emergency-item {
   padding: 1.5rem;
-  background: #1a1a1a;
-  border: 1px solid #444;
+  background: var(--color-bg-base);
+  border: 1px solid var(--color-border-medium);
   border-radius: 8px;
   text-align: center;
 }
 
 .emergency-item h4 {
-  color: #fff;
+  color: var(--color-text-primary);
   margin: 0 0 0.75rem 0;
   font-size: 1rem;
 }
 
 .emergency-tel {
   font-size: 2rem;
-  color: #ff4444;
+  color: var(--color-error);
   text-decoration: none;
   font-weight: bold;
   display: block;
@@ -358,12 +358,12 @@ onMounted(() => {
 }
 
 .emergency-tel:hover {
-  color: #ff6666;
+  color: var(--color-error);
 }
 
 .ranger-locations {
   font-weight: 600;
-  color: #8B0000;
+  color: var(--color-primary);
   margin: 0.5rem 0;
 }
 
@@ -371,14 +371,14 @@ onMounted(() => {
   display: flex;
   gap: 0.5rem;
   margin-bottom: 2rem;
-  border-bottom: 1px solid #444;
+  border-bottom: 1px solid var(--color-border-medium);
   flex-wrap: wrap;
 }
 
 .tab-btn {
   background: none;
   border: none;
-  color: #999;
+  color: var(--color-text-muted);
   padding: 0.75rem 1rem;
   cursor: pointer;
   font-size: 0.9rem;
@@ -388,12 +388,12 @@ onMounted(() => {
 }
 
 .tab-btn:hover {
-  color: #ccc;
+  color: var(--color-text-secondary);
 }
 
 .tab-btn.active {
-  color: #fff;
-  border-bottom-color: #8B0000;
+  color: var(--color-text-primary);
+  border-bottom-color: var(--color-primary);
 }
 
 .tab-content-section {
@@ -408,15 +408,15 @@ onMounted(() => {
 }
 
 .contact-card {
-  background: #1a1a1a;
-  border: 1px solid #333;
+  background: var(--color-bg-base);
+  border: 1px solid var(--color-border-light);
   border-radius: 8px;
   padding: 1.25rem;
   transition: all 0.2s ease;
 }
 
 .contact-card:hover {
-  border-color: #8B0000;
+  border-color: var(--color-primary);
 }
 
 .contact-header {
@@ -427,14 +427,14 @@ onMounted(() => {
 }
 
 .contact-header strong {
-  color: #fff;
+  color: var(--color-text-primary);
   font-size: 1.1rem;
 }
 
 .remove-btn {
   background: none;
   border: none;
-  color: #999;
+  color: var(--color-text-muted);
   font-size: 1.2rem;
   cursor: pointer;
   transition: color 0.2s;
@@ -447,7 +447,7 @@ onMounted(() => {
 }
 
 .remove-btn:hover {
-  color: #ff4444;
+  color: var(--color-error);
 }
 
 .contact-details {
@@ -457,26 +457,26 @@ onMounted(() => {
 }
 
 .relationship {
-  color: #8B0000;
+  color: var(--color-primary);
   font-weight: 500;
   font-size: 0.9rem;
 }
 
 .contact-phone {
-  color: #ccc;
+  color: var(--color-text-secondary);
   font-family: 'Berkeley Mono', monospace;
 }
 
 .contact-notes {
-  color: #999;
+  color: var(--color-text-muted);
   font-size: 0.85rem;
   font-style: italic;
   margin-top: 0.25rem;
 }
 
 .contact-form, .medical-form {
-  background: #1a1a1a;
-  border: 1px solid #333;
+  background: var(--color-bg-base);
+  border: 1px solid var(--color-border-light);
   padding: 1.5rem;
   border-radius: 8px;
   margin-top: 1rem;
@@ -490,14 +490,14 @@ onMounted(() => {
 }
 
 .resource-card {
-  background: #1a1a1a;
-  border: 1px solid #333;
+  background: var(--color-bg-base);
+  border: 1px solid var(--color-border-light);
   border-radius: 8px;
   padding: 1.25rem;
 }
 
 .resource-card h4 {
-  color: #FFD700;
+  color: var(--color-accent);
   margin: 0 0 1rem 0;
   font-size: 1rem;
 }
@@ -512,12 +512,12 @@ onMounted(() => {
 }
 
 .resource-card li {
-  color: #ccc;
+  color: var(--color-text-secondary);
   line-height: 1.4;
 }
 
 .resource-card strong {
-  color: #fff;
+  color: var(--color-text-primary);
   display: block;
   margin-bottom: 0.25rem;
 }

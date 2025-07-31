@@ -408,9 +408,9 @@ const toggleCollapse = () => {
 
 <style scoped>
 .map-control-tabs {
-  background: rgba(26, 26, 26, 0.9);
+  background: var(--color-background-secondary-alpha-90);
   border-radius: 8px;
-  border: 1px solid #444;
+  border: 1px solid var(--color-border);
   overflow: hidden;
   max-width: 320px;
   transition: all 0.3s ease;
@@ -426,9 +426,9 @@ const toggleCollapse = () => {
   align-items: center;
   justify-content: space-between;
   padding: 0.5rem 0.75rem;
-  background: rgba(0, 0, 0, 0.3);
+  background: var(--color-overlay-light);
   border-radius: 8px 8px 0 0;
-  border-bottom: 1px solid #444;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .collapsed .control-header {
@@ -438,7 +438,7 @@ const toggleCollapse = () => {
 
 .control-header h4 {
   margin: 0;
-  color: #FFD700;
+  color: var(--color-accent);
   font-size: 0.875rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -448,7 +448,7 @@ const toggleCollapse = () => {
 .control-header .collapse-btn {
   background: none;
   border: none;
-  color: #ccc;
+  color: var(--color-text-disabled);
   font-size: 0.75rem;
   cursor: pointer;
   padding: 0.25rem 0.5rem;
@@ -463,15 +463,15 @@ const toggleCollapse = () => {
 }
 
 .control-header .collapse-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
+  background: var(--color-white-alpha-10);
+  color: var(--color-text-primary);
 }
 
 /* Tab Header */
 .tab-header {
   display: flex;
-  background: rgba(0, 0, 0, 0.3);
-  border-bottom: 1px solid #444;
+  background: var(--color-overlay-light);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .tab-button {
@@ -479,12 +479,12 @@ const toggleCollapse = () => {
   padding: 0.75rem;
   background: none;
   border: none;
-  color: #999;
+  color: var(--color-text-muted);
   font-size: 0.875rem;
   font-weight: bold;
   cursor: pointer;
   transition: all 0.2s ease;
-  border-right: 1px solid #333;
+  border-right: 1px solid var(--color-border-dark);
   white-space: nowrap;
   text-transform: uppercase;
 }
@@ -494,13 +494,13 @@ const toggleCollapse = () => {
 }
 
 .tab-button:hover {
-  background: rgba(139, 0, 0, 0.3);
-  color: #fff;
+  background: var(--color-primary-alpha-30);
+  color: var(--color-text-primary);
 }
 
 .tab-button.active {
-  background: #8B0000;
-  color: #fff;
+  background: var(--color-primary);
+  color: var(--color-text-primary);
   font-weight: bold;
 }
 
@@ -520,7 +520,7 @@ const toggleCollapse = () => {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #ccc;
+  color: var(--color-text-disabled);
   cursor: pointer;
   padding: 0.5rem;
   border-radius: 4px;
@@ -528,8 +528,8 @@ const toggleCollapse = () => {
 }
 
 .control-item:hover {
-  background: rgba(255, 255, 255, 0.05);
-  color: #fff;
+  background: var(--color-white-alpha-05);
+  color: var(--color-text-primary);
 }
 
 .control-item.disabled {
@@ -539,7 +539,7 @@ const toggleCollapse = () => {
 
 .control-item.disabled:hover {
   background: none;
-  color: #ccc;
+  color: var(--color-text-disabled);
 }
 
 .control-label {
@@ -549,11 +549,11 @@ const toggleCollapse = () => {
 
 /* Infrastructure Categories */
 .infra-categories {
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--color-overlay-lighter);
   border-radius: 4px;
   padding: 0.5rem;
   margin-bottom: 0.5rem;
-  border-left: 3px solid #FFD700;
+  border-left: 3px solid var(--color-accent);
 }
 
 .control-item.sub-item {
@@ -574,7 +574,7 @@ const toggleCollapse = () => {
 
 /* Rotation Controls */
 .rotation-controls {
-  background: rgba(0, 0, 0, 0.3);
+  background: var(--color-overlay-light);
   padding: 0.75rem;
   border-radius: 4px;
   margin-top: 0.5rem;
@@ -583,7 +583,7 @@ const toggleCollapse = () => {
 .slider-label {
   display: block;
   font-size: 0.75rem;
-  color: #FFD700;
+  color: var(--color-accent);
   margin-bottom: 0.5rem;
 }
 
@@ -591,7 +591,7 @@ const toggleCollapse = () => {
   width: 100%;
   height: 4px;
   border-radius: 2px;
-  background: #444;
+  background: var(--color-border);
   outline: none;
   cursor: pointer;
 }
@@ -601,7 +601,7 @@ const toggleCollapse = () => {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: #FFD700;
+  background: var(--color-accent);
   cursor: pointer;
 }
 
@@ -609,7 +609,7 @@ const toggleCollapse = () => {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: #FFD700;
+  background: var(--color-accent);
   cursor: pointer;
   border: none;
 }
@@ -623,19 +623,19 @@ const toggleCollapse = () => {
 .rotation-preset-btn {
   flex: 1;
   padding: 0.375rem 0.5rem;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid #444;
+  background: var(--color-white-alpha-10);
+  border: 1px solid var(--color-border);
   border-radius: 4px;
-  color: #ccc;
+  color: var(--color-text-disabled);
   font-size: 0.625rem;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .rotation-preset-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-  color: #fff;
-  border-color: #666;
+  background: var(--color-white-alpha-20);
+  color: var(--color-text-primary);
+  border-color: var(--color-text-secondary);
 }
 
 .rotation-preset-btn:active {
@@ -653,19 +653,19 @@ const toggleCollapse = () => {
 }
 
 .loading-indicator {
-  background: rgba(255, 215, 0, 0.1);
-  color: #FFD700;
+  background: var(--color-accent-alpha-10);
+  color: var(--color-accent);
 }
 
 .error-indicator {
-  background: rgba(255, 107, 107, 0.1);
-  color: #ff6b6b;
+  background: var(--color-error-alpha-10);
+  color: var(--color-error);
 }
 
 .location-warning {
-  background: rgba(139, 0, 0, 0.2);
-  color: #ff9999;
-  border: 1px solid rgba(139, 0, 0, 0.3);
+  background: var(--color-primary-alpha-20);
+  color: var(--color-error-light);
+  border: 1px solid var(--color-primary-alpha-30);
   padding: 0.75rem;
 }
 
@@ -675,7 +675,7 @@ const toggleCollapse = () => {
 }
 
 .location-warning .warning-countdown {
-  color: #FFD700;
+  color: var(--color-accent);
   font-weight: 500;
   font-size: 0.875rem;
   margin-bottom: 0.25rem;
@@ -688,17 +688,17 @@ const toggleCollapse = () => {
 
 /* Reset View Button */
 .reset-view-container {
-  border-top: 1px solid #333;
+  border-top: 1px solid var(--color-border-dark);
   padding: 0 0.5rem 0.5rem 0.5rem;
 }
 
 .reset-view-btn {
   width: 100%;
   padding: 0.75rem;
-  background: #8B0000;
+  background: var(--color-primary);
   border: none;
   border-radius: 4px;
-  color: #fff;
+  color: var(--color-text-primary);
   font-size: 0.875rem;
   font-weight: bold;
   cursor: pointer;
@@ -710,9 +710,9 @@ const toggleCollapse = () => {
 }
 
 .reset-view-btn:hover {
-  background: #a00000;
+  background: var(--color-primary-hover);
   transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 4px var(--color-overlay-light);
 }
 
 .reset-view-btn:active {

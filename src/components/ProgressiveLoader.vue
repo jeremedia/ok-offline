@@ -244,7 +244,7 @@ onUnmounted(() => {
   right: 0;
   bottom: 0;
   z-index: 9000;
-  background: rgba(26, 26, 26, 0.95);
+  background: var(--color-overlay-dark);
 }
 
 .backdrop {
@@ -269,8 +269,8 @@ onUnmounted(() => {
 
 /* Only add styling when in full-screen mode */
 .progressive-loader.full-screen .loader-content {
-  background: #1a1a1a;
-  border: 2px solid #444;
+  background: var(--color-bg-base);
+  border: 2px solid var(--color-border);
   border-radius: 8px;
   padding: 2rem;
 }
@@ -309,7 +309,7 @@ onUnmounted(() => {
 .ring {
   position: absolute;
   border: 2px solid transparent;
-  border-top: 2px solid #FFD700;
+  border-top: 2px solid var(--color-accent);
   border-radius: 50%;
   animation: spin 2s linear infinite;
 }
@@ -366,7 +366,7 @@ onUnmounted(() => {
 .search-dots .dot {
   width: 8px;
   height: 8px;
-  background: #FFD700;
+  background: var(--color-accent);
   border-radius: 50%;
   animation: bounce 1.4s ease-in-out infinite both;
 }
@@ -385,8 +385,8 @@ onUnmounted(() => {
 .default-loader .spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid #444;
-  border-top: 4px solid #FFD700;
+  border: 4px solid var(--color-border);
+  border-top: 4px solid var(--color-accent);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto;
@@ -398,7 +398,7 @@ onUnmounted(() => {
 }
 
 .loader-title {
-  color: #FFD700;
+  color: var(--color-accent);
   margin: 0 0 0.75rem 0;
   font-size: 1.4rem;
   font-weight: 600;
@@ -406,7 +406,7 @@ onUnmounted(() => {
 }
 
 .loader-message {
-  color: #ccc;
+  color: var(--color-text-secondary);
   margin: 0 0 1.5rem 0;
   text-align: center;
   line-height: 1.4;
@@ -419,7 +419,7 @@ onUnmounted(() => {
 .progress-bar {
   width: 100%;
   height: 8px;
-  background: #333;
+  background: var(--color-bg-header);
   border-radius: 4px;
   overflow: hidden;
   margin-bottom: 0.5rem;
@@ -427,7 +427,7 @@ onUnmounted(() => {
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #8B0000, #FFD700);
+  background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
   transition: width 0.3s ease;
   border-radius: 4px;
 }
@@ -436,11 +436,11 @@ onUnmounted(() => {
   display: flex;
   justify-content: space-between;
   font-size: 0.9rem;
-  color: #999;
+  color: var(--color-text-muted);
 }
 
 .progress-percentage {
-  color: #FFD700;
+  color: var(--color-accent);
   font-weight: bold;
 }
 
@@ -460,27 +460,27 @@ onUnmounted(() => {
   align-items: stretch;
   gap: 0;
   padding: 0;
-  background: #2a2a2a;
+  background: var(--color-bg-elevated);
   border-radius: 6px;
-  border-left: 3px solid #444;
+  border-left: 3px solid var(--color-border);
   transition: all 0.2s ease;
   overflow: hidden;
   min-height: 3rem;
 }
 
 .step-item.step-completed {
-  border-left-color: #4CAF50;
-  background: rgba(76, 175, 80, 0.1);
+  border-left-color: var(--color-success);
+  background: var(--color-success-bg);
 }
 
 .step-item.step-active {
-  border-left-color: #FFD700;
-  background: rgba(255, 215, 0, 0.1);
+  border-left-color: var(--color-accent);
+  background: var(--color-accent-bg);
 }
 
 .step-item.step-error {
-  border-left-color: #f44336;
-  background: rgba(244, 67, 54, 0.1);
+  border-left-color: var(--color-error);
+  background: var(--color-error-bg);
 }
 
 .step-number {
@@ -488,30 +488,30 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.3);
-  border-right: 1px solid #444;
-  color: #666;
+  background: var(--color-overlay-subtle);
+  border-right: 1px solid var(--color-border);
+  color: var(--color-text-disabled);
   font-weight: bold;
   font-size: 1.1rem;
   flex-shrink: 0;
 }
 
 .step-item.step-active .step-number {
-  color: #FFD700;
-  background: rgba(255, 215, 0, 0.1);
-  border-right-color: #FFD700;
+  color: var(--color-accent);
+  background: var(--color-accent-bg);
+  border-right-color: var(--color-accent);
 }
 
 .step-item.step-completed .step-number {
-  color: #4CAF50;
-  background: rgba(76, 175, 80, 0.1);
-  border-right-color: #4CAF50;
+  color: var(--color-success);
+  background: var(--color-success-bg);
+  border-right-color: var(--color-success);
 }
 
 .step-item.step-error .step-number {
-  color: #f44336;
-  background: rgba(244, 67, 54, 0.1);
-  border-right-color: #f44336;
+  color: var(--color-error);
+  background: var(--color-error-bg);
+  border-right-color: var(--color-error);
 }
 
 .step-icon {
@@ -535,20 +535,20 @@ onUnmounted(() => {
 }
 
 .step-title {
-  color: #fff;
+  color: var(--color-text-primary);
   font-weight: 600;
   margin-bottom: 0.25rem;
   font-size: 1rem;
 }
 
 .step-description {
-  color: #999;
+  color: var(--color-text-muted);
   font-size: 0.875rem;
   line-height: 1.4;
 }
 
 .step-count {
-  color: #ccc;
+  color: var(--color-text-secondary);
   font-size: 0.9rem;
   font-weight: normal;
   flex-shrink: 0;
@@ -561,8 +561,8 @@ onUnmounted(() => {
 .tips-container {
   margin: 1.5rem 0;
   padding: 1rem;
-  background: rgba(139, 0, 0, 0.1);
-  border: 1px solid rgba(139, 0, 0, 0.3);
+  background: var(--color-primary-bg);
+  border: 1px solid var(--color-primary-border);
   border-radius: 6px;
 }
 
@@ -570,7 +570,7 @@ onUnmounted(() => {
   display: flex;
   align-items: flex-start;
   gap: 0.75rem;
-  color: #ccc;
+  color: var(--color-text-secondary);
   font-size: 0.875rem;
 }
 
@@ -591,7 +591,7 @@ onUnmounted(() => {
   justify-content: center;
   margin-top: 1.5rem;
   padding-top: 1rem;
-  border-top: 1px solid #333;
+  border-top: 1px solid var(--color-bg-header);
 }
 
 .action-btn {
@@ -604,13 +604,13 @@ onUnmounted(() => {
 }
 
 .cancel-btn {
-  background: #444;
-  color: #ccc;
+  background: var(--color-border);
+  color: var(--color-text-secondary);
 }
 
 .cancel-btn:hover:not(:disabled) {
-  background: #555;
-  color: #fff;
+  background: var(--color-bg-input);
+  color: var(--color-text-primary);
 }
 
 .cancel-btn:disabled {
@@ -619,12 +619,12 @@ onUnmounted(() => {
 }
 
 .skip-btn {
-  background: #8B0000;
-  color: #fff;
+  background: var(--color-primary);
+  color: var(--color-text-primary);
 }
 
 .skip-btn:hover {
-  background: #a00;
+  background: var(--color-primary-hover);
 }
 
 /* Responsive */

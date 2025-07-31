@@ -278,10 +278,10 @@ window.addEventListener('resize', constrainToViewport)
 .map-legend {
   position: fixed;
   z-index: 1000;
-  background: rgba(26, 26, 26, 0.95);
+  background: var(--color-background-secondary-alpha-95);
   padding: 0;
   border-radius: 8px;
-  border: 1px solid #444;
+  border: 1px solid var(--color-border);
   min-width: 200px;
   max-width: 250px;
   transition: opacity 0.2s ease, min-width 0.3s ease, max-width 0.3s ease;
@@ -305,7 +305,7 @@ window.addEventListener('resize', constrainToViewport)
   align-items: center;
   justify-content: space-between;
   padding: 0.5rem 0.75rem;
-  background: rgba(0, 0, 0, 0.3);
+  background: var(--color-overlay-light);
   border-radius: 8px 8px 0 0;
   cursor: move;
 }
@@ -317,7 +317,7 @@ window.addEventListener('resize', constrainToViewport)
 
 .legend-header h4 {
   margin: 0;
-  color: #FFD700;
+  color: var(--color-accent);
   font-size: 0.875rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -326,7 +326,7 @@ window.addEventListener('resize', constrainToViewport)
 .collapse-btn {
   background: none;
   border: none;
-  color: #ccc;
+  color: var(--color-text-disabled);
   font-size: 0.75rem;
   cursor: pointer;
   padding: 0.25rem 0.5rem;
@@ -341,8 +341,8 @@ window.addEventListener('resize', constrainToViewport)
 }
 
 .collapse-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
+  background: var(--color-white-alpha-10);
+  color: var(--color-text-primary);
 }
 
 /* Legend Content */
@@ -360,14 +360,14 @@ window.addEventListener('resize', constrainToViewport)
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  color: #ccc;
+  color: var(--color-text-disabled);
   font-size: 0.75rem;
 }
 
 .legend-divider {
   margin: 0.75rem 0;
   border: none;
-  border-top: 1px solid #444;
+  border-top: 1px solid var(--color-border);
 }
 
 /* Legend Icons */
@@ -383,28 +383,28 @@ window.addEventListener('resize', constrainToViewport)
 }
 
 .legend-icon.special-location {
-  background: rgba(139, 0, 0, 0.9);
-  border: 2px solid #FFD700;
+  background: var(--color-primary-alpha-90);
+  border: 2px solid var(--color-accent);
 }
 
 .legend-icon.camp {
-  background: rgba(34, 139, 34, 0.9);
-  border: 2px solid #fff;
+  background: var(--color-success-alpha-90);
+  border: 2px solid var(--color-text-primary);
 }
 
 .legend-icon.art {
-  background: rgba(106, 90, 205, 0.9);
-  border: 2px solid #fff;
+  background: var(--color-purple-alpha-90);
+  border: 2px solid var(--color-text-primary);
 }
 
 .legend-icon.event {
-  background: rgba(255, 140, 0, 0.9);
-  border: 2px solid #fff;
+  background: var(--color-warning-alpha-90);
+  border: 2px solid var(--color-text-primary);
 }
 
 .legend-icon.cpn {
-  background: rgba(106, 13, 173, 0.9);
-  border: 2px solid #fff;
+  background: var(--color-purple-alpha-90);
+  border: 2px solid var(--color-text-primary);
 }
 
 /* Legend Lines */
@@ -415,12 +415,12 @@ window.addEventListener('resize', constrainToViewport)
 }
 
 .legend-line.street {
-  background: #666666;
+  background: var(--color-text-secondary);
 }
 
 .legend-line.trash-fence {
-  background: #ff0000;
-  border-top: 2px dashed #ff0000;
+  background: var(--color-danger);
+  border-top: 2px dashed var(--color-danger);
   height: 0;
 }
 
@@ -433,13 +433,13 @@ window.addEventListener('resize', constrainToViewport)
 }
 
 .legend-area.city-block {
-  border-color: #444444;
-  background: rgba(34, 34, 34, 0.3);
+  border-color: var(--color-border);
+  background: var(--color-overlay-lighter);
 }
 
 .legend-area.plaza {
-  border-color: #6a0dad;
-  background: rgba(106, 13, 173, 0.3);
+  border-color: var(--color-purple);
+  background: var(--color-purple-alpha-30);
 }
 
 /* Mobile styles */

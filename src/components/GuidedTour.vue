@@ -411,7 +411,7 @@ defineExpose({
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: var(--color-modal-overlay);
   pointer-events: all;
 }
 
@@ -420,8 +420,8 @@ defineExpose({
   background: transparent;
   border-radius: 8px;
   box-shadow: 
-    0 0 0 4px rgba(255, 215, 0, 0.8),
-    0 0 0 9999px rgba(0, 0, 0, 0.7);
+    0 0 0 4px var(--color-accent-alpha-80),
+    0 0 0 9999px var(--color-modal-overlay);
   pointer-events: none;
   transition: all 0.3s ease;
   z-index: 10000;
@@ -429,10 +429,10 @@ defineExpose({
 
 .tour-tooltip {
   position: absolute;
-  background: #1a1a1a;
-  border: 2px solid #FFD700;
+  background: var(--color-bg-base);
+  border: 2px solid var(--color-accent);
   border-radius: 8px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 8px 32px var(--color-shadow-dark);
   pointer-events: all;
   opacity: 0;
   transform: scale(0.9) translateY(-10px);
@@ -455,7 +455,7 @@ defineExpose({
   transform: translateX(-50%);
   border-left: 10px solid transparent;
   border-right: 10px solid transparent;
-  border-bottom: 10px solid #FFD700;
+  border-bottom: 10px solid var(--color-accent);
 }
 
 .tour-tooltip--top::before {
@@ -466,7 +466,7 @@ defineExpose({
   transform: translateX(-50%);
   border-left: 10px solid transparent;
   border-right: 10px solid transparent;
-  border-top: 10px solid #FFD700;
+  border-top: 10px solid var(--color-accent);
 }
 
 .tour-tooltip--left::before {
@@ -477,7 +477,7 @@ defineExpose({
   transform: translateY(-50%);
   border-top: 10px solid transparent;
   border-bottom: 10px solid transparent;
-  border-left: 10px solid #FFD700;
+  border-left: 10px solid var(--color-accent);
 }
 
 .tour-tooltip--right::before {
@@ -488,7 +488,7 @@ defineExpose({
   transform: translateY(-50%);
   border-top: 10px solid transparent;
   border-bottom: 10px solid transparent;
-  border-right: 10px solid #FFD700;
+  border-right: 10px solid var(--color-accent);
 }
 
 .tour-content {
@@ -503,7 +503,7 @@ defineExpose({
 }
 
 .tour-header h3 {
-  color: #FFD700;
+  color: var(--color-accent);
   margin: 0;
   font-size: 1.1rem;
   line-height: 1.3;
@@ -512,7 +512,7 @@ defineExpose({
 .tour-close {
   background: none;
   border: none;
-  color: #999;
+  color: var(--color-text-muted);
   font-size: 1.5rem;
   cursor: pointer;
   padding: 0;
@@ -521,7 +521,7 @@ defineExpose({
 }
 
 .tour-close:hover {
-  color: #FFD700;
+  color: var(--color-accent);
 }
 
 .tour-body {
@@ -529,24 +529,24 @@ defineExpose({
 }
 
 .tour-body p {
-  color: #ccc;
+  color: var(--color-text-secondary);
   margin: 0 0 1rem 0;
   line-height: 1.5;
 }
 
 .tour-shortcut {
-  background: #2a2a2a;
-  border: 1px solid #444;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
   border-radius: 4px;
   padding: 0.5rem 0.75rem;
   margin: 0.75rem 0;
   font-size: 0.9rem;
-  color: #ccc;
+  color: var(--color-text-secondary);
 }
 
 .tour-shortcut kbd {
-  background: #444;
-  color: #FFD700;
+  background: var(--color-bg-input);
+  color: var(--color-accent);
   padding: 0.2rem 0.4rem;
   border-radius: 3px;
   font-size: 0.8rem;
@@ -559,10 +559,10 @@ defineExpose({
   gap: 0.5rem;
   margin: 0.75rem 0;
   padding: 0.5rem 0.75rem;
-  background: rgba(139, 0, 0, 0.2);
-  border-left: 3px solid #8B0000;
+  background: var(--color-primary-alpha-20);
+  border-left: 3px solid var(--color-primary);
   border-radius: 0 4px 4px 0;
-  color: #ccc;
+  color: var(--color-text-secondary);
   font-size: 0.9rem;
 }
 
@@ -572,7 +572,7 @@ defineExpose({
 }
 
 .tour-footer {
-  border-top: 1px solid #333;
+  border-top: 1px solid var(--color-border-light);
   padding-top: 1rem;
 }
 
@@ -584,7 +584,7 @@ defineExpose({
 }
 
 .step-counter {
-  color: #999;
+  color: var(--color-text-muted);
   font-size: 0.9rem;
 }
 
@@ -597,16 +597,16 @@ defineExpose({
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #444;
+  background: var(--color-bg-input);
   transition: background-color 0.2s;
 }
 
 .progress-dot.active {
-  background: #8B0000;
+  background: var(--color-primary);
 }
 
 .progress-dot.completed {
-  background: #FFD700;
+  background: var(--color-accent);
 }
 
 .tour-actions {
@@ -625,23 +625,23 @@ defineExpose({
 }
 
 .tour-btn--primary {
-  background: #8B0000;
-  color: #fff;
+  background: var(--color-primary);
+  color: var(--color-text-primary);
 }
 
 .tour-btn--primary:hover {
-  background: #a00;
+  background: var(--color-primary-hover);
 }
 
 .tour-btn--secondary {
   background: transparent;
-  color: #ccc;
-  border: 1px solid #444;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
 }
 
 .tour-btn--secondary:hover {
-  border-color: #8B0000;
-  color: #fff;
+  border-color: var(--color-primary);
+  color: var(--color-text-primary);
 }
 
 /* Responsive adjustments */

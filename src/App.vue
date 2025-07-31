@@ -16,6 +16,14 @@
       <div class="header-row">
         <!-- Desktop Navigation -->
         <div class="nav-section" v-if="!isMobile">
+          <!-- Theme Selector -->
+          <div class="theme-selector-group">
+            <select id="theme-selector" v-model="selectedTheme" @change="onThemeChange" class="unified-select">
+              <option v-for="theme in availableThemes" :key="theme.id" :value="theme.id">
+                {{ theme.name }}
+              </option>
+            </select>
+          </div>
           <div class="year-selector-group">
             <select id="year-selector" v-model="selectedYear" @change="onYearChange" class="unified-select">
               <option value="2023">2023</option>
@@ -129,7 +137,7 @@
       <router-view :year="selectedYear"></router-view>
     </main>
     <BottomNav v-if="!showOnboarding && !showTour" :year="selectedYear" />
-    <footer :class="{ 'mobile-footer': isMobile }" v-if="!isMobile || (isMobile && $route.name !== 'map')">
+    <footer class="d-none" :class="{ 'mobile-footer': isMobile }" v-if="!isMobile || (isMobile && $route.name !== 'map')">
       <div class="footer-content">
         <!-- Mobile Footer: Compact Single Row -->
         <div class="footer-mobile d-none" v-if="isMobile">
@@ -212,6 +220,7 @@ import GuidedTour from './components/GuidedTour.vue'
 import BottomNav from './components/BottomNav.vue'
 import { setToastRef } from './composables/useToast'
 import packageJson from '../package.json'
+import { themes, getCurrentTheme, applyTheme } from './services/themeService'
 
 const route = useRoute()
 const router = useRouter()
@@ -227,6 +236,7 @@ const lastSyncTime = ref(null)
 const showOnboarding = ref(false)
 const showTour = ref(false)
 const tourType = ref('general')
+const selectedTheme = ref(getCurrentTheme())
 
 // Check if device is truly mobile (phone, not tablet)
 const checkIfMobile = () => {
@@ -281,6 +291,11 @@ const formatLastSync = computed(() => {
   if (minutes < 60) return `${minutes}m ago`
   if (hours < 24) return `${hours}h ago`
   return `${days}d ago`
+})
+
+// Get available themes for selector
+const availableThemes = computed(() => {
+  return Object.values(themes)
 })
 
 // Check if user needs onboarding
@@ -454,6 +469,11 @@ const navigateFromMenu = (destination) => {
       break
   }
 }
+
+// Theme selector handler
+const onThemeChange = () => {
+  applyTheme(selectedTheme.value)
+}
 </script>
 
 <style>
@@ -470,8 +490,8 @@ const navigateFromMenu = (destination) => {
 /* ===== HEADER BASE STYLES ===== */
 header {
   padding: 0;
-  background: #333;
-  border-bottom: 1px solid #444;
+  background: var(--color-bg-header);
+  border-bottom: 1px solid var(--color-border-medium);
 }
 
 .header-row {
@@ -493,24 +513,34 @@ header {
   flex: 1;
 }
 
-.year-selector-group {
+.year-selector-group,
+.theme-selector-group {
   display: flex;
   align-items: center;
 }
 
 .unified-select {
-  background: var(--color-bg-input);
+  background-color: var(--color-bg-input);
   color: var(--color-text-secondary);
   border: 1px solid var(--color-border-heavy);
-  padding: 0.5rem 0.75rem;
+  padding: 0.5rem 2rem 0.5rem 0.75rem;
   border-radius: 4px;
   font-size: 0.9rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23666666' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: 1.25rem;
 }
 
 .unified-select:hover {
-  background: var(--color-bg-hover);
+  background-color: var(--color-bg-hover);
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23333333' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: 1.25rem;
   color: var(--color-text-primary);
   border-color: var(--color-primary);
 }
@@ -518,7 +548,7 @@ header {
 .unified-select:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px rgba(139, 0, 0, 0.2);
+  box-shadow: 0 0 0 2px var(--color-primary-alpha-20);
 }
 
 .main-nav {
@@ -530,7 +560,7 @@ header {
 /* ===== UNIFIED BUTTON SYSTEM ===== */
 .nav-btn {
   background: transparent;
-  color: #ccc;
+  color: var(--color-text-secondary);
   border: 1px solid transparent;
   padding: 0.5rem 1rem;
   border-radius: 4px;
@@ -541,15 +571,15 @@ header {
 }
 
 .nav-btn:hover {
-  background: #8B0000;
-  color: #fff;
-  border-color: #8B0000;
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  border-color: var(--color-primary);
 }
 
 .nav-btn.active {
-  background: #8B0000;
-  color: #fff;
-  border-color: #8B0000;
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  border-color: var(--color-primary);
 }
 
 /* ===== APP TITLE ===== */
@@ -567,18 +597,18 @@ header {
   flex-shrink: 0;
   font-size: 1.5rem;
   font-weight: bold;
-  color: #fff;
+  color: var(--color-text-primary);
 }
 
 .app-title:hover {
-  color: #8B0000;
+  color: var(--color-primary);
 }
 
 .status-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #4CAF50;
+  background: var(--color-success);
   border: none;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -586,16 +616,16 @@ header {
 }
 
 .status-dot.offline {
-  background: #f44336;
+  background: var(--color-error);
 }
 
 .status-dot:hover {
   transform: scale(1.2);
-  box-shadow: 0 0 8px rgba(76, 175, 80, 0.5);
+  box-shadow: 0 0 8px var(--color-success-glow);
 }
 
 .status-dot.offline:hover {
-  box-shadow: 0 0 8px rgba(244, 67, 54, 0.5);
+  box-shadow: 0 0 8px var(--color-error-glow);
 }
 
 /* ===== STATUS SECTION ===== */
@@ -611,9 +641,9 @@ header {
   align-items: flex-end;
   gap: 0.25rem;
   padding: 0.5rem;
-  background: rgba(68, 68, 68, 0.5);
+  background: var(--color-bg-input-alpha-50);
   border-radius: 4px;
-  border: 1px solid #555;
+  border: 1px solid var(--color-border-heavy);
 }
 
 .status-primary {
@@ -630,17 +660,17 @@ header {
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  color: #4CAF50;
+  color: var(--color-success);
   font-size: 0.85rem;
   font-weight: 500;
 }
 
 .online-status.offline {
-  color: #f44336;
+  color: var(--color-error);
 }
 
 .last-sync {
-  color: #999;
+  color: var(--color-text-muted);
   font-size: 0.75rem;
 }
 
@@ -701,9 +731,9 @@ footer {
   position: sticky;
   top: 0;
   z-index: 2000;
-  background: #333;
-  border-bottom: 1px solid #444;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  background: var(--color-bg-header);
+  border-bottom: 1px solid var(--color-border-medium);
+  box-shadow: 0 2px 4px var(--color-shadow-light);
 }
 
 .mobile-header .header-row {
@@ -715,7 +745,7 @@ footer {
 .mobile-header .app-title {
   font-size: 1.2rem;
   font-weight: bold;
-  color: #fff;
+  color: var(--color-text-primary);
   flex: 1;
   text-align: center;
 }
@@ -731,9 +761,9 @@ footer {
 }
 
 .mobile-action-btn {
-  background: #444;
-  border: 1px solid #555;
-  color: #ccc;
+  background: var(--color-bg-input);
+  border: 1px solid var(--color-border-heavy);
+  color: var(--color-text-secondary);
   min-width: 44px;  /* Touch-friendly minimum */
   height: 44px; /* Touch-friendly minimum */
   padding: 0 12px; /* Add horizontal padding */
@@ -762,16 +792,16 @@ footer {
 }
 
 .mobile-action-btn:hover {
-  background: #8B0000;
-  color: #fff;
-  border-color: #8B0000;
+  background: var(--color-primary);
+  color: var(--color-text-primary);
+  border-color: var(--color-primary);
   z-index: 1;
 }
 
 .mobile-action-btn:active {
   transform: scale(0.95);
-  background: #8B0000;
-  color: #fff;
+  background: var(--color-primary);
+  color: var(--color-text-primary);
 }
 
 /* Hamburger button specific styles */
@@ -783,8 +813,8 @@ footer {
 
 /* ===== FOOTER UNIFIED DESIGN ===== */
 footer {
-  background: #333;
-  border-top: 1px solid #444;
+  background: var(--color-bg-header);
+  border-top: 1px solid var(--color-border-medium);
   margin-top: auto;
 }
 
@@ -811,14 +841,14 @@ footer {
 
 .footer-title {
   font-weight: bold;
-  color: #fff;
+  color: var(--color-text-primary);
   font-size: 0.9rem;
 }
 
 .footer-version {
   font-size: 0.75rem;
-  color: #999;
-  background: #444;
+  color: var(--color-text-muted);
+  background: var(--color-bg-input);
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
 }
@@ -829,9 +859,9 @@ footer {
 }
 
 .footer-link-btn {
-  background: #444;
-  color: #ccc;
-  border: 1px solid #555;
+  background: var(--color-bg-input);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border-heavy);
   padding: 0.5rem 0.75rem;
   border-radius: 4px;
   font-size: 0.8rem;
@@ -842,9 +872,9 @@ footer {
 
 .footer-link-btn:hover,
 .footer-link-btn:active {
-  background: #8B0000;
-  color: #fff;
-  border-color: #8B0000;
+  background: var(--color-primary);
+  color: var(--color-text-primary);
+  border-color: var(--color-primary);
 }
 
 /* ===== DESKTOP FOOTER ===== */
@@ -864,12 +894,12 @@ footer {
 .footer-brand-title {
   font-size: 1.5rem;
   font-weight: bold;
-  color: #fff;
+  color: var(--color-text-primary);
   margin: 0;
 }
 
 .footer-description {
-  color: #ccc;
+  color: var(--color-text-secondary);
   font-size: 0.9rem;
   line-height: 1.4;
   margin: 0;
@@ -880,17 +910,17 @@ footer {
   flex-direction: column;
   gap: 0.25rem;
   font-size: 0.8rem;
-  color: #999;
+  color: var(--color-text-muted);
 }
 
 .footer-sync-status {
-  color: #888;
+  color: var(--color-text-muted);
 }
 
 .footer-section-title {
   font-size: 1rem;
   font-weight: bold;
-  color: #fff;
+  color: var(--color-text-primary);
   margin: 0 0 0.5rem 0;
 }
 
@@ -905,28 +935,28 @@ footer {
 
 .footer-links-list li {
   font-size: 0.9rem;
-  color: #ccc;
+  color: var(--color-text-secondary);
 }
 
 .footer-external-link {
-  color: #ccc;
+  color: var(--color-text-secondary);
   text-decoration: none;
   transition: color 0.2s ease;
 }
 
 .footer-external-link:hover {
-  color: #8B0000;
+  color: var(--color-primary);
 }
 
 .footer-creator {
   font-size: 0.9rem;
-  color: #ccc;
+  color: var(--color-text-secondary);
   margin: 0;
   line-height: 1.4;
 }
 
 .footer-brand-tag {
-  color: #8B0000;
+  color: var(--color-primary);
   font-weight: bold;
 }
 
@@ -940,7 +970,7 @@ footer {
 }
 
 .footer-camp-link:hover .footer-brand-tag {
-  color: #FF4444;
+  color: var(--color-error);
 }
 
 /* Utility class for hiding elements */
@@ -993,7 +1023,7 @@ footer {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--color-overlay-dark);
   z-index: 2998;
 }
 
@@ -1004,8 +1034,8 @@ footer {
   bottom: 0;
   width: 280px;
   max-width: 85vw;
-  background: #2a2a2a;
-  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.3);
+  background: var(--color-bg-elevated);
+  box-shadow: -2px 0 8px var(--color-shadow-medium);
   z-index: 2999;
   display: flex;
   flex-direction: column;
@@ -1017,13 +1047,13 @@ footer {
   align-items: center;
   justify-content: space-between;
   padding: 0.5rem;
-  background: #333;
-  border-bottom: 1px solid #444;
+  background: var(--color-bg-header);
+  border-bottom: 1px solid var(--color-border-medium);
 }
 
 .mobile-menu-header h3 {
   margin: 0;
-  color: #fff;
+  color: var(--color-text-primary);
   font-size: 1.2rem;
   padding-left: 0.5rem;
 }
@@ -1031,7 +1061,7 @@ footer {
 .close-menu-btn {
   background: none;
   border: none;
-  color: #ccc;
+  color: var(--color-text-secondary);
   font-size: 1.5rem;
   cursor: pointer;
   padding: 0.5rem;
@@ -1045,8 +1075,8 @@ footer {
 }
 
 .close-menu-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
+  background: var(--color-white-alpha-10);
+  color: var(--color-text-primary);
 }
 
 .mobile-menu-content {
@@ -1066,7 +1096,7 @@ footer {
 
 .menu-label {
   display: block;
-  color: var(--color-gold);
+  color: var(--color-accent);
   font-size: 0.875rem;
   margin-bottom: 0.5rem;
   text-transform: uppercase;
@@ -1075,7 +1105,7 @@ footer {
 
 .menu-select {
   width: 100%;
-  padding: 0.875rem 1rem;
+  padding: 0.875rem 2.5rem 0.875rem 1rem;
   background: var(--color-bg-header);
   border: 1px solid var(--color-border-medium);
   border-radius: 4px;
@@ -1091,7 +1121,7 @@ footer {
 }
 
 .menu-section-title {
-  color: var(--color-gold);
+  color: var(--color-accent);
   font-size: 0.875rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -1150,7 +1180,7 @@ footer {
 .menu-version {
   display: block;
   text-align: center;
-  color: var(--color-gold);
+  color: var(--color-accent);
   font-size: 0.875rem;
   margin-top: 1rem;
   padding-top: 1rem;

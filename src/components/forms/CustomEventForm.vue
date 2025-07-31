@@ -196,7 +196,7 @@ const handleSaved = (uid) => {
 }
 
 .form-text {
-  color: #999;
+  color: var(--color-text-muted);
   font-size: 0.85rem;
   margin-top: 0.25rem;
 }

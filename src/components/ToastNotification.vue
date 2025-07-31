@@ -78,9 +78,9 @@ defineExpose({
   gap: 0.75rem;
   padding: 0.75rem 1rem;
   margin-bottom: 0.75rem;
-  background: #2a2a2a;
+  background: var(--color-bg-elevated);
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--shadow-elevated);
   pointer-events: auto;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -97,29 +97,29 @@ defineExpose({
 
 .toast-message {
   flex: 1;
-  color: #fff;
+  color: var(--color-text-primary);
   line-height: 1.4;
 }
 
 /* Type variants */
 .toast-success {
-  background: #2d5a2d;
-  border-left: 4px solid #4caf50;
+  background: var(--color-success-dark);
+  border-left: 4px solid var(--color-success);
 }
 
 .toast-error {
-  background: #5a2d2d;
-  border-left: 4px solid #f44336;
+  background: var(--color-error-dark);
+  border-left: 4px solid var(--color-error);
 }
 
 .toast-warning {
-  background: #5a4a2d;
-  border-left: 4px solid #ff9800;
+  background: var(--color-warning-dark);
+  border-left: 4px solid var(--color-warning);
 }
 
 .toast-info {
-  background: #2d3a5a;
-  border-left: 4px solid #2196f3;
+  background: var(--color-info-dark);
+  border-left: 4px solid var(--color-info);
 }
 
 /* Animations */

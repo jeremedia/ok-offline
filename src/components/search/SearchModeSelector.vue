@@ -115,8 +115,8 @@ const selectMode = (mode) => {
   gap: 0;
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-  background: #2a2a2a;
+  box-shadow: var(--shadow-subtle);
+  background: var(--color-bg-elevated);
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
@@ -130,10 +130,10 @@ const selectMode = (mode) => {
   justify-content: center;
   gap: 8px;
   padding: 12px;
-  border: 1px solid #444;
+  border: 1px solid var(--color-border);
   border-right: none;
-  background: #2a2a2a;
-  color: #ccc;
+  background: var(--color-bg-elevated) !important;
+  color: var(--color-text-secondary);
   cursor: pointer;
   transition: all 0.2s ease;
   font-size: 14px;
@@ -147,30 +147,30 @@ const selectMode = (mode) => {
 }
 
 .mode-btn:last-child {
-  border-right: 1px solid #444;
+  border-right: 1px solid var(--color-border);
   border-radius: 0 8px 8px 0;
 }
 
 .mode-btn:hover:not(.disabled):not(.active) {
-  background: rgba(104, 0, 0, 0.1);
-  border-color: var(--color-dark-red);
-  color: #fff;
+  background: var(--color-primary-bg);
+  border-color: var(--color-primary);
+  color: var(--color-text-primary);
   z-index: 1;
 }
 
 .mode-btn.active {
-  background: var(--color-dark-red);
-  color: white;
-  border-color: var(--color-dark-red);
+  background: var(--color-primary) !important;
+  color: var(--color-text-inverse) !important;
+  border-color: var(--color-primary) !important;
   z-index: 2;
 }
 
 .mode-btn.disabled {
   opacity: 0.6;
   cursor: not-allowed;
-  background: #333;
-  color: #666;
-  border-color: #555;
+  background: var(--color-bg-header);
+  color: var(--color-text-disabled);
+  border-color: var(--color-bg-input);
 }
 
 .mode-icon {
@@ -188,8 +188,8 @@ const selectMode = (mode) => {
   position: absolute;
   top: 2px;
   right: 2px;
-  background: #ff4757;
-  color: white;
+  background: var(--color-error);
+  color: var(--color-text-inverse);
   font-size: 8px;
   font-weight: bold;
   padding: 1px 4px;
@@ -199,18 +199,18 @@ const selectMode = (mode) => {
 }
 
 .mode-btn.active .mode-badge {
-  background: rgba(255, 255, 255, 0.9);
-  color: var(--color-dark-red);
+  background: var(--color-overlay-light);
+  color: var(--color-primary);
 }
 
 .mode-description {
   margin-top: 8px;
   padding: 8px 12px;
-  background: #2a2a2a;
-  border: 1px solid #444;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
   border-radius: 4px;
   font-size: 13px;
-  color: #ccc;
+  color: var(--color-text-secondary);
   text-align: center;
 }
 

@@ -158,7 +158,7 @@ const setActiveTab = (tab) => {
   display: flex;
   gap: 1rem;
   margin-bottom: 2rem;
-  border-bottom: 2px solid #444;
+  border-bottom: 2px solid var(--color-border);
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   /* Safari fixes - force container height */
@@ -171,7 +171,7 @@ const setActiveTab = (tab) => {
 .tab-button {
   background: none;
   border: none;
-  color: #999;
+  color: var(--color-text-muted);
   cursor: pointer;
   padding: 1rem 1.5rem;
   font-size: 1rem;
@@ -185,12 +185,12 @@ const setActiveTab = (tab) => {
 }
 
 .tab-button:hover {
-  color: #ccc;
+  color: var(--color-text-secondary);
 }
 
 .tab-button.active {
-  color: #fff;
-  border-bottom-color: #8B0000;
+  color: var(--color-text-primary);
+  border-bottom-color: var(--color-primary);
 }
 
 /* Base tab content styles */
@@ -200,12 +200,12 @@ const setActiveTab = (tab) => {
 }
 
 :deep(.tab-content h2) {
-  color: #fff;
+  color: var(--color-text-primary);
   margin: 0 0 1.5rem 0;
 }
 
 :deep(.tab-content h3) {
-  color: #fff;
+  color: var(--color-text-primary);
   margin-bottom: 1rem;
 }
 

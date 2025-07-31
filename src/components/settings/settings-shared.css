@@ -12,20 +12,20 @@
 }
 
 .tab-content h2 {
-  color: #fff;
+  color: var(--color-text-primary);
   margin-bottom: 1.5rem;
   font-size: 1.5rem;
 }
 
 .tab-content h3 {
-  color: #FFD700;
+  color: var(--color-accent);
   margin: 0 0 1rem 0;
   font-size: 1.1rem;
   font-weight: 600;
 }
 
 .tab-content h4 {
-  color: #fff;
+  color: var(--color-text-primary);
   margin: 0 0 0.75rem 0;
   font-size: 1rem;
   font-weight: 500;
@@ -40,22 +40,22 @@
 .feedback-section {
   margin-bottom: 2.5rem;
   padding: 1.5rem;
-  background: #2a2a2a;
-  border: 1px solid #444;
+  background: var(--color-background-tertiary);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
 }
 
 /* Typography */
 .tab-content p {
   line-height: 1.6;
-  color: #ccc;
+  color: var(--color-text-secondary);
   margin-bottom: 1rem;
 }
 
 .tab-content ul,
 .tab-content ol {
   margin-left: 1.5rem;
-  color: #ccc;
+  color: var(--color-text-secondary);
   line-height: 1.8;
 }
 
@@ -65,7 +65,7 @@
 
 /* Links */
 .tab-content a {
-  color: var(--color-gold);
+  color: var(--color-accent);
   text-decoration: none;
   transition: all 0.2s ease;
 }
@@ -81,9 +81,9 @@
 .sync-all-button,
 .release-notes-button,
 .submit-button {
-  background: #8B0000;
-  color: #fff;
-  border: 1px solid #8B0000;
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  border: 1px solid var(--color-primary);
   padding: 0.75rem 1.5rem;
   border-radius: 4px;
   cursor: pointer;
@@ -98,8 +98,8 @@
 .sync-all-button:hover,
 .release-notes-button:hover,
 .submit-button:hover {
-  background: #a00;
-  border-color: #a00;
+  background: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
 }
 
 .primary-button:disabled,
@@ -115,9 +115,9 @@
 .clear-button,
 .edit-button,
 .cancel-button {
-  background: #444;
-  color: #ccc;
-  border: 1px solid #555;
+  background: var(--color-border);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-secondary);
   padding: 0.75rem 1.5rem;
   border-radius: 4px;
   cursor: pointer;
@@ -131,9 +131,9 @@
 .clear-button:hover,
 .edit-button:hover,
 .cancel-button:hover {
-  background: #555;
-  color: #fff;
-  border-color: #666;
+  background: var(--color-border-secondary);
+  color: var(--color-text-primary);
+  border-color: var(--color-text-secondary);
 }
 
 .secondary-button:disabled,
@@ -146,9 +146,9 @@
 /* Danger buttons */
 .danger-button,
 .delete-button {
-  background: #ff6b6b;
-  color: #fff;
-  border: 1px solid #ff6b6b;
+  background: var(--color-error);
+  color: var(--color-text-inverse);
+  border: 1px solid var(--color-error);
   padding: 0.75rem 1.5rem;
   border-radius: 4px;
   cursor: pointer;
@@ -160,8 +160,8 @@
 
 .danger-button:hover,
 .delete-button:hover {
-  background: #ff5252;
-  border-color: #ff5252;
+  background: var(--color-error-hover);
+  border-color: var(--color-error-hover);
 }
 
 /* Info boxes */
@@ -169,8 +169,8 @@
 .version-info,
 .status-box {
   padding: 1rem;
-  background: #1a1a1a;
-  border: 1px solid #333;
+  background: var(--color-background-secondary);
+  border: 1px solid var(--color-border-dark);
   border-radius: 4px;
   font-size: 0.9rem;
   line-height: 1.6;
@@ -181,7 +181,7 @@
 .empty-state {
   text-align: center;
   padding: 2rem;
-  color: #999;
+  color: var(--color-text-muted);
 }
 
 .empty-state p {
@@ -190,7 +190,7 @@
 
 .empty-state .hint {
   font-size: 0.875rem;
-  color: #666;
+  color: var(--color-text-secondary);
 }
 
 /* Form elements */
@@ -201,7 +201,7 @@
 .form-group label {
   display: block;
   margin-bottom: 0.5rem;
-  color: #ccc;
+  color: var(--color-text-secondary);
   font-weight: 500;
 }
 
@@ -209,10 +209,10 @@
 .form-textarea {
   width: 100%;
   padding: 0.75rem;
-  background: #333;
-  border: 1px solid #555;
+  background: var(--color-border-dark);
+  border: 1px solid var(--color-border-secondary);
   border-radius: 4px;
-  color: #fff;
+  color: var(--color-text-primary);
   font-family: 'Berkeley Mono', monospace;
   font-size: 0.9rem;
   transition: all 0.2s ease;
@@ -221,8 +221,8 @@
 .form-input:focus,
 .form-textarea:focus {
   outline: none;
-  border-color: #8B0000;
-  background: #3a3a3a;
+  border-color: var(--color-primary);
+  background: var(--color-background-form-focus);
 }
 
 .form-textarea {
@@ -236,7 +236,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 0.75rem 0;
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid var(--color-border-dark);
 }
 
 .status-row:last-child {
@@ -245,21 +245,21 @@
 
 .type-label {
   font-weight: 500;
-  color: #ccc;
+  color: var(--color-text-muted);
 }
 
 .count {
-  color: #8B0000;
+  color: var(--color-primary);
   font-weight: 600;
 }
 
 .last-sync {
-  color: #999;
+  color: var(--color-text-muted);
   font-size: 0.875rem;
 }
 
 .never-synced {
-  color: #666;
+  color: var(--color-text-secondary);
   font-size: 0.875rem;
   font-style: italic;
 }
@@ -271,7 +271,7 @@
 
 .progress-bar {
   height: 4px;
-  background: #333;
+  background: var(--color-border-dark);
   border-radius: 2px;
   overflow: hidden;
   margin: 0.5rem 0;
@@ -279,13 +279,13 @@
 
 .progress-fill {
   height: 100%;
-  background: #8B0000;
+  background: var(--color-primary);
   transition: width 0.3s ease;
 }
 
 .progress-text {
   font-size: 0.875rem;
-  color: #999;
+  color: var(--color-text-muted);
   text-align: center;
 }
 
@@ -301,15 +301,15 @@
 .feature-card,
 .gis-feature {
   padding: 1.25rem;
-  background: #1a1a1a;
-  border: 1px solid #333;
+  background: var(--color-background-secondary);
+  border: 1px solid var(--color-border-dark);
   border-radius: 8px;
   transition: all 0.2s ease;
 }
 
 .feature-card:hover,
 .gis-feature:hover {
-  border-color: #8B0000;
+  border-color: var(--color-primary);
   transform: translateY(-2px);
 }
 

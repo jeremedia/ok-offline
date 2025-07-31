@@ -164,8 +164,8 @@ const handleEntityClick = (type, value) => {
 
 <style scoped>
 .search-result-item {
-  background: #2a2a2a;
-  border: 1px solid #444;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-medium);
   border-radius: 8px;
   padding: 8px 16px 16px 16px;
   margin-bottom: 12px;
@@ -175,9 +175,9 @@ const handleEntityClick = (type, value) => {
 }
 
 .search-result-item:hover {
-  border-color: #8B0000;
-  box-shadow: 0 2px 8px rgba(139, 0, 0, 0.3);
-  background: rgba(139, 0, 0, 0.05);
+  border-color: var(--color-primary);
+  box-shadow: 0 2px 8px var(--color-primary-alpha-20);
+  background: var(--color-primary-alpha-20);
   transform: translateY(-1px);
 }
 
@@ -198,7 +198,7 @@ const handleEntityClick = (type, value) => {
   margin: 0;
   font-size: 16px;
   font-weight: 600;
-  color: #fff;
+  color: var(--color-text-primary);
   line-height: 1.3;
   display: flex;
   align-items: center;
@@ -216,7 +216,7 @@ const handleEntityClick = (type, value) => {
   align-items: center;
   gap: 0.25rem;
   font-size: 11px;
-  color: var(--color-gold);
+  color: var(--color-accent);
   font-weight: bold;
   text-transform: uppercase;
 }
@@ -234,7 +234,7 @@ const handleEntityClick = (type, value) => {
   border: none;
   font-size: 24px;
   cursor: pointer;
-  color: #ccc;
+  color: var(--color-text-secondary);
   transition: color 0.2s ease;
   padding: 8px;
   border-radius: 6px;
@@ -246,11 +246,11 @@ const handleEntityClick = (type, value) => {
 }
 
 .favorite-btn:hover {
-  color: #ffd700;
+  color: var(--color-accent);
 }
 
 .favorite-btn.active {
-  color: #ffd700;
+  color: var(--color-accent);
 }
 
 .result-content {
@@ -259,14 +259,14 @@ const handleEntityClick = (type, value) => {
 
 .result-location {
   font-size: 13px;
-  color: #ccc;
+  color: var(--color-text-secondary);
   margin-bottom: 6px;
   font-weight: 500;
 }
 
 .result-description {
   font-size: 14px;
-  color: #ddd;
+  color: var(--color-text-secondary);
   line-height: 1.4;
   margin-bottom: 8px;
 }
@@ -295,79 +295,79 @@ const handleEntityClick = (type, value) => {
 }
 
 .entity-location {
-  background: rgba(139, 0, 0, 0.15);
-  color: #ff6b6b;
-  border: 1px solid rgba(139, 0, 0, 0.3);
+  background: var(--color-primary-alpha-20);
+  color: var(--color-error);
+  border: 1px solid var(--color-primary-alpha-20);
 }
 
 .entity-activity {
-  background: rgba(139, 0, 0, 0.12);
-  color: #ffb3ba;
-  border: 1px solid rgba(139, 0, 0, 0.25);
+  background: var(--color-primary-alpha-20);
+  color: var(--color-error);
+  border: 1px solid var(--color-primary-alpha-20);
 }
 
 .entity-theme {
-  background: rgba(139, 0, 0, 0.18);
-  color: #ff8a95;
-  border: 1px solid rgba(139, 0, 0, 0.35);
+  background: var(--color-primary-alpha-20);
+  color: var(--color-error);
+  border: 1px solid var(--color-primary-alpha-20);
 }
 
 .entity-time {
-  background: rgba(139, 0, 0, 0.10);
-  color: #ffc1cc;
-  border: 1px solid rgba(139, 0, 0, 0.20);
+  background: var(--color-primary-alpha-20);
+  color: var(--color-error);
+  border: 1px solid var(--color-primary-alpha-20);
 }
 
 .entity-person {
-  background: rgba(139, 0, 0, 0.20);
-  color: #ff7782;
-  border: 1px solid rgba(139, 0, 0, 0.40);
+  background: var(--color-primary-alpha-20);
+  color: var(--color-error);
+  border: 1px solid var(--color-primary-alpha-20);
 }
 
 .entity-item_type {
-  background: rgba(139, 0, 0, 0.14);
-  color: #ffaab3;
-  border: 1px solid rgba(139, 0, 0, 0.28);
+  background: var(--color-primary-alpha-20);
+  color: var(--color-error);
+  border: 1px solid var(--color-primary-alpha-20);
 }
 
 /* Entity hover states */
 .entity-tag:hover {
   transform: translateY(-1px);
-  box-shadow: 0 3px 8px rgba(139, 0, 0, 0.3);
+  box-shadow: 0 3px 8px var(--color-primary-alpha-20);
 }
 
 .entity-location:hover {
-  background: rgba(139, 0, 0, 0.25);
-  border-color: rgba(139, 0, 0, 0.5);
+  background: var(--color-primary-alpha-20);
+  border-color: var(--color-primary-alpha-20);
 }
 
 .entity-activity:hover {
-  background: rgba(139, 0, 0, 0.22);
-  border-color: rgba(139, 0, 0, 0.45);
+  background: var(--color-primary-alpha-20);
+  border-color: var(--color-primary-alpha-20);
 }
 
 .entity-theme:hover {
-  background: rgba(139, 0, 0, 0.28);
-  border-color: rgba(139, 0, 0, 0.55);
+  background: var(--color-primary-alpha-20);
+  border-color: var(--color-primary-alpha-20);
 }
 
 .entity-time:hover {
-  background: rgba(139, 0, 0, 0.20);
-  border-color: rgba(139, 0, 0, 0.40);
+  background: var(--color-primary-alpha-20);
+  border-color: var(--color-primary-alpha-20);
 }
 
 .entity-person:hover {
-  background: rgba(139, 0, 0, 0.30);
-  border-color: rgba(139, 0, 0, 0.60);
+  background: var(--color-primary-alpha-20);
+  border-color: var(--color-primary-alpha-20);
 }
 
 .entity-item_type:hover {
-  background: rgba(139, 0, 0, 0.24);
-  border-color: rgba(139, 0, 0, 0.48);
+  background: var(--color-primary-alpha-20);
+  border-color: var(--color-primary-alpha-20);
 }
 
 .entity-more {
-  color: #666;
+  color: var(--color-text-disabled);
   font-size: 11px;
   font-style: italic;
   padding: 2px 6px;

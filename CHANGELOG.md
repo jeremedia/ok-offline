@@ -8,6 +8,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Complete Theme System Overhaul** - Professional 4-theme design system for all UI components
+  - OKNOTOK Theme: Dark red/gold classic camp theme
+  - Sparkle Pony Theme: Light Barbie pink theme with bright magical colors
+  - Khaki Theme: Desert earth tones optimized for bright sunlight readability
+  - Mush Love Theme: Dark psychedelic theme with electric lime accents
+  - Dynamic theme switching with instant visual feedback across all components
+  - Proper contrast ratios ensuring readability in all lighting conditions
+  - Theme-aware overlays, shadows, and transparency effects
+  - Consistent accent colors that adapt to each theme's personality
+
+### Fixed
+- **Theme Contrast Issues** - Resolved low contrast problems across all themes
+  - Fixed tab buttons and search controls using proper `textInverse` colors on colored backgrounds
+  - OKNOTOK theme now uses white text on red backgrounds instead of dark text
+  - Mush Love theme uses electric lime text on purple backgrounds for psychedelic pop
+  - All active states now have proper contrast ratios for accessibility
+- **Hardcoded Color References** - Eliminated all hardcoded color values for complete theme consistency
+  - Replaced 15+ instances of `--color-dark-red` with `--color-primary` throughout the app
+  - Updated 10+ instances of `--color-gold` with `--color-accent` for proper theme adaptation
+  - SearchView, App navigation, and settings components now fully theme-aware
+  - Infrastructure views and about pages use theme variables instead of hardcoded colors
+- **RGBA Color Values** - Modernized all transparency effects to use theme variables
+  - Map controls, shadows, and overlays now adapt to each theme's color palette
+  - Search entity backgrounds and hover states use theme-appropriate alpha values
+  - Log message backgrounds and icon shadows properly themed
+  - DetailView marker and popup styling consistent across all themes
+- **Select Dropdown UI** - Modern dropdown arrow implementation with proper spacing
+  - Added custom SVG dropdown arrow using `appearance: none` for cross-browser consistency
+  - Fixed cramped caret positioning with proper right-side padding (0.5rem from edge)
+  - Eliminated animation issues on hover with separated background properties
+  - Enhanced arrow visibility with larger size (1.25rem) and proper stroke weight
+- **Component Style Consistency** - Normalized styling patterns across settings and search components
+  - DataSyncSettings and AppearanceSettings now use shared CSS architecture
+  - SearchModeSelector and SearchOptions have consistent button styling and contrast
+  - Settings shared CSS properly handles all theme variations
+  - Unified button styling with proper `textInverse` usage on colored backgrounds
+
+### Changed
+- **Theme Architecture** - Complete CSS variable system for maintainable theming
+  - All components now use semantic theme variables instead of hardcoded values
+  - Theme service dynamically applies all color variations including transparency effects
+  - Background overlays adapt to light vs dark themes (purple for Sparkle, brown for Khaki, black for dark themes)
+  - Interactive states (hover, active, focus) properly themed across all components
+
+### Technical
 - **Detail View Polish** - Comprehensive enhancements to camp, art, and event detail pages
   - Collapsible CAMP EVENTS section with lazy loading and event count display
   - Shows "CAMP EVENTS (20)" format with expand/collapse functionality

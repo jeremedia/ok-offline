@@ -105,7 +105,7 @@
   content: "•";
   position: absolute;
   left: 0;
-  color: var(--color-gold);
+  color: var(--color-accent);
 }
 
 .keyboard-shortcuts table {
@@ -115,11 +115,11 @@
 
 .keyboard-shortcuts td {
   padding: 0.5rem;
-  border-bottom: 1px solid #444;
+  border-bottom: 1px solid var(--color-border-medium);
 }
 
 .keyboard-shortcuts kbd {
-  background: #444;
+  background: var(--color-bg-input);
   padding: 0.2rem 0.5rem;
   border-radius: 4px;
   font-family: 'Berkeley Mono', monospace;

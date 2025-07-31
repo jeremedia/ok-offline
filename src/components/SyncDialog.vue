@@ -37,7 +37,7 @@ defineProps({
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
+  background: var(--color-overlay-dark);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -45,31 +45,31 @@ defineProps({
 }
 
 .sync-dialog {
-  background: #2a2a2a;
+  background: var(--color-bg-elevated);
   border-radius: 8px;
   padding: 2rem;
   text-align: center;
   max-width: 400px;
   width: 90%;
-  border: 1px solid #444;
+  border: 1px solid var(--color-border);
 }
 
 .sync-dialog h2 {
   margin: 0 0 1rem 0;
-  color: #fff;
+  color: var(--color-text-primary);
 }
 
 .sync-dialog p {
   margin: 0.5rem 0;
-  color: #ccc;
+  color: var(--color-text-secondary);
 }
 
 .spinner {
   width: 40px;
   height: 40px;
   margin: 1.5rem auto;
-  border: 4px solid #444;
-  border-top-color: #8B0000;
+  border: 4px solid var(--color-border);
+  border-top-color: var(--color-primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -81,6 +81,6 @@ defineProps({
 
 .sync-status {
   font-size: 0.9rem;
-  color: #90CAF9;
+  color: var(--color-accent-light);
 }
 </style>

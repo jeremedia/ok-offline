@@ -266,6 +266,11 @@ const { showSyncDialog, checkAndAutoSync } = useAutoSync()
 const mapContainer = ref(null)
 const item = ref(null)
 const loading = ref(true)
+
+// Helper function to get CSS variable values for JavaScript
+const getCSSColor = (varName) => {
+  return getComputedStyle(document.documentElement).getPropertyValue(varName).trim()
+}
 const error = ref(null)
 const campEvents = ref([])
 const campEventsLoaded = ref(false)
@@ -488,7 +493,7 @@ const initMap = async () => {
         style: (feature) => {
           // Custom red styling for all streets
           return {
-            color: '#FF0000',  // Red color
+            color: getCSSColor('--color-danger'),  // Red color
             weight: 2,         // Thinner lines for detail view
             opacity: 0.8
           }
@@ -505,8 +510,8 @@ const initMap = async () => {
       console.warn('No street data available for year:', props.year)
       // Add a simple circle to show the general area if no streets are available
       const circle = L.circle(BRC_CENTER, {
-        color: '#FF0000',
-        fillColor: '#FF0000',
+        color: getCSSColor('--color-danger'),
+        fillColor: getCSSColor('--color-danger'),
         fillOpacity: 0.1,
         radius: 2000, // 2000 meter radius for BRC
         weight: 1
@@ -516,8 +521,8 @@ const initMap = async () => {
     console.warn('Failed to initialize GIS data:', err)
     // Add a simple circle to show the general area if GIS fails
     const circle = L.circle(BRC_CENTER, {
-      color: '#FF0000',
-      fillColor: '#FF0000',
+      color: getCSSColor('--color-danger'),
+      fillColor: getCSSColor('--color-danger'),
       fillOpacity: 0.1,
       radius: 2000, // 2000 meter radius for BRC
       weight: 1
@@ -855,7 +860,7 @@ watch(() => props.id, async () => {
 
 
 .detail-field label, .events-title, .visit-tracking h3, .visit-tracking h4 {
-  color: var(--color-gold, #FFD700) !important;
+  color: var(--color-accent) !important;
   font-weight: 600;
   font-size: 1rem;
   text-transform: uppercase;
@@ -868,11 +873,11 @@ watch(() => props.id, async () => {
 }
 
 .detail-field a {
-  color: var(--color-gold, #FFD700);
+  color: var(--color-accent);
 }
 
 .detail-field a:hover {
-  color: #fff;
+  color: var(--color-text-primary);
   text-decoration: underline;
 }
 
@@ -908,7 +913,7 @@ watch(() => props.id, async () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: rgba(0, 0, 0, 0.8);
+  background: var(--color-modal-overlay);
   flex-shrink: 0;
   border-top: 1px solid var(--color-bg-input); /* Only top border */
   border-radius: 0; /* Remove radius since container handles it */
@@ -960,7 +965,7 @@ watch(() => props.id, async () => {
 
 /* Open in map link styling */
 .open-in-map-link {
-  color: var(--color-gold, #FFD700);
+  color: var(--color-accent);
   text-decoration: none;
   font-size: 0.9rem;
   font-weight: bold;
@@ -1308,7 +1313,7 @@ h2 {
   background: var(--color-bg-elevated);
   border: 1px solid var(--color-bg-input);
   border-radius: 4px;
-  box-shadow: 0 3px 14px rgba(0,0,0,0.8);
+  box-shadow: 0 3px 14px var(--color-modal-overlay);
   padding: 0;
 }
 
@@ -1364,7 +1369,7 @@ h2 {
 }
 
 :deep(.detail-marker .marker-icon) {
-  background: rgba(139, 0, 0, 0.9);
+  background: var(--color-primary);
   border: 2px solid var(--color-accent);
   border-radius: 50%;
   width: 30px;
@@ -1373,7 +1378,7 @@ h2 {
   align-items: center;
   justify-content: center;
   font-size: 18px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+  box-shadow: 0 2px 5px var(--color-overlay-dark);
 }
 
 /* Popup styles remain interactive */

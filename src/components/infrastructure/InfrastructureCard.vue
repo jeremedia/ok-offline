@@ -49,8 +49,8 @@ const formatDistance = (dist) => {
 
 <style scoped>
 .infrastructure-card {
-  background: #2a2a2a;
-  border: 1px solid #444;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-medium);
   border-radius: 8px;
   padding: 1.5rem;
   cursor: pointer;
@@ -62,8 +62,8 @@ const formatDistance = (dist) => {
 
 .infrastructure-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  border-color: #666;
+  box-shadow: 0 4px 12px var(--color-shadow-medium);
+  border-color: var(--color-bg-active);
 }
 
 .card-header {
@@ -80,7 +80,7 @@ const formatDistance = (dist) => {
 
 .card-title {
   font-size: 1.25rem;
-  color: #fff;
+  color: var(--color-text-primary);
   margin: 0;
   flex: 1;
 }
@@ -92,7 +92,7 @@ const formatDistance = (dist) => {
 }
 
 .card-description {
-  color: #ccc;
+  color: var(--color-text-secondary);
   line-height: 1.5;
   margin-bottom: 1rem;
   flex: 1;
@@ -106,16 +106,16 @@ const formatDistance = (dist) => {
 }
 
 .category-badge {
-  background: #1a1a1a;
+  background: var(--color-bg-base);
   padding: 0.25rem 0.75rem;
   border-radius: 4px;
   font-size: 0.85rem;
-  color: #999;
-  border: 1px solid #333;
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border-light);
 }
 
 .distance {
-  color: #8B0000;
+  color: var(--color-primary);
   font-weight: bold;
   font-size: 0.9rem;
 }

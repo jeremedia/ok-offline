@@ -90,24 +90,24 @@ onMounted(() => {
   width: 100%;
   padding: 0.75rem;
   font-size: 1.1rem;
-  background: #2a2a2a;
-  color: #fff;
-  border: 1px solid #444;
+  background: var(--color-bg-elevated);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-medium);
   border-radius: 8px;
   transition: all 0.2s ease;
   box-sizing: border-box;
   max-width: 100%;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+  box-shadow: inset 0 2px 4px var(--color-shadow-medium);
 }
 
 .search-input:focus {
   outline: none;
-  border-color: #680000 !important;
-  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4), 0 0 0 2px rgba(104, 0, 0, 0.2);
+  border-color: var(--color-primary-dark) !important;
+  box-shadow: inset 0 2px 6px var(--color-shadow-medium), 0 0 0 2px var(--color-primary-alpha-20);
 }
 
 .search-input::placeholder {
-  color: #999;
+  color: var(--color-text-muted);
 }
 
 /* Desktop unified input */
@@ -116,21 +116,21 @@ onMounted(() => {
   padding: 0.75rem 1rem;
   background: transparent;
   border: none;
-  color: #fff;
+  color: var(--color-text-primary);
   font-size: 1rem;
   outline: none;
   height: 100%;
   display: flex;
   align-items: center;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: inset 0 2px 4px var(--color-shadow-light);
   transition: box-shadow 0.2s ease;
 }
 
 .search-input-unified::placeholder {
-  color: #999;
+  color: var(--color-text-muted);
 }
 
 .search-input-unified:focus {
-  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.3);
+  box-shadow: inset 0 2px 6px var(--color-shadow-medium);
 }
 </style>

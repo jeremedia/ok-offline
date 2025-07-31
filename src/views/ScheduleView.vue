@@ -1,4 +1,4 @@
-<template>
+ <template>
   <section id="schedule-section" class="view">
     <h2>My Schedule</h2>
     
@@ -341,7 +341,7 @@ onMounted(() => {
 }
 
 h2 {
-  color: #ccc;
+  color: var(--color-text-secondary);
   margin-bottom: 1.5rem;
 }
 
@@ -361,9 +361,9 @@ h2 {
 }
 
 .day-btn {
-  background: #2a2a2a;
-  color: #ccc;
-  border: 1px solid #444;
+  background: var(--color-bg-elevated);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
   padding: 0.5rem 1rem;
   border-radius: 4px;
   cursor: pointer;
@@ -371,17 +371,17 @@ h2 {
 }
 
 .day-btn:hover {
-  background: #333;
+  background: var(--color-bg-header);
 }
 
 .day-btn.active {
-  background: #8B0000;
-  color: #fff;
+  background: var(--color-primary);
+  color: var(--color-text-primary);
 }
 
 .clear-btn {
-  background: #444;
-  color: #ccc;
+  background: var(--color-bg-input);
+  color: var(--color-text-secondary);
   border: none;
   padding: 0.5rem 1rem;
   border-radius: 4px;
@@ -390,12 +390,12 @@ h2 {
 }
 
 .clear-btn:hover {
-  background: #555;
+  background: var(--color-bg-hover);
 }
 
 .schedule-timeline {
-  background: #1a1a1a;
-  border: 1px solid #444;
+  background: var(--color-bg-base);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   padding: 1rem;
   margin-bottom: 2rem;
@@ -405,13 +405,13 @@ h2 {
 .empty-state {
   text-align: center;
   padding: 3rem;
-  color: #999;
+  color: var(--color-text-muted);
 }
 
 .empty-state .hint {
   margin-top: 0.5rem;
   font-size: 0.9rem;
-  color: #666;
+  color: var(--color-text-disabled);
 }
 
 .timeline {
@@ -419,10 +419,10 @@ h2 {
   height: 1000px; /* 8 AM to midnight = 16 hours * 60px */
   background-image: repeating-linear-gradient(
     180deg,
-    #2a2a2a,
-    #2a2a2a 59px,
-    #444 59px,
-    #444 60px
+    var(--color-bg-elevated),
+    var(--color-bg-elevated) 59px,
+    var(--color-border) 59px,
+    var(--color-border) 60px
   );
 }
 
@@ -430,8 +430,8 @@ h2 {
   position: absolute;
   left: 0;
   right: 0;
-  background: #2a2a2a;
-  border: 1px solid #666;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-bg-active);
   border-radius: 4px;
   padding: 0.5rem;
   display: flex;
@@ -440,13 +440,13 @@ h2 {
 }
 
 .scheduled-event:hover {
-  background: #333;
-  border-color: #8B0000;
+  background: var(--color-bg-header);
+  border-color: var(--color-primary);
 }
 
 .event-time {
   font-size: 0.8rem;
-  color: #999;
+  color: var(--color-text-muted);
   white-space: nowrap;
   min-width: 100px;
 }
@@ -457,16 +457,16 @@ h2 {
 
 .event-content h4 {
   margin: 0;
-  color: #fff;
+  color: var(--color-text-primary);
   font-size: 0.95rem;
 }
 
 .event-content small {
-  color: #999;
+  color: var(--color-text-muted);
 }
 
 .conflict-warning {
-  color: #ff6b6b;
+  color: var(--color-schedule-conflict);
   font-size: 0.8rem;
   margin-top: 0.25rem;
 }
@@ -474,26 +474,26 @@ h2 {
 .remove-btn {
   background: none;
   border: none;
-  color: #999;
+  color: var(--color-text-muted);
   cursor: pointer;
   padding: 0.25rem;
   font-size: 1.2rem;
 }
 
 .remove-btn:hover {
-  color: #ff6b6b;
+  color: var(--color-schedule-conflict);
 }
 
 .schedule-stats {
-  background: #2a2a2a;
-  border: 1px solid #444;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   padding: 1.5rem;
   margin-bottom: 2rem;
 }
 
 .schedule-stats h3 {
-  color: #ccc;
+  color: var(--color-text-secondary);
   margin-bottom: 1rem;
 }
 
@@ -510,16 +510,16 @@ h2 {
 .stat strong {
   display: block;
   font-size: 1.5rem;
-  color: #fff;
+  color: var(--color-text-primary);
 }
 
 .stat span {
   font-size: 0.9rem;
-  color: #999;
+  color: var(--color-text-muted);
 }
 
 .stat.conflicts strong {
-  color: #ff6b6b;
+  color: var(--color-schedule-conflict);
 }
 
 .export-controls {
@@ -529,9 +529,9 @@ h2 {
 }
 
 .export-btn, .share-btn {
-  background: #2a2a2a;
-  color: #ccc;
-  border: 1px solid #444;
+  background: var(--color-bg-elevated);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
   padding: 0.75rem 1.5rem;
   border-radius: 4px;
   cursor: pointer;
@@ -540,8 +540,8 @@ h2 {
 }
 
 .export-btn:hover, .share-btn:hover {
-  background: #8B0000;
-  color: #fff;
+  background: var(--color-primary);
+  color: var(--color-text-primary);
 }
 
 @media (max-width: 768px) {

@@ -116,8 +116,8 @@
 /* Component-specific styles */
 .feedback-link {
   display: inline-block;
-  background: #8B0000;
-  color: #fff;
+  background: var(--color-primary);
+  color: var(--color-text-primary);
   padding: 0.75rem 1.5rem;
   border-radius: 4px;
   text-decoration: none;
@@ -126,14 +126,14 @@
 }
 
 .feedback-link:hover {
-  background: #a00000;
+  background: var(--color-primary-dark);
   text-decoration: none;
 }
 
 .feedback-tips {
   margin-top: 1.5rem;
   padding-top: 1.5rem;
-  border-top: 1px solid #444;
+  border-top: 1px solid var(--color-border-medium);
 }
 
 .feedback-tips p {
@@ -142,7 +142,7 @@
 }
 
 .feedback-note {
-  background: #1a1a1a;
+  background: var(--color-bg-base);
   padding: 1rem;
   border-radius: 4px;
   font-size: 0.9rem;

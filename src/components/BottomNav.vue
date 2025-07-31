@@ -91,8 +91,8 @@ const isActive = (view) => {
   bottom: 0;
   left: 0;
   right: 0;
-  background: #333;
-  border-top: 1px solid #444;
+  background: var(--color-bg-header);
+  border-top: 1px solid var(--color-border-medium);
   display: flex;
   justify-content: space-around;
   align-items: center;
@@ -119,7 +119,7 @@ const isActive = (view) => {
   padding: 8px 4px;
   background: none;
   border: none;
-  color: #ccc;
+  color: var(--color-text-secondary);
   cursor: pointer;
   min-height: 44px;
   transition: all 0.2s ease;
@@ -129,8 +129,8 @@ const isActive = (view) => {
 }
 
 .nav-item:hover {
-  background: rgba(139, 0, 0, 0.1);
-  color: #fff;
+  background: var(--color-primary-alpha-20);
+  color: var(--color-text-primary);
 }
 
 .nav-item:active {
@@ -138,8 +138,8 @@ const isActive = (view) => {
 }
 
 .nav-item.active {
-  background: #8B0000;
-  color: #fff;
+  background: var(--color-primary);
+  color: var(--color-text-primary);
 }
 
 .nav-item.active::before {

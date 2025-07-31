@@ -305,8 +305,8 @@ const clearAllFilters = () => {
 
 <style scoped>
 .list-controls-container {
-  background: #2a2a2a;
-  border-bottom: 1px solid #444;
+  background: var(--color-bg-elevated);
+  border-bottom: 1px solid var(--color-border);
   padding: 1rem;
   margin-bottom: 0;
   font-family: 'Berkeley Mono', monospace;
@@ -334,7 +334,7 @@ const clearAllFilters = () => {
 .search-icon {
   position: absolute;
   left: 0.75rem;
-  color: #999;
+  color: var(--color-text-muted);
   z-index: 1;
   pointer-events: none;
 }
@@ -342,10 +342,10 @@ const clearAllFilters = () => {
 .search-input {
   width: 100%;
   padding: 0.75rem 0.75rem 0.75rem 2.5rem;
-  background: #1a1a1a;
-  border: 1px solid #555;
+  background: var(--color-bg-base);
+  border: 1px solid var(--color-border-heavy);
   border-radius: 4px;
-  color: #fff;
+  color: var(--color-text-primary);
   font-family: inherit;
   font-size: 1rem;
   transition: all 0.2s ease;
@@ -354,8 +354,8 @@ const clearAllFilters = () => {
 
 .search-input:focus {
   outline: none;
-  border-color: #8B0000;
-  box-shadow: 0 0 0 2px rgba(139, 0, 0, 0.2);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px var(--color-primary-alpha-20);
 }
 
 .clear-search-btn {
@@ -363,7 +363,7 @@ const clearAllFilters = () => {
   right: 0.5rem;
   background: none;
   border: none;
-  color: #999;
+  color: var(--color-text-muted);
   font-size: 1.5rem;
   cursor: pointer;
   padding: 0.25rem;
@@ -372,7 +372,7 @@ const clearAllFilters = () => {
 }
 
 .clear-search-btn:hover {
-  color: #8B0000;
+  color: var(--color-primary);
 }
 
 /* Control Bar - Secondary */
@@ -409,9 +409,9 @@ const clearAllFilters = () => {
 }
 
 .sort-select {
-  background: #444;
-  color: #fff;
-  border: 1px solid #555;
+  background: var(--color-bg-input);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-heavy);
   border-radius: 4px;
   padding: 0.5rem 2rem 0.5rem 0.75rem;
   font-family: inherit;
@@ -429,20 +429,20 @@ const clearAllFilters = () => {
 }
 
 .sort-select:hover {
-  background-color: #555;
-  border-color: #8B0000;
+  background-color: var(--color-bg-hover);
+  border-color: var(--color-primary);
 }
 
 .sort-select:focus {
   outline: none;
-  border-color: #8B0000;
-  box-shadow: 0 0 0 2px rgba(139, 0, 0, 0.2);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px var(--color-primary-alpha-20);
 }
 
 .filters-btn {
-  background: #444;
-  color: #ccc;
-  border: 1px solid #555;
+  background: var(--color-bg-input);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border-heavy);
   border-radius: 4px;
   padding: 0.5rem 0.75rem;
   font-family: inherit;
@@ -457,14 +457,14 @@ const clearAllFilters = () => {
 
 .filters-btn:hover,
 .filters-btn.active {
-  background: #8B0000;
-  color: #fff;
-  border-color: #8B0000;
+  background: var(--color-primary);
+  color: var(--color-text-primary);
+  border-color: var(--color-primary);
 }
 
 .filter-count {
   font-size: 0.8rem;
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--color-white-alpha-20);
   padding: 0.1rem 0.4rem;
   border-radius: 10px;
 }
@@ -474,9 +474,9 @@ const clearAllFilters = () => {
 }
 
 .clear-btn {
-  background: #555;
-  color: #ccc;
-  border: 1px solid #666;
+  background: var(--color-bg-hover);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-bg-active);
   border-radius: 4px;
   padding: 0.5rem;
   font-family: inherit;
@@ -492,21 +492,21 @@ const clearAllFilters = () => {
 }
 
 .clear-btn:hover {
-  background: #8B0000;
-  color: #fff;
-  border-color: #8B0000;
+  background: var(--color-primary);
+  color: var(--color-text-primary);
+  border-color: var(--color-primary);
 }
 
 /* Results Count */
 .results-count {
   font-size: 0.85rem;
-  color: #999;
+  color: var(--color-text-muted);
   margin-bottom: 0.5rem;
 }
 
 /* Filters Content */
 .filters-content {
-  border-bottom: 1px solid #444;
+  border-bottom: 1px solid var(--color-border);
   padding-top: 1rem;
   margin-top: 0.5rem;
 }
@@ -528,7 +528,7 @@ const clearAllFilters = () => {
 
 .filter-section-title {
   font-weight: bold;
-  color: #fff;
+  color: var(--color-text-primary);
   font-size: 0.9rem;
 }
 
@@ -537,9 +537,9 @@ const clearAllFilters = () => {
 }
 
 .filter-btn {
-  background: #444;
-  color: #ccc;
-  border: 1px solid #555;
+  background: var(--color-bg-input);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border-heavy);
   padding: 0.4rem 0.8rem;
   font-family: inherit;
   font-size: 0.8rem;
@@ -557,13 +557,13 @@ const clearAllFilters = () => {
 }
 
 .filter-btn:hover:not(:disabled) {
-  background: #8B0000;
-  color: #fff;
+  background: var(--color-primary);
+  color: var(--color-text-primary);
 }
 
 .filter-btn:disabled {
-  background: #333;
-  color: #666;
+  background: var(--color-bg-header);
+  color: var(--color-text-disabled);
   cursor: not-allowed;
   opacity: 0.6;
 }
@@ -581,7 +581,7 @@ const clearAllFilters = () => {
   align-items: center;
   gap: 0.5rem;
   font-size: 0.85rem;
-  color: #ccc;
+  color: var(--color-text-secondary);
   cursor: pointer;
   padding: 0.25rem;
   border-radius: 4px;
@@ -590,7 +590,7 @@ const clearAllFilters = () => {
 
 .sector-checkbox:hover,
 .event-type-checkbox:hover {
-  background: rgba(139, 0, 0, 0.1);
+  background: var(--color-primary-alpha-10);
 }
 
 .additional-controls {
@@ -601,9 +601,9 @@ const clearAllFilters = () => {
 
 .favorites-toggle,
 .location-toggle {
-  background: #444;
-  color: #ccc;
-  border: 1px solid #555;
+  background: var(--color-bg-input);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border-heavy);
   border-radius: 4px;
   padding: 0.5rem 0.75rem;
   font-family: inherit;
@@ -615,15 +615,15 @@ const clearAllFilters = () => {
 
 .favorites-toggle:hover,
 .location-toggle:hover:not(:disabled) {
-  background: #8B0000;
-  color: #fff;
-  border-color: #8B0000;
+  background: var(--color-primary);
+  color: var(--color-text-primary);
+  border-color: var(--color-primary);
 }
 
 .favorites-toggle.active {
-  background: #8B0000;
-  color: #fff;
-  border-color: #8B0000;
+  background: var(--color-primary);
+  color: var(--color-text-primary);
+  border-color: var(--color-primary);
 }
 
 .location-toggle:disabled {

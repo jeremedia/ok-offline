@@ -245,7 +245,7 @@ watch(() => props.modelValue, (value) => {
 }
 
 .location-picker h3 {
-  color: #ccc;
+  color: var(--color-text-secondary);
   margin-bottom: 1rem;
   font-size: 1.1rem;
 }
@@ -259,9 +259,9 @@ watch(() => props.modelValue, (value) => {
 .tab {
   flex: 1;
   padding: 0.5rem 1rem;
-  background-color: #333;
-  color: #999;
-  border: 1px solid #444;
+  background-color: var(--color-bg-header);
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.2s;
@@ -269,14 +269,14 @@ watch(() => props.modelValue, (value) => {
 }
 
 .tab.active {
-  background-color: #8B0000;
-  color: white;
-  border-color: #8B0000;
+  background-color: var(--color-primary);
+  color: var(--color-text-primary);
+  border-color: var(--color-primary);
 }
 
 .tab:hover:not(.active) {
-  background-color: #444;
-  color: #ccc;
+  background-color: var(--color-border);
+  color: var(--color-text-secondary);
 }
 
 .form-group {
@@ -285,7 +285,7 @@ watch(() => props.modelValue, (value) => {
 
 .form-group label {
   display: block;
-  color: #ccc;
+  color: var(--color-text-secondary);
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
 }
@@ -293,9 +293,9 @@ watch(() => props.modelValue, (value) => {
 .form-control {
   width: 100%;
   padding: 0.75rem;
-  background-color: #333;
-  color: #fff;
-  border: 1px solid #444;
+  background-color: var(--color-bg-header);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
   border-radius: 4px;
   font-size: 1rem;
   font-family: inherit;
@@ -303,20 +303,20 @@ watch(() => props.modelValue, (value) => {
 
 .form-control:focus {
   outline: none;
-  border-color: #8B0000;
-  background-color: #3a3a3a;
+  border-color: var(--color-primary);
+  background-color: var(--color-bg-input);
 }
 
 .location-preview {
   padding: 0.75rem;
-  background-color: #333;
+  background-color: var(--color-bg-header);
   border-radius: 4px;
   margin-top: 1rem;
-  color: #ccc;
+  color: var(--color-text-secondary);
 }
 
 .error-message {
-  color: #ff6666;
+  color: var(--color-error);
   margin-top: 0.5rem;
   font-size: 0.9rem;
 }
@@ -332,15 +332,15 @@ watch(() => props.modelValue, (value) => {
 }
 
 .btn-secondary {
-  background-color: #444;
-  color: #ccc;
+  background-color: var(--color-border);
+  color: var(--color-text-secondary);
   margin-top: 1rem;
   width: 100%;
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background-color: #555;
-  color: #fff;
+  background-color: var(--color-bg-input);
+  color: var(--color-text-primary);
 }
 
 .btn-secondary:disabled {

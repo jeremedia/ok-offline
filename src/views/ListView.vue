@@ -729,12 +729,12 @@ watch(() => [props.type, props.year], () => {
 <style scoped>
 
 .section-header {
-  background-color: #2a2a2a;
+  background-color: var(--color-bg-elevated);
   font-weight: normal; /* Label will be bold, count will be normal */
   padding: 0.75rem 1rem;
   cursor: pointer;
-  border-bottom: 1px solid #444;
-  color: #999;
+  border-bottom: 1px solid var(--color-border-medium);
+  color: var(--color-text-muted);
   font-size: 1.4rem; /* Larger for prominent label */
   display: flex;
   align-items: center;
@@ -743,12 +743,12 @@ watch(() => [props.type, props.year], () => {
 }
 
 .section-header:hover {
-  background-color: #8B0000;
-  color: #fff;
+  background-color: var(--color-primary);
+  color: var(--color-text-inverse);
 }
 
 .section-header:hover .group-count {
-  color: #fff;
+  color: var(--color-text-inverse);
 }
 
 .collapse-icon {
@@ -764,7 +764,7 @@ watch(() => [props.type, props.year], () => {
 .group-count {
   margin-left: auto; /* Push to right side for clean layout */
   font-size: 0.85rem; /* Match results count text size */
-  color: #999;
+  color: var(--color-text-muted);
   font-weight: normal; /* Secondary element should be lighter */
 }
 
@@ -792,7 +792,7 @@ watch(() => [props.type, props.year], () => {
   font-size: 1.2rem;
   cursor: pointer;
   padding: 0.2rem 0.5rem;
-  color: #666;
+  color: var(--color-text-disabled);
   transition: all 0.2s;
 }
 
@@ -801,7 +801,7 @@ watch(() => [props.type, props.year], () => {
 }
 
 .schedule-btn.active {
-  color: #4CAF50;
+  color: var(--color-success);
 }
 
 .favorite-btn {
@@ -810,31 +810,31 @@ watch(() => [props.type, props.year], () => {
   font-size: 1.2rem;
   cursor: pointer;
   padding: 0.2rem 0.5rem;
-  color: #666;
+  color: var(--color-text-disabled);
   transition: color 0.2s;
 }
 
 .favorite-btn:hover {
-  color: #FFD700;
+  color: var(--color-accent);
 }
 
 .favorite-btn.active {
-  color: #FFD700;
+  color: var(--color-accent);
 }
 
 #items-list li.favorited {
-  background-color: rgba(255, 215, 0, 0.1);
+  background-color: var(--color-accent-alpha-10);
 }
 
 
 .distance {
-  color: #8B0000;
+  color: var(--color-primary);
   font-weight: bold;
   margin-left: 0.5rem;
 }
 
 .visited-badge {
-  color: #228B22;
+  color: var(--color-success);
   font-size: 0.9em;
   margin-left: 0.5rem;
 }
@@ -859,17 +859,17 @@ watch(() => [props.type, props.year], () => {
 .error-state {
   text-align: center;
   padding: 3rem 1rem;
-  color: #999;
+  color: var(--color-text-muted);
 }
 
 .error-state p {
   margin-bottom: 1rem;
-  color: #ff6666;
+  color: var(--color-schedule-conflict);
 }
 
 .retry-button {
-  background: #8B0000;
-  color: #fff;
+  background: var(--color-primary);
+  color: var(--color-text-primary);
   border: none;
   padding: 0.5rem 1.5rem;
   border-radius: 4px;
@@ -879,13 +879,13 @@ watch(() => [props.type, props.year], () => {
 }
 
 .retry-button:hover {
-  background: #a00000;
+  background: var(--color-primary-hover);
 }
 
 .empty-state {
   text-align: center;
   padding: 3rem 1rem;
-  color: #666;
+  color: var(--color-text-disabled);
 }
 
 .empty-state p {
@@ -894,16 +894,16 @@ watch(() => [props.type, props.year], () => {
 
 .empty-hint {
   font-size: 0.9rem;
-  color: #555;
+  color: var(--color-bg-hover);
 }
 
 .event-time {
-  color: #90CAF9;
+  color: var(--color-info);
   font-weight: 500;
 }
 
 .happening-now {
-  color: #ff4444;
+  color: var(--color-schedule-conflict);
   font-weight: bold;
   font-size: 0.8rem;
   animation: pulse 2s infinite;

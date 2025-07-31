@@ -36,11 +36,11 @@ const goToInfrastructure = () => {
 
 <style scoped>
 .infrastructure-hero {
-  background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+  background: linear-gradient(135deg, var(--color-bg-elevated) 0%, var(--color-bg-base) 100%);
   border-radius: 8px;
   padding: 2rem;
   margin-bottom: 2rem;
-  border: 1px solid #444;
+  border: 1px solid var(--color-border-medium);
 }
 
 .hero-content {
@@ -52,7 +52,7 @@ const goToInfrastructure = () => {
 .hero-icon {
   font-size: 4rem;
   line-height: 1;
-  background: #8B0000;
+  background: var(--color-primary);
   width: 100px;
   height: 100px;
   display: flex;
@@ -65,7 +65,7 @@ const goToInfrastructure = () => {
 }
 
 .hero-icon:hover {
-  background: #a00000;
+  background: var(--color-primary-dark);
   transform: scale(1.05);
 }
 
@@ -75,12 +75,12 @@ const goToInfrastructure = () => {
 
 .hero-title {
   font-size: 2.5rem;
-  color: #fff;
+  color: var(--color-text-primary);
   margin: 0 0 0.5rem 0;
 }
 
 .hero-category {
-  color: var(--color-gold);
+  color: var(--color-accent);
   font-size: 1.1rem;
   margin: 0;
   text-transform: uppercase;

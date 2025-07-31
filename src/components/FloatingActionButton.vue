@@ -78,10 +78,10 @@ onUnmounted(() => {
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background-color: #8B0000;
-  color: white;
+  background-color: var(--color-primary);
+  color: var(--color-text-inverse);
   border: none;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 8px var(--color-shadow-medium);
   cursor: pointer;
   z-index: 100;
   transition: all 0.3s ease;
@@ -93,9 +93,9 @@ onUnmounted(() => {
 }
 
 .fab:hover {
-  background-color: #a00000;
+  background-color: var(--color-primary-dark);
   transform: scale(1.05);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 6px 12px var(--color-shadow-medium);
 }
 
 .fab:active {

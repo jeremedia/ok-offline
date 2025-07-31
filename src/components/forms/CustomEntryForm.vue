@@ -318,7 +318,7 @@ watch(show, (newValue) => {
 .section-title {
   font-size: 1rem;
   font-weight: 600;
-  color: #ccc;
+  color: var(--color-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin: 0 0 1rem 0;
@@ -333,7 +333,7 @@ watch(show, (newValue) => {
 :deep(.form-group label) {
   display: block;
   margin-bottom: 0.5rem;
-  color: #ccc;
+  color: var(--color-text-secondary);
   font-size: 0.9rem;
   font-weight: 500;
 }
@@ -341,16 +341,16 @@ watch(show, (newValue) => {
 .form-group label.required::after,
 :deep(.form-group label.required::after) {
   content: ' *';
-  color: #ff6666;
+  color: var(--color-error-light);
 }
 
 .form-control,
 :deep(.form-control) {
   width: 100%;
   padding: 0.75rem;
-  background-color: #333;
-  color: #fff;
-  border: 1px solid #444;
+  background-color: var(--color-bg-header);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
   border-radius: 4px;
   font-size: 1rem;
   font-family: inherit;
@@ -360,13 +360,13 @@ watch(show, (newValue) => {
 .form-control:focus,
 :deep(.form-control:focus) {
   outline: none;
-  border-color: #8B0000;
-  background-color: #3a3a3a;
+  border-color: var(--color-primary);
+  background-color: var(--color-background-form-focus);
 }
 
 .form-control::placeholder,
 :deep(.form-control::placeholder) {
-  color: #666;
+  color: var(--color-text-disabled);
 }
 
 textarea.form-control,
@@ -376,23 +376,23 @@ textarea.form-control,
 }
 
 .error-message {
-  color: #ff6666;
+  color: var(--color-error-light);
   font-size: 0.85rem;
   margin-top: 0.25rem;
 }
 
 .location-preview {
   padding: 0.75rem;
-  background-color: #2a2a2a;
+  background-color: var(--color-bg-elevated);
   border-radius: 4px;
   margin-top: 1rem;
-  color: #90CAF9;
+  color: var(--color-accent-light);
   font-size: 0.9rem;
 }
 
 .custom-notice {
-  background-color: rgba(139, 0, 0, 0.1);
-  border: 1px solid #8B0000;
+  background-color: var(--color-primary-bg);
+  border: 1px solid var(--color-primary);
   border-radius: 8px;
   padding: 1rem;
   text-align: center;
@@ -404,8 +404,8 @@ textarea.form-control,
   align-items: center;
   justify-content: center;
   padding: 0.375rem 0.875rem;
-  background-color: #8B0000;
-  color: #fff;
+  background-color: var(--color-primary);
+  color: var(--color-text-primary);
   border-radius: 20px;
   font-weight: 600;
   margin-bottom: 0.5rem;
@@ -430,7 +430,7 @@ textarea.form-control,
 
 .custom-notice p {
   margin: 0;
-  color: #ccc;
+  color: var(--color-text-secondary);
   font-size: 0.85rem;
 }
 </style>

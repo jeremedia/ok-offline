@@ -143,9 +143,9 @@ onMounted(() => {
 /* Collapsible container matching infrastructure-intro style */
 .search-options-container {
   margin: 1rem auto;
-  background: rgba(0, 0, 0, 0.3);
+  background: var(--color-black-alpha-30);
   border-radius: 8px;
-  border: 1px solid #444;
+  border: 1px solid var(--color-border-subtle);
   max-width: 100%;
   overflow: hidden;
 }
@@ -160,19 +160,19 @@ onMounted(() => {
   align-items: center;
   justify-content: flex-start;
   padding: 0.75rem 1rem;
-  background: #2a2a2a;
-  border-bottom: 1px solid #444;
+  background: var(--color-bg-elevated);
+  border-bottom: 1px solid var(--color-border-subtle);
   cursor: pointer;
   transition: background 0.2s ease;
 }
 
 .options-header:hover {
-  background: #333;
+  background: var(--color-bg-header);
 }
 
 .options-header h4 {
   margin: 0;
-  color: #fff;
+  color: var(--color-text);
   font-size: 0.8rem;
   font-weight: bold;
   text-transform: uppercase;
@@ -183,7 +183,7 @@ onMounted(() => {
 .options-header .collapse-btn {
   background: none;
   border: none;
-  color: #ccc;
+  color: var(--color-text-secondary);
   font-size: 0.875rem;
   cursor: pointer;
   padding: 0.25rem 0.5rem;
@@ -194,8 +194,8 @@ onMounted(() => {
 }
 
 .options-header .collapse-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
+  background: var(--color-white-alpha-10);
+  color: var(--color-text);
 }
 
 /* Slide down transition */
@@ -235,7 +235,7 @@ onMounted(() => {
 .mode-buttons {
   display: flex;
   gap: 0;
-  border-bottom: 1px solid #555;
+  border-bottom: 1px solid var(--color-border);
   overflow: hidden;
   width: 100%;
 }
@@ -246,10 +246,10 @@ onMounted(() => {
   justify-content: center;
   gap: 0.375rem;
   padding: 0.75rem 1rem;
-  background: none;
+  background: var(--color-bg-elevated);
   border: none;
-  border-right: 1px solid #555;
-  color: #ccc;
+  border-right: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
   cursor: pointer;
   transition: all 0.2s ease;
   font-size: 0.875rem;
@@ -263,13 +263,13 @@ onMounted(() => {
 }
 
 .mode-btn:hover:not(.active):not(.disabled) {
-  background: #444;
-  color: #fff;
+  background: var(--color-bg-hover);
+  color: var(--color-text);
 }
 
 .mode-btn.active {
-  background: var(--color-dark-red);
-  color: #fff;
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
 }
 
 .mode-btn.disabled {
@@ -300,10 +300,10 @@ onMounted(() => {
   justify-content: center;
   gap: 0.375rem;
   padding: 0.875rem 1rem;
-  background: none;
+  background: var(--color-bg-elevated);
   border: none;
-  border-right: 1px solid #555;
-  color: #ccc;
+  border-right: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
@@ -322,13 +322,13 @@ onMounted(() => {
 }
 
 .filter-btn:hover:not(.active) {
-  background: #444;
-  color: #fff;
+  background: var(--color-bg-hover);
+  color: var(--color-text);
 }
 
 .filter-btn.active {
-  background: var(--color-dark-red);
-  color: #fff;
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
 }
 
 /* Desktop/Mobile label switching */
@@ -403,7 +403,7 @@ onMounted(() => {
     width: auto;
     min-width: 44px;
     padding: 0.75rem; /* Make buttons square with proper padding */
-    border-right: 1px solid #555;
+    border-right: 1px solid var(--color-border);
     justify-content: center;
     gap: 0;
   }

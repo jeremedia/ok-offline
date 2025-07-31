@@ -4,6 +4,7 @@
   --color-primary: #8B0000;              /* OKNOTOK red */
   --color-primary-dark: #680000;         /* Darker red variant */
   --color-primary-darker: #5a0000;       /* Even darker for deep shadows */
+  --color-primary-hover: #a00000;        /* Lighter red for hover states */
   --color-accent: #FFD700;               /* OKNOTOK gold */
   --color-accent-dark: #DAA520;          /* Darker gold for hover */
   
@@ -14,6 +15,13 @@
   --color-bg-input: #444;                /* Form inputs, selects */
   --color-bg-hover: #555;                /* Hover states */
   --color-bg-active: #666;               /* Active/selected states */
+  
+  /* Background Color Aliases for map components */
+  --color-background-secondary: #1a1a1a;  /* Alias for bg-base */
+  --color-background-secondary-alpha-90: rgba(26, 26, 26, 0.9);  /* 90% opacity */
+  --color-background-secondary-alpha-95: rgba(26, 26, 26, 0.95); /* 95% opacity */
+  --color-background-tertiary: #2a2a2a;   /* Alias for bg-elevated */
+  --color-background-form-focus: #3a3a3a; /* Form focus state */
   
   /* Text Colors */
   --color-text-primary: #fff;            /* Primary text, headings */
@@ -27,12 +35,19 @@
   --color-border-medium: #444;           /* Standard borders */
   --color-border-heavy: #555;            /* Emphasized borders */
   --color-border-focus: var(--color-primary);  /* Focus borders */
+  --color-border: #444;                  /* Alias for border-medium */
+  --color-border-dark: #333;             /* Alias for border-light */
+  --color-border-secondary: #555;        /* Alias for border-heavy */
   
   /* Status Colors */
   --color-success: #4CAF50;              /* Success states */
   --color-error: #f44336;                /* Error states */
+  --color-error-light: #ff9999;          /* Light error for text */
+  --color-error-hover: #ff5252;          /* Error hover state */
   --color-warning: #ff9800;              /* Warning states */
   --color-info: #2196f3;                 /* Info states */
+  --color-danger: #ff0000;               /* Danger/alert states */
+  --color-purple: #6a0dad;               /* Purple for special elements */
   
   /* Interactive States */
   --color-link: var(--color-accent);
@@ -61,6 +76,84 @@
   /* Special Effects */
   --color-glow: var(--color-accent);
   --color-shadow: rgba(0, 0, 0, 0.5);
+  
+  /* Transparency Effects */
+  --color-primary-alpha-20: rgba(139, 0, 0, 0.2);
+  --color-primary-alpha-30: rgba(139, 0, 0, 0.3);
+  --color-primary-alpha-90: rgba(139, 0, 0, 0.9);
+  --color-success-glow: rgba(76, 175, 80, 0.5);
+  --color-success-alpha-90: rgba(34, 139, 34, 0.9);
+  --color-success-alpha-10: rgba(76, 175, 80, 0.1);
+  --color-error-glow: rgba(244, 67, 54, 0.5);
+  --color-error-alpha-10: rgba(244, 67, 54, 0.1);
+  --color-warning-alpha-90: rgba(255, 140, 0, 0.9);
+  --color-accent-alpha-10: rgba(255, 215, 0, 0.1);
+  --color-accent-alpha-80: rgba(255, 215, 0, 0.8);
+  --color-shadow-dark: rgba(0, 0, 0, 0.8);
+  --color-schedule-conflict-alpha-10: rgba(255, 107, 107, 0.1);
+  --color-warning-alpha-10: rgba(255, 217, 61, 0.1);
+  --color-primary-dark-alpha-10: rgba(104, 0, 0, 0.1);
+  --color-primary-alpha-30: rgba(139, 0, 0, 0.3);
+  --color-primary-alpha-05: rgba(139, 0, 0, 0.05);
+  --color-primary-alpha-40: rgba(139, 0, 0, 0.4);
+  --color-bg-input-alpha-50: rgba(68, 68, 68, 0.5);
+  --color-shadow-light: rgba(0, 0, 0, 0.2);
+  --color-shadow-medium: rgba(0, 0, 0, 0.3);
+  --color-overlay-light: rgba(0, 0, 0, 0.3);
+  --color-overlay-lighter: rgba(0, 0, 0, 0.2);
+  --color-overlay-medium: rgba(0, 0, 0, 0.5);
+  --color-white-alpha-05: rgba(255, 255, 255, 0.05);
+  --color-white-alpha-10: rgba(255, 255, 255, 0.1);
+  --color-white-alpha-20: rgba(255, 255, 255, 0.2);
+  --color-white-alpha-30: rgba(255, 255, 255, 0.3);
+  --color-white-alpha-50: rgba(255, 255, 255, 0.5);
+  --color-modal-overlay: rgba(0, 0, 0, 0.7);
+  --color-purple-alpha-30: rgba(106, 13, 173, 0.3);
+  --color-purple-alpha-90: rgba(106, 13, 173, 0.9);
+  --color-black-alpha-30: rgba(0, 0, 0, 0.3);
+  
+  /* Additional overlay colors */
+  --color-overlay-subtle: rgba(0, 0, 0, 0.3);
+  --color-overlay-light: rgba(255, 255, 255, 0.1);
+  
+  /* Status background colors */
+  --color-success-bg: rgba(76, 175, 80, 0.1);
+  --color-error-bg: rgba(244, 67, 54, 0.1);
+  --color-warning-bg: rgba(255, 152, 0, 0.1);
+  --color-info-bg: rgba(33, 150, 243, 0.1);
+  --color-accent-bg: rgba(255, 215, 0, 0.1);
+  --color-primary-bg: rgba(139, 0, 0, 0.1);
+  
+  /* Dark status colors for toast backgrounds */
+  --color-success-dark: #2d5a2d;
+  --color-error-dark: #5a2d2d;
+  --color-warning-dark: #5a4a2d;
+  --color-info-dark: #2d3a5a;
+  
+  /* Additional border colors */
+  --color-primary-border: rgba(139, 0, 0, 0.3);
+  
+  /* Light accent for special text */
+  --color-accent-light: #90CAF9;
+  
+  /* Shadow definitions */
+  --shadow-subtle: 0 2px 4px rgba(0, 0, 0, 0.2);
+  --shadow-elevated: 0 4px 12px rgba(0, 0, 0, 0.4);
+  
+  /* Overlay colors for different opacities */
+  --color-overlay-dark: rgba(0, 0, 0, 0.8);
+  --color-border-subtle: #444;
+  --color-text: #fff;
+  --color-primary-alpha-10: rgba(139, 0, 0, 0.1);
+  
+  /* Weather & Dust Colors */
+  --color-dust-clear: #4CAF50;
+  --color-dust-light: #FFC107;
+  --color-dust-moderate: #FF9800;
+  --color-dust-heavy: #FF5722;
+  --color-dust-whiteout: #F44336;
+  --color-weather-card-bg: var(--color-bg-elevated);
+  --color-weather-icon: var(--color-accent);
   
   /* Legacy Support - Will be removed after full migration */
   --color-gold: #FFD700;

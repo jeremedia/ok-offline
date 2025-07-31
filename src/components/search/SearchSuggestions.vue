@@ -150,11 +150,11 @@ defineExpose({
   top: 100%;
   left: 0;
   right: 0;
-  background: #2a2a2a;
-  border: 1px solid #444;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-medium);
   border-top: none;
   border-radius: 0 0 8px 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 12px var(--color-shadow-medium);
   z-index: 1000;
   min-height: 50px;
   max-height: 300px;
@@ -173,7 +173,7 @@ defineExpose({
   padding: 12px 16px;
   cursor: pointer;
   transition: all 0.2s ease;
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid var(--color-border-light);
 }
 
 .suggestion-item:last-child {
@@ -182,12 +182,12 @@ defineExpose({
 
 .suggestion-item:hover,
 .suggestion-item.active {
-  background: rgba(139, 0, 0, 0.2);
-  border-color: #8B0000;
+  background: var(--color-primary-alpha-20);
+  border-color: var(--color-primary);
 }
 
 .suggestion-icon {
-  color: #ccc;
+  color: var(--color-text-secondary);
   font-size: 16px;
   flex-shrink: 0;
 }
@@ -195,12 +195,12 @@ defineExpose({
 .suggestion-text {
   flex: 1;
   font-size: 14px;
-  color: #fff;
+  color: var(--color-text-primary);
 }
 
 .suggestion-action {
   font-size: 12px;
-  color: #8B0000;
+  color: var(--color-primary);
   font-weight: 500;
   opacity: 0.7;
   transition: opacity 0.2s ease;
@@ -215,19 +215,19 @@ defineExpose({
 .no-suggestions {
   padding: 16px;
   text-align: center;
-  color: #999;
+  color: var(--color-text-muted);
   font-size: 13px;
   font-style: italic;
 }
 
 .suggestions-loading {
-  color: #8B0000;
+  color: var(--color-primary);
 }
 
 /* Mobile optimizations */
 @media (max-width: 600px) {
   .search-suggestions {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 2px 8px var(--color-shadow-medium);
   }
   
   .suggestion-item {
@@ -250,15 +250,15 @@ defineExpose({
 }
 
 .search-suggestions::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: var(--color-bg-hover);
 }
 
 .search-suggestions::-webkit-scrollbar-thumb {
-  background: #ccc;
+  background: var(--color-text-secondary);
   border-radius: 3px;
 }
 
 .search-suggestions::-webkit-scrollbar-thumb:hover {
-  background: #999;
+  background: var(--color-text-muted);
 }
 </style>

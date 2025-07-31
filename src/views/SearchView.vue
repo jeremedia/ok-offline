@@ -1030,16 +1030,16 @@ const ensureAtLeastOneFilter = () => {
 
 .status-error {
   color: var(--color-error);
-  background: rgba(255, 107, 107, 0.1);
+  background: var(--color-schedule-conflict-alpha-10);
 }
 
 .status-offline {
   color: var(--color-warning);
-  background: rgba(255, 217, 61, 0.1);
+  background: var(--color-warning-alpha-10);
 }
 
 .status-online {
-  color: var(--color-dark-red);
+  color: var(--color-primary);
 }
 
 /* Search results */
@@ -1098,7 +1098,7 @@ const ensureAtLeastOneFilter = () => {
 @media (min-width: 601px) {
   .mode-info:hover {
     border-color: var(--color-primary-dark) !important;
-    background: rgba(104, 0, 0, 0.1);
+    background: var(--color-primary-dark-alpha-10);
   }
 }
 
@@ -1152,8 +1152,8 @@ const ensureAtLeastOneFilter = () => {
 }
 
 .entity-stat:hover {
-  border-color: rgba(139, 0, 0, 0.3);
-  background: rgba(139, 0, 0, 0.05);
+  border-color: var(--color-primary-alpha-30);
+  background: var(--color-primary-alpha-05);
 }
 
 .entity-stats .entity-stat .entity-tag {
@@ -1185,7 +1185,7 @@ const ensureAtLeastOneFilter = () => {
 
 .popular-section h5 {
   margin: 0 0 0.5rem 0;
-  color: var(--color-gold);
+  color: var(--color-accent);
   font-size: 0.9rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -1211,17 +1211,17 @@ const ensureAtLeastOneFilter = () => {
   text-transform: uppercase;
   cursor: pointer;
   transition: all 0.2s ease;
-  background: var(--color-dark-red);
-  color: white;
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
   outline: none;
-  border: 1px solid var(--color-dark-red);
+  border: 1px solid var(--color-primary);
 }
 
 .popular-entity-tag:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(139, 0, 0, 0.4);
-  background: var(--color-dark-red-original);
-  border-color: var(--color-dark-red-original);
+  box-shadow: 0 4px 12px var(--color-primary-alpha-40);
+  background: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
 }
 
 .popular-count {
@@ -1262,8 +1262,8 @@ const ensureAtLeastOneFilter = () => {
   justify-content: center;
   align-items: center;
   gap: 0.75rem;
-  background: rgba(139, 0, 0, 0.1);
-  border: 1px solid rgba(139, 0, 0, 0.3);
+  background: var(--color-primary-alpha-10);
+  border: 1px solid var(--color-primary-alpha-30);
   border-radius: 6px;
   padding: 0.75rem 1rem;
   margin-bottom: 0.75rem;
@@ -1295,7 +1295,7 @@ const ensureAtLeastOneFilter = () => {
 }
 
 .clear-entity-btn:hover {
-  background: rgba(139, 0, 0, 0.2);
+  background: var(--color-primary-alpha-20);
   color: var(--color-text-primary);
 }
 
@@ -1308,8 +1308,8 @@ const ensureAtLeastOneFilter = () => {
 }
 
 .search-mode-badge {
-  background: var(--color-dark-red);
-  color: white;
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
   padding: 0.25rem 0.5rem;
   border-radius: 12px;
   font-size: 0.75rem;
@@ -1329,8 +1329,8 @@ const ensureAtLeastOneFilter = () => {
 }
 
 .load-more-btn {
-  background: var(--color-dark-red);
-  color: white;
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
   border: none;
   padding: 0.75rem 1.5rem;
   border-radius: 4px;
@@ -1341,7 +1341,7 @@ const ensureAtLeastOneFilter = () => {
 }
 
 .load-more-btn:hover {
-  background: var(--color-dark-red-original);
+  background: var(--color-primary-dark);
 }
 
 /* Mobile optimizations */
