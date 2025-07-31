@@ -1,57 +1,68 @@
 <template>
   <section id="detail-section" class="view">
     <div id="detail-content" v-if="item">
-      <!-- Mobile title - shown above map on mobile -->
-      <h2 class="detail-title mobile-title">
-        {{ getItemName(item) }}
-        <button 
-          @click="handleToggleFavorite"
-          class="favorite-btn-detail"
-          :class="{ active: isFavorited }"
-        >
-          {{ isFavorited ? '★' : '☆' }}
-        </button>
-        <span v-if="item.isCustom" class="custom-badge">
-          <span class="badge-icon">✏️</span>
-          <span class="badge-text">CUSTOM ENTRY</span>
-        </span>
-      </h2>
-
-      <div id="detail-info">
-        <!-- Desktop title - hidden on mobile -->
-        <h2 class="detail-title desktop-title">
-          {{ getItemName(item) }}
-          <button 
-            @click="handleToggleFavorite"
-            class="favorite-btn-detail"
-            :class="{ active: isFavorited }"
-          >
-            {{ isFavorited ? '★' : '☆' }}
-          </button>
-          <span v-if="item.isCustom" class="custom-badge">
-          <span class="badge-icon">✏️</span>
-          <span class="badge-text">CUSTOM ENTRY</span>
-        </span>
+      <!-- Header - full width on desktop, follows mobile order -->
+      <div class="detail-header">
+        <h2 class="detail-title">
+          <div class="title-left">
+            <span class="item-type-icon">{{ props.type === 'camp' ? '🏕️' : props.type === 'art' ? '🎨' : '🎪' }}</span>
+            <span class="title-text">{{ getItemName(item) }}</span>
+          </div>
+          <div class="title-right">
+            <button 
+              @click="handleToggleFavorite"
+              class="favorite-btn-detail"
+              :class="{ active: isFavorited }"
+            >
+              {{ isFavorited ? '★' : '☆' }}
+            </button>
+            <span v-if="item.isCustom" class="custom-badge">
+              <span class="badge-icon">✏️</span>
+              <span class="badge-text">CUSTOM ENTRY</span>
+            </span>
+          </div>
         </h2>
+      </div>
+
+      <!-- Desktop two-column layout wrapper -->
+      <div class="detail-columns">
+        <!-- Column 1: Item details -->
+        <div id="detail-info">
         
         <div class="detail-field" v-if="item.description">
           <label>Description</label>
           <div class="value">{{ item.description }}</div>
         </div>
         
-        <div class="detail-field" v-if="item.hometown">
-          <label>Hometown</label>
-          <div class="value">{{ item.hometown }}</div>
+        <!-- Camp: Hometown, Location, Camp Size on one line -->
+        <div class="detail-fields-row" v-if="props.type === 'camp' && (item.hometown || item.location_string || item.location?.dimensions)">
+          <div class="detail-field" v-if="item.hometown">
+            <label>Hometown</label>
+            <div class="value">{{ item.hometown }}</div>
+          </div>
+          
+          <div class="detail-field" v-if="item.location_string">
+            <label>Location</label>
+            <div class="value">{{ item.location_string }}</div>
+          </div>
+          
+          <div class="detail-field" v-if="item.location?.dimensions">
+            <label>Camp Size</label>
+            <div class="value">{{ item.location.dimensions }}</div>
+          </div>
         </div>
         
-        <div class="detail-field" v-if="item.location_string">
-          <label>Location</label>
-          <div class="value">{{ item.location_string }}</div>
-        </div>
-        
-        <div class="detail-field" v-if="item.location?.dimensions">
-          <label>Camp Size</label>
-          <div class="value">{{ item.location.dimensions }}</div>
+        <!-- Art: Hometown and Location on one line -->
+        <div class="detail-fields-row" v-if="props.type === 'art' && (item.hometown || item.location_string)">
+          <div class="detail-field" v-if="item.hometown">
+            <label>Hometown</label>
+            <div class="value">{{ item.hometown }}</div>
+          </div>
+          
+          <div class="detail-field" v-if="item.location_string">
+            <label>Location</label>
+            <div class="value">{{ item.location_string }}</div>
+          </div>
         </div>
         
         <div class="detail-field" v-if="item.landmark">
@@ -73,36 +84,49 @@
           </div>
         </div>
         
-        <div class="detail-field" v-if="props.type === 'camp' && campEvents.length > 0">
-          <label>Camp Events</label>
-          <div class="value">
-            <ul class="camp-events">
-              <li v-for="event in campEvents" :key="event.uid" class="event-item">
-                <strong>
-                  <router-link 
-                    :to="`/${props.year}/events/${event.uid}`" 
-                    class="event-title-link"
-                    @click.stop
-                  >
-                    {{ event.title }}
-                  </router-link>
-                </strong>
-                <span v-if="event.event_type" class="event-type">{{ event.event_type.label }}</span>
-                <div v-if="event.description" class="event-description">{{ event.description }}</div>
-                <div v-if="event.occurrence_set && event.occurrence_set.length > 0" class="event-times">
-                  <div v-for="(occ, idx) in event.occurrence_set" :key="idx" class="occurrence-item">
-                    <small>{{ formatEventTime(occ) }}</small>
-                    <button 
-                      @click.stop="handleScheduleEvent(event, occ)"
-                      :class="['schedule-btn', { scheduled: scheduledOccurrences.get(`${event.uid}_${occ.start_time}`) }]"
-                      :title="scheduledOccurrences.get(`${event.uid}_${occ.start_time}`) ? 'Remove from schedule' : 'Add to schedule'"
+        <!-- Collapsible Camp Events Section -->
+        <div class="detail-field" v-if="props.type === 'camp'">
+          <div class="camp-events-section">
+            <div class="events-header" @click="toggleCampEvents">
+              <span class="expand-icon">{{ campEventsExpanded ? '▼' : '▶' }}</span>
+              <span class="events-title">CAMP EVENTS{{ campEventsLoaded ? ` (${campEvents.length})` : '' }}</span>
+            </div>
+            
+            <div class="events-content" v-if="campEventsExpanded">
+              <div v-if="!campEventsLoaded" class="loading-events">
+                Loading events...
+              </div>
+              <div v-else-if="campEvents.length === 0" class="no-events">
+                No events scheduled for this camp.
+              </div>
+              <ul v-else class="camp-events">
+                <li v-for="event in campEvents" :key="event.uid" class="event-item">
+                  <strong>
+                    <router-link 
+                      :to="`/${props.year}/events/${event.uid}`" 
+                      class="event-title-link"
+                      @click.stop
                     >
-                      {{ scheduledOccurrences.get(`${event.uid}_${occ.start_time}`) ? '📅' : '➕' }}
-                    </button>
+                      {{ event.title }}
+                    </router-link>
+                  </strong>
+                  <span v-if="event.event_type" class="event-type">{{ event.event_type.label }}</span>
+                  <div v-if="event.description" class="event-description">{{ event.description }}</div>
+                  <div v-if="event.occurrence_set && event.occurrence_set.length > 0" class="event-times">
+                    <div v-for="(occ, idx) in event.occurrence_set" :key="idx" class="occurrence-item">
+                      <small>{{ formatEventTime(occ) }}</small>
+                      <button 
+                        @click.stop="handleScheduleEvent(event, occ)"
+                        :class="['schedule-btn', { scheduled: scheduledOccurrences.get(`${event.uid}_${occ.start_time}`) }]"
+                        :title="scheduledOccurrences.get(`${event.uid}_${occ.start_time}`) ? 'Remove from schedule' : 'Add to schedule'"
+                      >
+                        {{ scheduledOccurrences.get(`${event.uid}_${occ.start_time}`) ? '📅' : '➕' }}
+                      </button>
+                    </div>
                   </div>
-                </div>
-              </li>
-            </ul>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
         
@@ -125,9 +149,17 @@
           </div>
         </div>
         
-        <div class="detail-field" v-if="props.type === 'event' && item.enriched_location">
-          <label>Location</label>
-          <div class="value">{{ item.enriched_location }}</div>
+        <!-- Event: Event Type and Location on one line -->
+        <div class="detail-fields-row" v-if="props.type === 'event' && (item.event_type || item.enriched_location)">
+          <div class="detail-field" v-if="item.event_type">
+            <label>Event Type</label>
+            <div class="value">{{ item.event_type.label }}</div>
+          </div>
+          
+          <div class="detail-field" v-if="item.enriched_location">
+            <label>Location</label>
+            <div class="value">{{ item.enriched_location }}</div>
+          </div>
         </div>
         
         <div class="detail-field" v-if="props.type === 'event' && item.camp_name">
@@ -142,11 +174,6 @@
             </router-link>
             <span v-else>{{ item.camp_name }}</span>
           </div>
-        </div>
-        
-        <div class="detail-field" v-if="props.type === 'event' && item.event_type">
-          <label>Event Type</label>
-          <div class="value">{{ item.event_type.label }}</div>
         </div>
 
         <div class="visit-tracking">
@@ -174,24 +201,27 @@
           </div>
         </div>
 
+
         <button id="back-to-list" @click="goBack">← Back to List</button>
 
-      </div>
-      
-      <div id="detail-map-container">
-        <div id="detail-map" ref="mapContainer"></div>
-        <div class="map-controls">
-          <div class="zoom-controls">
-            <button @click="handleZoomOut" class="zoom-btn" :disabled="currentZoom <= 10">−</button>
-            <span class="zoom-level">{{ currentZoom }}</span>
-            <button @click="handleZoomIn" class="zoom-btn" :disabled="currentZoom >= 18">+</button>
+        </div>
+        
+        <!-- Column 2: Map -->
+        <div id="detail-map-container">
+          <div id="detail-map" ref="mapContainer"></div>
+          <div class="map-controls">
+            <div class="zoom-controls">
+              <button @click="handleZoomOut" class="zoom-btn" :disabled="currentZoom <= 10">−</button>
+              <span class="zoom-level">{{ currentZoom }}</span>
+              <button @click="handleZoomIn" class="zoom-btn" :disabled="currentZoom >= 18">+</button>
+            </div>
+            <router-link 
+              :to="`/${props.year}/map?focus=${props.type}_${props.id}`" 
+              class="open-in-map-link"
+            >
+              Open in map →
+            </router-link>
           </div>
-          <router-link 
-            :to="`/${props.year}/map?focus=${props.type}_${props.id}`" 
-            class="open-in-map-link"
-          >
-            Open in map →
-          </router-link>
         </div>
       </div>
     </div>
@@ -210,6 +240,7 @@
 import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import L from 'leaflet'
+import 'leaflet-rotate'
 import { BRC_CENTER } from '../config'
 import { getItemName, getItemLocation } from '../utils'
 import { getFromCache } from '../services/storage'
@@ -237,6 +268,8 @@ const item = ref(null)
 const loading = ref(true)
 const error = ref(null)
 const campEvents = ref([])
+const campEventsLoaded = ref(false)
+const campEventsExpanded = ref(false)
 const isFavorited = ref(false)
 const visitInfo = ref(null)
 const notes = ref('')
@@ -253,16 +286,19 @@ const goBack = () => {
   router.push(`/${props.year}/${props.type}s`)
 }
 
+// Store the marker position for zoom centering
+let markerPosition = null
+
 // Zoom control handlers
 const handleZoomIn = () => {
-  if (detailMap && currentZoom.value < 18) {
-    detailMap.zoomIn()
+  if (detailMap && currentZoom.value < 18 && markerPosition) {
+    detailMap.setView(markerPosition, currentZoom.value + 1)
   }
 }
 
 const handleZoomOut = () => {
-  if (detailMap && currentZoom.value > 10) {
-    detailMap.zoomOut()
+  if (detailMap && currentZoom.value > 10 && markerPosition) {
+    detailMap.setView(markerPosition, currentZoom.value - 1)
   }
 }
 
@@ -346,6 +382,13 @@ const loadItem = async () => {
         isFavorited.value = isFavorite(props.type, props.id)
         visitInfo.value = getVisitInfo(props.type, props.id, props.year)
         notes.value = getItemNotes(props.type, props.id, props.year)
+        
+        // Initialize camp events expanded state from localStorage
+        if (props.type === 'camp') {
+          const storageKey = `campEventsExpanded_${props.id}`
+          const savedState = localStorage.getItem(storageKey)
+          campEventsExpanded.value = savedState === 'true'
+        }
         
         // Check scheduled occurrences for events
         if (props.type === 'event' && cachedItem.occurrence_set) {
@@ -488,6 +531,7 @@ const initMap = async () => {
   const locationString = getItemLocation(item.value)
   let coords = null
   
+  
   // Only try to geocode if we're allowed to show locations
   if (canShow && locationString && locationString !== 'Unknown location') {
     coords = brcAddressToLatLon(locationString)
@@ -504,6 +548,7 @@ const initMap = async () => {
   
   if (coords) {
     // Show actual location
+    markerPosition = coords // Store for zoom centering
     console.log('Setting view to coords:', coords, 'with zoom', detailMap.getZoom())
     detailMap.setView(coords, detailMap.getZoom())
     detailMarker = L.marker(coords, { icon: markerIcon }).addTo(detailMap)
@@ -514,6 +559,7 @@ const initMap = async () => {
   } else {
     // Show at Golden Spike (center) with note about location
     // Use zoom 14 for items without location
+    markerPosition = BRC_CENTER // Store for zoom centering
     const noLocationZoom = 14
     console.log('No coords, setting view to BRC_CENTER with zoom', noLocationZoom)
     detailMap.setView(BRC_CENTER, noLocationZoom)
@@ -531,6 +577,33 @@ const initMap = async () => {
       <strong>${getItemName(item.value)}</strong><br>
       <em>${locationMessage}</em>
     `).openPopup()
+  }
+  
+  // Prevent map from intercepting scroll events - allow smooth page scrolling
+  const mapElement = mapContainer.value
+  if (mapElement) {
+    // Use CSS to prevent scroll events from reaching the map
+    mapElement.style.touchAction = 'pan-y pinch-zoom'
+    mapElement.style.overscrollBehavior = 'contain'
+    
+    // Add event listener that stops scroll events from reaching Leaflet
+    const preventMapScroll = (e) => {
+      e.stopImmediatePropagation()
+      e.preventDefault()
+      return false
+    }
+    
+    mapElement.addEventListener('wheel', preventMapScroll, { capture: true, passive: false })
+    mapElement.addEventListener('mousewheel', preventMapScroll, { capture: true, passive: false })
+    mapElement.addEventListener('DOMMouseScroll', preventMapScroll, { capture: true, passive: false })
+    
+    console.log('Map scroll interception disabled - page scrolling enabled')
+  }
+  
+  // Apply -45 degree rotation for better city orientation (gate at bottom, temple at top)
+  if (detailMap && detailMap.setBearing) {
+    detailMap.setBearing(-45)
+    console.log('Applied -45 degree rotation to detail map')
   }
   
   setTimeout(() => detailMap.invalidateSize(), 100)
@@ -627,14 +700,29 @@ const formatEventTime = (occurrence) => {
   return `${day} ${startTime}`
 }
 
-// Load camp events
+// Toggle camp events section
+const toggleCampEvents = async () => {
+  const storageKey = `campEventsExpanded_${props.id}`
+  campEventsExpanded.value = !campEventsExpanded.value
+  
+  // Remember state per camp
+  localStorage.setItem(storageKey, campEventsExpanded.value.toString())
+  
+  // Only load events when expanded for the first time
+  if (campEventsExpanded.value && !campEventsLoaded.value) {
+    await loadCampEvents()
+  }
+}
+
+// Load camp events (lazy loading)
 const loadCampEvents = async () => {
-  if (props.type !== 'camp' || !item.value) return
+  if (props.type !== 'camp' || !item.value || campEventsLoaded.value) return
   
   try {
     // Use the events service to get filtered events
     const events = await getCampEvents(item.value.uid, props.year)
     campEvents.value = events
+    campEventsLoaded.value = true
     
     // Check which occurrences are scheduled
     events.forEach(event => {
@@ -659,10 +747,6 @@ onMounted(async () => {
   await loadItem()
   if (item.value) {
     setTimeout(() => initMap(), 100)
-    // Load events if it's a camp
-    if (props.type === 'camp') {
-      loadCampEvents()
-    }
   }
 })
 
@@ -678,14 +762,100 @@ watch(() => props.id, async () => {
 #detail-section {
   background: #1a1a1a;
   color: #fff;
+  padding: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
-h2 {
-  color: #fff;
+#detail-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  gap: 0;
 }
 
-.detail-field label {
-  color: #ccc;
+/* Header styling - full width */
+.detail-header {
+  padding: 0 16px;
+  flex-shrink: 0;
+}
+
+.detail-title {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+/* Mobile layout - stacked columns */
+.detail-columns {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0; /* Critical for nested flex containers */
+  overflow: hidden;
+}
+
+#detail-info {
+  padding: 0 16px 16px !important;
+  padding-bottom: 0 !important; /* Override external padding */
+  overflow-y: auto;
+  flex: 1;
+  box-sizing: border-box;
+}
+
+#detail-map-container {
+  background-color: #000000 !important;
+  position: relative !important;
+  flex-shrink: 0;
+  height: 300px; /* Fixed height on mobile */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-sizing: border-box;
+  border: 1px solid #444 !important;
+  border-radius: 8px;
+  padding: 0 !important; /* Override external padding */
+  top: auto !important; /* Override sticky positioning */
+  max-width: none !important;
+}
+
+/* Desktop layout - side by side columns */
+@media (min-width: 768px) {
+  .detail-columns {
+    flex-direction: row;
+    gap: 0;
+  }
+  
+  #detail-info {
+    flex: 1 1 50%; /* grow: 1, shrink: 1, basis: 50% */
+    width: auto;
+    padding: 24px;
+    min-height: 0;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+  
+  #detail-map-container {
+    flex: 1 1 50%; /* grow: 1, shrink: 1, basis: 50% */
+    width: auto !important;
+    height: auto !important; /* Override fit-content */
+    min-height: 0; /* Allow shrinking */
+    box-sizing: border-box;
+    overflow: hidden;
+    align-self: stretch; /* Ensure it stretches to match sibling height */
+    position: relative !important; /* Override sticky */
+    top: auto !important;
+    max-width: none !important;
+  }
+}
+
+
+.detail-field label, .events-title, .visit-tracking h3, .visit-tracking h4 {
+  color: var(--color-gold, #FFD700) !important;
   font-weight: 600;
   font-size: 1rem;
   text-transform: uppercase;
@@ -694,14 +864,16 @@ h2 {
 
 .detail-field .value {
   color: #fff;
+  line-height: 1.5;
 }
 
 .detail-field a {
-  color: #ff6666;
+  color: var(--color-gold, #FFD700);
 }
 
 .detail-field a:hover {
-  color: #ff9999;
+  color: #fff;
+  text-decoration: underline;
 }
 
 .event {
@@ -732,10 +904,14 @@ h2 {
 
 /* Map controls container */
 .map-controls {
+  padding: 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 8px;
+  background: rgba(0, 0, 0, 0.8);
+  flex-shrink: 0;
+  border-top: 1px solid #444; /* Only top border */
+  border-radius: 0; /* Remove radius since container handles it */
 }
 
 /* Zoom controls container */
@@ -836,9 +1012,7 @@ h2 {
   border-bottom: 1px solid #333;
 }
 
-.camp-events .event-item:hover {
-  background-color: #8B0000;
-}
+/* Hover effect removed per user request */
 
 .camp-events {
   list-style: none;
@@ -859,29 +1033,38 @@ h2 {
   gap: 1rem;
 }
 
-/* Hide mobile title on desktop */
-.mobile-title {
-  display: none;
-}
-
-/* Show desktop title */
-.desktop-title {
+.title-left {
   display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
 }
 
-@media (max-width: 768px) {
-  /* Show mobile title */
-  .mobile-title {
-    display: flex;
-    order: -2; /* Ensure it's before the map */
-    margin: 0;
-    font-size: 1.5rem;
-  }
-  
-  /* Hide desktop title */
-  .desktop-title {
-    display: none;
-  }
+.title-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.item-type-icon {
+  font-size: 1.75rem;
+  flex-shrink: 0;
+}
+
+/* Flexbox row for grouped detail fields */
+.detail-fields-row {
+  display: flex;
+  gap: 16px; /* Same as current vertical gap between detail-field divs */
+  flex-wrap: nowrap;
+  margin-bottom: 0px;
+  overflow-x: auto;
+}
+
+.detail-fields-row .detail-field {
+  flex: 1;
+  min-width: 150px; /* Reduced to allow 3 items on one line */
+  margin-bottom: 0; /* Remove bottom margin since parent handles gap */
 }
 
 .favorite-btn-detail {
@@ -933,7 +1116,7 @@ h2 {
 }
 
 .visit-tracking {
-  margin-top: 2rem;
+  margin-top: 1rem;
   padding: 16px; /* 2x 8px rhythm */
   background: #2a2a2a;
   border-radius: 8px;
@@ -941,13 +1124,8 @@ h2 {
 }
 
 .visit-tracking h3 {
-  color: #ccc;
   margin-top: 0;
   margin-bottom: 1rem;
-  font-size: 1rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-weight: 600;
 }
 
 .visit-info {
@@ -966,7 +1144,7 @@ h2 {
   background: #2a2a2a;
   color: #ccc;
   border: 1px solid #444;
-  padding: 0.75rem 1.5rem;
+  padding: 0.75rem;
   border-radius: 4px;
   cursor: pointer;
   font-size: 1rem;
@@ -1083,6 +1261,10 @@ h2 {
 
 #detail-map {
   background-color: #000000;
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  border: none !important; /* Ensure no borders */
 }
 
 /* Style the Leaflet container background */
@@ -1193,4 +1375,6 @@ h2 {
   font-size: 18px;
   box-shadow: 0 2px 5px rgba(0,0,0,0.5);
 }
+
+/* Popup styles remain interactive */
 </style>

@@ -203,7 +203,7 @@ main {
   border-radius: 4px;
   cursor: pointer;
   font-size: 0.9rem;
-  margin: 24px 24px 16px 24px; /* Consistent with content padding */
+  margin: 24px 0px 16px 0px; /* Consistent with content padding */
 }
 
 #back-to-list:hover {
@@ -216,7 +216,9 @@ main {
   gap: 24px; /* 3x 8px rhythm */
   max-width: 1200px;
   margin: 0 auto;
-  padding: 24px; /* 3x 8px rhythm */
+  padding-bottom: 24px; /* 3x 8px rhythm */
+  padding-left: 0px !important;
+    padding-right: 0px  !important;;
 }
 
 #detail-info {
@@ -303,6 +305,40 @@ main {
 }
 
 /* Camp events in detail view */
+.camp-events-section .events-header {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0;
+  font-weight: 600;
+  color: #ccc;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 1rem;
+}
+
+.camp-events-section .events-header:hover {
+  color: #fff;
+}
+
+.camp-events-section .expand-icon {
+  font-size: 0.875rem;
+  color: var(--color-gold);
+  transition: transform 0.2s ease;
+}
+
+.camp-events-section .events-content {
+  margin-top: 0.5rem;
+}
+
+.camp-events-section .loading-events,
+.camp-events-section .no-events {
+  color: #999;
+  font-style: italic;
+  padding: 1rem 0;
+}
+
 .camp-events {
   list-style: none;
   padding: 0;

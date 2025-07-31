@@ -8,6 +8,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Detail View Polish** - Comprehensive enhancements to camp, art, and event detail pages
+  - Collapsible CAMP EVENTS section with lazy loading and event count display
+  - Shows "CAMP EVENTS (20)" format with expand/collapse functionality
+  - Only loads events when section is expanded for better performance
+  - Remembers open/closed state per camp using localStorage
+  - Gold-colored expand/collapse indicator matching theme
+  
+- **Detail View Map Improvements** - Enhanced mini-map experience for better usability
+  - Fixed scroll wheel zoom conflicts with page scrolling
+  - Added -45° rotation for proper Burning Man orientation (gate at bottom)
+  - Converted to non-interactive static view for smooth scrolling
+  - Added manual zoom controls (+/-) that maintain marker centering
+  
+- **Detail View Layout Enhancements** - Improved information organization
+  - Grouped related fields on single lines for better space usage
+  - Camp items: Hometown, Location, and Camp Size on one line
+  - Art items: Hometown and Location on one line
+  - Event items: Event Type and Location on one line
+  - Added item type icons to headers (🏕️ camps, 🎨 art, 🎪 events)
+  - Increased icon size for better visibility
+  - Flexbox layout with no wrapping for consistent display
+
+### Added
 - **PWA Icon System Overhaul** - Complete redesign of all app icons using AI-powered generation
   - Implemented gpt-image-1 model support with OpenAI Responses API
   - Uses existing OKNOTOK logo as reference for consistent branding

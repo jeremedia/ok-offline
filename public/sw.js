@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ok-offline-v27'; // PWA icon system overhaul
+const CACHE_NAME = 'ok-offline-v28'; // Detail view polish with collapsible events
 const urlsToCache = [
   // Core app files
   '/',
