@@ -8,6 +8,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **PWA Icon System Overhaul** - Complete redesign of all app icons using AI-powered generation
+  - Implemented gpt-image-1 model support with OpenAI Responses API
+  - Uses existing OKNOTOK logo as reference for consistent branding
+  - Generated new app icons in all required sizes (16x16 to 1024x1024)
+  - Created new social media preview images maintaining brand consistency
+  - Desert/playa themed background textures on all icons
+  - Transparent background support for better app icon appearance
+  - Added IconViewer component at /icon_viewer to display all image assets
+  - Shows icon usage, sizes, and meta tag examples for easy reference
+
+### Changed
+- **Image Generation Script** - Modernized to use OpenAI SDK and latest models
+  - Rewritten generate-pwa-images.js to use Responses API
+  - Added image reference capability for brand consistency
+  - Support for both gpt-image-1 (default) and dall-e-3 models
+  - Automatic base64 encoding and decoding of images
+  - Better error handling and progress feedback
+
+### Added
 - **Interactive Entity Discovery** - Transform static entity tags into a powerful discovery system
   - Click any entity tag in search results to find all related camps, art, and events
   - Entity tags display global counts showing total occurrences (e.g., "music (411)")

@@ -16,6 +16,7 @@ import NotFound from './views/NotFound.vue'
 import PromptsView from './views/PromptsView.vue'
 import InfrastructureView from './views/InfrastructureView.vue'
 import InfrastructureDetailView from './views/InfrastructureDetailView.vue'
+import IconViewer from './views/IconViewer.vue'
 
 // Import CSS
 import './styles/fonts.css'
@@ -143,6 +144,11 @@ const routes = [
     path: '/prompts',
     name: 'prompts',
     component: PromptsView
+  },
+  {
+    path: '/icon_viewer',
+    name: 'icon-viewer',
+    component: IconViewer
   },
   {
     path: '/reload',
