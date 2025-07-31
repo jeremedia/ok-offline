@@ -12,123 +12,21 @@
     />
   <div class="app-container" v-if="!showOnboarding && !showTour">
     <ToastNotification ref="toastRef" />
-    <header :class="{ 'mobile-header': isMobile }">
-      <div class="header-row">
-        <!-- Desktop Navigation -->
-        <div class="nav-section" v-if="!isMobile">
-          <!-- Theme Selector -->
-          <div class="theme-selector-group">
-            <select id="theme-selector" v-model="selectedTheme" @change="onThemeChange" class="unified-select">
-              <option v-for="theme in availableThemes" :key="theme.id" :value="theme.id">
-                {{ theme.name }}
-              </option>
-            </select>
-          </div>
-          <div class="year-selector-group">
-            <select id="year-selector" v-model="selectedYear" @change="onYearChange" class="unified-select">
-              <option value="2023">2023</option>
-              <option value="2024">2024</option>
-              <option value="2025">2025</option>
-            </select>
-          </div>
-          <nav class="main-nav">
-            <button @click="navigate('map')" :class="['nav-btn', { active: isActive('map') }]">MAP</button>
-            <button @click="navigate('search')" :class="['nav-btn', { active: isActive('search') }]">SEARCH</button>
-            <button @click="navigate('camps')" :class="['nav-btn', { active: isActive('camps') }]">CAMPS</button>
-            <button @click="navigate('art')" :class="['nav-btn', { active: isActive('art') }]">ART</button>
-            <button @click="navigate('events')" :class="['nav-btn', { active: isActive('events') }]">EVENTS</button>
-            <button @click="navigate('infrastructure')" :class="['nav-btn', { active: isActive('infrastructure') }]">INFRA</button>
-            <button @click="navigate('schedule')" :class="['nav-btn', { active: isActive('schedule') }]">SCHEDULE</button>
-            <button @click="navigateToDust" :class="['nav-btn', { active: isActive('dust') }]">DUST</button>
-          </nav>
-        </div>
-        
-        <!-- App Title -->
-        <div class="app-title-section">
-          <h1 @click="navigateToSettings" class="app-title">OK-OFFLINE</h1>
-          <button 
-            @click="navigateToDataSync" 
-            :class="['status-dot', { offline: !isOnline }]"
-            :title="isOnline ? 'Online - Click for data sync' : 'Offline - Click for data sync'"
-            aria-label="Connection status and data sync">
-          </button>
-        </div>
-        
-        <!-- Mobile Actions -->
-        <div class="mobile-actions" v-if="isMobile">
-          <button @click="navigate('search')" class="mobile-action-btn" aria-label="Search">
-            🔍
-          </button>
-          <button @click="toggleMobileMenu" class="mobile-action-btn hamburger-btn" aria-label="Menu">
-            ≡
-          </button>
-        </div>
-      </div>
-    </header>
+    <AppHeader 
+      :is-mobile="isMobile"
+      :selected-year="selectedYear"
+      :is-online="isOnline"
+      @update:selected-year="selectedYear = $event"
+      @navigate="handleHeaderNavigate"
+      @toggle-menu="toggleMobileMenu"
+    />
     
-    <!-- Mobile Menu Overlay -->
-    <transition name="menu-overlay">
-      <div v-if="showMobileMenu" class="mobile-menu-overlay" @click="closeMobileMenu"></div>
-    </transition>
-    
-    <!-- Mobile Menu -->
-    <transition name="menu-slide">
-      <div v-if="showMobileMenu" class="mobile-menu">
-        <div class="mobile-menu-header">
-          <h3>MENU</h3>
-          <button @click="closeMobileMenu" class="close-menu-btn" aria-label="Close menu">
-            ✕
-          </button>
-        </div>
-        
-        <div class="mobile-menu-content">
-          <!-- Year Selector -->
-          <div class="menu-section">
-            <label for="mobile-year-selector" class="menu-label">YEAR</label>
-            <select id="mobile-year-selector" v-model="selectedYear" @change="onYearChange" class="menu-select">
-              <option value="2023">2023</option>
-              <option value="2024">2024</option>
-              <option value="2025">2025</option>
-            </select>
-          </div>
-          
-          <!-- Additional Navigation -->
-          <div class="menu-section">
-            <h4 class="menu-section-title">MORE</h4>
-            <button @click="navigateFromMenu('infrastructure')" class="menu-nav-btn">
-              <span class="menu-icon">🏛️</span>
-              <span class="menu-text">Infrastructure</span>
-            </button>
-            <button @click="navigateFromMenu('dust')" class="menu-nav-btn">
-              <span class="menu-icon">🌪️</span>
-              <span class="menu-text">Weather</span>
-            </button>
-            <button @click="navigateFromMenu('search')" class="menu-nav-btn">
-              <span class="menu-icon">🔍</span>
-              <span class="menu-text">Search</span>
-            </button>
-          </div>
-          
-          <!-- Settings & Info -->
-          <div class="menu-section">
-            <h4 class="menu-section-title">SETTINGS & INFO</h4>
-            <button @click="navigateFromMenu('about')" class="menu-nav-btn">
-              <span class="menu-icon">📱</span>
-              <span class="menu-text">About</span>
-            </button>
-            <button @click="navigateFromMenu('features')" class="menu-nav-btn">
-              <span class="menu-icon">✨</span>
-              <span class="menu-text">Features</span>
-            </button>
-            <button @click="navigateFromMenu('settings')" class="menu-nav-btn">
-              <span class="menu-icon">⚙️</span>
-              <span class="menu-text">Settings</span>
-            </button>
-            <router-link to="/reset" class="menu-version">v{{ appVersion }}</router-link>
-          </div>
-        </div>
-      </div>
-    </transition>
+    <MobileMenu 
+      :show="showMobileMenu"
+      :selected-year="selectedYear"
+      @close="closeMobileMenu"
+      @update:selected-year="selectedYear = $event"
+    />
     
     <main :class="{ 
       'has-bottom-nav': isMobile,
@@ -137,26 +35,12 @@
       <router-view :year="selectedYear"></router-view>
     </main>
     <BottomNav v-if="!showOnboarding && !showTour" :year="selectedYear" />
-    <footer>
-      <div class="footer-content">
-        <div class="footer-controls">
-          <!-- Theme Selector -->
-          <div class="theme-selector-group">
-            <label for="footer-theme-selector">Theme:</label>
-            <select id="footer-theme-selector" v-model="selectedTheme" @change="onThemeChange" class="unified-select">
-              <option v-for="theme in availableThemes" :key="theme.id" :value="theme.id">
-                {{ theme.name }}
-              </option>
-            </select>
-          </div>
-          
-          <!-- Reset Button -->
-          <button @click="navigateToReset" class="reset-btn">
-            🔄 Reset App
-          </button>
-        </div>
-      </div>
-    </footer>
+    <AppFooter 
+      :selected-theme="selectedTheme"
+      :available-themes="availableThemes"
+      @update:selected-theme="selectedTheme = $event; onThemeChange()"
+      @reset="navigateToReset"
+    />
   </div>
   </div>
 </template>
@@ -171,6 +55,9 @@ import ToastNotification from './components/ToastNotification.vue'
 import WelcomeScreen from './components/WelcomeScreen.vue'
 import GuidedTour from './components/GuidedTour.vue'
 import BottomNav from './components/BottomNav.vue'
+import AppHeader from './components/layout/AppHeader.vue'
+import AppFooter from './components/layout/AppFooter.vue'
+import MobileMenu from './components/layout/MobileMenu.vue'
 import { setToastRef } from './composables/useToast'
 import packageJson from '../package.json'
 import { themes, getCurrentTheme, applyTheme } from './services/themeService'
@@ -378,6 +265,14 @@ const navigateToReset = () => {
   router.push('/reset')
 }
 
+const handleHeaderNavigate = (path) => {
+  if (path === 'settings') {
+    router.push('/settings')
+  } else if (path === 'settings/data_sync') {
+    router.push('/settings/data_sync')
+  }
+}
+
 // Mobile menu methods
 const toggleMobileMenu = () => {
   showMobileMenu.value = !showMobileMenu.value
@@ -470,8 +365,7 @@ header {
   flex: 1;
 }
 
-.year-selector-group,
-.theme-selector-group {
+.year-selector-group {
   display: flex;
   align-items: center;
 }
