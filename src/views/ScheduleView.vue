@@ -1,6 +1,5 @@
  <template>
-  <div class="view-container">
-    <section id="schedule-section" class="view">
+  <section id="schedule-section" class="schedule-view-container">
     <h2>My Schedule</h2>
     
     <div class="schedule-controls">
@@ -86,8 +85,7 @@
         🔗 Share Schedule
       </BaseButton>
     </div>
-    </section>
-  </div>
+  </section>
 </template>
 
 <script setup>
@@ -342,23 +340,21 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.view-container {
-  width: 100%;
+.schedule-view-container {
   height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-#schedule-section {
-  padding: 1rem;
+  display: flex;
+  flex-direction: column;
   max-width: 1200px;
   margin: 0 auto;
-  min-height: 100%;
+  width: 100%;
+  overflow: hidden; /* Prevent outer scrolling */
+  padding: 1rem;
 }
 
 h2 {
   color: var(--color-text-secondary);
   margin-bottom: 1.5rem;
+  flex-shrink: 0;
 }
 
 .schedule-controls {
@@ -368,6 +364,7 @@ h2 {
   align-items: center;
   flex-wrap: wrap;
   gap: 1rem;
+  flex-shrink: 0;
 }
 
 .day-selector {
@@ -383,8 +380,10 @@ h2 {
   border: 1px solid var(--color-border);
   border-radius: 8px;
   padding: 1rem;
-  margin-bottom: 2rem;
-  min-height: 400px;
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  min-height: 0; /* Important for flex containers */
 }
 
 .empty-state {
@@ -507,6 +506,8 @@ h2 {
   display: flex;
   gap: 1rem;
   justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1rem;
 }
 
 .export-btn, .share-btn {
