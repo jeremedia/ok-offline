@@ -13,7 +13,6 @@
   <div class="app-container" v-if="!showOnboarding && !showTour">
     <ToastNotification ref="toastRef" />
     <AppHeader 
-      :is-mobile="isMobile"
       :selected-year="selectedYear"
       :is-online="isOnline"
       @update:selected-year="selectedYear = $event"

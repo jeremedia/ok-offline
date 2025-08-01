@@ -1,8 +1,8 @@
 <template>
-  <header :class="{ 'mobile-header': isMobile }">
+  <header>
     <div class="header-row">
       <!-- Desktop Navigation -->
-      <div class="nav-section" v-if="!isMobile">
+      <div class="nav-section desktop-only">
         <div class="year-selector-group">
           <select 
             id="year-selector" 
@@ -43,7 +43,7 @@
       </div>
       
       <!-- Mobile Actions -->
-      <div class="mobile-actions" v-if="isMobile">
+      <div class="mobile-actions mobile-only">
         <BaseButton @click="navigate('search')" variant="secondary" class="mobile-action-btn" aria-label="Search">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="11" cy="11" r="8"/>
@@ -68,10 +68,6 @@ import { useRoute, useRouter } from 'vue-router'
 import BaseButton from '../ui/BaseButton.vue'
 
 const props = defineProps({
-  isMobile: {
-    type: Boolean,
-    required: true
-  },
   selectedYear: {
     type: String,
     required: true
@@ -256,8 +252,8 @@ header {
   100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
 }
 
-/* Mobile Header */
-.mobile-header {
+/* Mobile-specific styles using body-level classes */
+body.mobile-device header {
   position: sticky;
   top: 0;
   z-index: 2000;
@@ -267,13 +263,13 @@ header {
   padding: 0.5rem 1rem; /* Reduced padding for mobile */
 }
 
-.mobile-header .header-row {
+body.mobile-device .header-row {
   padding: 0; /* Remove double padding */
   gap: 0.75rem;
   max-width: none;
 }
 
-.mobile-header .app-title {
+body.mobile-device .app-title {
   font-size: 1.2rem;
   font-weight: bold;
   color: var(--color-text-primary);
@@ -281,7 +277,7 @@ header {
   text-align: center;
 }
 
-.mobile-header .status-indicator {
+body.mobile-device .status-indicator {
   display: none;
 }
 
@@ -314,22 +310,25 @@ header {
   height: 20px;
 }
 
-/* Responsive adjustments */
-@media (max-width: 600px) {
-  .header-row {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-  }
-  
-  .app-title {
-    order: 1;
-    text-align: left;
-    margin: 0;
-  }
-  
-  nav {
-    display: none;
-  }
+/* Visibility controls using body-level mobile classes */
+body.mobile-device .desktop-only {
+  display: none;
+}
+
+body.desktop-device .mobile-only {
+  display: none;
+}
+
+/* Mobile-specific responsive adjustments */
+body.mobile-device .header-row {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+body.mobile-device .app-title {
+  order: 1;
+  text-align: left;
+  margin: 0;
 }
 </style>
