@@ -76,15 +76,12 @@ This document tracks the migration of ~100 button elements across 15+ components
 
 | Element | Line | Current Class | Target | Status |
 |---------|------|---------------|--------|--------|
-| Collapse Button | 7-12 | .collapse-btn | BaseButton variant="ghost" icon | ⬜ |
-| Layers Tab | 17-19 | .tab-btn | BaseButton variant="ghost" class="btn-tab" | ⬜ |
-| Legend Tab | 20-22 | .tab-btn | BaseButton variant="ghost" class="btn-tab" | ⬜ |
-| Info Tab | 23-25 | .tab-btn | BaseButton variant="ghost" class="btn-tab" | ⬜ |
-| Layer Toggles | (multiple) | checkbox labels | Consider BaseButton toggle | ⬜ |
-| Rotation Presets | 182-187 | .rotation-preset-btn | BaseButton variant="secondary" | ⬜ |
-| Reset View | 200-205 | .reset-view-btn | BaseButton variant="primary" | ⬜ |
+| Collapse Button | 7-12 | .collapse-btn | BaseButton variant="ghost" icon | ✅ |
+| Tab Buttons (3x) | 17-25, 212-220 | .tab-button | BaseButton variant="ghost" | ✅ |
+| Rotation Presets (2) | 182-187 | .rotation-preset-btn | BaseButton variant="secondary" | ✅ |
+| Reset View | 200-205 | .reset-view-btn | BaseButton variant="primary" | ✅ |
 
-**Total**: 7+ buttons
+**Total**: 7 buttons (All migrated)
 
 ### 6. SearchOptions.vue
 **File**: `/src/components/search/SearchOptions.vue`
@@ -92,13 +89,12 @@ This document tracks the migration of ~100 button elements across 15+ components
 
 | Element | Line | Current Class | Target | Status |
 |---------|------|---------------|--------|--------|
-| Collapse Button | 4-9 | .collapse-btn | BaseButton variant="ghost" icon | ⬜ |
-| Keyword Mode | 18-21 | .mode-btn | BaseButton variant="secondary" active | ⬜ |
-| Semantic Mode | 22-25 | .mode-btn | BaseButton variant="secondary" active | ⬜ |
-| Smart Mode | 26-29 | .mode-btn | BaseButton variant="secondary" active | ⬜ |
-| Filter Buttons | 33-53 | .filter-btn | BaseButton variant="secondary" active | ⬜ |
+| Collapse Button | 4-9 | .collapse-btn | BaseButton variant="ghost" icon | ✅ |
+| Search Mode Buttons (3) | 19-29 | .mode-btn | BaseButton variant="ghost" active | ✅ |
+| Search Everything | 34-41 | .filter-btn | BaseButton variant="ghost" active | ✅ |
+| Filter Buttons (5) | 42-52 | .filter-btn | BaseButton variant="ghost" active | ✅ |
 
-**Total**: 7+ buttons
+**Total**: 9 buttons (All migrated)
 
 ### 7. FormModal.vue
 **File**: `/src/components/FormModal.vue`
@@ -160,12 +156,12 @@ This document tracks the migration of ~100 button elements across 15+ components
 | AppHeader | 11 | 11 | 0 | 100% |
 | ListControls | 11+ | 9 | 2+ | 82% |
 | SearchResultItem | 2+ | 2+ | 0 | 100% |
-| MapControlTabs | 7+ | 0 | 7+ | 0% |
-| SearchOptions | 7+ | 0 | 7+ | 0% |
+| MapControlTabs | 7 | 7 | 0 | 100% |
+| SearchOptions | 9 | 9 | 0 | 100% |
 | FormModal | 3 | 3 | 0 | 100% |
 | MobileMenu | 8 | 0 | 8 | 0% |
 | Others | 20+ | 4 | 16+ | 20% |
-| **TOTAL** | **73+** | **34** | **39+** | **47%** |
+| **TOTAL** | **75+** | **50** | **25+** | **67%** |
 
 ## Migration Process for Each Component
 

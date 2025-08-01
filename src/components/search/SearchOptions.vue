@@ -1,12 +1,14 @@
 <template>
   <div class="search-options-container" :class="{ collapsed: isCollapsed }">
     <div class="options-header" @click="toggleCollapse">
-      <button 
-        class="collapse-btn"
+      <BaseButton 
+        variant="ghost"
+        size="sm"
+        :icon="isCollapsed ? '▶' : '▼'"
+        :uppercase="false"
         :aria-label="isCollapsed ? 'Expand search options' : 'Collapse search options'"
-      >
-        {{ isCollapsed ? '▶' : '▼' }}
-      </button>
+        class="collapse-btn"
+      />
       <h4>Options</h4>
     </div>
     
@@ -16,40 +18,47 @@
       <div class="options-button-group">
         <!-- Search Mode Buttons -->
         <div class="mode-buttons">
-          <button
+          <BaseButton
             v-for="mode in searchModes"
             :key="mode.value"
             @click="$emit('update:searchMode', mode.value); $emit('modeChanged', { mode: mode.value })"
-            :class="['mode-btn', { active: searchMode === mode.value, disabled: mode.disabled }]"
+            variant="ghost"
+            :active="searchMode === mode.value"
             :disabled="mode.disabled"
+            :uppercase="true"
             :title="mode.tooltip"
+            class="mode-btn"
           >
             <span class="mode-icon">{{ mode.icon }}</span>
             <span class="mode-label">{{ mode.label }}</span>
-          </button>
+          </BaseButton>
         </div>
         
         <!-- Filter Buttons -->
         <div class="filter-button-group">
-          <button
-            class="filter-btn"
-            :class="{ active: everythingSelected }"
+          <BaseButton
+            variant="ghost"
+            :active="everythingSelected"
+            :uppercase="true"
             @click="$emit('toggleEverything')"
+            class="filter-btn"
           >
             <span class="desktop-label">Search Everything</span>
             <span class="mobile-label">ALL</span>
-          </button>
-          <button
+          </BaseButton>
+          <BaseButton
             v-for="type in filterTypes"
             :key="type.key"
-            class="filter-btn"
-            :class="{ active: includeTypes[type.key] }"
+            variant="ghost"
+            :active="includeTypes[type.key]"
+            :uppercase="true"
             @click="$emit('toggleFilter', type.key)"
             :title="type.label"
+            class="filter-btn"
           >
             <span class="desktop-label">{{ type.icon }} {{ type.label }}</span>
             <span class="mobile-label">{{ type.icon }}</span>
-          </button>
+          </BaseButton>
         </div>
       </div>
       </div>
@@ -59,6 +68,7 @@
 
 <script setup>
 import { ref, computed, onMounted, defineProps, defineEmits } from 'vue'
+import BaseButton from '../ui/BaseButton.vue'
 
 const props = defineProps({
   searchMode: {
@@ -181,21 +191,9 @@ onMounted(() => {
 }
 
 .options-header .collapse-btn {
-  background: none;
-  border: none;
-  color: var(--color-text-secondary);
   font-size: 0.875rem;
-  cursor: pointer;
-  padding: 0.25rem 0.5rem;
   margin-right: 0.5rem;
-  border-radius: 4px;
-  transition: all 0.2s ease;
   transform-origin: center;
-}
-
-.options-header .collapse-btn:hover {
-  background: var(--color-white-alpha-10);
-  color: var(--color-text);
 }
 
 /* Slide down transition */
@@ -241,40 +239,17 @@ onMounted(() => {
 }
 
 .mode-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   gap: 0.375rem;
   padding: 0.75rem 1rem;
-  background: var(--color-bg-elevated);
-  border: none;
   border-right: 1px solid var(--color-border);
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  transition: all 0.2s ease;
   font-size: 0.875rem;
   min-height: 44px;
-  text-transform: uppercase;
   flex: 1;
+  border-radius: 0;
 }
 
 .mode-btn:last-child {
   border-right: none;
-}
-
-.mode-btn:hover:not(.active):not(.disabled) {
-  background: var(--color-bg-hover);
-  color: var(--color-text);
-}
-
-.mode-btn.active {
-  background: var(--color-primary);
-  color: var(--color-text-inverse);
-}
-
-.mode-btn.disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
 }
 
 .mode-icon {
@@ -295,22 +270,14 @@ onMounted(() => {
 }
 
 .filter-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   gap: 0.375rem;
   padding: 0.875rem 1rem;
-  background: var(--color-bg-elevated);
-  border: none;
   border-right: 1px solid var(--color-border);
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  transition: all 0.2s ease;
   white-space: nowrap;
   font-size: 0.875rem;
   min-height: 44px;
   flex: 1;
-  text-transform: uppercase;
+  border-radius: 0;
 }
 
 .filter-btn:first-child {
@@ -319,16 +286,6 @@ onMounted(() => {
 
 .filter-btn:last-child {
   border-right: none;
-}
-
-.filter-btn:hover:not(.active) {
-  background: var(--color-bg-hover);
-  color: var(--color-text);
-}
-
-.filter-btn.active {
-  background: var(--color-primary);
-  color: var(--color-text-inverse);
 }
 
 /* Desktop/Mobile label switching */
@@ -357,7 +314,6 @@ onMounted(() => {
   
   .options-header .collapse-btn {
     font-size: 0.75rem;
-    padding: 0.125rem 0.25rem;
     flex-shrink: 0;
   }
   

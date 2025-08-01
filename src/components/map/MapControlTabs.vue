@@ -14,15 +14,17 @@
     
     <!-- Tab Headers (Desktop Position) -->
     <div v-if="!isMobile" v-show="!isCollapsed" class="tab-header">
-      <button 
+      <BaseButton 
         v-for="tab in tabs" 
         :key="tab.id"
         @click="activeTab = tab.id"
+        variant="ghost"
+        :active="activeTab === tab.id"
+        :uppercase="true"
         class="tab-button"
-        :class="{ active: activeTab === tab.id }"
       >
         {{ tab.icon }} {{ tab.label }}
-      </button>
+      </BaseButton>
     </div>
     
     <!-- Tab Content -->
@@ -209,15 +211,17 @@
     
     <!-- Tab Headers (Mobile Position - Bottom) -->
     <div v-if="isMobile" v-show="!isCollapsed" class="tab-header tab-header-bottom">
-      <button 
+      <BaseButton 
         v-for="tab in tabs" 
         :key="tab.id"
         @click="activeTab = tab.id"
+        variant="ghost"
+        :active="activeTab === tab.id"
+        :uppercase="true"
         class="tab-button"
-        :class="{ active: activeTab === tab.id }"
       >
         {{ tab.icon }} {{ tab.label }}
-      </button>
+      </BaseButton>
     </div>
   </div>
 </template>
@@ -479,25 +483,10 @@ const toggleCollapse = () => {
 }
 
 .control-header .collapse-btn {
-  background: none;
-  border: none;
-  color: var(--color-text-disabled);
   font-size: 0.75rem;
-  cursor: pointer;
-  padding: 0.25rem 0.5rem;
   margin-left: 0.5rem;
-  border-radius: 4px;
-  transition: all 0.2s ease;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   width: 24px;
   height: 24px;
-}
-
-.control-header .collapse-btn:hover {
-  background: var(--color-white-alpha-10);
-  color: var(--color-text-primary);
 }
 
 /* Tab Header */
@@ -511,31 +500,14 @@ const toggleCollapse = () => {
 .tab-button {
   flex: 1;
   padding: 0.75rem;
-  background: none;
-  border: none;
-  color: var(--color-text-muted);
   font-size: 0.875rem;
   font-weight: bold;
-  cursor: pointer;
-  transition: all 0.2s ease;
   border-right: 1px solid var(--color-border-dark);
-  white-space: nowrap;
-  text-transform: uppercase;
+  border-radius: 0;
 }
 
 .tab-button:last-child {
   border-right: none;
-}
-
-.tab-button:hover {
-  background: var(--color-primary-alpha-30);
-  color: var(--color-text-primary);
-}
-
-.tab-button.active {
-  background: var(--color-primary);
-  color: var(--color-text-primary);
-  font-weight: bold;
 }
 
 /* Tab Content */
@@ -664,24 +636,7 @@ const toggleCollapse = () => {
 
 .rotation-preset-btn {
   flex: 1;
-  padding: 0.375rem 0.5rem;
-  background: var(--color-white-alpha-10);
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
-  color: var(--color-text-disabled);
   font-size: 0.625rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.rotation-preset-btn:hover {
-  background: var(--color-white-alpha-20);
-  color: var(--color-text-primary);
-  border-color: var(--color-text-secondary);
-}
-
-.rotation-preset-btn:active {
-  transform: scale(0.95);
 }
 
 /* Loading/Error States */
@@ -737,29 +692,8 @@ const toggleCollapse = () => {
 .reset-view-btn {
   width: 100%;
   padding: 0.75rem;
-  background: var(--color-primary);
-  border: none;
-  border-radius: 4px;
-  color: var(--color-text-primary);
   font-size: 0.875rem;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   gap: 0.5rem;
-}
-
-.reset-view-btn:hover {
-  background: var(--color-primary-hover);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px var(--color-overlay-light);
-}
-
-.reset-view-btn:active {
-  transform: translateY(0);
-  box-shadow: none;
 }
 
 /* Mobile Adjustments */
