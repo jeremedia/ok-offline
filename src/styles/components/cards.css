@@ -1,0 +1,290 @@
+/**
+ * Card Component Styles
+ * 
+ * Unified card styles for the OK-OFFLINE application.
+ * All card variants, layouts, and interactive states are defined here.
+ * 
+ * Variants: elevated, flat, outlined, danger
+ * Modifiers: interactive, compact, no-padding
+ */
+
+/* Base card styles */
+.card {
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-medium);
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.2s ease;
+}
+
+/* Card variants */
+.card-elevated {
+  box-shadow: 0 2px 4px var(--color-shadow-light);
+}
+
+.card-elevated:hover {
+  box-shadow: 0 4px 8px var(--color-shadow-medium);
+}
+
+.card-flat {
+  box-shadow: none;
+  background: var(--color-bg-base);
+}
+
+.card-outlined {
+  background: transparent;
+  box-shadow: none;
+  border-width: 2px;
+}
+
+.card-danger {
+  border-color: var(--color-error);
+  background: var(--color-error-bg);
+}
+
+.card-danger .card-header {
+  background: var(--color-error-alpha-10);
+  border-bottom-color: var(--color-error);
+}
+
+/* Interactive cards */
+.card-interactive {
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  padding: 0;
+  position: relative;
+}
+
+.card-interactive:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px var(--color-shadow-medium);
+  border-color: var(--color-bg-active);
+}
+
+.card-interactive:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px var(--color-shadow-light);
+}
+
+.card-interactive:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+/* Card sections */
+.card-header {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--color-border-light);
+  background: var(--color-white-alpha-05);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.card-header:empty {
+  display: none;
+}
+
+.card-icon {
+  font-size: 2rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.card-title {
+  margin: 0;
+  font-size: 1.25rem;
+  color: var(--color-text-primary);
+  font-weight: 600;
+  flex: 1;
+}
+
+.card-body {
+  padding: 1.5rem;
+  flex: 1;
+  color: var(--color-text-secondary);
+}
+
+.card-body > *:first-child {
+  margin-top: 0;
+}
+
+.card-body > *:last-child {
+  margin-bottom: 0;
+}
+
+.card-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--color-border-light);
+  background: var(--color-white-alpha-05);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.card-footer:empty {
+  display: none;
+}
+
+.card-meta {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+.card-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+/* Compact variant */
+.card-compact .card-header {
+  padding: 0.75rem 1rem;
+}
+
+.card-compact .card-body {
+  padding: 1rem;
+}
+
+.card-compact .card-footer {
+  padding: 0.75rem 1rem;
+}
+
+.card-compact .card-title {
+  font-size: 1.1rem;
+}
+
+/* No padding variant */
+.card-no-padding .card-body {
+  padding: 0;
+}
+
+/* Special card patterns */
+
+/* Settings/form card */
+.card-settings {
+  background: var(--color-background-tertiary);
+  margin-bottom: 1.5rem;
+}
+
+.card-settings .card-header {
+  background: transparent;
+  border-bottom: 1px solid var(--color-border-dark);
+}
+
+.card-settings .card-title {
+  color: var(--color-accent);
+  font-size: 1.1rem;
+}
+
+/* Feature card */
+.card-feature {
+  text-align: center;
+  padding: 1.5rem;
+}
+
+.card-feature .card-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.card-feature .card-title {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Info/fact card */
+.card-info {
+  background: var(--color-background-secondary);
+  border-color: var(--color-border-dark);
+}
+
+.card-info .card-body {
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+/* Resource card */
+.card-resource {
+  position: relative;
+}
+
+.card-resource .card-icon {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  font-size: 1.5rem;
+  opacity: 0.5;
+}
+
+/* Grid layouts for cards */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.card-grid-compact {
+  gap: 1rem;
+}
+
+.card-grid-large {
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .card-header {
+    padding: 0.875rem 1rem;
+  }
+  
+  .card-body {
+    padding: 1rem;
+  }
+  
+  .card-footer {
+    padding: 0.875rem 1rem;
+  }
+  
+  .card-title {
+    font-size: 1.1rem;
+  }
+  
+  .card-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .card-feature {
+    padding: 1.25rem;
+  }
+  
+  .card-feature .card-icon {
+    font-size: 2.5rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .card {
+    border-radius: 6px;
+  }
+  
+  .card-interactive {
+    touch-action: manipulation;
+  }
+  
+  .card-interactive:hover {
+    transform: none; /* Disable hover transform on mobile */
+  }
+  
+  .card-interactive:active {
+    transform: scale(0.98);
+  }
+}

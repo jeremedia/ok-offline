@@ -1,3 +1,8 @@
+/* Import component styles */
+@import './components/buttons.css';
+@import './components/cards.css';
+@import './components/spacing.css';
+
 /* CSS Variables - OKNOTOK Theme (Default) */
 :root {
   /* Primary Brand Colors */
