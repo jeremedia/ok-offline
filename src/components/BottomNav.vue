@@ -24,6 +24,8 @@ const props = defineProps({
   }
 })
 
+const emit = defineEmits(['toggle-map-controls'])
+
 const route = useRoute()
 const router = useRouter()
 
@@ -77,7 +79,13 @@ const navItems = [
 ]
 
 const navigate = (view) => {
-  router.push(`/${props.year}/${view}`)
+  // If already on map view and map is clicked, toggle controls
+  if (view === 'map' && route.name === 'map') {
+    console.log('BottomNav: Emitting toggle-map-controls')
+    emit('toggle-map-controls')
+  } else {
+    router.push(`/${props.year}/${view}`)
+  }
 }
 
 const isActive = (view) => {
@@ -87,10 +95,6 @@ const isActive = (view) => {
 
 <style scoped>
 .bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
   background: var(--color-bg-header);
   border-top: 1px solid var(--color-border-medium);
   display: flex;
@@ -98,8 +102,8 @@ const isActive = (view) => {
   align-items: center;
   padding: 0;
   padding-bottom: env(safe-area-inset-bottom, 0);
-  z-index: 2000;
   height: 60px;
+  flex-shrink: 0; /* Don't shrink */
   /* Extend background into safe area */
   box-sizing: content-box;
 }

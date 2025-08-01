@@ -1,5 +1,6 @@
  <template>
-  <section id="schedule-section" class="view">
+  <div class="view-container">
+    <section id="schedule-section" class="view">
     <h2>My Schedule</h2>
     
     <div class="schedule-controls">
@@ -80,7 +81,8 @@
         🔗 Share Schedule
       </button>
     </div>
-  </section>
+    </section>
+  </div>
 </template>
 
 <script setup>
@@ -334,10 +336,18 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.view-container {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
 #schedule-section {
   padding: 1rem;
   max-width: 1000px;
   margin: 0 auto;
+  min-height: 100%;
 }
 
 h2 {

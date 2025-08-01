@@ -1,5 +1,6 @@
 <template>
-  <section id="map-section" class="view">
+  <div class="view-container">
+    <section id="map-section" class="view">
     <!-- Mobile Controls -->
     <button 
       v-if="isMobile" 
@@ -7,7 +8,11 @@
       class="map-controls-toggle"
       aria-label="Open map controls"
     >
-      ☰
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="3" width="18" height="18" rx="2" />
+        <line x1="3" y1="9" x2="21" y2="9" />
+        <line x1="9" y1="21" x2="9" y2="9" />
+      </svg>
     </button>
     
     <!-- Desktop Controls -->
@@ -52,11 +57,12 @@
       :markerStats="markerStats"
       :layerStatus="layerStatus"
     />
-  </section>
+    </section>
+  </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed, reactive, watch } from 'vue'
+import { ref, onMounted, computed, reactive, watch, inject } from 'vue'
 import { useRoute } from 'vue-router'
 import L from 'leaflet'
 import 'leaflet-rotate'
@@ -88,6 +94,10 @@ const route = useRoute()
 const mapContainer = ref(null)
 const bottomSheet = ref(null)
 
+// Inject map controls toggle event from App
+const mapControlsToggle = inject('mapControlsToggle')
+console.log('MapView: Injected mapControlsToggle:', mapControlsToggle)
+
 // Mobile detection and controls state
 const checkIfMobile = () => {
   const isSmallScreen = window.innerWidth < 600
@@ -104,6 +114,7 @@ const checkIfMobile = () => {
 }
 
 const isMobile = ref(checkIfMobile())
+console.log('MapView: isMobile initial value:', isMobile.value)
 const year = computed(() => route.params.year || localStorage.getItem('selectedYear') || '2025')
 
 // Helper function to get CSS variable values for JavaScript
@@ -249,6 +260,13 @@ const handleControlUpdate = (newControls) => {
         markersLayer.removeLayer(layer)
       }
     })
+    
+    // Remove toilet layer if infrastructure is being turned off
+    if ('showInfrastructure' in newControls && !mapControls.showInfrastructure && 
+        gisLayers.toilets && map.hasLayer(gisLayers.toilets)) {
+      map.removeLayer(gisLayers.toilets)
+    }
+    
     // Re-add with new settings
     addInfrastructureMarkers()
   }
@@ -326,11 +344,67 @@ const resetMapView = () => {
     mapControls.rotationAngle = 0
   }
   
-  // Animate to default view
-  map.flyTo(defaultCenter, defaultZoom, {
-    bearing: defaultBearing,
-    duration: 1.5
-  })
+  // Reset ALL layer controls to match the visual state
+  const layerUpdates = {
+    // Content controls - turn everything off
+    showCamps: false,
+    showArt: false,
+    showEvents: false,
+    showFavoritesOnly: false,
+    showInfrastructure: false,
+    // Infrastructure sub-items
+    showTheMan: false,
+    showCenterCamp: false,
+    showTemple: false,
+    showAirport: false,
+    showMedical: false,
+    showRangers: false,
+    showDPW: false,
+    showArctica: false,
+    showDMZ: false,
+    showHellStation: false,
+    showToilets: false,
+    showPoints: false,
+    // Layer controls - only streets and trash fence on
+    showStreets: true,
+    showTrashFence: true,
+    showStreetOutlines: false,
+    showCityBlocks: false,
+    showPlazas: false,
+    showPortals: false,
+    showCPNs: false,
+    // Display controls
+    showBasemap: false,  // Disable base map for cooler look
+    showLegend: false,
+    showMapInfo: false
+  }
+  
+  // Update the controls
+  Object.assign(mapControls, layerUpdates)
+  
+  // Trigger layer update
+  handleControlUpdate(layerUpdates)
+  
+  // Try to fit to trash fence bounds
+  const trashFenceData = getTrashFence()
+  if (trashFenceData && trashFenceData.features && trashFenceData.features.length > 0) {
+    // Convert GeoJSON to Leaflet bounds
+    const layer = L.geoJSON(trashFenceData)
+    const bounds = layer.getBounds()
+    
+    // Fit map to trash fence with no padding for tightest view
+    map.flyToBounds(bounds, {
+      padding: [0, 0],    // No padding - fill viewport
+      maxZoom: 15,        // Don't zoom in too far
+      duration: 0.4       // Faster animation
+    })
+  } else {
+    // Fallback to default view if no trash fence data
+    map.flyTo(defaultCenter, defaultZoom, {
+      bearing: defaultBearing,
+      duration: 1.5
+    })
+  }
   
   // Update default view state after animation
   setTimeout(() => {
@@ -373,7 +447,23 @@ watch(year, async (newYear, oldYear) => {
   updateMapInfoState()
 })
 
+// Watch for map controls toggle from bottom nav
+watch(mapControlsToggle, () => {
+  console.log('MapView: Toggle watcher triggered')
+  console.log('MapView: bottomSheet.value:', bottomSheet.value)
+  if (bottomSheet.value) {
+    console.log('MapView: Calling bottomSheet.toggle()')
+    bottomSheet.value.toggle()
+  } else {
+    console.log('MapView: bottomSheet ref is null')
+  }
+})
+
 onMounted(async () => {
+  console.log('MapView: Component mounted')
+  console.log('MapView: bottomSheet ref on mount:', bottomSheet.value)
+  console.log('MapView: isMobile on mount:', isMobile.value)
+  
   // Load saved control state from localStorage
   const savedState = localStorage.getItem('mapControlState')
   if (savedState) {
@@ -394,13 +484,35 @@ onMounted(async () => {
     }
   }
   
+  // Try to restore saved map position
+  let initialCenter = BRC_CENTER
+  let initialZoom = defaultZoom
+  let initialBearing = 0
+  
+  const savedPosition = localStorage.getItem('mapPosition')
+  if (savedPosition) {
+    try {
+      const position = JSON.parse(savedPosition)
+      // Only use saved position if it's less than 24 hours old
+      if (position.timestamp && Date.now() - position.timestamp < 24 * 60 * 60 * 1000) {
+        initialCenter = [position.lat, position.lng]
+        initialZoom = position.zoom
+        initialBearing = position.bearing || 0
+      }
+    } catch (e) {
+      console.error('Failed to restore map position:', e)
+    }
+  }
+  
   // Initialize Leaflet map with rotation support
   map = L.map(mapContainer.value, {
-    center: BRC_CENTER,
-    zoom: defaultZoom,
-    zoomControl: true,
+    center: initialCenter,
+    zoom: initialZoom,
+    zoomControl: false,  // Disable default zoom controls
     rotate: true,
-    bearing: 0
+    bearing: initialBearing,
+    zoomSnap: 0.001,    // Very fine fractional zoom control
+    zoomDelta: 0.5      // Zoom buttons use 0.5 increments
   })
   
   // Set black background when basemap is off
@@ -427,6 +539,19 @@ onMounted(async () => {
   map.on('moveend zoomend rotate', () => {
     checkDefaultView()
     updateMapInfoState()
+    
+    // Save map position to localStorage
+    const center = map.getCenter()
+    const zoom = map.getZoom()
+    const bearing = map.getBearing() || 0
+    
+    localStorage.setItem('mapPosition', JSON.stringify({
+      lat: center.lat,
+      lng: center.lng,
+      zoom: zoom,
+      bearing: bearing,
+      timestamp: Date.now()
+    }))
   })
   
   // Track map size changes
@@ -760,8 +885,11 @@ const addInfrastructureMarkers = () => {
       // Add the toilet layer group to the map
       gisLayers.toilets.addTo(map)
     }
-  } else if (gisLayers.toilets && map.hasLayer(gisLayers.toilets)) {
-    // Remove toilet layer if toggled off
+  }
+  
+  // Always check if toilets should be removed (either infrastructure or toilets toggled off)
+  if ((!mapControls.showInfrastructure || !mapControls.showToilets) && 
+      gisLayers.toilets && map.hasLayer(gisLayers.toilets)) {
     map.removeLayer(gisLayers.toilets)
   }
 }
@@ -854,7 +982,7 @@ const updateMarkers = () => {
 
 const addMarker = (item, type, icon) => {
   const location = getItemLocation(item)
-  if (!location || location === 'Unknown location') return
+  if (!location || location === 'Unknown Location' || location === 'Location Not Released') return
   
   const coords = brcAddressToLatLon(location)
   if (!coords) return
@@ -944,8 +1072,15 @@ const updateGISLayers = () => {
   if (mapControls.showTrashFence) {
     const trashFenceData = getTrashFence()
     if (trashFenceData) {
+      // Use brighter red color and thicker line for better visibility
       gisLayers.trashFence = L.geoJSON(trashFenceData, {
-        style: gisStyles.trashFence
+        style: {
+          color: '#FF0000',  // Bright red
+          weight: 4,         // Thicker line
+          opacity: 1,        // Full opacity
+          fillOpacity: 0,
+          dashArray: '10, 5'
+        }
       }).addTo(map)
     }
   }
@@ -1166,14 +1301,18 @@ const applyRotation = () => {
 </script>
 
 <style scoped>
-#map-section {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+.view-container {
   width: 100%;
   height: 100%;
+  overflow: hidden;
+}
+
+#map-section {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
 #map {
@@ -1197,27 +1336,43 @@ const applyRotation = () => {
   position: absolute;
   top: 10px;
   right: 10px;
+  bottom: 10px;
   z-index: 1000;
+  max-height: calc(100% - 20px); /* Account for top/bottom margins */
+  display: flex;
+  flex-direction: column;
 }
 
 /* Mobile controls toggle button */
 .map-controls-toggle {
   position: fixed;
-  top: 66px; /* Account for mobile header height */
-  right: 10px;
+  bottom: 80px; /* Above bottom navigation */
+  left: 10px;
   z-index: 1001;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: var(--color-background-secondary-alpha-90);
-  border: 1px solid var(--color-border);
+  width: 48px;
+  height: 48px;
+  border-radius: 4px;
+  background: var(--color-bg-elevated);
+  border: 2px solid var(--color-border-medium);
   color: var(--color-text-primary);
-  font-size: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 2px 4px var(--color-overlay-light);
+  box-shadow: 0 2px 8px var(--color-shadow-medium);
+  transition: all 0.2s ease;
+}
+
+.map-controls-toggle:hover {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px var(--color-shadow-medium);
+}
+
+.map-controls-toggle svg {
+  width: 24px;
+  height: 24px;
 }
 
 .map-controls-toggle:active {

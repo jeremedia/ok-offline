@@ -158,6 +158,36 @@ onMounted(() => {
 // Release notes data
 const releaseNotes = [
   {
+    version: '3.23.0',
+    date: '2025-08-01',
+    added: [
+      '📱 Mobile UX Enhancements - Major improvements to mobile interface',
+      '🎯 Map nav button toggles controls when already on map view',
+      '👆 Swipe down gesture to close MapBottomSheet',
+      '👍 Tabs moved to bottom for better thumb accessibility',
+      '🗺️ Map remembers zoom, center, and rotation (24hr cache)',
+      '🔍 Fractional zoom support for perfect trash fence fit',
+      '🏛️ Infrastructure layer management improvements'
+    ],
+    fixed: [
+      '📜 Desktop scrolling architecture completely refactored',
+      '📏 Fixed mobile header height and eliminated white gaps',
+      '🗺️ MapBottomSheet properly positioned above bottom nav',
+      '🚽 Porto pins now properly removed when infrastructure unchecked',
+      '🔴 Trash fence visibility fixed with bright red styling',
+      '☑️ All checkboxes properly update when map is reset',
+      '🎨 Art detail links fixed (/arts/ → /art/)',
+      '🏠 AppFooter now desktop-only as intended'
+    ],
+    changed: [
+      '🎯 Reset Map shows minimal view: streets and trash fence only',
+      '⚫ Reset Map disables basemap for striking black background',
+      '📍 Reset Map button moved to Display tab',
+      '🧩 App.vue decomposed into maintainable components',
+      '📐 BottomNav uses flexbox instead of fixed positioning'
+    ]
+  },
+  {
     version: '3.22.0',
     date: '2025-07-31',
     added: [

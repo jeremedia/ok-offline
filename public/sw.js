@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ok-offline-v29'; // Complete theme system overhaul with 4 themes
+const CACHE_NAME = 'ok-offline-v30'; // Mobile UX enhancements and map improvements
 const urlsToCache = [
   // Core app files
   '/',

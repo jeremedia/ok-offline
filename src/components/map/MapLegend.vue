@@ -104,7 +104,7 @@ const isDragging = ref(false)
 // Position state
 const position = reactive({
   x: 10,
-  y: window.innerHeight - 400
+  y: 200 // Will be adjusted on mount based on container size
 })
 
 // Drag state
@@ -158,13 +158,22 @@ onMounted(() => {
         const parsed = JSON.parse(savedPosition)
         position.x = parsed.x
         position.y = parsed.y
-        
-        // Ensure legend stays in viewport
-        constrainToViewport()
       } catch (e) {
         console.error('Failed to load legend position:', e)
       }
+    } else {
+      // Set initial position based on container size
+      const mapContainer = legendEl.value?.closest('#map-section')
+      if (mapContainer) {
+        const mapRect = mapContainer.getBoundingClientRect()
+        position.y = mapRect.height - 400 // Position near bottom
+      }
     }
+    
+    // Ensure legend stays in viewport after position is set
+    setTimeout(() => {
+      constrainToViewport()
+    }, 100)
   }
 })
 
@@ -184,7 +193,11 @@ const toggleCollapse = () => {
         constrainToViewport()
       } catch (e) {
         // If no saved position, place it at a default spot
-        position.y = window.innerHeight - 400
+        const mapContainer = legendEl.value?.closest('#map-section')
+        if (mapContainer) {
+          const mapRect = mapContainer.getBoundingClientRect()
+          position.y = mapRect.height - 400
+        }
       }
     }
   }
@@ -263,8 +276,13 @@ const constrainToViewport = () => {
   if (!legendEl.value) return
   
   const rect = legendEl.value.getBoundingClientRect()
-  const maxX = window.innerWidth - rect.width - 10
-  const maxY = window.innerHeight - rect.height - 10
+  // Get the parent map container bounds
+  const mapContainer = legendEl.value.closest('#map-section')
+  if (!mapContainer) return
+  
+  const mapRect = mapContainer.getBoundingClientRect()
+  const maxX = mapRect.width - rect.width - 10
+  const maxY = mapRect.height - rect.height - 10
   
   position.x = Math.max(10, Math.min(position.x, maxX))
   position.y = Math.max(10, Math.min(position.y, maxY))
@@ -276,7 +294,7 @@ window.addEventListener('resize', constrainToViewport)
 
 <style scoped>
 .map-legend {
-  position: fixed;
+  position: absolute;
   z-index: 1000;
   background: var(--color-background-secondary-alpha-95);
   padding: 0;
@@ -445,7 +463,7 @@ window.addEventListener('resize', constrainToViewport)
 /* Mobile styles */
 @media (max-width: 600px) {
   .map-legend {
-    position: fixed;
+    position: absolute;
     left: 10px !important;
     bottom: 20px !important;
     top: auto !important;

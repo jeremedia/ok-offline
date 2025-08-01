@@ -183,11 +183,12 @@ button {
 }
 
 body {
-  overflow-x: hidden;
+  overflow: hidden; /* Prevent all body scrolling for PWA */
+  height: 100vh;
 }
 
 main {
-  overflow-x: hidden;
+  overflow: hidden; /* Let individual views handle scrolling */
 }
 
 /* Header styles from old style.css */

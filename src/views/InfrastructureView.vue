@@ -1,5 +1,6 @@
 <template>
-  <div class="infrastructure-view">
+  <div class="view-container">
+    <div class="infrastructure-view">
     <!-- Header with search -->
     <div class="header-section">
       <h2 class="view-title">Infrastructure</h2>
@@ -82,6 +83,7 @@
         >
         Sort by distance
       </label>
+    </div>
     </div>
   </div>
 </template>
@@ -193,10 +195,18 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.view-container {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
 .infrastructure-view {
   padding: 1rem;
   max-width: 1200px;
   margin: 0 auto;
+  min-height: 100%;
 }
 
 .header-section {
@@ -355,13 +365,16 @@ margin-top: 0;
 }
 
 .sort-controls {
-  position: fixed;
-  bottom: 80px;
-  right: 20px;
+  position: sticky;
+  bottom: 20px;
+  float: right;
   background: var(--color-bg-elevated);
   padding: 1rem;
   border-radius: 4px;
   border: 1px solid var(--color-border-medium);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  margin-top: 1rem;
 }
 
 .sort-option {
@@ -421,7 +434,7 @@ margin-top: 0;
   }
   
   .sort-controls {
-    bottom: 70px;
+    bottom: 10px;
     right: 10px;
     padding: 0.75rem;
   }

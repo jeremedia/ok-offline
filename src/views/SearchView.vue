@@ -983,7 +983,9 @@ const ensureAtLeastOneFilter = () => {
   padding: 1rem;
   color: var(--color-text-primary);
   background: var(--color-bg-base);
-  min-height: 100vh;
+  height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .search-header {

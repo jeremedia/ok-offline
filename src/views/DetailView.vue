@@ -538,7 +538,7 @@ const initMap = async () => {
   
   
   // Only try to geocode if we're allowed to show locations
-  if (canShow && locationString && locationString !== 'Unknown location') {
+  if (canShow && locationString && locationString !== 'Unknown Location' && locationString !== 'Location Not Released') {
     coords = brcAddressToLatLon(locationString)
   }
   
@@ -779,6 +779,7 @@ watch(() => props.id, async () => {
   height: 100%;
   overflow: hidden;
   gap: 0;
+  position: relative;
 }
 
 /* Header styling - full width */
@@ -801,14 +802,15 @@ watch(() => props.id, async () => {
   flex-direction: column;
   flex: 1;
   min-height: 0; /* Critical for nested flex containers */
-  overflow: hidden;
+  overflow-y: auto; /* Single scroll container for mobile */
+  -webkit-overflow-scrolling: touch;
 }
 
 #detail-info {
   padding: 0 16px 16px !important;
   padding-bottom: 0 !important; /* Override external padding */
-  overflow-y: auto;
-  flex: 1;
+  overflow: visible; /* No inner scrolling */
+  flex-shrink: 0; /* Don't shrink, let parent scroll */
   box-sizing: border-box;
 }
 
@@ -826,6 +828,7 @@ watch(() => props.id, async () => {
   padding: 0 !important; /* Override external padding */
   top: auto !important; /* Override sticky positioning */
   max-width: none !important;
+  margin-bottom: 16px; /* Add spacing for scroll */
 }
 
 /* Desktop layout - side by side columns */
@@ -833,6 +836,7 @@ watch(() => props.id, async () => {
   .detail-columns {
     flex-direction: row;
     gap: 0;
+    overflow-y: auto; /* Single scroll container for desktop too */
   }
   
   #detail-info {
@@ -841,7 +845,8 @@ watch(() => props.id, async () => {
     padding: 24px;
     min-height: 0;
     box-sizing: border-box;
-    overflow: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
   
   #detail-map-container {

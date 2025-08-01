@@ -8,6 +8,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Mobile UX Enhancements** - Major improvements to mobile interface and navigation
+  - MapBottomSheet now properly positioned above bottom navigation
+  - Tabs moved to bottom for better thumb accessibility
+  - Swipe down gesture to close bottom sheet
+  - Map nav button toggles controls when already on map view
+- **Map Control Improvements** - Enhanced map interface and controls
+  - Desktop map controls now scroll properly when content is long
+  - Reset Map button moved to Display tab for better organization
+  - Map remembers and restores user's zoom, center, and rotation (24hr cache)
+  - Reset Map shows minimal view: streets and trash fence only, basemap off
+  - Fractional zoom support (0.001 snap) for perfect trash fence fit
+  - Removed default Leaflet zoom controls for cleaner interface
+- **Infrastructure Layer Fixes** - Proper layer management
+  - Fixed Porto pins not being removed when infrastructure unchecked
+  - Fixed trash fence visibility with bright red styling
+  - All layer checkboxes properly update when map is reset
+
+### Fixed
+- **Desktop Scrolling Architecture** - Complete refactor of scrolling system
+  - Eliminated double-scrolling issues with proper PWA layout
+  - Fixed body scrolling - now using fixed viewport architecture
+  - Main content area properly sized with flexbox without padding hacks
+- **Mobile Layout Issues** - Resolved spacing and sizing problems
+  - Fixed mobile header height from 93px to proper 60px
+  - Eliminated white gap between content and bottom nav
+  - MapBottomSheet now fills content area with proper flex layout
+  - Fixed map panels using container bounds instead of viewport
+- **Component Architecture** - Improved maintainability
+  - Decomposed App.vue into AppHeader, AppFooter, and MobileMenu components
+  - Fixed navigation routes missing year parameter
+  - Fixed art detail links using wrong route (/arts/ → /art/)
+  - AppFooter now desktop-only as intended
+  - BottomNav uses flexbox instead of fixed positioning
+
+### Changed
+- **Map Reset Behavior** - More intuitive default view
+  - Shows only essential layers (streets and trash fence)
+  - Disables basemap for striking black background
+  - All checkboxes properly reflect visual state
+  - Zooms to fit trash fence with minimal padding
+
+## [3.22.0] - 2025-08-01
+
+### Added
 - **Complete Theme System Overhaul** - Professional 4-theme design system for all UI components
   - OKNOTOK Theme: Dark red/gold classic camp theme
   - Sparkle Pony Theme: Light Barbie pink theme with bright magical colors
