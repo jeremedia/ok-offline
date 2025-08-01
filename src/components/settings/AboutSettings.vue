@@ -17,9 +17,9 @@
         <span class="build-time">Built: {{ buildTime }}</span>
       </p>
       
-      <button @click="showReleaseNotes = true" class="release-notes-button">
+      <BaseButton @click="showReleaseNotes = true" variant="primary">
         📋 View Release Notes
-      </button>
+      </BaseButton>
     </div>
 
     <div class="about-section">
@@ -69,7 +69,7 @@
       <div class="modal-content" @click.stop>
         <div class="modal-header">
           <h2>Release Notes</h2>
-          <button @click="showReleaseNotes = false" class="close-button">×</button>
+          <BaseButton @click="showReleaseNotes = false" variant="ghost" size="sm">×</BaseButton>
         </div>
         <div class="modal-body">
           <div v-for="release in releaseNotes" :key="release.version" class="release-section">
@@ -125,6 +125,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { BaseButton } from '@/components/ui'
 
 // Props
 const props = defineProps({

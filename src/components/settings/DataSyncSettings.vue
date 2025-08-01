@@ -3,13 +3,14 @@
     <h2>Data Sync Settings</h2>
     
     <div class="settings-section">
-      <button 
+      <BaseButton 
         @click="syncAllYears" 
         :disabled="syncingAll"
-        class="primary-button"
+        :loading="syncingAll"
+        variant="primary"
       >
         {{ syncingAll ? 'Syncing All Years...' : 'Sync All Years' }}
-      </button>
+      </BaseButton>
       <div v-if="syncingAll" class="sync-all-progress">
         {{ syncAllProgress }}
       </div>
@@ -31,22 +32,23 @@
         </div>
         
         <div class="sync-actions">
-          <button 
+          <BaseButton 
             @click="syncYear(year)" 
             :disabled="syncing[year]"
-            class="primary-button"
+            :loading="syncing[year]"
+            variant="primary"
           >
             {{ syncing[year] ? 'Syncing...' : 'Sync All Data' }}
-          </button>
+          </BaseButton>
           
-          <button 
+          <BaseButton 
             @click="clearYear(year)"
             :disabled="syncing[year]"
-            class="secondary-button"
+            variant="secondary"
             v-if="syncStatus[year] && hasData(year)"
           >
             Clear Data
-          </button>
+          </BaseButton>
         </div>
         
         <div v-if="progress[year] || progressText[year]" class="progress-bar">
@@ -84,21 +86,22 @@
       </div>
       
       <div class="tile-actions">
-        <button 
+        <BaseButton 
           @click="downloadTiles" 
           :disabled="downloadingTiles || (tileStats && tileStats.percentage >= 90)"
-          class="primary-button"
+          :loading="downloadingTiles"
+          variant="primary"
         >
           {{ downloadingTiles ? 'Downloading...' : 'Cache Map Tiles' }}
-        </button>
+        </BaseButton>
         
-        <button 
+        <BaseButton 
           @click="clearTiles"
           :disabled="downloadingTiles || !tileStats || tileStats.storedTiles === 0"
-          class="secondary-button"
+          variant="secondary"
         >
           Clear Tile Cache
-        </button>
+        </BaseButton>
       </div>
     </div>
     
@@ -117,6 +120,7 @@ import { clearCache } from '../../services/storage'
 import { useToast } from '../../composables/useToast'
 import { getErrorMessage } from '../../utils/errorHandler'
 import tileDownloader from '../../services/tileDownloader'
+import { BaseButton } from '@/components/ui'
 
 // Toast notifications
 const { showSuccess, showError, showWarning, showInfo } = useToast()

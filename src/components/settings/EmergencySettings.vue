@@ -20,24 +20,30 @@
     
     <div class="settings-section">
       <div class="emergency-tabs">
-        <button 
+        <BaseButton 
           @click="emergencyTab = 'contacts'" 
-          :class="['tab-btn', { active: emergencyTab === 'contacts' }]"
+          variant="ghost"
+          :active="emergencyTab === 'contacts'"
+          class="btn-tab"
         >
           Personal Contacts
-        </button>
-        <button 
+        </BaseButton>
+        <BaseButton 
           @click="emergencyTab = 'medical'" 
-          :class="['tab-btn', { active: emergencyTab === 'medical' }]"
+          variant="ghost"
+          :active="emergencyTab === 'medical'"
+          class="btn-tab"
         >
           Medical Info
-        </button>
-        <button 
+        </BaseButton>
+        <BaseButton 
           @click="emergencyTab = 'resources'" 
-          :class="['tab-btn', { active: emergencyTab === 'resources' }]"
+          variant="ghost"
+          :active="emergencyTab === 'resources'"
+          class="btn-tab"
         >
           Resources
-        </button>
+        </BaseButton>
       </div>
 
       <!-- Emergency Contacts Tab -->
@@ -53,7 +59,7 @@
           <div v-for="contact in contacts" :key="contact.id" class="contact-card">
             <div class="contact-header">
               <strong>{{ contact.name }}</strong>
-              <button @click="removeContact(contact.id)" class="remove-btn" title="Remove contact">×</button>
+              <BaseButton @click="removeContact(contact.id)" variant="ghost" size="sm" title="Remove contact">×</BaseButton>
             </div>
             <div class="contact-details">
               <span class="relationship">{{ contact.relationship }}</span>
@@ -63,9 +69,9 @@
           </div>
         </div>
         
-        <button @click="showAddContact = !showAddContact" class="primary-button">
+        <BaseButton @click="showAddContact = !showAddContact" :variant="showAddContact ? 'secondary' : 'primary'">
           {{ showAddContact ? 'Cancel' : '+ Add Contact' }}
-        </button>
+        </BaseButton>
 
         <form v-if="showAddContact" @submit.prevent="addContact" class="contact-form">
           <div class="form-group">
@@ -114,7 +120,7 @@
             ></textarea>
           </div>
           
-          <button type="submit" class="submit-button">Add Contact</button>
+          <BaseButton type="submit" variant="primary">Add Contact</BaseButton>
         </form>
       </div>
 
@@ -181,7 +187,7 @@
             ></textarea>
           </div>
           
-          <button type="submit" class="submit-button">Save Medical Info</button>
+          <BaseButton type="submit" variant="primary">Save Medical Info</BaseButton>
         </form>
       </div>
 
@@ -225,6 +231,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useToast } from '../../composables/useToast'
+import { BaseButton } from '@/components/ui'
 
 const { showToast } = useToast()
 
