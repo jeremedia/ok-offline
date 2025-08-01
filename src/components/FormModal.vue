@@ -5,9 +5,7 @@
         <div class="modal-container" @click.stop>
           <header class="modal-header">
             <h2>{{ title }}</h2>
-            <button @click="$emit('update:modelValue', false)" class="close-btn" aria-label="Close">
-              ×
-            </button>
+            <BaseButton @click="$emit('update:modelValue', false)" variant="ghost" icon="×" size="sm" :uppercase="false" aria-label="Close" class="close-btn" />
           </header>
           
           <div class="modal-body">
@@ -15,12 +13,12 @@
           </div>
           
           <footer class="modal-footer">
-            <button @click="$emit('update:modelValue', false)" class="btn btn-secondary">
+            <BaseButton @click="$emit('update:modelValue', false)" variant="secondary" :uppercase="false">
               Cancel
-            </button>
-            <button @click="handleSave" class="btn btn-primary" :disabled="!isValid || saving">
+            </BaseButton>
+            <BaseButton @click="handleSave" variant="primary" :disabled="!isValid || saving" :loading="saving" :uppercase="false">
               {{ saving ? 'Saving...' : 'Save' }}
-            </button>
+            </BaseButton>
           </footer>
         </div>
       </div>
@@ -30,6 +28,7 @@
 
 <script setup>
 import { watch, onMounted, onUnmounted } from 'vue'
+import BaseButton from './ui/BaseButton.vue'
 
 const props = defineProps({
   modelValue: {
@@ -128,23 +127,9 @@ onUnmounted(() => {
 }
 
 .close-btn {
-  background: none;
-  border: none;
-  color: var(--color-text-muted);
   font-size: 2rem;
-  line-height: 1;
-  cursor: pointer;
-  padding: 0;
   width: 2rem;
   height: 2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: color 0.2s;
-}
-
-.close-btn:hover {
-  color: var(--color-text-primary);
 }
 
 .modal-body {
@@ -162,40 +147,6 @@ onUnmounted(() => {
   flex-shrink: 0;
 }
 
-.btn {
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.2s;
-  font-family: inherit;
-}
-
-.btn-primary {
-  background-color: var(--color-primary);
-  color: var(--color-text-inverse);
-}
-
-.btn-primary:hover:not(:disabled) {
-  background-color: var(--color-primary-dark);
-}
-
-.btn-primary:disabled {
-  background-color: var(--color-bg-input);
-  color: var(--color-text-muted);
-  cursor: not-allowed;
-}
-
-.btn-secondary {
-  background-color: var(--color-bg-input);
-  color: var(--color-text-secondary);
-}
-
-.btn-secondary:hover {
-  background-color: var(--color-bg-hover);
-  color: var(--color-text-primary);
-}
 
 /* Mobile adjustments */
 @media (max-width: 600px) {

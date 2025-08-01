@@ -11,14 +11,16 @@
           :placeholder="`Search ${type}s...`"
           class="search-input"
         />
-        <button 
+        <BaseButton 
           v-if="searchQuery"
           @click="$emit('update:searchQuery', '')"
-          class="clear-search-btn"
+          variant="ghost"
+          icon="×"
+          size="sm"
+          :uppercase="false"
           aria-label="Clear search"
-        >
-          ×
-        </button>
+          class="clear-search-btn"
+        />
       </div>
     </div>
 
@@ -43,25 +45,30 @@
 
       <!-- Filters Toggle -->
       <div class="filters-group">
-        <button 
+        <BaseButton 
           @click="toggleFilters"
-          :class="['filters-btn', { active: !filtersCollapsed }]"
+          variant="secondary"
+          :active="!filtersCollapsed"
+          :uppercase="false"
+          class="filters-btn"
         >
           Filters
           <span v-if="activeFilterCount > 0" class="filter-count">({{ activeFilterCount }})</span>
           <span class="dropdown-arrow">{{ filtersCollapsed ? '▼' : '▲' }}</span>
-        </button>
+        </BaseButton>
       </div>
 
       <!-- Clear All Button -->
       <div class="clear-group" v-if="hasActiveFilters">
-        <button 
+        <BaseButton 
           @click="clearAllFilters"
-          class="clear-btn"
+          variant="ghost"
+          icon="×"
+          size="sm"
+          :uppercase="false"
           aria-label="Clear all filters"
-        >
-          ×
-        </button>
+          class="clear-btn"
+        />
       </div>
     </div>
 
@@ -77,20 +84,26 @@
         <div class="filter-section-header">
           <span class="filter-section-title">Sector</span>
           <div class="button-group">
-            <button 
+            <BaseButton 
               @click="$emit('selectAllSectors')" 
-              class="filter-btn filter-btn-left"
+              variant="ghost"
+              size="sm"
+              :uppercase="false"
               :disabled="allSectorsSelected"
+              class="filter-btn filter-btn-left"
             >
               All
-            </button>
-            <button 
+            </BaseButton>
+            <BaseButton 
               @click="$emit('clearAllSectors')" 
-              class="filter-btn filter-btn-right"
+              variant="ghost"
+              size="sm"
+              :uppercase="false"
               :disabled="noSectorsSelected"
+              class="filter-btn filter-btn-right"
             >
               None
-            </button>
+            </BaseButton>
           </div>
         </div>
         <div class="sector-checkboxes">
@@ -111,20 +124,26 @@
         <div class="filter-section-header">
           <span class="filter-section-title">Event Type</span>
           <div class="button-group">
-            <button 
+            <BaseButton 
               @click="$emit('selectAllEventTypes')" 
-              class="filter-btn filter-btn-left"
+              variant="ghost"
+              size="sm"
+              :uppercase="false"
               :disabled="allEventTypesSelected"
+              class="filter-btn filter-btn-left"
             >
               All
-            </button>
-            <button 
+            </BaseButton>
+            <BaseButton 
               @click="$emit('clearAllEventTypes')" 
-              class="filter-btn filter-btn-right"
+              variant="ghost"
+              size="sm"
+              :uppercase="false"
               :disabled="noEventTypesSelected"
+              class="filter-btn filter-btn-right"
             >
               None
-            </button>
+            </BaseButton>
           </div>
         </div>
         <div class="event-type-checkboxes">
@@ -143,22 +162,27 @@
       <!-- Additional Controls -->
       <div class="filter-section">
         <div class="additional-controls">
-          <button 
+          <BaseButton 
             @click="$emit('toggleFavorites')"
-            :class="['favorites-toggle', { active: showFavoritesOnly }]"
+            variant="secondary"
+            :active="showFavoritesOnly"
+            :uppercase="false"
+            class="favorites-toggle"
           >
             ⭐ {{ showFavoritesOnly ? 'Show All' : 'Favorites' }} 
             <span v-if="favoriteCount > 0">({{ favoriteCount }})</span>
-          </button>
+          </BaseButton>
           
-          <button 
+          <BaseButton 
             v-if="!userLocation"
             @click="$emit('enableLocation')"
-            class="location-toggle"
+            variant="secondary"
             :disabled="locationLoading"
+            :uppercase="false"
+            class="location-toggle"
           >
             📍 {{ locationLoading ? 'Getting location...' : 'Enable Location' }}
-          </button>
+          </BaseButton>
         </div>
       </div>
     </div>
@@ -167,6 +191,7 @@
 
 <script setup>
 import { computed } from 'vue'
+import BaseButton from './ui/BaseButton.vue'
 
 const props = defineProps({
   type: {
@@ -361,18 +386,6 @@ const clearAllFilters = () => {
 .clear-search-btn {
   position: absolute;
   right: 0.5rem;
-  background: none;
-  border: none;
-  color: var(--color-text-muted);
-  font-size: 1.5rem;
-  cursor: pointer;
-  padding: 0.25rem;
-  line-height: 1;
-  transition: color 0.2s ease;
-}
-
-.clear-search-btn:hover {
-  color: var(--color-primary);
 }
 
 /* Control Bar - Secondary */
@@ -440,26 +453,8 @@ const clearAllFilters = () => {
 }
 
 .filters-btn {
-  background: var(--color-bg-input);
-  color: var(--color-text-secondary);
-  border: 1px solid var(--color-border-heavy);
-  border-radius: 4px;
-  padding: 0.5rem 0.75rem;
-  font-family: inherit;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
   gap: 0.5rem;
   white-space: nowrap;
-}
-
-.filters-btn:hover,
-.filters-btn.active {
-  background: var(--color-primary);
-  color: var(--color-text-primary);
-  border-color: var(--color-primary);
 }
 
 .filter-count {
@@ -474,27 +469,8 @@ const clearAllFilters = () => {
 }
 
 .clear-btn {
-  background: var(--color-bg-hover);
-  color: var(--color-text-secondary);
-  border: 1px solid var(--color-bg-active);
-  border-radius: 4px;
-  padding: 0.5rem;
-  font-family: inherit;
-  font-size: 1.2rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  line-height: 1;
   width: 32px;
   height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.clear-btn:hover {
-  background: var(--color-primary);
-  color: var(--color-text-primary);
-  border-color: var(--color-primary);
 }
 
 /* Results Count */
@@ -536,17 +512,6 @@ const clearAllFilters = () => {
   display: flex;
 }
 
-.filter-btn {
-  background: var(--color-bg-input);
-  color: var(--color-text-secondary);
-  border: 1px solid var(--color-border-heavy);
-  padding: 0.4rem 0.8rem;
-  font-family: inherit;
-  font-size: 0.8rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
 .filter-btn-left {
   border-radius: 4px 0 0 4px;
   border-right: none;
@@ -554,18 +519,6 @@ const clearAllFilters = () => {
 
 .filter-btn-right {
   border-radius: 0 4px 4px 0;
-}
-
-.filter-btn:hover:not(:disabled) {
-  background: var(--color-primary);
-  color: var(--color-text-primary);
-}
-
-.filter-btn:disabled {
-  background: var(--color-bg-header);
-  color: var(--color-text-disabled);
-  cursor: not-allowed;
-  opacity: 0.6;
 }
 
 .sector-checkboxes,
@@ -601,34 +554,7 @@ const clearAllFilters = () => {
 
 .favorites-toggle,
 .location-toggle {
-  background: var(--color-bg-input);
-  color: var(--color-text-secondary);
-  border: 1px solid var(--color-border-heavy);
-  border-radius: 4px;
-  padding: 0.5rem 0.75rem;
-  font-family: inherit;
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
   white-space: nowrap;
-}
-
-.favorites-toggle:hover,
-.location-toggle:hover:not(:disabled) {
-  background: var(--color-primary);
-  color: var(--color-text-primary);
-  border-color: var(--color-primary);
-}
-
-.favorites-toggle.active {
-  background: var(--color-primary);
-  color: var(--color-text-primary);
-  border-color: var(--color-primary);
-}
-
-.location-toggle:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
 }
 
 /* Mobile Responsive */
@@ -647,16 +573,9 @@ const clearAllFilters = () => {
     justify-content: space-between;
   }
 
-  .sort-select,
-  .filters-btn {
+  .sort-select {
     min-height: 44px;
     font-size: 1rem;
-  }
-
-  .clear-btn {
-    align-self: center;
-    min-width: 44px;
-    min-height: 44px;
   }
 
   .sector-checkboxes,
@@ -668,10 +587,6 @@ const clearAllFilters = () => {
     flex-direction: column;
   }
 
-  .favorites-toggle,
-  .location-toggle {
-    min-height: 44px;
-  }
 }
 
 /* Desktop enhancements */
