@@ -256,12 +256,14 @@ import {
 import { recordVisit, getVisitInfo, saveItemNotes, getItemNotes } from '../services/visits'
 import { addEventToSchedule, removeEventFromSchedule, isEventScheduled } from '../services/schedule'
 import { useAutoSync } from '../composables/useAutoSync'
+import { useToast } from '../composables/useToast'
 import SyncDialog from '../components/SyncDialog.vue'
 import { canShowLocations } from '../stores/globalState'
 
 const props = defineProps(['type', 'year', 'id'])
 const router = useRouter()
 const { showSyncDialog, checkAndAutoSync } = useAutoSync()
+const { showSuccess } = useToast()
 
 const mapContainer = ref(null)
 const item = ref(null)
@@ -312,6 +314,14 @@ const handleZoomOut = () => {
 const handleToggleFavorite = () => {
   const wasAdded = toggleFavorite(props.type, props.id)
   isFavorited.value = wasAdded
+  
+  // Show toast notification
+  const itemName = getItemName(item.value)
+  if (wasAdded) {
+    showSuccess(`Added "${itemName}" to favorites`)
+  } else {
+    showSuccess(`Removed "${itemName}" from favorites`)
+  }
 }
 
 const markAsVisited = () => {
@@ -784,7 +794,7 @@ watch(() => props.id, async () => {
 
 /* Header styling - full width */
 .detail-header {
-  padding: 0 16px;
+  padding: 0 16px 8px 16px;
   flex-shrink: 0;
 }
 
@@ -807,8 +817,7 @@ watch(() => props.id, async () => {
 }
 
 #detail-info {
-  padding: 0 16px 16px !important;
-  padding-bottom: 0 !important; /* Override external padding */
+  padding: 0 16px 0 16px !important;
   overflow: visible; /* No inner scrolling */
   flex-shrink: 0; /* Don't shrink, let parent scroll */
   box-sizing: border-box;
@@ -825,10 +834,31 @@ watch(() => props.id, async () => {
   box-sizing: border-box;
   border: 1px solid var(--color-bg-input) !important;
   border-radius: 8px;
+  margin: 16px; /* Same margin on all sides on mobile */
   padding: 0 !important; /* Override external padding */
   top: auto !important; /* Override sticky positioning */
   max-width: none !important;
-  margin-bottom: 16px; /* Add spacing for scroll */
+}
+
+/* Mobile layout - explicit mobile styles */
+@media (max-width: 767px) {
+  #detail-content {
+    padding: 0;
+    gap: 0;
+  }
+  
+  .detail-header {
+    padding: 16px !important;
+    border-bottom: 1px solid var(--color-bg-input);
+  }
+  
+  #detail-info {
+    padding: 16px 16px 0 16px !important;
+  }
+  
+  #detail-map-container {
+    margin: 16px 16px 0 16px !important;
+  }
 }
 
 /* Desktop layout - side by side columns */
@@ -914,11 +944,11 @@ watch(() => props.id, async () => {
 
 /* Map controls container */
 .map-controls {
-  padding: 16px;
+  padding: 8px 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: var(--color-modal-overlay);
+  background: var(--color-bg-elevated);
   flex-shrink: 0;
   border-top: 1px solid var(--color-bg-input); /* Only top border */
   border-radius: 0; /* Remove radius since container handles it */
@@ -966,6 +996,27 @@ watch(() => props.id, async () => {
   font-weight: bold;
   min-width: 20px;
   text-align: center;
+}
+
+/* Back to List button */
+#back-to-list {
+  background: var(--color-bg-elevated);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-bg-input);
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  margin-top: 16px;
+  margin-bottom: 1rem;
+}
+
+#back-to-list:hover {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
 }
 
 /* Open in map link styling */
@@ -1082,9 +1133,15 @@ h2 {
   border: none;
   font-size: 3rem;
   cursor: pointer;
-  padding: 0.2rem 0.5rem;
+  padding: 0;
   color: var(--color-text-disabled);
   transition: color 0.2s;
+  line-height: 0.5;
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  position: relative;
+  top: -0.1em;
 }
 
 .favorite-btn-detail:hover {

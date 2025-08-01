@@ -158,6 +158,26 @@ onMounted(() => {
 // Release notes data
 const releaseNotes = [
   {
+    version: '3.24.0',
+    date: '2025-08-01',
+    added: [
+      '🔔 Toast Notifications - Visual feedback when adding/removing favorites',
+      '🎨 Mobile Theme Selector - Quick theme switching in mobile menu',
+      '✨ Theme-aware toast colors that adapt to current theme'
+    ],
+    fixed: [
+      '📱 Mobile Detail View Polish - Refined spacing and layout',
+      '⭐ Favorite star alignment optimized without expanding line height',
+      '🔲 Back-to-list button styled with proper theme colors',
+      '🎯 Map controls padding reduced for compact layout',
+      '🎨 Toast notifications now use theme CSS variables'
+    ],
+    changed: [
+      '📐 Consistent 16px spacing rhythm throughout mobile layout',
+      '🗺️ Map controls background uses elevated surface color'
+    ]
+  },
+  {
     version: '3.23.0',
     date: '2025-08-01',
     added: [

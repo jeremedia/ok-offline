@@ -8,6 +8,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Toast Notifications** - User feedback for favorites management
+  - Shows confirmation when adding/removing favorites
+  - Theme-aware colors that adapt to current theme selection
+- **Mobile Theme Selector** - Easy theme switching on mobile devices
+  - Added theme dropdown to mobile menu
+  - Instant theme switching without navigation
+
+### Fixed
+- **Mobile Detail View Polish** - Refined spacing and layout
+  - Tightened header padding with proper border separator
+  - Fixed map container margins for consistent spacing
+  - Optimized favorite star alignment without expanding line height
+  - Styled back-to-list button with proper theme colors
+  - Reduced map controls padding for more compact layout
+- **Toast Theme Support** - Fixed toast colors to use theme CSS variables
+  - Background now uses `--color-bg-elevated` for consistency
+  - Status colors adapt to each theme (OKNOTOK, Sparkle, Khaki, Mush)
+
+### Changed
 - **Mobile UX Enhancements** - Major improvements to mobile interface and navigation
   - MapBottomSheet now properly positioned above bottom navigation
   - Tabs moved to bottom for better thumb accessibility

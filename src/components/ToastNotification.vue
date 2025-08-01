@@ -103,23 +103,27 @@ defineExpose({
 
 /* Type variants */
 .toast-success {
-  background: var(--color-success-dark);
+  background: var(--color-bg-elevated);
   border-left: 4px solid var(--color-success);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .toast-error {
-  background: var(--color-error-dark);
+  background: var(--color-bg-elevated);
   border-left: 4px solid var(--color-error);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .toast-warning {
-  background: var(--color-warning-dark);
+  background: var(--color-bg-elevated);
   border-left: 4px solid var(--color-warning);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .toast-info {
-  background: var(--color-info-dark);
+  background: var(--color-bg-elevated);
   border-left: 4px solid var(--color-info);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 /* Animations */
