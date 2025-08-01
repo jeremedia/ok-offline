@@ -1,24 +1,21 @@
 <template>
   <div class="search-mode-selector">
     <div class="mode-buttons">
-      <button
+      <BaseButton
         v-for="mode in availableModes"
         :key="mode.value"
         @click="selectMode(mode.value)"
-        :class="[
-          'mode-btn',
-          { 
-            'active': selectedMode === mode.value,
-            'disabled': mode.disabled
-          }
-        ]"
+        variant="ghost"
+        :active="selectedMode === mode.value"
         :disabled="mode.disabled"
         :title="mode.tooltip"
+        :uppercase="true"
+        class="mode-btn"
       >
         <span class="mode-icon">{{ mode.icon }}</span>
         <span class="mode-label">{{ mode.label }}</span>
         <span v-if="mode.badge" class="mode-badge">{{ mode.badge }}</span>
-      </button>
+      </BaseButton>
     </div>
     
     <div v-if="showDescription" class="mode-description">
@@ -29,6 +26,7 @@
 
 <script setup>
 import { computed, defineEmits, defineProps } from 'vue'
+import BaseButton from '../ui/BaseButton.vue'
 
 const props = defineProps({
   selectedMode: {
@@ -124,22 +122,11 @@ const selectMode = (mode) => {
 
 .mode-btn {
   flex: 1;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
   gap: 8px;
-  padding: 12px;
-  border: 1px solid var(--color-border);
+  border-radius: 0;
   border-right: none;
-  background: var(--color-bg-elevated) !important;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 14px;
   position: relative;
   min-height: 44px;
-  text-transform: uppercase;
 }
 
 .mode-btn:first-child {
@@ -149,28 +136,6 @@ const selectMode = (mode) => {
 .mode-btn:last-child {
   border-right: 1px solid var(--color-border);
   border-radius: 0 8px 8px 0;
-}
-
-.mode-btn:hover:not(.disabled):not(.active) {
-  background: var(--color-primary-bg);
-  border-color: var(--color-primary);
-  color: var(--color-text-primary);
-  z-index: 1;
-}
-
-.mode-btn.active {
-  background: var(--color-primary) !important;
-  color: var(--color-text-inverse) !important;
-  border-color: var(--color-primary) !important;
-  z-index: 2;
-}
-
-.mode-btn.disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  background: var(--color-bg-header);
-  color: var(--color-text-disabled);
-  border-color: var(--color-bg-input);
 }
 
 .mode-icon {

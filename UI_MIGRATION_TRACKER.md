@@ -127,10 +127,10 @@ This document tracks the migration of ~100 button elements across 15+ components
 ### 9. Additional Components
 
 #### MapLegend.vue & MapInfo.vue
-- Collapse buttons (1 each) | ⬜
+- Collapse buttons (1 each) | ✅
 
 #### SearchModeSelector.vue  
-- Mode selection buttons (3) | ⬜
+- Mode selection buttons (3) | ✅
 
 #### ScheduleView.vue
 - Day buttons (8) | ✅
@@ -140,8 +140,8 @@ This document tracks the migration of ~100 button elements across 15+ components
 - Remove buttons (multiple) | ✅
 
 #### InfrastructureView.vue
-- Category filter buttons (~5) | ⬜
-- Collapse buttons (1) | ⬜
+- Category filter buttons (6) | ✅
+- Collapse buttons (1) | ✅
 
 #### GuidedTour.vue
 - Close button (1) | ✅
@@ -153,15 +153,19 @@ This document tracks the migration of ~100 button elements across 15+ components
 |-----------|--------------|----------|-----------|----------|
 | BottomNav | 5 | 5 | 0 | 100% |
 | AppHeader | 11 | 11 | 0 | 100% |
-| ListControls | 11+ | 9 | 2+ | 82% |
+| ListControls | 9 | 9 | 0 | 100% |
 | SearchResultItem | 2+ | 2+ | 0 | 100% |
 | MapControlTabs | 7 | 7 | 0 | 100% |
 | SearchOptions | 9 | 9 | 0 | 100% |
 | FormModal | 3 | 3 | 0 | 100% |
 | MobileMenu | 7 | 7 | 0 | 100% |
 | ScheduleView | 12 | 12 | 0 | 100% |
-| Others | 8+ | 8 | 0+ | 100% |
-| **TOTAL** | **82+** | **77** | **5+** | **94%** |
+| MapLegend | 1 | 1 | 0 | 100% |
+| MapInfo | 1 | 1 | 0 | 100% |
+| SearchModeSelector | 3 | 3 | 0 | 100% |
+| InfrastructureView | 7 | 7 | 0 | 100% |
+| GuidedTour | 4 | 4 | 0 | 100% |
+| **TOTAL** | **91** | **91** | **0** | **🎉 100%** |
 
 ## Migration Process for Each Component
 

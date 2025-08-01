@@ -12,13 +12,15 @@
       @touchstart="startDrag"
     >
       <h4>Map Legend</h4>
-      <button 
+      <BaseButton 
         @click.stop="toggleCollapse"
-        class="collapse-btn"
+        variant="ghost"
+        size="sm"
+        :icon="isCollapsed ? '▲' : '▼'"
         :aria-label="isCollapsed ? 'Expand legend' : 'Collapse legend'"
-      >
-        {{ isCollapsed ? '▲' : '▼' }}
-      </button>
+        :uppercase="false"
+        class="collapse-btn"
+      />
     </div>
     
     <!-- Legend Content -->
@@ -92,6 +94,7 @@
 
 <script setup>
 import { ref, reactive, onMounted, computed } from 'vue'
+import BaseButton from '../ui/BaseButton.vue'
 
 const props = defineProps({
   isMobile: Boolean
@@ -342,25 +345,7 @@ window.addEventListener('resize', constrainToViewport)
 }
 
 .collapse-btn {
-  background: none;
-  border: none;
-  color: var(--color-text-disabled);
-  font-size: 0.75rem;
-  cursor: pointer;
-  padding: 0.25rem 0.5rem;
   margin-left: 0.5rem;
-  border-radius: 4px;
-  transition: all 0.2s ease;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-}
-
-.collapse-btn:hover {
-  background: var(--color-white-alpha-10);
-  color: var(--color-text-primary);
 }
 
 /* Legend Content */

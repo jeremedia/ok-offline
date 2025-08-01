@@ -351,7 +351,7 @@ onMounted(() => {
 
 #schedule-section {
   padding: 1rem;
-  max-width: 1000px;
+  max-width: 1200px;
   margin: 0 auto;
   min-height: 100%;
 }
