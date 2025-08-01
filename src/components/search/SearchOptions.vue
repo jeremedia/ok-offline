@@ -50,7 +50,7 @@
             v-for="type in filterTypes"
             :key="type.key"
             variant="ghost"
-            :active="includeTypes[type.key]"
+            :active="includeTypes[type.key] && !everythingSelected"
             :uppercase="true"
             @click="$emit('toggleFilter', type.key)"
             :title="type.label"
