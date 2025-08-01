@@ -946,6 +946,94 @@ The enhanced weather/dust forecast feature requires an OpenWeatherMap API key:
 
 Without an API key, the app will show a configuration error but all other features remain functional.
 
+## Flexbox Layout Architecture
+
+### Overview
+The app uses a nested flexbox layout system to ensure proper height management and scrolling behavior across all views. This architecture was implemented to fix viewport overflow issues and ensure consistent behavior between mobile and desktop.
+
+### Core Layout Structure
+```
+html (height: 100%)
+└── body (height: 100%)
+    └── #app (height: 100%, overflow: hidden)
+        └── .app-root (height: 100%, flex container)
+            └── .app-container (flex: 1, flex container)
+                ├── AppHeader (flex-shrink: 0)
+                ├── main (flex: 1, overflow: hidden)
+                │   └── View Component (height: 100%, flex container)
+                │       ├── Fixed Content (flex-shrink: 0)
+                │       └── Scrollable Content (flex: 1, overflow-y: auto)
+                └── AppFooter (flex-shrink: 0) [desktop only]
+```
+
+### Key Principles
+1. **Height Inheritance**: Start with `height: 100%` at html/body level
+2. **Flex Containers**: Each level uses flexbox for proper space distribution
+3. **No 100vh**: Avoid viewport units that don't account for mobile browser chrome
+4. **min-height: 0**: Critical on flex children to allow proper shrinking
+5. **Overflow Management**: Only the innermost content area should scroll
+
+### Implementation Details
+
+#### App.vue
+```css
+.app-root {
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-container {
+  flex: 1; /* Fill remaining space, not height: 100% */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0; /* Critical for nested flexbox */
+}
+
+main {
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+```
+
+#### View Components Pattern
+```css
+.view-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.fixed-header {
+  flex-shrink: 0;
+}
+
+.scrollable-content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  min-height: 0;
+}
+```
+
+### Common Issues and Solutions
+
+1. **36px Overflow**: Caused by using `height: 100%` instead of `flex: 1`
+2. **No Scrolling**: Missing `min-height: 0` on flex containers
+3. **Double Scrolling**: Multiple nested scrollable areas
+4. **Footer Hidden**: Improper flex distribution in parent containers
+
+### Testing Checklist
+- [ ] Desktop footer visible at all viewport heights
+- [ ] List views scroll properly without body scroll
+- [ ] No horizontal overflow on any device
+- [ ] Mobile browser chrome doesn't cause layout shift
+- [ ] Nested components maintain proper scroll containment
+
 ## Visual Testing Protocol
 
 When testing UI changes, especially for mobile optimization:

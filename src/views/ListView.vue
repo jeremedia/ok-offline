@@ -952,5 +952,6 @@ watch(() => [props.type, props.year], () => {
   margin: 0 auto;
   width: 100%;
   overflow: hidden; /* Prevent outer scrolling */
+  min-height: 0; /* Important for nested flexbox */
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="app-root">
     <WelcomeScreen 
       v-if="showOnboarding" 
       @complete="handleOnboardingComplete"
@@ -375,12 +375,21 @@ provide('mapControlsToggle', mapControlsToggleEvent)
 
 <style scoped>
 /* ===== APP LAYOUT STYLES ===== */
+/* Root element must not exceed parent height */
+.app-root {
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
 /* Full-screen PWA layout */
 .app-container {
-  height: 100%;
+  flex: 1;
   display: flex;
   flex-direction: column;
   overflow: hidden; /* Prevent body scrolling */
+  min-height: 0; /* Important for nested flexbox */
 }
 
 main {

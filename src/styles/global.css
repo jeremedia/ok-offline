@@ -171,7 +171,13 @@
   box-sizing: border-box;
 }
 
-html, body {
+html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
   margin: 0;
   padding: 0;
   height: 100%;
@@ -180,6 +186,7 @@ html, body {
   color: var(--color-text-secondary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  position: relative; /* Establish positioning context */
 }
 
 /* Ensure all buttons inherit the font */
@@ -190,6 +197,11 @@ button {
 body {
   overflow: hidden; /* Prevent all body scrolling for PWA */
   /* height inherited from html (100%) - no need for 100vh which causes mobile issues */
+}
+
+#app {
+  height: 100%;
+  overflow: hidden; /* Prevent content from pushing beyond body height */
 }
 
 main {
