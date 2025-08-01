@@ -38,6 +38,10 @@ const props = defineProps({
   type: {
     type: String,
     default: 'button'
+  },
+  uppercase: {
+    type: Boolean,
+    default: true
   }
 })
 
@@ -55,7 +59,8 @@ const buttonClasses = computed(() => {
       'btn-full': props.fullWidth,
       'btn-loading': props.loading,
       'btn-active': props.active,
-      'btn-icon': props.icon && !hasContent
+      'btn-icon': props.icon && !hasContent,
+      'btn-uppercase': props.uppercase
     }
   ]
 })

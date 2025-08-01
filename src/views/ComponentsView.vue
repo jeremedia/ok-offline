@@ -22,6 +22,16 @@
           </div>
         </div>
 
+        <!-- Button Text Transform -->
+        <div class="component-group">
+          <h3>Button Text Transform</h3>
+          <div class="component-demo">
+            <BaseButton>Default (Uppercase)</BaseButton>
+            <BaseButton :uppercase="false">Not Uppercase</BaseButton>
+            <BaseButton :uppercase="true">Explicitly Uppercase</BaseButton>
+          </div>
+        </div>
+
         <!-- Button Sizes -->
         <div class="component-group">
           <h3>Button Sizes</h3>

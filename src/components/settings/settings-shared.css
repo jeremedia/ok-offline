@@ -33,6 +33,7 @@
 }
 
 /* Section containers */
+/* Note: Consider migrating these to BaseCard component for consistency */
 .settings-section,
 .feature-section,
 .about-section,
@@ -76,94 +77,8 @@
   opacity: 0.9;
 }
 
-/* Primary buttons */
-.primary-button,
-.sync-button,
-.sync-all-button,
-.release-notes-button,
-.submit-button {
-  background: var(--color-primary);
-  color: var(--color-text-inverse);
-  border: 1px solid var(--color-primary);
-  padding: 0.75rem 1.5rem;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 0.9rem;
-  font-weight: 500;
-  font-family: 'Berkeley Mono', monospace;
-}
-
-.primary-button:hover,
-.sync-button:hover,
-.sync-all-button:hover,
-.release-notes-button:hover,
-.submit-button:hover {
-  background: var(--color-primary-hover);
-  border-color: var(--color-primary-hover);
-}
-
-.primary-button:disabled,
-.sync-button:disabled,
-.sync-all-button:disabled,
-.submit-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-/* Secondary buttons */
-.secondary-button,
-.clear-button,
-.edit-button,
-.cancel-button {
-  background: var(--color-border);
-  color: var(--color-text-primary);
-  border: 1px solid var(--color-border-secondary);
-  padding: 0.75rem 1.5rem;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 0.9rem;
-  font-weight: 500;
-  font-family: 'Berkeley Mono', monospace;
-}
-
-.secondary-button:hover,
-.clear-button:hover,
-.edit-button:hover,
-.cancel-button:hover {
-  background: var(--color-border-secondary);
-  color: var(--color-text-primary);
-  border-color: var(--color-text-secondary);
-}
-
-.secondary-button:disabled,
-.clear-button:disabled,
-.edit-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-/* Danger buttons */
-.danger-button,
-.delete-button {
-  background: var(--color-error);
-  color: var(--color-text-inverse);
-  border: 1px solid var(--color-error);
-  padding: 0.75rem 1.5rem;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 0.9rem;
-  font-weight: 500;
-  font-family: 'Berkeley Mono', monospace;
-}
-
-.danger-button:hover,
-.delete-button:hover {
-  background: var(--color-error-hover);
-  border-color: var(--color-error-hover);
-}
+/* Button styles have been migrated to BaseButton component */
+/* See /src/styles/components/buttons.css for button styling */
 
 /* Info boxes */
 .info-box,
@@ -299,7 +214,8 @@
   margin-top: 1.5rem;
 }
 
-.feature-card,
+/* Card styles have been migrated to BaseCard component */
+/* See /src/styles/components/cards.css for card styling */
 .gis-feature {
   padding: 1.25rem;
   background: var(--color-background-secondary);
@@ -308,7 +224,6 @@
   transition: all 0.2s ease;
 }
 
-.feature-card:hover,
 .gis-feature:hover {
   border-color: var(--color-primary);
   transform: translateY(-2px);
@@ -336,12 +251,7 @@
     margin-bottom: 1.5rem;
   }
   
-  .primary-button,
-  .secondary-button,
-  .danger-button {
-    padding: 0.75rem 1rem;
-    font-size: 0.875rem;
-  }
+  /* Button responsive styles handled by BaseButton component */
   
   .features-grid,
   .gis-features-grid {

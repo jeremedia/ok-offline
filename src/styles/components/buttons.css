@@ -149,6 +149,11 @@
   width: 100%;
 }
 
+.btn-uppercase {
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
 .btn-active:not(.btn-ghost) {
   background: var(--color-primary);
   color: var(--color-text-inverse);

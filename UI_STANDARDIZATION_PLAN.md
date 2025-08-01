@@ -57,7 +57,7 @@ src/
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, useSlots } from 'vue'
 
 const props = defineProps({
   variant: {
@@ -78,19 +78,30 @@ const props = defineProps({
   iconPosition: {
     type: String,
     default: 'left'
+  },
+  uppercase: {
+    type: Boolean,
+    default: true  // NEW: Buttons are uppercase and bold by default
   }
 })
 
-const buttonClasses = computed(() => [
-  'btn',
-  `btn-${props.variant}`,
-  `btn-${props.size}`,
-  {
-    'btn-full': props.fullWidth,
-    'btn-loading': props.loading,
-    'btn-active': props.active
-  }
-])
+const slots = useSlots()
+
+const buttonClasses = computed(() => {
+  const hasContent = !!slots.default?.()
+  return [
+    'btn',
+    `btn-${props.variant}`,
+    `btn-${props.size}`,
+    {
+      'btn-full': props.fullWidth,
+      'btn-loading': props.loading,
+      'btn-active': props.active,
+      'btn-icon': props.icon && !hasContent,
+      'btn-uppercase': props.uppercase
+    }
+  ]
+})
 </script>
 ```
 
@@ -199,6 +210,11 @@ const buttonClasses = computed(() => [
 /* State modifiers */
 .btn-full {
   width: 100%;
+}
+
+.btn-uppercase {
+  text-transform: uppercase;
+  font-weight: bold;
 }
 
 .btn-active {
