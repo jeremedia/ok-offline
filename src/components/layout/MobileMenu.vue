@@ -31,6 +31,22 @@
             </select>
           </div>
           
+          <!-- Theme Selector -->
+          <div class="menu-section">
+            <label for="mobile-theme-selector" class="menu-label">THEME</label>
+            <select 
+              id="mobile-theme-selector" 
+              :value="currentTheme" 
+              @change="handleThemeChange"
+              class="menu-select"
+            >
+              <option value="oknotok">OKNOTOK</option>
+              <option value="sparkle">Sparkle</option>
+              <option value="khaki">Khaki</option>
+              <option value="mush">Mush</option>
+            </select>
+          </div>
+          
           <!-- Additional Navigation -->
           <div class="menu-section">
             <h4 class="menu-section-title">MORE</h4>
@@ -72,8 +88,10 @@
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import packageJson from '../../../package.json'
+import { getCurrentTheme, applyTheme } from '../../services/themeService'
 
 const appVersion = packageJson.version
 
@@ -91,9 +109,17 @@ const props = defineProps({
 const emit = defineEmits(['close', 'update:selectedYear'])
 
 const router = useRouter()
+const currentTheme = ref(getCurrentTheme())
 
 const handleYearChange = (event) => {
   emit('update:selectedYear', event.target.value)
+}
+
+const handleThemeChange = (event) => {
+  const theme = event.target.value
+  currentTheme.value = theme
+  applyTheme(theme)
+  localStorage.setItem('selectedTheme', theme)
 }
 
 const navigateTo = (route) => {
