@@ -1,21 +1,24 @@
 <template>
   <nav class="bottom-nav" :class="{ 'bottom-nav-pwa': isPWA }" v-if="isMobile">
-    <button 
+    <BaseButton 
       v-for="item in navItems" 
       :key="item.route"
       @click="navigate(item.route)"
-      :class="{ active: isActive(item.route) }"
+      variant="ghost"
+      :active="isActive(item.route)"
+      :uppercase="true"
       class="nav-item"
     >
       <span class="nav-icon">{{ item.icon }}</span>
       <span class="nav-label">{{ item.label }}</span>
-    </button>
+    </BaseButton>
   </nav>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import BaseButton from './ui/BaseButton.vue'
 
 const props = defineProps({
   year: {
@@ -115,39 +118,15 @@ const isActive = (view) => {
 
 .nav-item {
   flex: 1;
-  display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
   gap: 4px;
   padding: 8px 4px;
-  background: none;
-  border: none;
-  color: var(--color-text-secondary);
-  cursor: pointer;
   min-height: 44px;
-  transition: all 0.2s ease;
-  position: relative;
-  font-family: 'Berkeley Mono', monospace;
-  text-transform: uppercase;
-}
-
-.nav-item:hover {
-  background: var(--color-primary-alpha-20);
-  color: var(--color-text-primary);
+  border-radius: 0;
 }
 
 .nav-item:active {
   transform: scale(0.95);
-}
-
-.nav-item.active {
-  background: var(--color-primary);
-  color: var(--color-text-primary);
-}
-
-.nav-item.active::before {
-  display: none;
 }
 
 .nav-icon {

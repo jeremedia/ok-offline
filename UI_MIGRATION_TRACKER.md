@@ -17,13 +17,13 @@ This document tracks the migration of ~100 button elements across 15+ components
 
 | Element | Line | Current Class | Target | Status |
 |---------|------|---------------|--------|--------|
-| Map nav | 3-4 | .nav-item | BaseButton variant="ghost" | ⬜ |
-| Camps nav | 5-6 | .nav-item | BaseButton variant="ghost" | ⬜ |
-| Art nav | 7-8 | .nav-item | BaseButton variant="ghost" | ⬜ |
-| Events nav | 9-10 | .nav-item | BaseButton variant="ghost" | ⬜ |
-| Schedule nav | 11-12 | .nav-item | BaseButton variant="ghost" | ⬜ |
+| Map nav | 3-4 | .nav-item | BaseButton variant="ghost" | ✅ |
+| Camps nav | 5-6 | .nav-item | BaseButton variant="ghost" | ✅ |
+| Art nav | 7-8 | .nav-item | BaseButton variant="ghost" | ✅ |
+| Events nav | 9-10 | .nav-item | BaseButton variant="ghost" | ✅ |
+| Schedule nav | 11-12 | .nav-item | BaseButton variant="ghost" | ✅ |
 
-**Total**: 5 buttons
+**Total**: 5 buttons (All migrated)
 
 ### 2. AppHeader.vue
 **File**: `/src/components/layout/AppHeader.vue`
@@ -31,19 +31,12 @@ This document tracks the migration of ~100 button elements across 15+ components
 
 | Element | Line | Current Class | Target | Status |
 |---------|------|---------------|--------|--------|
-| Desktop Map | 19 | .nav-btn | BaseButton variant="ghost" | ⬜ |
-| Desktop List | 20 | .nav-btn | BaseButton variant="ghost" | ⬜ |
-| Desktop Search | 21 | .nav-btn | BaseButton variant="ghost" | ⬜ |
-| Desktop Schedule | 22 | .nav-btn | BaseButton variant="ghost" | ⬜ |
-| Desktop Emergency | 23 | .nav-btn | BaseButton variant="ghost" | ⬜ |
-| Desktop Settings | 24 | .nav-btn | BaseButton variant="ghost" | ⬜ |
-| Desktop Menu | 25 | .nav-btn | BaseButton variant="ghost" | ⬜ |
-| Mobile Search | 43 | .mobile-action-btn | BaseButton variant="secondary" icon | ⬜ |
-| Mobile Emergency | 47 | .mobile-action-btn | BaseButton variant="secondary" icon | ⬜ |
-| Mobile Settings | 51 | .mobile-action-btn | BaseButton variant="secondary" icon | ⬜ |
-| Status Dot | 33-37 | .status-dot | BaseButton variant="ghost" custom | ⬜ |
+| Desktop Nav (8 items) | 19-27 | .nav-btn | BaseButton variant="ghost" | ✅ |
+| Status Dot | 33-37 | .status-dot | BaseButton variant="ghost" custom | ✅ |
+| Mobile Search | 43 | .mobile-action-btn | BaseButton variant="secondary" | ✅ |
+| Mobile Menu | 49 | .mobile-action-btn | BaseButton variant="secondary" | ✅ |
 
-**Total**: 11 buttons
+**Total**: 11 buttons (All migrated)
 
 ### 3. ListControls.vue
 **File**: `/src/components/ListControls.vue`
@@ -163,8 +156,8 @@ This document tracks the migration of ~100 button elements across 15+ components
 
 | Component | Total Buttons | Migrated | Remaining | Progress |
 |-----------|--------------|----------|-----------|----------|
-| BottomNav | 5 | 0 | 5 | 0% |
-| AppHeader | 11 | 0 | 11 | 0% |
+| BottomNav | 5 | 5 | 0 | 100% |
+| AppHeader | 11 | 11 | 0 | 100% |
 | ListControls | 11+ | 9 | 2+ | 82% |
 | SearchResultItem | 2+ | 2+ | 0 | 100% |
 | MapControlTabs | 7+ | 0 | 7+ | 0% |
@@ -172,7 +165,7 @@ This document tracks the migration of ~100 button elements across 15+ components
 | FormModal | 3 | 3 | 0 | 100% |
 | MobileMenu | 8 | 0 | 8 | 0% |
 | Others | 20+ | 4 | 16+ | 20% |
-| **TOTAL** | **73+** | **18** | **55+** | **25%** |
+| **TOTAL** | **73+** | **34** | **39+** | **47%** |
 
 ## Migration Process for Each Component
 

@@ -16,43 +16,47 @@
           </select>
         </div>
         <nav class="main-nav">
-          <button 
+          <BaseButton 
             v-for="item in navItems" 
             :key="item.route"
             @click="navigate(item.route)" 
-            :class="['nav-btn', { active: isActive(item.route) }]"
+            variant="ghost"
+            :active="isActive(item.route)"
+            :uppercase="true"
+            class="nav-btn"
           >
             {{ item.label }}
-          </button>
+          </BaseButton>
         </nav>
       </div>
       
       <!-- App Title -->
       <div class="app-title-section">
         <h1 @click="$emit('navigate', 'settings')" class="app-title">OK-OFFLINE</h1>
-        <button 
+        <BaseButton 
           @click="$emit('navigate', 'settings/data_sync')"
+          variant="ghost"
           :class="['status-dot', { offline: !isOnline }]"
           :title="isOnline ? 'Online - Click for data sync' : 'Offline - Click for data sync'"
-          aria-label="Connection status and data sync">
-        </button>
+          aria-label="Connection status and data sync"
+        />
       </div>
       
       <!-- Mobile Actions -->
       <div class="mobile-actions" v-if="isMobile">
-        <button @click="navigate('search')" class="mobile-action-btn" aria-label="Search">
+        <BaseButton @click="navigate('search')" variant="secondary" class="mobile-action-btn" aria-label="Search">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="11" cy="11" r="8"/>
             <path d="m21 21-4.35-4.35"/>
           </svg>
-        </button>
-        <button @click="$emit('toggle-menu')" class="mobile-action-btn menu-btn" aria-label="Menu">
+        </BaseButton>
+        <BaseButton @click="$emit('toggle-menu')" variant="secondary" class="mobile-action-btn menu-btn" aria-label="Menu">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="3" y1="6" x2="21" y2="6"/>
             <line x1="3" y1="12" x2="21" y2="12"/>
             <line x1="3" y1="18" x2="21" y2="18"/>
           </svg>
-        </button>
+        </BaseButton>
       </div>
     </div>
   </header>
@@ -61,6 +65,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import BaseButton from '../ui/BaseButton.vue'
 
 const props = defineProps({
   isMobile: {
@@ -196,28 +201,9 @@ header {
 }
 
 .nav-btn {
-  background: transparent;
-  color: var(--color-text-secondary);
-  border: 1px solid transparent;
-  padding: 0.5rem 0.75rem;
-  border-radius: 4px;
   font-size: 0.85rem;
   font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
   white-space: nowrap;
-}
-
-.nav-btn:hover {
-  background: var(--color-bg-input);
-  color: var(--color-text-primary);
-  border-color: var(--color-border-medium);
-}
-
-.nav-btn.active {
-  background: var(--color-primary);
-  color: var(--color-text-primary);
-  border-color: var(--color-primary);
 }
 
 /* App Title Section */
@@ -247,8 +233,9 @@ header {
   border-radius: 50%;
   background: var(--color-success);
   border: 2px solid var(--color-success-dark);
-  cursor: pointer;
-  transition: all 0.3s;
+  padding: 0;
+  min-width: 16px;
+  min-height: 16px;
   animation: pulse 2s infinite;
 }
 
@@ -305,18 +292,9 @@ header {
 }
 
 .mobile-action-btn {
-  background: var(--color-bg-input);
-  border: 1px solid var(--color-border-heavy);
-  color: var(--color-text-secondary);
   min-width: 44px;
   height: 44px;
   padding: 0 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s;
-  font-size: 0.9rem;
   border-radius: 8px;
 }
 
@@ -329,13 +307,6 @@ header {
 .mobile-action-btn:last-child {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
-}
-
-.mobile-action-btn:hover,
-.mobile-action-btn:active {
-  background: var(--color-primary);
-  color: var(--color-text-primary);
-  border-color: var(--color-primary);
 }
 
 .mobile-action-btn svg {
