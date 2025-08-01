@@ -189,7 +189,7 @@ button {
 
 body {
   overflow: hidden; /* Prevent all body scrolling for PWA */
-  height: 100vh;
+  /* height inherited from html (100%) - no need for 100vh which causes mobile issues */
 }
 
 main {
@@ -242,12 +242,7 @@ nav select {
 }
 
 /* Layout styles */
-main {
-  height: calc(100vh - 88px);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
+/* main height is managed by flexbox in App.vue, no fixed height needed */
 
 /* Map and List sections */
 .map-view {
@@ -410,9 +405,7 @@ textarea:focus {
     font-size: 0.8rem;
   }
   
-  main {
-    height: calc(100vh - 60px);
-  }
+  /* main height is managed by flexbox, no calc needed */
   
   .list-view {
     padding: 0.5rem;

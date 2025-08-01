@@ -377,7 +377,7 @@ provide('mapControlsToggle', mapControlsToggleEvent)
 /* ===== APP LAYOUT STYLES ===== */
 /* Full-screen PWA layout */
 .app-container {
-  height: 100vh;
+  height: 100%;
   display: flex;
   flex-direction: column;
   overflow: hidden; /* Prevent body scrolling */
