@@ -27,6 +27,46 @@ Created by Jeremy Roush and brought to you by Mr. OK of OKNOTOK.
 - **Service Workers** - PWA functionality
 - **Berkeley Mono** - Custom monospace font
 
+### Body-Level Mobile Class System
+
+The app uses a sophisticated body-level class system for mobile/desktop targeting that provides precise CSS control without media queries.
+
+#### Implementation (`src/App.vue`)
+- **Enhanced Mobile Detection**: Multi-factor detection using screen width, touch capability, and user agent
+- **Development Mode**: Uses width-only detection (`< 600px`) for easier testing
+- **Production Mode**: Combines screen size + touch/UA for accurate mobile detection
+- **Reactive Classes**: `watchEffect` automatically applies `mobile-device` or `desktop-device` classes to body element
+
+#### Global CSS Integration (`src/styles/global.css`)
+```css
+/* Target mobile devices */
+body.mobile-device h1 { font-weight: bold; }
+body.mobile-device button { min-height: 44px; }
+
+/* Target desktop devices */
+body.desktop-device .card:hover { transform: translateY(-2px); }
+```
+
+#### Key Features
+- **Automatic Updates**: Classes change reactively when viewport resizes
+- **iOS Optimizations**: 16px font size prevents zoom, tap highlight disabled
+- **Touch Targets**: 44px minimum button sizes on mobile
+- **Debug Logging**: Console logs device mode changes during development
+
+#### Usage Patterns
+- **Mobile-Specific Styles**: `body.mobile-device .component { ... }`
+- **Desktop-Only Effects**: `body.desktop-device .hover-effect:hover { ... }`
+- **Responsive Spacing**: Target different devices without media queries
+- **Touch Optimization**: Mobile-specific touch targets and interactions
+
+#### Testing Verified
+| Viewport | Class Applied | Status |
+|----------|---------------|--------|
+| 390px | `mobile-device` | ✅ |
+| 599px | `mobile-device` | ✅ |
+| 600px | `desktop-device` | ✅ |
+| 1920px | `desktop-device` | ✅ |
+
 ## CRITICAL: Screenshot Handling
 
 **MANDATORY RULE FOR ALL CLAUDE CODE SESSIONS:**
