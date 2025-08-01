@@ -5,19 +5,22 @@
     
     <div class="schedule-controls">
       <div class="day-selector">
-        <button 
+        <BaseButton 
           v-for="day in days" 
           :key="day.date"
           @click="selectedDay = day.date"
-          :class="['day-btn', { active: selectedDay === day.date }]"
+          variant="secondary"
+          :active="selectedDay === day.date"
+          :uppercase="false"
+          class="day-btn"
         >
           {{ day.label }}
-        </button>
+        </BaseButton>
       </div>
       
-      <button @click="clearDaySchedule" class="clear-btn" v-if="hasEventsOnDay">
+      <BaseButton @click="clearDaySchedule" variant="secondary" :uppercase="false" class="clear-btn" v-if="hasEventsOnDay">
         Clear {{ formatDayLabel(selectedDay) }}
-      </button>
+      </BaseButton>
     </div>
     
     <div class="schedule-timeline">
@@ -41,12 +44,14 @@
               ⚠️ Conflicts with other events
             </div>
           </div>
-          <button 
+          <BaseButton 
             @click="removeFromSchedule(event.scheduleId)"
+            variant="ghost"
+            icon="✕"
+            size="sm"
+            :uppercase="false"
             class="remove-btn"
-          >
-            ✕
-          </button>
+          />
         </div>
       </div>
     </div>
@@ -74,12 +79,12 @@
     </div>
     
     <div class="export-controls">
-      <button @click="exportSchedule" class="export-btn">
+      <BaseButton @click="exportSchedule" variant="secondary" :uppercase="false" class="export-btn">
         📤 Export Schedule
-      </button>
-      <button @click="shareSchedule" class="share-btn">
+      </BaseButton>
+      <BaseButton @click="shareSchedule" variant="secondary" :uppercase="false" class="share-btn">
         🔗 Share Schedule
-      </button>
+      </BaseButton>
     </div>
     </section>
   </div>
@@ -88,6 +93,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import BaseButton from '../components/ui/BaseButton.vue'
 
 const route = useRoute()
 const year = computed(() => route.params.year || localStorage.getItem('selectedYear') || '2025')
@@ -370,38 +376,7 @@ h2 {
   flex-wrap: wrap;
 }
 
-.day-btn {
-  background: var(--color-bg-elevated);
-  color: var(--color-text-secondary);
-  border: 1px solid var(--color-border);
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
 
-.day-btn:hover {
-  background: var(--color-bg-header);
-}
-
-.day-btn.active {
-  background: var(--color-primary);
-  color: var(--color-text-primary);
-}
-
-.clear-btn {
-  background: var(--color-bg-input);
-  color: var(--color-text-secondary);
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.clear-btn:hover {
-  background: var(--color-bg-hover);
-}
 
 .schedule-timeline {
   background: var(--color-bg-base);
@@ -482,11 +457,7 @@ h2 {
 }
 
 .remove-btn {
-  background: none;
-  border: none;
   color: var(--color-text-muted);
-  cursor: pointer;
-  padding: 0.25rem;
   font-size: 1.2rem;
 }
 
@@ -539,19 +510,8 @@ h2 {
 }
 
 .export-btn, .share-btn {
-  background: var(--color-bg-elevated);
-  color: var(--color-text-secondary);
-  border: 1px solid var(--color-border);
   padding: 0.75rem 1.5rem;
-  border-radius: 4px;
-  cursor: pointer;
   font-size: 1rem;
-  transition: all 0.2s;
-}
-
-.export-btn:hover, .share-btn:hover {
-  background: var(--color-primary);
-  color: var(--color-text-primary);
 }
 
 @media (max-width: 768px) {

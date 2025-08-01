@@ -50,35 +50,35 @@
           <!-- Additional Navigation -->
           <div class="menu-section">
             <h4 class="menu-section-title">MORE</h4>
-            <button @click="navigateTo('infrastructure')" class="menu-nav-btn">
+            <BaseButton @click="navigateTo('infrastructure')" variant="secondary" :uppercase="false" class="menu-nav-btn">
               <span class="menu-icon">🏛️</span>
               <span class="menu-text">Infrastructure</span>
-            </button>
-            <button @click="navigateTo('dust')" class="menu-nav-btn">
+            </BaseButton>
+            <BaseButton @click="navigateTo('dust')" variant="secondary" :uppercase="false" class="menu-nav-btn">
               <span class="menu-icon">🌪️</span>
               <span class="menu-text">Weather</span>
-            </button>
-            <button @click="navigateTo('search')" class="menu-nav-btn">
+            </BaseButton>
+            <BaseButton @click="navigateTo('search')" variant="secondary" :uppercase="false" class="menu-nav-btn">
               <span class="menu-icon">🔍</span>
               <span class="menu-text">Search</span>
-            </button>
+            </BaseButton>
           </div>
           
           <!-- Settings & Info -->
           <div class="menu-section">
             <h4 class="menu-section-title">SETTINGS & INFO</h4>
-            <button @click="navigateTo('about')" class="menu-nav-btn">
+            <BaseButton @click="navigateTo('about')" variant="secondary" :uppercase="false" class="menu-nav-btn">
               <span class="menu-icon">📱</span>
               <span class="menu-text">About</span>
-            </button>
-            <button @click="navigateTo('features')" class="menu-nav-btn">
+            </BaseButton>
+            <BaseButton @click="navigateTo('features')" variant="secondary" :uppercase="false" class="menu-nav-btn">
               <span class="menu-icon">✨</span>
               <span class="menu-text">Features</span>
-            </button>
-            <button @click="navigateTo('settings')" class="menu-nav-btn">
+            </BaseButton>
+            <BaseButton @click="navigateTo('settings')" variant="secondary" :uppercase="false" class="menu-nav-btn">
               <span class="menu-icon">⚙️</span>
               <span class="menu-text">Settings</span>
-            </button>
+            </BaseButton>
             <router-link to="/reset" class="menu-version">v{{ appVersion }}</router-link>
           </div>
         </div>
@@ -205,24 +205,9 @@ const navigateTo = (route) => {
 }
 
 .close-menu-btn {
-  background: none;
-  border: none;
-  color: var(--color-text-secondary);
   font-size: 1.5rem;
-  cursor: pointer;
-  padding: 0.5rem;
   width: 44px;
   height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
-  transition: all 0.2s ease;
-}
-
-.close-menu-btn:hover {
-  background: var(--color-white-alpha-10);
-  color: var(--color-text-primary);
 }
 
 .mobile-menu-content {
@@ -275,18 +260,12 @@ const navigateTo = (route) => {
 }
 
 .menu-nav-btn {
-  display: flex;
-  align-items: center;
   gap: 1rem;
   width: 100%;
   padding: 0.875rem 1rem;
-  background: var(--color-bg-header);
   border: 1px solid var(--color-border-medium);
   border-radius: 0;
-  color: var(--color-text-secondary);
-  cursor: pointer;
   margin-bottom: 0;
-  transition: all 0.2s ease;
   text-align: left;
   border-top: 0;
 }
@@ -305,9 +284,6 @@ const navigateTo = (route) => {
 }
 
 .menu-nav-btn:hover {
-  background: var(--color-primary);
-  color: var(--color-text-primary);
-  border-color: var(--color-primary);
   z-index: 1;
   position: relative;
 }
