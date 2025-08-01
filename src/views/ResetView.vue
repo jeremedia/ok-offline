@@ -588,6 +588,11 @@ onMounted(async () => {
   margin-bottom: 3rem;
 }
 
+/* Ensure BaseButtons in card footers stretch full width */
+.reset-options :deep(.base-card__footer .base-button) {
+  width: 100%;
+}
+
 .reset-card {
   background: var(--color-bg-elevated);
   border: 1px solid var(--color-border);
@@ -622,49 +627,7 @@ onMounted(async () => {
   line-height: 1.4;
 }
 
-.reset-btn {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: all 0.2s;
-}
-
-.reset-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.reset-btn.primary {
-  background: var(--color-primary);
-  color: var(--color-text-primary);
-}
-
-.reset-btn.primary:hover:not(:disabled) {
-  background: var(--color-primary-hover);
-}
-
-.reset-btn.secondary {
-  background: var(--color-bg-input);
-  color: var(--color-text-secondary);
-}
-
-.reset-btn.secondary:hover:not(:disabled) {
-  background: var(--color-bg-hover);
-  color: var(--color-text-primary);
-}
-
-.reset-btn.danger {
-  background: var(--color-primary);
-  color: var(--color-text-primary);
-}
-
-.reset-btn.danger:hover:not(:disabled) {
-  background: var(--color-primary-hover);
-}
+/* Removed old button styles - using BaseButton component */
 
 .current-status {
   background: var(--color-bg-base);
@@ -714,33 +677,7 @@ onMounted(async () => {
   margin-bottom: 2rem;
 }
 
-.refresh-btn, .home-btn {
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: all 0.2s;
-}
-
-.refresh-btn {
-  background: var(--color-bg-input);
-  color: var(--color-text-secondary);
-}
-
-.refresh-btn:hover:not(:disabled) {
-  background: var(--color-bg-hover);
-  color: var(--color-text-primary);
-}
-
-.home-btn {
-  background: var(--color-primary);
-  color: var(--color-text-primary);
-}
-
-.home-btn:hover {
-  background: var(--color-primary-hover);
-}
+/* Removed old action button styles - using BaseButton component */
 
 .reset-log {
   background: var(--color-bg-base);
@@ -761,21 +698,7 @@ onMounted(async () => {
   margin: 0;
 }
 
-.copy-logs-btn {
-  padding: 0.5rem 1rem;
-  background: var(--color-bg-input);
-  color: var(--color-text-secondary);
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.85rem;
-  transition: all 0.2s;
-}
-
-.copy-logs-btn:hover {
-  background: var(--color-bg-hover);
-  color: var(--color-text-primary);
-}
+/* Removed copy logs button styles - using BaseButton component */
 
 .log-entries {
   display: flex;

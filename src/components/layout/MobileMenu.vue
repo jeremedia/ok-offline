@@ -50,35 +50,39 @@
           <!-- Additional Navigation -->
           <div class="menu-section">
             <h4 class="menu-section-title">MORE</h4>
-            <BaseButton @click="navigateTo('infrastructure')" variant="secondary" :uppercase="false" class="menu-nav-btn">
-              <span class="menu-icon">🏛️</span>
-              <span class="menu-text">Infrastructure</span>
-            </BaseButton>
-            <BaseButton @click="navigateTo('dust')" variant="secondary" :uppercase="false" class="menu-nav-btn">
-              <span class="menu-icon">🌪️</span>
-              <span class="menu-text">Weather</span>
-            </BaseButton>
-            <BaseButton @click="navigateTo('search')" variant="secondary" :uppercase="false" class="menu-nav-btn">
-              <span class="menu-icon">🔍</span>
-              <span class="menu-text">Search</span>
-            </BaseButton>
+            <ButtonGroup direction="vertical">
+              <BaseButton @click="navigateTo('infrastructure')" variant="secondary" :uppercase="false" fullWidth class="menu-nav-btn">
+                <span class="menu-icon">🏛️</span>
+                <span class="menu-text">Infrastructure</span>
+              </BaseButton>
+              <BaseButton @click="navigateTo('dust')" variant="secondary" :uppercase="false" fullWidth class="menu-nav-btn">
+                <span class="menu-icon">🌪️</span>
+                <span class="menu-text">Weather</span>
+              </BaseButton>
+              <BaseButton @click="navigateTo('search')" variant="secondary" :uppercase="false" fullWidth class="menu-nav-btn">
+                <span class="menu-icon">🔍</span>
+                <span class="menu-text">Search</span>
+              </BaseButton>
+            </ButtonGroup>
           </div>
           
           <!-- Settings & Info -->
           <div class="menu-section">
             <h4 class="menu-section-title">SETTINGS & INFO</h4>
-            <BaseButton @click="navigateTo('about')" variant="secondary" :uppercase="false" class="menu-nav-btn">
-              <span class="menu-icon">📱</span>
-              <span class="menu-text">About</span>
-            </BaseButton>
-            <BaseButton @click="navigateTo('features')" variant="secondary" :uppercase="false" class="menu-nav-btn">
-              <span class="menu-icon">✨</span>
-              <span class="menu-text">Features</span>
-            </BaseButton>
-            <BaseButton @click="navigateTo('settings')" variant="secondary" :uppercase="false" class="menu-nav-btn">
-              <span class="menu-icon">⚙️</span>
-              <span class="menu-text">Settings</span>
-            </BaseButton>
+            <ButtonGroup direction="vertical">
+              <BaseButton @click="navigateTo('about')" variant="secondary" :uppercase="false" fullWidth class="menu-nav-btn">
+                <span class="menu-icon">📱</span>
+                <span class="menu-text">About</span>
+              </BaseButton>
+              <BaseButton @click="navigateTo('features')" variant="secondary" :uppercase="false" fullWidth class="menu-nav-btn">
+                <span class="menu-icon">✨</span>
+                <span class="menu-text">Features</span>
+              </BaseButton>
+              <BaseButton @click="navigateTo('settings')" variant="secondary" :uppercase="false" fullWidth class="menu-nav-btn">
+                <span class="menu-icon">⚙️</span>
+                <span class="menu-text">Settings</span>
+              </BaseButton>
+            </ButtonGroup>
             <router-link to="/reset" class="menu-version">v{{ appVersion }}</router-link>
           </div>
         </div>
@@ -92,6 +96,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import packageJson from '../../../package.json'
 import { getCurrentTheme, applyTheme } from '../../services/themeService'
+import { BaseButton, ButtonGroup } from '../ui'
 
 const appVersion = packageJson.version
 
@@ -259,34 +264,23 @@ const navigateTo = (route) => {
   border-color: var(--color-primary);
 }
 
+/* Button content styling */
 .menu-nav-btn {
-  gap: 1rem;
-  width: 100%;
-  padding: 0.875rem 1rem;
-  border: 1px solid var(--color-border-medium);
-  border-radius: 0;
-  margin-bottom: 0;
   text-align: left;
-  border-top: 0;
 }
 
-/* First button in each section */
-.menu-section .menu-nav-btn:first-of-type {
-  border-top: 1px solid var(--color-border-medium);
-  border-top-left-radius: 4px;
-  border-top-right-radius: 4px;
+/* Force BaseButton content to flex layout */
+.menu-nav-btn :deep(.btn-content) {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  justify-content: flex-start;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  min-height: 44px; /* Touch target */
 }
 
-/* Last button in each section */
-.menu-section .menu-nav-btn:last-of-type {
-  border-bottom-left-radius: 4px;
-  border-bottom-right-radius: 4px;
-}
-
-.menu-nav-btn:hover {
-  z-index: 1;
-  position: relative;
-}
 
 .menu-icon {
   font-size: 1.25rem;

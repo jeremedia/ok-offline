@@ -13,7 +13,8 @@
           :uppercase="false"
           class="day-btn"
         >
-          {{ day.label }}
+          <span class="day-full">{{ day.label }}</span>
+          <span class="day-short">{{ day.label.split(' ')[0] }}</span>
         </BaseButton>
       </div>
       
@@ -56,33 +57,32 @@
     </div>
     
     <div class="schedule-stats">
-      <h3>Schedule Overview</h3>
       <div class="stats-grid">
         <div class="stat">
           <strong>{{ totalEvents }}</strong>
-          <span>Total Events</span>
+          <span class="stat-label">Events</span>
         </div>
         <div class="stat">
           <strong>{{ uniqueCamps }}</strong>
-          <span>Different Camps</span>
+          <span class="stat-label">Camps</span>
         </div>
         <div class="stat">
           <strong>{{ totalHours }}h</strong>
-          <span>Time Planned</span>
+          <span class="stat-label">Hours</span>
         </div>
         <div class="stat conflicts" v-if="conflictCount > 0">
           <strong>{{ conflictCount }}</strong>
-          <span>Conflicts</span>
+          <span class="stat-label">Conflicts</span>
         </div>
       </div>
     </div>
     
     <div class="export-controls">
       <BaseButton @click="exportSchedule" variant="secondary" :uppercase="false" class="export-btn">
-        📤 Export Schedule
+        <span class="btn-icon">📤</span> Export Schedule
       </BaseButton>
       <BaseButton @click="shareSchedule" variant="secondary" :uppercase="false" class="share-btn">
-        🔗 Share Schedule
+        <span class="btn-icon">🔗</span> Share Schedule
       </BaseButton>
     </div>
   </section>
@@ -353,12 +353,12 @@ onMounted(() => {
 
 h2 {
   color: var(--color-text-secondary);
-  margin-bottom: 1.5rem;
+  margin: 0 0 1rem 0;
   flex-shrink: 0;
 }
 
 .schedule-controls {
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -378,7 +378,8 @@ h2 {
 .schedule-timeline {
   background: var(--color-bg-base);
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: 8px 8px 0 0;
+  border-bottom: none;
   padding: 1rem;
   flex: 1;
   overflow-y: auto;
@@ -467,15 +468,13 @@ h2 {
 .schedule-stats {
   background: var(--color-bg-elevated);
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
   padding: 1.5rem;
-  margin-bottom: 2rem;
-}
-
-.schedule-stats h3 {
-  color: var(--color-text-secondary);
   margin-bottom: 1rem;
 }
+
+/* Schedule Overview header removed */
 
 .stats-grid {
   display: grid;
@@ -493,7 +492,7 @@ h2 {
   color: var(--color-text-primary);
 }
 
-.stat span {
+.stat .stat-label {
   font-size: 0.9rem;
   color: var(--color-text-muted);
 }
@@ -507,12 +506,73 @@ h2 {
   gap: 1rem;
   justify-content: center;
   flex-shrink: 0;
-  margin-top: 1rem;
+  margin-top: 0;
 }
 
 .export-btn, .share-btn {
   padding: 0.75rem 1.5rem;
   font-size: 1rem;
+}
+
+/* Hide button icons on mobile devices using body-level class */
+body.mobile-device .btn-icon {
+  display: none;
+}
+
+/* Show only day abbreviation on mobile */
+.day-short {
+  display: none;
+}
+
+body.mobile-device .day-full {
+  display: none;
+}
+
+body.mobile-device .day-short {
+  display: inline;
+}
+
+body.mobile-device .day-selector {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.25rem;
+  width: 100%;
+}
+
+body.mobile-device .day-btn {
+  padding: 0.5rem 0.25rem;
+  font-size: 0.875rem;
+  width: 100%;
+}
+
+/* Mobile-specific stats display */
+body.mobile-device .schedule-stats {
+  padding: 0.5rem; /* 1/3 of desktop padding (1.5rem) */
+}
+
+body.mobile-device .stats-grid {
+  display: flex;
+  justify-content: space-around;
+  gap: 0.5rem;
+}
+
+body.mobile-device .stat {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+}
+
+body.mobile-device .stat strong {
+  display: inline;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+body.mobile-device .stat span {
+  display: inline;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
 }
 
 @media (max-width: 768px) {

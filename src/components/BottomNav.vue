@@ -118,11 +118,18 @@ const isActive = (view) => {
 
 .nav-item {
   flex: 1;
-  flex-direction: column;
-  gap: 4px;
   padding: 8px 4px;
   min-height: 44px;
   border-radius: 0;
+}
+
+/* Force BaseButton to use flex layout for nav items */
+.nav-item :deep(.btn-content) {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+  justify-content: center;
 }
 
 .nav-item:active {

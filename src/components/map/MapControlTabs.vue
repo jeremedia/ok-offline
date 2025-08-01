@@ -181,12 +181,12 @@
             class="rotation-slider"
           >
           <div class="rotation-buttons">
-            <button @click="setRotation(0)" class="rotation-preset-btn">
+            <BaseButton @click="setRotation(0)" variant="secondary" size="sm">
               Reset to 0°
-            </button>
-            <button @click="setRotation(-45)" class="rotation-preset-btn">
+            </BaseButton>
+            <BaseButton @click="setRotation(-45)" variant="secondary" size="sm">
               Reset to -45°
-            </button>
+            </BaseButton>
           </div>
         </div>
         <label class="control-item">
@@ -199,12 +199,14 @@
         </label>
         
         <div class="reset-view-container" v-if="showResetView">
-          <button 
+          <BaseButton 
             @click="handleResetView"
+            variant="primary"
+            :uppercase="true"
             class="reset-view-btn"
           >
             🎯 RESET MAP
-          </button>
+          </BaseButton>
         </div>
       </div>
     </div>
@@ -229,6 +231,7 @@
 <script setup>
 import { ref, reactive, onMounted, watch, nextTick, computed } from 'vue'
 import { canShowLocations } from '@/stores/globalState'
+import BaseButton from '@/components/ui/BaseButton.vue'
 
 const props = defineProps({
   isMobile: Boolean,
@@ -482,11 +485,23 @@ const toggleCollapse = () => {
   white-space: nowrap;
 }
 
-.control-header .collapse-btn {
+.collapse-btn {
   font-size: 0.75rem;
   margin-left: 0.5rem;
   width: 24px;
   height: 24px;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.collapse-btn:hover {
+  background: var(--color-bg-hover);
+  color: var(--color-text-primary);
+  border-color: var(--color-primary);
 }
 
 /* Tab Header */
@@ -634,7 +649,7 @@ const toggleCollapse = () => {
   margin-top: 0.5rem;
 }
 
-.rotation-preset-btn {
+.rotation-buttons :deep(.base-button) {
   flex: 1;
   font-size: 0.625rem;
 }
@@ -691,9 +706,6 @@ const toggleCollapse = () => {
 
 .reset-view-btn {
   width: 100%;
-  padding: 0.75rem;
-  font-size: 0.875rem;
-  gap: 0.5rem;
 }
 
 /* Mobile Adjustments */

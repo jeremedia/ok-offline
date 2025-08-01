@@ -10,4 +10,6 @@
 
 export { default as BaseButton } from './BaseButton.vue'
 export { default as BaseCard } from './BaseCard.vue'
+export { default as BaseSelect } from './BaseSelect.vue'
+export { default as ButtonGroup } from './ButtonGroup.vue'
 // export { default as BaseContainer } from './BaseContainer.vue' // TODO: Implement in next iteration
