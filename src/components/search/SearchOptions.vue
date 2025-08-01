@@ -252,6 +252,13 @@ onMounted(() => {
   border-right: none;
 }
 
+/* Override ghost button active state for search modes */
+.mode-btn.btn-active {
+  background: var(--color-primary) !important;
+  color: var(--color-text-inverse) !important;
+  border-color: var(--color-primary) !important;
+}
+
 .mode-icon {
   font-size: 1.1rem;
 }
@@ -286,6 +293,13 @@ onMounted(() => {
 
 .filter-btn:last-child {
   border-right: none;
+}
+
+/* Override ghost button active state for filter buttons */
+.filter-btn.btn-active {
+  background: var(--color-primary) !important;
+  color: var(--color-text-inverse) !important;
+  border-color: var(--color-primary) !important;
 }
 
 /* Desktop/Mobile label switching */
