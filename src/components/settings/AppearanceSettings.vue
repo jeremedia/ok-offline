@@ -9,10 +9,12 @@
       </p>
       
       <div class="theme-grid">
-        <div
+        <BaseCard
           v-for="(theme, key) in availableThemes"
           :key="key"
-          :class="['theme-card', { active: isActiveTheme(key) }]"
+          variant="elevated"
+          :interactive="true"
+          :class="{ 'theme-card-active': isActiveTheme(key) }"
           @click="selectTheme(key)"
         >
           <div class="theme-preview" :class="`theme-preview-${key}`">
@@ -30,7 +32,7 @@
           <div v-if="isActiveTheme(key)" class="active-indicator">
             <span>✓ Active</span>
           </div>
-        </div>
+        </BaseCard>
       </div>
     </div>
     
@@ -63,6 +65,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { availableThemes, currentTheme, switchTheme, isActiveTheme } from '@/stores/themeStore'
+import { BaseCard } from '@/components/ui'
 
 // Theme preferences
 const smoothTransitions = ref(localStorage.getItem('smoothTransitions') !== 'false')

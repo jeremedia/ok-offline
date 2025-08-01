@@ -56,17 +56,19 @@
         </div>
         
         <div v-else class="contacts-grid">
-          <div v-for="contact in contacts" :key="contact.id" class="contact-card">
-            <div class="contact-header">
-              <strong>{{ contact.name }}</strong>
-              <BaseButton @click="removeContact(contact.id)" variant="ghost" size="sm" title="Remove contact">×</BaseButton>
-            </div>
+          <BaseCard v-for="contact in contacts" :key="contact.id" variant="elevated" compact>
+            <template #header>
+              <div class="contact-header">
+                <strong>{{ contact.name }}</strong>
+                <BaseButton @click="removeContact(contact.id)" variant="ghost" size="sm" title="Remove contact">×</BaseButton>
+              </div>
+            </template>
             <div class="contact-details">
               <span class="relationship">{{ contact.relationship }}</span>
               <div class="contact-phone">📞 {{ contact.phone }}</div>
               <div v-if="contact.notes" class="contact-notes">{{ contact.notes }}</div>
             </div>
-          </div>
+          </BaseCard>
         </div>
         
         <BaseButton @click="showAddContact = !showAddContact" :variant="showAddContact ? 'secondary' : 'primary'">
@@ -196,25 +198,22 @@
         <h4>Emergency Resources</h4>
         
         <div class="resource-grid">
-          <div class="resource-card">
-            <h4>🏥 Medical Centers</h4>
+          <BaseCard variant="elevated" title="🏥 Medical Centers">
             <ul>
               <li><strong>Rampart Medical</strong><br>9:00 & Esplanade</li>
               <li><strong>BRC ESD (Emergency Services)</strong><br>5:15 & Esplanade</li>
             </ul>
-          </div>
+          </BaseCard>
           
-          <div class="resource-card">
-            <h4>🧠 Mental Health Support</h4>
+          <BaseCard variant="elevated" title="🧠 Mental Health Support">
             <ul>
               <li><strong>Zendo Project</strong><br>Psychedelic crisis support</li>
               <li><strong>Rangers</strong><br>Available 24/7 for any situation</li>
             </ul>
-          </div>
+          </BaseCard>
         </div>
         
-        <div class="resource-card safety-tips">
-          <h4>🛡️ Safety Reminders</h4>
+        <BaseCard variant="elevated" title="🛡️ Safety Reminders" class="safety-tips">
           <ul>
             <li>Drink water frequently - dehydration happens fast</li>
             <li>Protect yourself from dust storms</li>
@@ -222,7 +221,7 @@
             <li>Carry a headlamp and extra batteries</li>
             <li>Have a meeting spot if separated from friends</li>
           </ul>
-        </div>
+        </BaseCard>
       </div>
     </div>
   </div>
@@ -231,7 +230,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useToast } from '../../composables/useToast'
-import { BaseButton } from '@/components/ui'
+import { BaseButton, BaseCard } from '@/components/ui'
 
 const { showToast } = useToast()
 
