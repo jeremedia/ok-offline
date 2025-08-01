@@ -34,8 +34,13 @@
     }">
       <router-view :year="selectedYear"></router-view>
     </main>
-    <BottomNav v-if="!showOnboarding && !showTour" :year="selectedYear" />
+    <BottomNav 
+      v-if="!showOnboarding && !showTour" 
+      :year="selectedYear" 
+      @toggle-map-controls="handleToggleMapControls"
+    />
     <AppFooter 
+      v-if="!isMobile"
       :selected-theme="selectedTheme"
       :available-themes="availableThemes"
       @update:selected-theme="selectedTheme = $event; onThemeChange()"
@@ -46,7 +51,7 @@
 </template>
 
 <script setup>
-import { ref, watch, computed, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, watch, computed, onMounted, onUnmounted, nextTick, provide } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useKeyboardShortcuts } from './composables/useKeyboardShortcuts'
 import { useSwipeGestures } from './composables/useSwipeGestures'
@@ -326,6 +331,19 @@ const navigateFromMenu = (destination) => {
 const onThemeChange = () => {
   applyTheme(selectedTheme.value)
 }
+
+// Map controls toggle event
+const mapControlsToggleEvent = ref(0)
+
+const handleToggleMapControls = () => {
+  console.log('App: Received toggle-map-controls event')
+  // Increment to trigger watchers in MapView
+  mapControlsToggleEvent.value++
+  console.log('App: mapControlsToggleEvent value:', mapControlsToggleEvent.value)
+}
+
+// Provide the event to child components
+provide('mapControlsToggle', mapControlsToggleEvent)
 </script>
 
 
@@ -344,14 +362,6 @@ main {
   overflow: hidden; /* Let individual views manage their own scrolling */
   position: relative;
   min-height: 0; /* Important for nested flex containers */
-}
-
-/* Bottom nav spacing handled by views themselves */
-
-/* Special handling for map view */
-main.map-view {
-  position: relative;
-  overflow: hidden;
 }
 
 /* Landscape mode adjustments moved to component files */

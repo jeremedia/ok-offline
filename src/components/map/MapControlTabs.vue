@@ -12,8 +12,8 @@
       </button>
     </div>
     
-    <!-- Tab Headers -->
-    <div v-show="!isCollapsed" class="tab-header">
+    <!-- Tab Headers (Desktop Position) -->
+    <div v-if="!isMobile" v-show="!isCollapsed" class="tab-header">
       <button 
         v-for="tab in tabs" 
         :key="tab.id"
@@ -112,15 +112,6 @@
             <span class="control-label">🚻 Portos</span>
           </label>
         </div>
-        
-        <div class="reset-view-container" v-if="showResetView">
-          <button 
-            @click="$emit('reset-view')"
-            class="reset-view-btn"
-          >
-            🎯 Reset View
-          </button>
-        </div>
       </div>
       
       <!-- Layers Tab -->
@@ -204,7 +195,29 @@
           <input type="checkbox" v-model="controls.showMapInfo" @change="updateControls">
           <span class="control-label">🔍 Show Map Info</span>
         </label>
+        
+        <div class="reset-view-container" v-if="showResetView">
+          <button 
+            @click="handleResetView"
+            class="reset-view-btn"
+          >
+            🎯 RESET MAP
+          </button>
+        </div>
       </div>
+    </div>
+    
+    <!-- Tab Headers (Mobile Position - Bottom) -->
+    <div v-if="isMobile" v-show="!isCollapsed" class="tab-header tab-header-bottom">
+      <button 
+        v-for="tab in tabs" 
+        :key="tab.id"
+        @click="activeTab = tab.id"
+        class="tab-button"
+        :class="{ active: activeTab === tab.id }"
+      >
+        {{ tab.icon }} {{ tab.label }}
+      </button>
     </div>
   </div>
 </template>
@@ -221,7 +234,7 @@ const props = defineProps({
   showResetView: Boolean
 })
 
-const emit = defineEmits(['update:controls', 'reset-view'])
+const emit = defineEmits(['update:controls', 'reset-view', 'close'])
 
 // Tab configuration
 const tabs = [
@@ -382,10 +395,26 @@ const updateControls = () => {
   emit('update:controls', { ...controls })
 }
 
+// Handle reset view click
+const handleResetView = () => {
+  emit('reset-view')
+  // If we're in mobile view, also emit close event
+  if (props.isMobile) {
+    emit('close')
+  }
+}
+
 // Save active tab preference
 watch(activeTab, (newTab) => {
   localStorage.setItem('mapActiveTab', newTab)
 })
+
+// Watch for external control updates (e.g., from Reset Map)
+watch(() => props.initialControls, (newControls) => {
+  if (newControls) {
+    Object.assign(controls, newControls)
+  }
+}, { deep: true })
 
 // Set rotation to a specific angle
 const setRotation = (angle) => {
@@ -414,6 +443,9 @@ const toggleCollapse = () => {
   overflow: hidden;
   max-width: 320px;
   transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  max-height: 100%; /* Take full height from parent */
 }
 
 .map-control-tabs.collapsed {
@@ -429,6 +461,7 @@ const toggleCollapse = () => {
   background: var(--color-overlay-light);
   border-radius: 8px 8px 0 0;
   border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0; /* Prevent header from shrinking */
 }
 
 .collapsed .control-header {
@@ -472,6 +505,7 @@ const toggleCollapse = () => {
   display: flex;
   background: var(--color-overlay-light);
   border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0; /* Prevent header from shrinking */
 }
 
 .tab-button {
@@ -506,13 +540,21 @@ const toggleCollapse = () => {
 
 /* Tab Content */
 .tab-content {
-  padding: 1rem;
+  padding: 0;
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 0; /* Important for flex child scrolling */
 }
 
 .tab-panel {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  padding: 1rem;
+  overflow-y: auto;
+  flex: 1;
 }
 
 /* Control Items */
@@ -724,6 +766,37 @@ const toggleCollapse = () => {
 .mobile-view {
   max-width: none;
   border-radius: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.mobile-view .tab-header {
+  flex-shrink: 0; /* Keep header fixed */
+}
+
+.mobile-view .tab-header-bottom {
+  order: 2; /* Move to bottom */
+  border-top: 1px solid var(--color-border-medium);
+  border-bottom: none;
+  background: var(--color-bg-elevated);
+}
+
+.mobile-view .tab-content {
+  flex: 1;
+  overflow: hidden; /* Make content area fill remaining space */
+  padding: 0; /* Remove padding from tab-content */
+  display: flex;
+  flex-direction: column;
+  order: 1; /* Keep content above tabs */
+}
+
+.mobile-view .tab-panel {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 1rem; /* Move padding to tab-panel */
+  padding-bottom: 0.5rem; /* Less bottom padding since tabs are below */
 }
 
 .mobile-view .tab-button {
