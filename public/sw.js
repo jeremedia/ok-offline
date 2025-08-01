@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ok-offline-v30'; // Mobile UX enhancements and map improvements
+const CACHE_NAME = 'ok-offline-v31'; // Mobile detail polish and toast notifications
 const urlsToCache = [
   // Core app files
   '/',
