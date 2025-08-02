@@ -67,6 +67,197 @@ body.desktop-device .card:hover { transform: translateY(-2px); }
 | 600px | `desktop-device` | ✅ |
 | 1920px | `desktop-device` | ✅ |
 
+### Global Theme System
+
+The app features a comprehensive theming system that allows users to switch between multiple color schemes optimized for different environments and preferences.
+
+#### Theme Architecture
+- **Theme Service** (`src/services/themeService.js`): Manages theme definitions and switching
+- **Theme Store** (`src/stores/themeStore.js`): Reactive theme state management
+- **CSS Variables**: All colors defined as CSS custom properties for easy switching (50+ variables)
+- **Global Styles** (`src/styles/global.css`): Base CSS variable definitions
+- **User Interface** (`src/components/settings/AppearanceSettings.vue`): Theme selector in Settings view
+
+#### Available Themes
+
+1. **OKNOTOK (Dark)** - Default theme
+   - Original camp colors: red (#8B0000), black, and gold (#FFD700)
+   - Dark backgrounds with high contrast text
+   - Optimized for night-time use
+
+2. **Sparkle Pony (Light)** - Barbie-inspired theme
+   - Bright pink (#FF1493) primary with electric magenta (#FF00FF) accents
+   - Light backgrounds (lavender blush) with dark purple text
+   - Fun, fabulous, and readable in daylight
+
+3. **Khaki (Light)** - Professional/Ranger theme
+   - iOS-style colors for universal recognition
+   - Pure white backgrounds with maximum contrast
+   - Designed for emergency staff and harsh desert sunlight
+   - Large touch targets and clear status indicators
+
+4. **Mush Love (Dark)** - Psychedelic theme
+   - Dark magenta (#8B008B) and electric lime (#39FF14)
+   - Deep purple backgrounds with vibrant accents
+   - Groovy but still readable
+
+#### Theme Implementation
+
+##### CSS Variable System
+```css
+/* All colors use CSS variables that get updated when theme changes */
+:root {
+  --color-primary: #8B0000;
+  --color-bg-base: #1a1a1a;
+  --color-text-primary: #fff;
+  /* ... 50+ color variables ... */
+}
+```
+
+##### Theme Switching
+```javascript
+import { switchTheme, currentTheme } from '@/stores/themeStore'
+
+// Switch to a new theme
+switchTheme('sparkle')
+
+// React to current theme
+watch(currentTheme, (theme) => {
+  console.log(`Theme changed to ${theme}`)
+})
+```
+
+##### Component Usage
+```vue
+<template>
+  <div class="card">
+    <!-- Automatically uses theme colors via CSS variables -->
+    <h2>Content adapts to current theme</h2>
+  </div>
+</template>
+
+<style scoped>
+.card {
+  background: var(--color-bg-elevated);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-medium);
+}
+</style>
+```
+
+#### Theme Features
+
+1. **Instant Switching**: No page reload required
+2. **Persistent Selection**: Theme choice saved to localStorage
+3. **Comprehensive Coverage**: All UI elements support theming
+4. **Special Effects**: Each theme has unique transparency/overlay colors
+5. **Map Integration**: Map markers and controls adapt to theme
+6. **Weather Colors**: Dust level indicators match theme aesthetics
+7. **User Controls**: Visual theme selector in Settings > Appearance tab
+8. **Smooth Transitions**: Optional color transitions when switching themes
+9. **Accessibility**: Reduce motion option for better accessibility
+
+#### User Experience
+
+##### Switching Themes
+Users can change themes through:
+1. Navigate to Settings view (gear icon)
+2. Select "Appearance" tab
+3. Click on any theme card to activate it
+4. Theme changes instantly with visual feedback
+
+##### Theme Persistence
+- Selected theme is saved to `localStorage` with key `selectedTheme`
+- Theme preference persists across browser sessions
+- Default theme is OKNOTOK if no preference is saved
+- Theme applies immediately on app load via `initializeTheme()` in main.js
+
+##### Additional Options
+- **Smooth Transitions**: Toggle color transitions on/off
+- **Reduce Motion**: Disable all animations for accessibility
+- Both preferences saved to localStorage
+
+#### Design Considerations
+
+- **Light Themes**: Use purple or colored overlays instead of black
+- **Dark Themes**: Black overlays work well for modals/overlays
+- **Accessibility**: All themes maintain WCAG AA contrast ratios
+- **Mobile Optimization**: Touch targets remain 44px+ in all themes
+- **Performance**: CSS variables update instantly with no flicker
+
+#### Theme Usage in Practice
+
+##### Map View
+- Map tiles remain consistent but UI controls adapt
+- Camp markers use `--color-success-alpha-90` (green tint)
+- Art markers use `--color-purple-alpha-90` (purple tint)
+- Event markers use `--color-warning-alpha-90` (orange tint)
+- Portal markers glow with `--color-accent-alpha-50`
+
+##### Weather/Dust Forecast
+- Dust levels maintain recognizable colors across themes
+- Clear: Green (`--color-dust-clear`)
+- Light: Yellow (`--color-dust-light`)
+- Moderate: Orange (`--color-dust-moderate`)
+- Heavy: Red-orange (`--color-dust-heavy`)
+- Whiteout: Deep red (`--color-dust-whiteout`)
+
+##### List Views
+- Group headers use `--color-bg-elevated`
+- Active filters highlight with `--color-primary`
+- Visited badges adapt to theme colors
+- Hover states use theme primary color
+
+##### Modal Overlays
+- Dark themes: `--color-modal-overlay` uses black with opacity
+- Light themes: Uses colored overlays for better aesthetics
+- Sparkle Pony: Purple overlay `rgba(45, 27, 105, 0.7)`
+- Khaki: Standard black overlay for professional look
+
+#### Adding New Themes
+
+To add a new theme, update `themeService.js`:
+```javascript
+themes.newtheme = {
+  id: 'newtheme',
+  name: 'Theme Name',
+  description: 'Theme description',
+  colors: {
+    // Required color definitions (minimum set):
+    primary: '#hexcolor',
+    primaryDark: '#hexcolor',
+    primaryDarker: '#hexcolor',
+    accent: '#hexcolor',
+    accentDark: '#hexcolor',
+    
+    // Backgrounds (6 required)
+    bgBase: '#hexcolor',
+    bgElevated: '#hexcolor',
+    bgHeader: '#hexcolor',
+    bgInput: '#hexcolor',
+    bgHover: '#hexcolor',
+    bgActive: '#hexcolor',
+    
+    // Text (5 required)
+    textPrimary: '#hexcolor',
+    textSecondary: '#hexcolor',
+    textMuted: '#hexcolor',
+    textDisabled: '#hexcolor',
+    textInverse: '#hexcolor',
+    
+    // Plus 30+ additional colors...
+  }
+}
+```
+
+#### Technical Implementation Notes
+
+1. **CSS Variable Scope**: Over 50 CSS variables are updated when switching themes
+2. **Performance**: Uses CSS custom properties for instant updates without re-rendering
+3. **Event System**: Dispatches `themeChanged` custom event for components that need to react
+4. **Initialization**: `initializeTheme()` called in main.js before app mount
+5. **Fallback**: OKNOTOK theme used if stored preference is invalid
+
 ## CRITICAL: Screenshot Handling
 
 **MANDATORY RULE FOR ALL CLAUDE CODE SESSIONS:**
@@ -92,7 +283,8 @@ ok-offline/
 │   │   ├── SettingsView.vue    # Data sync and app settings
 │   │   ├── EmergencyView.vue   # Emergency contacts & medical info
 │   │   ├── DustForecastView.vue # Weather and dust conditions
-│   │   └── MapSettingsView.vue # GIS data and map information
+│   │   ├── MapSettingsView.vue # GIS data and map information
+│   │   └── KnowledgeGraphView.vue # Seven Pools knowledge graph visualization
 │   ├── components/search/      # Search UI components
 │   │   ├── SearchModeSelector.vue  # Keyword/Semantic/Smart modes
 │   │   ├── SearchResultItem.vue    # Result display with scores
@@ -103,6 +295,7 @@ ok-offline/
 │   │   ├── events.js           # Event-specific operations
 │   │   ├── favorites.js        # Favorites management
 │   │   ├── schedule.js         # Schedule management
+│   │   ├── knowledgeGraphService.js # Seven Pools graph data & caching
 │   │   ├── visits.js           # Visit tracking and notes
 │   │   ├── gisData.js          # GIS data loading and management
 │   │   ├── vectorSearchService.js  # AI search API integration
@@ -127,6 +320,17 @@ ok-offline/
 ```
 
 ## Key Features Implemented
+
+### 0. **Seven Pools Knowledge Graph** (NEW v3.26+)
+- **Interactive Enliteracy Visualization**: Shows how Burning Man data demonstrates cross-domain understanding
+- **Bridge Entity Selection**: Click bridge entities to highlight connected pools (e.g., "community gathering" spans 6 pools)
+- **Pool Selection**: Click pools to show which bridge entities connect through that domain
+- **Smooth Animated Layout**: ForceSupervisor provides organic movement with overlap prevention
+- **Three View Modes**: Pool Overview (enliteracy demo), Single Pool (deep dive), Entity Neighborhood (connections)
+- **Semantic Positioning**: Seven Pools arranged meaningfully from concrete (Manifest) to abstract (Idea/Emanation)
+- **Advanced Rendering**: Sigma.js WebGL + Graphology data structures + @sigma/node-border for strokes
+- **Theme Integration**: Uses CSS variables for consistent theming across all node/edge colors
+- **Interactive Features**: Draggable nodes, zoom controls, fullscreen mode, caching with localStorage
 
 ### 1. **Offline-First Architecture**
 - All data synced through Settings page only (no background API calls)
@@ -794,19 +998,27 @@ The app uses pre-enriched static JSON files to improve performance:
 
 ## Deployment & Version Management
 
-### Automatic Deployment
-The app automatically deploys to production at https://offline.oknotok.com on every push to the main branch:
+### Overview
+The app uses a fully automated deployment pipeline with semantic versioning and zero-downtime deployments. Every push to main triggers automatic deployment to production.
 
-1. **GitHub Actions Workflow** (`.github/workflows/deploy.yml`)
-   - Triggers on push to main
-   - Builds the Vue app
-   - Deploys via SSH to Caddy server
-   - Zero-downtime deployment
+### Deployment Architecture
 
-2. **Production URL**: https://offline.oknotok.com
-   - Hosted on Caddy server
-   - SSL automatically provisioned
-   - PWA headers configured
+#### 1. **GitHub Actions Workflows**
+- **deploy.yml**: Builds and deploys to production server
+  - Triggers on push to main branch
+  - Runs `npm run build` 
+  - Deploys via SCP to Caddy server
+  - Zero-downtime deployment
+- **version-bump.yml**: Automatic semantic versioning
+  - Analyzes commit messages
+  - Updates package.json version
+  - Creates git tags
+
+#### 2. **Production Infrastructure**
+- **URL**: https://offline.oknotok.com
+- **Server**: Caddy with automatic SSL
+- **Deploy Path**: `/var/www/offline.oknotok.com`
+- **PWA**: Full offline support with service workers
 
 ### Semantic Versioning
 The app uses automatic semantic versioning based on commit messages:
@@ -844,83 +1056,160 @@ Maintain release history in `CHANGELOG.md`:
    - Update release notes in SettingsView.vue
    - Consider using `scripts/parse-changelog.js` for automation
 
-### Release Workflow Best Practices
 
-Based on experience, there are two recommended approaches for releases:
+### Complete Release Process
 
-#### Approach A: All-in-One PR (Recommended)
-Include everything in your feature branch before creating the PR:
-1. Feature implementation code
-2. Updated CHANGELOG.md
-3. Updated AboutSettings.vue release notes
-4. Incremented service worker cache version
-5. Any related documentation updates
-
-**Benefits**: Single PR review, atomic deployment, no post-merge cleanup
-
+#### Pre-Release Checklist
+Before starting any release:
 ```bash
-# On feature branch
-git add -A
-git commit -m "feat: Add custom entries with release notes"
-gh pr create --title "feat: Add custom entries feature"
-# After approval
-gh pr merge --merge --delete-branch
+# 1. Ensure you're on main and up to date
+git checkout main
+git pull origin main
+
+# 2. Verify no uncommitted changes
+git status
+
+# 3. Run tests and build locally
+npm test
+npm run build
 ```
 
-#### Approach B: Post-Merge Release Updates
-Merge feature first, then update release notes:
-1. Create and merge feature PR with just the implementation
-2. After merge, create a separate commit for release updates
-3. Push release updates directly to main
+#### Release Steps
 
-**Benefits**: Clean feature PRs, coordinated multi-feature releases
+##### Step 1: Update Version Files
+1. **CHANGELOG.md** - Add release entry following [Keep a Changelog](https://keepachangelog.com/):
+   ```markdown
+   ## [3.26.0] - 2025-08-03
+   
+   ### Added
+   - Feature description with emoji prefix
+   
+   ### Fixed
+   - Bug fix description
+   ```
 
+2. **AboutSettings.vue** - Add release notes to `releaseNotes` array:
+   ```javascript
+   {
+     version: '3.26.0',
+     date: '2025-08-03',
+     added: ['Feature description'],
+     fixed: ['Bug fix description']
+   }
+   ```
+
+3. **Service Worker** - Increment cache version in `public/sw.js`:
+   ```javascript
+   const CACHE_NAME = 'ok-offline-v34'; // Brief description of changes
+   ```
+
+##### Step 2: Create Release Commit
 ```bash
-# After feature PR is merged
-git checkout main && git pull
-# Update CHANGELOG.md, AboutSettings.vue, sw.js
-git add -A
-git commit -m "chore: Release v3.15.0 with custom entries feature"
+# Stage all release files
+git add CHANGELOG.md src/components/settings/AboutSettings.vue public/sw.js
+
+# Create release commit (triggers patch version bump)
+git commit -m "chore: Release v3.26.0 - Feature name
+
+- Updated CHANGELOG.md
+- Updated release notes in AboutSettings.vue  
+- Incremented service worker cache to v34"
+```
+
+##### Step 3: Push and Deploy
+```bash
+# Push to main (triggers automatic deployment)
 git push origin main
+
+# Monitor deployment
+# Check GitHub Actions: https://github.com/[your-repo]/actions
 ```
 
-### Common Release Pitfalls & Solutions
+##### Step 4: Post-Deployment Verification
+1. **Check deployment status** in GitHub Actions
+2. **Visit production site** and verify:
+   - New version appears in Settings > About
+   - Service worker updates (check DevTools > Application)
+   - New features work as expected
+3. **Test PWA update** on mobile device
 
-#### Uncommitted Changes from Other Work
-**Problem**: OpenGraph changes mixed with custom entries feature
-**Solution**: Always check `git status` before creating PRs. Stash or commit unrelated changes separately.
+### Critical Release Requirements
 
-```bash
-# Before creating PR
-git status  # Check for uncommitted changes
-git stash   # If unrelated changes exist
-# ... create and merge PR ...
-git stash pop  # Restore changes after
-```
-
-#### Git Workflow Confusion
-**Problem**: Complex cherry-picking and branch switching
-**Solution**: Keep main branch clean, use feature branches consistently
-
-#### Service Worker Cache Versioning
-**Critical**: MUST increment `CACHE_NAME` in `public/sw.js` for EVERY release
+#### 1. Service Worker Cache Version
+**MUST increment `CACHE_NAME` in `public/sw.js` for EVERY release**
 ```javascript
-// Before: const CACHE_NAME = 'ok-offline-v18';
-// After:  const CACHE_NAME = 'ok-offline-v19'; // Custom entries feature
+// Before: const CACHE_NAME = 'ok-offline-v33';
+// After:  const CACHE_NAME = 'ok-offline-v34'; // Feature description
+```
+Without this, users won't receive updates due to aggressive browser caching.
+
+#### 2. Release Notes Synchronization
+Keep these three files in sync:
+- `CHANGELOG.md` - Official changelog
+- `AboutSettings.vue` - In-app release notes  
+- `public/sw.js` - Cache version with comment
+
+#### 3. Commit Message Conventions
+For automatic versioning:
+```bash
+# Major version (1.0.0 → 2.0.0)
+feat: [major] Complete UI redesign
+
+# Minor version (1.0.0 → 1.1.0)
+feat: Add weather forecast feature
+
+# Patch version (1.0.0 → 1.0.1)
+fix: Correct map marker positioning
+chore: Update dependencies
 ```
 
-### Deployment Checklist
-Before pushing to main:
-- [ ] Ensure main branch is clean (`git status`)
-- [ ] Test locally with `npm run build` (preview not needed - starts long-running server)
-- [ ] Update CHANGELOG.md following [Keep a Changelog](https://keepachangelog.com/) format
-- [ ] **Update release notes in AboutSettings.vue** - The release notes are hardcoded in `src/components/settings/AboutSettings.vue` in the `releaseNotes` array
-- [ ] **Increment service worker cache version** in `public/sw.js` (e.g., `ok-offline-v18` → `ok-offline-v19`)
-- [ ] Use conventional commit messages for proper versioning
-- [ ] Create comprehensive PR description linking to issues
-- [ ] After merge, verify GitHub Actions deployment succeeds
+### Emergency Procedures
 
-**Important**: Safari and other browsers aggressively cache service workers. Without incrementing the cache version, users won't receive updates.
+#### Rollback Process
+If issues are discovered post-deployment:
+```bash
+# 1. Revert the deployment commit
+git revert HEAD
+git push origin main
+
+# 2. Fix the issue on a branch
+git checkout -b fix/emergency-issue
+# ... make fixes ...
+
+# 3. Follow normal release process
+```
+
+#### Manual Deployment
+If GitHub Actions fails:
+```bash
+# Build locally
+npm run build
+
+# Deploy manually via SSH
+scp -r dist/* user@server:/var/www/offline.oknotok.com/
+```
+
+### Production Monitoring
+
+#### Health Checks
+- Service worker registration: DevTools > Application > Service Workers
+- PWA installability: DevTools > Application > Manifest
+- Console errors: Check for runtime errors
+- Network requests: Verify API calls work
+
+#### User Reports
+Monitor these channels:
+- GitHub Issues
+- User feedback in app
+- Error tracking (if configured)
+
+### Deployment Best Practices
+
+1. **Deploy Early in the Day** - More time to monitor and fix issues
+2. **Announce Major Changes** - Update users about significant features
+3. **Test Service Worker Updates** - Use incognito/private browsing
+4. **Monitor Cache Behavior** - Ensure users get updates
+5. **Document Everything** - Keep CHANGELOG.md comprehensive
 
 ## Contributing
 
