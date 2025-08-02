@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ok-offline-v31'; // Mobile detail polish and toast notifications
+const CACHE_NAME = 'ok-offline-v32'; // UI standardization and emergency-ready khaki theme
 const urlsToCache = [
   // Core app files
   '/',

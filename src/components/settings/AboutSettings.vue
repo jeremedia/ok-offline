@@ -159,6 +159,28 @@ onMounted(() => {
 // Release notes data
 const releaseNotes = [
   {
+    version: '3.25.0',
+    date: '2025-08-02',
+    added: [
+      '🚨 Emergency-Ready Khaki Theme - Complete redesign for Rangers & staff',
+      '🌤️ Major Weather UI Enhancements - Accordion system and Light Cycle countdowns',
+      '🎛️ Complete UI Component System - BaseButton, BaseCard, ButtonGroup foundation',
+      '📱 Enhanced Mobile Experience - Body-level mobile class system and better touch targets'
+    ],
+    fixed: [
+      '🖥️ Desktop Scrolling Architecture - Fixed 36px overflow and double-scrolling',
+      '🔘 Button Standardization - All buttons migrated to BaseButton for consistency',
+      '🗂️ List View Improvements - Section headers with thick borders and clear hierarchy',
+      '🎨 Secondary button contrast enhanced for khaki theme visibility'
+    ],
+    changed: [
+      '🎨 Khaki theme transformed from earth tones to high-contrast professional',
+      '📐 Layout Architecture - Modern flexbox-based design with percentage heights',
+      '🌤️ Weather display with Apple WeatherKit integration and trend indicators',
+      '🚨 Emergency color coding: Green=Safe, Yellow=Caution, Orange=Warning, Red=Danger'
+    ]
+  },
+  {
     version: '3.24.0',
     date: '2025-08-01',
     added: [

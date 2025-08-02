@@ -7,27 +7,56 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.25.0] - 2025-08-02
+
 ### Added
-- **Toast Notifications** - User feedback for favorites management
-  - Shows confirmation when adding/removing favorites
-  - Theme-aware colors that adapt to current theme selection
-- **Mobile Theme Selector** - Easy theme switching on mobile devices
-  - Added theme dropdown to mobile menu
-  - Instant theme switching without navigation
+- **🚨 Emergency-Ready Khaki Theme** - Complete redesign for Rangers & staff
+  - Maximum contrast design (WCAG AAA) for desert sunlight readability
+  - iOS-style professional colors (Blue primary, Red emergency accents)
+  - Emergency color coding: Green=Safe, Yellow=Caution, Orange=Warning, Red=Danger
+  - High-visibility map markers and weather status indicators
+  - Mobile-optimized for field use by Rangers, Medical, Law Enforcement
+- **🌤️ Major Weather UI Enhancements** - Comprehensive weather system upgrade
+  - Accordion system for organized weather sections with persistent state
+  - Real-time Light Cycle countdowns (Golden Hour, Sunset, Pure Dark)
+  - Apple WeatherKit integration with twilight times
+  - Weather trend indicators with up/down arrows
+  - Enhanced mobile weather display with uppercase labels
+- **🎛️ Complete UI Component System** - Foundation for consistent design
+  - BaseButton component with variants (primary, secondary, danger, ghost, link)
+  - BaseCard component for consistent content containers
+  - ButtonGroup component for connected button sets
+  - Comprehensive migration of all UI elements to new system
+- **📱 Enhanced Mobile Experience** - Improved touch and usability
+  - Body-level mobile class system for precise CSS targeting
+  - Refined spacing and layout consistency
+  - Better touch targets and interaction feedback
 
 ### Fixed
-- **Mobile Detail View Polish** - Refined spacing and layout
-  - Tightened header padding with proper border separator
-  - Fixed map container margins for consistent spacing
-  - Optimized favorite star alignment without expanding line height
-  - Styled back-to-list button with proper theme colors
-  - Reduced map controls padding for more compact layout
-- **Toast Theme Support** - Fixed toast colors to use theme CSS variables
-  - Background now uses `--color-bg-elevated` for consistency
-  - Status colors adapt to each theme (OKNOTOK, Sparkle, Khaki, Mush)
+- **🖥️ Desktop Scrolling Architecture** - Complete refactor for proper viewport management
+  - Fixed 36px viewport overflow issues
+  - Proper flexbox layout hierarchy throughout app
+  - Eliminated double-scrolling problems
+  - Consistent scroll containment across all views
+- **🔘 Button Standardization** - Unified interaction patterns
+  - All buttons migrated to BaseButton for consistency
+  - Fixed hover states and active styling
+  - Improved accessibility and keyboard navigation
+  - Secondary button contrast enhanced for khaki theme
+- **🗂️ List View Improvements** - Better information scanning
+  - Section headers with thick borders and bold collapse icons
+  - Enhanced mobile responsiveness
+  - Clear visual hierarchy for quick access
 
 ### Changed
-- **Mobile UX Enhancements** - Major improvements to mobile interface and navigation
+- **🎨 Theme System Enhancement** - Professional appearance options
+  - Khaki theme transformed from earth tones to high-contrast professional
+  - Better theme documentation and usage guidelines
+  - Emergency response color coding standards
+- **📐 Layout Architecture** - Modern flexbox-based design
+  - Replaced 100vh with percentage-based heights
+  - Proper mobile browser chrome handling
+  - Consistent spacing rhythm (16px) throughout mobile layout
   - MapBottomSheet now properly positioned above bottom navigation
   - Tabs moved to bottom for better thumb accessibility
   - Swipe down gesture to close bottom sheet
