@@ -22,6 +22,7 @@ import InfrastructureView from './views/InfrastructureView.vue'
 import InfrastructureDetailView from './views/InfrastructureDetailView.vue'
 import IconViewer from './views/IconViewer.vue'
 import ComponentsView from './views/ComponentsView.vue'
+import KnowledgeGraphView from './views/KnowledgeGraphView.vue'
 
 // Import CSS
 import './styles/fonts.css'
@@ -159,6 +160,11 @@ const routes = [
     path: '/components',
     name: 'components',
     component: ComponentsView
+  },
+  {
+    path: '/knowledge',
+    name: 'knowledge-graph',
+    component: KnowledgeGraphView
   },
   {
     path: '/reload',
