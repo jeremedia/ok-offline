@@ -762,8 +762,8 @@ watch(() => [props.type, props.year], () => {
   font-weight: normal; /* Label will be bold, count will be normal */
   padding: 0.75rem 1rem;
   cursor: pointer;
-  border-bottom: 1px solid var(--color-border-medium);
-  color: var(--color-text-muted);
+  border-bottom: 2px solid var(--color-border-heavy);
+  color: var(--color-text-primary);
   font-size: 1.4rem; /* Larger for prominent label */
   display: flex;
   align-items: center;
@@ -781,8 +781,10 @@ watch(() => [props.type, props.year], () => {
 }
 
 .collapse-icon {
-  margin-right: 0.5rem;
-  font-size: 1rem; /* Proportional to header text */
+  margin-right: 0.75rem;
+  font-size: 1.2rem; /* Larger for visibility */
+  color: var(--color-text-primary);
+  font-weight: bold;
 }
 
 .group-label {

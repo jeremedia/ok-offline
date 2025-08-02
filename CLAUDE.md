@@ -606,6 +606,54 @@ const LOCATION_MESSAGES = {
 }
 ```
 
+## UI Component System
+
+### Core Components
+
+The app uses a custom UI component system for consistency and maintainability:
+
+#### BaseButton
+- **Variants**: primary, secondary, danger, ghost, link
+- **Sizes**: sm, md, lg
+- **Props**: variant, size, fullWidth, loading, disabled, active, icon, uppercase
+- **Usage**: 
+  ```vue
+  <BaseButton variant="secondary" size="md" @click="handleClick">
+    Click Me
+  </BaseButton>
+  ```
+
+#### BaseCard
+- Consistent card styling with header, content, and footer slots
+- Used for data display throughout the app
+
+#### BaseSelect
+- Custom dropdown to fix Chrome positioning bugs
+- Handles keyboard navigation and click-outside
+- **Usage**:
+  ```vue
+  <BaseSelect v-model="selected" :options="options" />
+  ```
+
+#### ButtonGroup
+- Creates connected button groups with proper borders
+- **Directions**: horizontal, vertical
+- Automatically handles border radius on first/last buttons
+- **Usage**:
+  ```vue
+  <ButtonGroup direction="vertical">
+    <BaseButton>First</BaseButton>
+    <BaseButton>Middle</BaseButton>
+    <BaseButton>Last</BaseButton>
+  </ButtonGroup>
+  ```
+
+### Component Best Practices
+1. Always use BaseButton instead of native buttons
+2. Use ButtonGroup for any set of related buttons
+3. Import components from `@/components/ui` index
+4. Maintain consistent spacing and sizing
+
 ## Common Development Tasks
 
 ### Add New View/Route

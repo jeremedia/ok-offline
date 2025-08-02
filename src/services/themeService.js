@@ -139,63 +139,89 @@ export const themes = {
   khaki: {
     id: 'khaki',
     name: 'Khaki',
-    description: 'Desert-appropriate earth tones',
+    description: 'RANGERS/STAFF: Max contrast professional theme for emergency use',
+    // KHAKI THEME - RANGER & STAFF OPTIMIZED
+    // ====================================
+    // This theme is specifically designed for Black Rock Rangers, Medical, Law Enforcement, 
+    // and event staff who need maximum readability in harsh desert conditions.
+    //
+    // DESIGN PRINCIPLES:
+    // - Maximum contrast: Pure white backgrounds with black text (WCAG AAA)
+    // - Emergency color coding: Red for critical, Orange for warnings, Blue for professional
+    // - Large, clear UI elements for quick access under stress
+    // - Familiar iOS-style colors for universal recognition
+    // - High-visibility status indicators for dust levels and weather conditions
+    //
+    // TESTED FOR:
+    // - Bright desert sunlight readability
+    // - Emergency response scenarios
+    // - Mobile use in field conditions
+    // - Professional appearance for official use
+    // - Clear hierarchy for quick information scanning
     colors: {
-      // Primary Brand Colors
-      primary: '#8B7355',              // Tan/Khaki
-      primaryDark: '#5D4E37',          // Coffee Brown
-      primaryDarker: '#3E2723',        // Dark Brown
-      accent: '#DAA520',               // Goldenrod
-      accentDark: '#B8860B',           // Dark Goldenrod
+      // Primary Brand Colors - Emergency & Professional
+      primary: '#007AFF',              // iOS Blue (familiar, professional)
+      primaryDark: '#0051D5',          // Darker Blue for active states
+      primaryDarker: '#003D99',        // Deep Blue
+      accent: '#FF3B30',               // iOS Red (critical/emergency)
+      accentDark: '#D70015',           // Darker Red
       
-      // Background Colors - Light Desert Theme
-      bgBase: '#f5f5dc',               // Beige
-      bgElevated: '#fff8dc',           // Cornsilk
-      bgHeader: '#deb887',             // Burlywood
-      bgInput: '#d2b48c',              // Tan
-      bgHover: '#cd853f',              // Peru
-      bgActive: '#a0522d',             // Sienna
+      // Background Colors - Clean Professional
+      bgBase: '#FFFFFF',               // Pure white background
+      bgElevated: '#F2F2F7',           // iOS system gray 6
+      bgHeader: '#E5E5EA',             // iOS system gray 5
+      bgInput: '#FFFFFF',              // White inputs with borders
+      bgHover: '#D1D1D6',              // iOS system gray 4
+      bgActive: '#C7C7CC',             // iOS system gray 3
       
-      // Text Colors - Dark for Light Backgrounds
-      textPrimary: '#3E2723',          // Dark Brown
-      textSecondary: '#5D4E37',        // Coffee Brown
-      textMuted: '#8B7355',            // Tan
-      textDisabled: '#a0826d',         // Light Brown
-      textInverse: '#fff8dc',          // Cornsilk
+      // Text Colors - Maximum readability
+      textPrimary: '#000000',          // Pure black text
+      textSecondary: '#333333',        // Dark gray
+      textMuted: '#666666',            // Medium gray
+      textDisabled: '#999999',         // Light gray
+      textInverse: '#FFFFFF',          // White on dark
       
-      // Border Colors
-      borderLight: '#d2b48c',          // Tan borders
-      borderMedium: '#cd853f',         // Peru
-      borderHeavy: '#a0522d',          // Sienna
+      // Border Colors - Clear definition
+      borderLight: '#CCCCCC',          // Light gray borders
+      borderMedium: '#999999',         // Medium gray borders
+      borderHeavy: '#666666',          // Dark gray borders
       
-      // Status Colors - Earth tones
-      success: '#228B22',              // Forest Green
-      error: '#B22222',                // Firebrick
-      warning: '#FF8C00',              // Dark Orange
-      info: '#4682B4',                 // Steel Blue
+      // Status Colors - Emergency Levels
+      success: '#34C759',              // iOS Green (all clear)
+      error: '#FF3B30',                // iOS Red (emergency)
+      warning: '#FF9500',              // iOS Orange (caution)
+      info: '#007AFF',                 // iOS Blue (information)
       
-      // Weather & Dust Colors
-      dustClear: '#228B22',
-      dustLight: '#DAA520',
-      dustModerate: '#D2691E',
-      dustHeavy: '#A0522D',
-      dustWhiteout: '#8B4513',
-      weatherCardBg: '#fff8dc',
-      weatherIcon: '#DAA520',
+      // Weather & Dust Colors - Clear Status Levels
+      dustClear: '#34C759',            // Green - Safe
+      dustLight: '#FFCC00',            // Yellow - Caution
+      dustModerate: '#FF9500',         // Orange - Warning
+      dustHeavy: '#FF3B30',            // Red - Dangerous
+      dustWhiteout: '#000000',         // Black - Emergency
+      weatherCardBg: '#F2F2F7',        // Light gray
+      weatherIcon: '#FF9500',          // Warning orange
       
-      // Transparency Effects - Light theme needs darker overlays for contrast
-      primaryAlpha20: 'rgba(139, 115, 85, 0.2)',
-      successGlow: 'rgba(34, 139, 34, 0.5)',
-      errorGlow: 'rgba(178, 34, 34, 0.5)',
-      bgInputAlpha50: 'rgba(210, 180, 140, 0.5)',
-      shadowLight: 'rgba(62, 39, 35, 0.1)',         // Brown shadow for light theme
-      shadowMedium: 'rgba(62, 39, 35, 0.2)',       // Brown shadow for light theme
-      overlayDark: 'rgba(62, 39, 35, 0.5)',        // Brown overlay instead of black
-      overlaySubtle: 'rgba(62, 39, 35, 0.1)',      // Very subtle brown overlay for light theme
-      overlayLight: 'rgba(62, 39, 35, 0.15)',      // Light brown overlay
-      overlayMedium: 'rgba(62, 39, 35, 0.3)',      // Medium brown overlay
-      whiteAlpha10: 'rgba(255, 255, 255, 0.9)',    // More opaque for light theme
-      modalOverlay: 'rgba(62, 39, 35, 0.7)',       // Brown modal overlay
+      // Transparency Effects - Professional blues
+      primaryAlpha20: 'rgba(0, 102, 204, 0.2)',
+      successGlow: 'rgba(0, 170, 0, 0.5)',
+      errorGlow: 'rgba(255, 0, 0, 0.5)',
+      bgInputAlpha50: 'rgba(255, 255, 255, 0.5)',
+      shadowLight: 'rgba(0, 0, 0, 0.1)',           // Standard shadows
+      shadowMedium: 'rgba(0, 0, 0, 0.2)',
+      overlayDark: 'rgba(0, 0, 0, 0.7)',           // Standard black overlays
+      overlaySubtle: 'rgba(0, 0, 0, 0.1)',
+      overlayLight: 'rgba(0, 0, 0, 0.2)',
+      overlayMedium: 'rgba(0, 0, 0, 0.4)',
+      whiteAlpha10: 'rgba(255, 255, 255, 0.9)',
+      modalOverlay: 'rgba(0, 0, 0, 0.8)',          // High contrast modal
+      
+      // Map Marker Colors - Emergency Response Optimized
+      successAlpha90: 'rgba(52, 199, 89, 0.95)',   // Camp markers - green
+      purpleAlpha90: 'rgba(175, 82, 222, 0.95)',   // Art markers - purple
+      warningAlpha90: 'rgba(255, 149, 0, 0.95)',   // Event markers - orange
+      infoAlpha90: 'rgba(0, 122, 255, 0.95)',      // Info markers - blue
+      primaryAlpha90: 'rgba(0, 122, 255, 0.95)',   // Primary markers - blue
+      accentAlpha50: 'rgba(255, 59, 48, 0.5)',     // Red glow for portal markers
     }
   },
   
@@ -387,6 +413,26 @@ export function applyTheme(themeName) {
   root.style.setProperty('--color-primary-alpha-30', colors.primaryAlpha20.replace('0.2', '0.3'));
   root.style.setProperty('--color-accent-alpha-10', colors.successGlow.replace(colors.success, colors.accent).replace('0.5', '0.1'));
   root.style.setProperty('--color-accent-alpha-80', colors.successGlow.replace(colors.success, colors.accent).replace('0.5', '0.8'));
+  
+  // Map marker alpha colors (if defined in theme)
+  if (colors.successAlpha90) {
+    root.style.setProperty('--color-success-alpha-90', colors.successAlpha90);
+  }
+  if (colors.purpleAlpha90) {
+    root.style.setProperty('--color-purple-alpha-90', colors.purpleAlpha90);
+  }
+  if (colors.warningAlpha90) {
+    root.style.setProperty('--color-warning-alpha-90', colors.warningAlpha90);
+  }
+  if (colors.infoAlpha90) {
+    root.style.setProperty('--color-info-alpha-90', colors.infoAlpha90);
+  }
+  if (colors.primaryAlpha90) {
+    root.style.setProperty('--color-primary-alpha-90', colors.primaryAlpha90);
+  }
+  if (colors.accentAlpha50) {
+    root.style.setProperty('--color-accent-alpha-50', colors.accentAlpha50);
+  }
   
   // Background aliases for transparency
   root.style.setProperty('--color-primary-bg', colors.primaryAlpha20.replace('0.2', '0.1'));

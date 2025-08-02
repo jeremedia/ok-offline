@@ -32,7 +32,10 @@
       
       <!-- App Title -->
       <div class="app-title-section">
-        <h1 @click="$emit('navigate', 'settings')" class="app-title">OK-OFFLINE</h1>
+        <h1 @click="$emit('navigate', 'settings')" class="app-title">
+          OK-OFFLINE
+          <span v-if="isDev" class="dev-indicator">DEV</span>
+        </h1>
         <BaseButton 
           @click="$emit('navigate', 'settings/data_sync')"
           variant="ghost"
@@ -82,6 +85,9 @@ const emit = defineEmits(['update:selectedYear', 'navigate', 'toggle-menu'])
 
 const route = useRoute()
 const router = useRouter()
+
+// Development mode indicator
+const isDev = computed(() => import.meta.env.DEV)
 
 const navItems = [
   { route: 'map', label: 'MAP' },
@@ -221,6 +227,18 @@ header {
 
 .app-title:hover {
   color: var(--color-primary);
+}
+
+.dev-indicator {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: var(--color-error);
+  background: var(--color-error-light);
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  margin-left: 0.5rem;
+  vertical-align: middle;
+  letter-spacing: 0.1em;
 }
 
 .status-dot {
