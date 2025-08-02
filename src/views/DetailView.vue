@@ -568,7 +568,6 @@ const initMap = async () => {
     detailMap.setView(coords, detailMap.getZoom())
     detailMarker = L.marker(coords, { icon: markerIcon }).addTo(detailMap)
     detailMarker.bindPopup(`
-      <strong>${getItemName(item.value)}</strong><br>
       <em>${locationString}</em>
     `).openPopup()
   } else {
@@ -585,11 +584,10 @@ const initMap = async () => {
     
     // Different message based on whether locations are hidden by policy or just not available
     const locationMessage = !canShow 
-      ? `${itemType} location not yet released`
+      ? `Location Not Released`
       : `${itemType} location not available`
     
     detailMarker.bindPopup(`
-      <strong>${getItemName(item.value)}</strong><br>
       <em>${locationMessage}</em>
     `).openPopup()
   }
