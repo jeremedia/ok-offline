@@ -861,6 +861,20 @@ watch(() => props.id, async () => {
   }
 }
 
+/* Mobile layout - ensure single column */
+@media (max-width: 767px) {
+  #detail-content {
+    display: flex !important; /* Override any grid layout */
+    flex-direction: column !important;
+    grid-template-columns: none !important;
+    gap: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    max-width: none !important;
+    margin: 0 !important;
+  }
+}
+
 /* Desktop layout - side by side columns */
 @media (min-width: 768px) {
   #detail-content {
