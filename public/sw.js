@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ok-offline-v32'; // UI standardization and emergency-ready khaki theme
+const CACHE_NAME = 'ok-offline-v33'; // Desktop detail view improvements and mobile layout fixes
 const urlsToCache = [
   // Core app files
   '/',
