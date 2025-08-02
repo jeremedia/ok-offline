@@ -863,6 +863,15 @@ watch(() => props.id, async () => {
 
 /* Desktop layout - side by side columns */
 @media (min-width: 768px) {
+  #detail-content {
+    padding-bottom: 0 !important; /* Remove bottom padding to use full space */
+  }
+  
+  .detail-header {
+    margin-top: 1rem; /* Add breathing room from top nav */
+    margin-bottom: 1rem; /* Add breathing room from content */
+  }
+  
   .detail-columns {
     flex-direction: row;
     gap: 0;
@@ -872,7 +881,7 @@ watch(() => props.id, async () => {
   #detail-info {
     flex: 1 1 50%; /* grow: 1, shrink: 1, basis: 50% */
     width: auto;
-    padding: 24px;
+    padding: 24px 24px 0 24px; /* Remove bottom padding for full space usage */
     min-height: 0;
     box-sizing: border-box;
     overflow-y: auto;
@@ -890,6 +899,8 @@ watch(() => props.id, async () => {
     position: relative !important; /* Override sticky */
     top: auto !important;
     max-width: none !important;
+    margin: 0 0 16px 0 !important; /* Add bottom margin to prevent touching footer */
+    padding: 0 !important; /* Remove any padding causing misalignment */
   }
 }
 
