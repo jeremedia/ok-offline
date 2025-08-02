@@ -1,8 +1,8 @@
 <template>
-  <header :class="{ 'mobile-header': isMobile }">
+  <header>
     <div class="header-row">
       <!-- Desktop Navigation -->
-      <div class="nav-section" v-if="!isMobile">
+      <div class="nav-section desktop-only">
         <div class="year-selector-group">
           <select 
             id="year-selector" 
@@ -16,43 +16,50 @@
           </select>
         </div>
         <nav class="main-nav">
-          <button 
+          <BaseButton 
             v-for="item in navItems" 
             :key="item.route"
             @click="navigate(item.route)" 
-            :class="['nav-btn', { active: isActive(item.route) }]"
+            variant="ghost"
+            :active="isActive(item.route)"
+            :uppercase="true"
+            class="nav-btn"
           >
             {{ item.label }}
-          </button>
+          </BaseButton>
         </nav>
       </div>
       
       <!-- App Title -->
       <div class="app-title-section">
-        <h1 @click="$emit('navigate', 'settings')" class="app-title">OK-OFFLINE</h1>
-        <button 
+        <h1 @click="$emit('navigate', 'settings')" class="app-title">
+          OK-OFFLINE
+          <span v-if="isDev" class="dev-indicator">DEV</span>
+        </h1>
+        <BaseButton 
           @click="$emit('navigate', 'settings/data_sync')"
+          variant="ghost"
           :class="['status-dot', { offline: !isOnline }]"
           :title="isOnline ? 'Online - Click for data sync' : 'Offline - Click for data sync'"
-          aria-label="Connection status and data sync">
-        </button>
+          aria-label="Connection status and data sync"
+        />
       </div>
       
       <!-- Mobile Actions -->
-      <div class="mobile-actions" v-if="isMobile">
-        <button @click="navigate('search')" class="mobile-action-btn" aria-label="Search">
+      <div class="mobile-actions mobile-only">
+        <BaseButton @click="navigate('search')" variant="secondary" class="mobile-action-btn" aria-label="Search">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="11" cy="11" r="8"/>
             <path d="m21 21-4.35-4.35"/>
           </svg>
-        </button>
-        <button @click="$emit('toggle-menu')" class="mobile-action-btn menu-btn" aria-label="Menu">
+        </BaseButton>
+        <BaseButton @click="$emit('toggle-menu')" variant="secondary" class="mobile-action-btn menu-btn" aria-label="Menu">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="3" y1="6" x2="21" y2="6"/>
             <line x1="3" y1="12" x2="21" y2="12"/>
             <line x1="3" y1="18" x2="21" y2="18"/>
           </svg>
-        </button>
+        </BaseButton>
       </div>
     </div>
   </header>
@@ -61,12 +68,9 @@
 <script setup>
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import BaseButton from '../ui/BaseButton.vue'
 
 const props = defineProps({
-  isMobile: {
-    type: Boolean,
-    required: true
-  },
   selectedYear: {
     type: String,
     required: true
@@ -81,6 +85,9 @@ const emit = defineEmits(['update:selectedYear', 'navigate', 'toggle-menu'])
 
 const route = useRoute()
 const router = useRouter()
+
+// Development mode indicator
+const isDev = computed(() => import.meta.env.DEV)
 
 const navItems = [
   { route: 'map', label: 'MAP' },
@@ -196,28 +203,9 @@ header {
 }
 
 .nav-btn {
-  background: transparent;
-  color: var(--color-text-secondary);
-  border: 1px solid transparent;
-  padding: 0.5rem 0.75rem;
-  border-radius: 4px;
   font-size: 0.85rem;
   font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
   white-space: nowrap;
-}
-
-.nav-btn:hover {
-  background: var(--color-bg-input);
-  color: var(--color-text-primary);
-  border-color: var(--color-border-medium);
-}
-
-.nav-btn.active {
-  background: var(--color-primary);
-  color: var(--color-text-primary);
-  border-color: var(--color-primary);
 }
 
 /* App Title Section */
@@ -241,14 +229,27 @@ header {
   color: var(--color-primary);
 }
 
+.dev-indicator {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: var(--color-error);
+  background: var(--color-error-light);
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  margin-left: 0.5rem;
+  vertical-align: middle;
+  letter-spacing: 0.1em;
+}
+
 .status-dot {
   width: 12px;
   height: 12px;
   border-radius: 50%;
   background: var(--color-success);
   border: 2px solid var(--color-success-dark);
-  cursor: pointer;
-  transition: all 0.3s;
+  padding: 0;
+  min-width: 16px;
+  min-height: 16px;
   animation: pulse 2s infinite;
 }
 
@@ -269,8 +270,8 @@ header {
   100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
 }
 
-/* Mobile Header */
-.mobile-header {
+/* Mobile-specific styles using body-level classes */
+body.mobile-device header {
   position: sticky;
   top: 0;
   z-index: 2000;
@@ -280,13 +281,13 @@ header {
   padding: 0.5rem 1rem; /* Reduced padding for mobile */
 }
 
-.mobile-header .header-row {
+body.mobile-device .header-row {
   padding: 0; /* Remove double padding */
   gap: 0.75rem;
   max-width: none;
 }
 
-.mobile-header .app-title {
+body.mobile-device .app-title {
   font-size: 1.2rem;
   font-weight: bold;
   color: var(--color-text-primary);
@@ -294,7 +295,7 @@ header {
   text-align: center;
 }
 
-.mobile-header .status-indicator {
+body.mobile-device .status-indicator {
   display: none;
 }
 
@@ -305,18 +306,9 @@ header {
 }
 
 .mobile-action-btn {
-  background: var(--color-bg-input);
-  border: 1px solid var(--color-border-heavy);
-  color: var(--color-text-secondary);
   min-width: 44px;
   height: 44px;
   padding: 0 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s;
-  font-size: 0.9rem;
   border-radius: 8px;
 }
 
@@ -331,34 +323,30 @@ header {
   border-bottom-left-radius: 0;
 }
 
-.mobile-action-btn:hover,
-.mobile-action-btn:active {
-  background: var(--color-primary);
-  color: var(--color-text-primary);
-  border-color: var(--color-primary);
-}
-
 .mobile-action-btn svg {
   width: 20px;
   height: 20px;
 }
 
-/* Responsive adjustments */
-@media (max-width: 600px) {
-  .header-row {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-  }
-  
-  .app-title {
-    order: 1;
-    text-align: left;
-    margin: 0;
-  }
-  
-  nav {
-    display: none;
-  }
+/* Visibility controls using body-level mobile classes */
+body.mobile-device .desktop-only {
+  display: none;
+}
+
+body.desktop-device .mobile-only {
+  display: none;
+}
+
+/* Mobile-specific responsive adjustments */
+body.mobile-device .header-row {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+body.mobile-device .app-title {
+  order: 1;
+  text-align: left;
+  margin: 0;
 }
 </style>

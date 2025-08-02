@@ -12,7 +12,9 @@ const BLACK_ROCK_CITY = {
 }
 
 // Rails API endpoint for Apple WeatherKit proxy
-const RAILS_WEATHER_API = '/api/v1/weather/current'
+const RAILS_WEATHER_API = import.meta.env.DEV 
+  ? 'http://100.104.170.10:3555/api/v1/weather/current'
+  : '/api/v1/weather/current'
 
 // Cache keys
 const APPLE_WEATHER_CACHE_KEY = 'apple_weather_data_cache'
@@ -104,6 +106,10 @@ export const getCurrentWeatherFromApple = async () => {
   }
 
   try {
+    // Debug logging
+    console.log('🔧 Environment DEV:', import.meta.env.DEV)
+    console.log('🔧 API Endpoint:', RAILS_WEATHER_API)
+    
     // Call Rails API proxy for Apple Weather data
     const response = await fetch(RAILS_WEATHER_API, {
       method: 'POST',
@@ -124,6 +130,13 @@ export const getCurrentWeatherFromApple = async () => {
 
     const data = await response.json()
     
+    // Log full response for exploration (only in development)
+    if (import.meta.env.DEV) {
+      console.log('🌤️ Full Apple Weather Response:', JSON.stringify(data, null, 2))
+      localStorage.setItem('apple_weather_full_response', JSON.stringify(data, null, 2))
+      console.log('💾 Full response saved to localStorage as "apple_weather_full_response"')
+    }
+    
     // Process Apple Weather data
     const current = data.currentWeather
     if (!current) {
@@ -134,8 +147,10 @@ export const getCurrentWeatherFromApple = async () => {
     const dustLevel = convertAppleConditionToDustLevel(current.conditionCode, windSpeed)
     const dustInfo = getDustLevelInfo(dustLevel)
     
-    // Extract moon phase data if available
+    // Extract moon phase and twilight data if available
     let moonPhase = null
+    let twilightTimes = null
+    
     console.log('Apple Weather response structure:', {
       hasForecastDaily: !!data.forecastDaily,
       hasDays: !!(data.forecastDaily && data.forecastDaily.days),
@@ -145,19 +160,62 @@ export const getCurrentWeatherFromApple = async () => {
     
     if (data.forecastDaily && data.forecastDaily.days && data.forecastDaily.days[0]) {
       const today = data.forecastDaily.days[0]
-      console.log('Today forecast data:', today)
+      console.log('Today forecast data keys:', Object.keys(today))
       
+      // Extract moon phase data
       if (today.moonPhase !== undefined) {
         moonPhase = {
           phase: today.moonPhase,
           phaseName: getMoonPhaseName(today.moonPhase),
           phaseIcon: getMoonPhaseIcon(today.moonPhase),
-          moonrise: today.moonrise ? formatMoonTime(today.moonrise) : null,
-          moonset: today.moonset ? formatMoonTime(today.moonset) : null
+          moonrise: today.moonrise ? formatAppleTime(today.moonrise) : null,
+          moonset: today.moonset ? formatAppleTime(today.moonset) : null
         }
         console.log('🌙 Moon phase extracted:', moonPhase)
-      } else {
-        console.log('⚠️ No moonPhase field in today forecast')
+      }
+      
+      // Extract twilight/sun times - try various possible field names
+      const possibleSunFields = [
+        'sunrise', 'sunriseTime', 'sunRise',
+        'sunset', 'sunsetTime', 'sunSet',
+        'civilTwilightStart', 'civilTwilightBegin', 'civilDawnStart',
+        'civilTwilightEnd', 'civilTwilightFinish', 'civilDuskEnd',
+        'nauticalTwilightStart', 'nauticalTwilightBegin', 'nauticalDawnStart',
+        'nauticalTwilightEnd', 'nauticalTwilightFinish', 'nauticalDuskEnd',
+        'astronomicalTwilightStart', 'astronomicalTwilightBegin', 'astronomicalDawnStart',
+        'astronomicalTwilightEnd', 'astronomicalTwilightFinish', 'astronomicalDuskEnd',
+        'solarNoon'
+      ]
+      
+      const foundSunFields = {}
+      possibleSunFields.forEach(field => {
+        if (today[field] !== undefined) {
+          foundSunFields[field] = today[field]
+        }
+      })
+      
+      console.log('🌅 Found sun/twilight fields:', foundSunFields)
+      
+      // Create twilight times object with found data
+      if (Object.keys(foundSunFields).length > 0) {
+        twilightTimes = {
+          sunrise: today.sunrise ? formatAppleTime(today.sunrise) : 
+                   today.sunriseTime ? formatAppleTime(today.sunriseTime) : 
+                   today.sunRise ? formatAppleTime(today.sunRise) : null,
+          sunset: today.sunset ? formatAppleTime(today.sunset) : 
+                  today.sunsetTime ? formatAppleTime(today.sunsetTime) : 
+                  today.sunSet ? formatAppleTime(today.sunSet) : null,
+          civilTwilightStart: today.civilTwilightStart ? formatAppleTime(today.civilTwilightStart) : 
+                              today.civilTwilightBegin ? formatAppleTime(today.civilTwilightBegin) : null,
+          civilTwilightEnd: today.civilTwilightEnd ? formatAppleTime(today.civilTwilightEnd) : 
+                            today.civilTwilightFinish ? formatAppleTime(today.civilTwilightFinish) : null,
+          nauticalTwilightStart: today.nauticalTwilightStart ? formatAppleTime(today.nauticalTwilightStart) : null,
+          nauticalTwilightEnd: today.nauticalTwilightEnd ? formatAppleTime(today.nauticalTwilightEnd) : null,
+          astronomicalTwilightStart: today.astronomicalTwilightStart ? formatAppleTime(today.astronomicalTwilightStart) : null,
+          astronomicalTwilightEnd: today.astronomicalTwilightEnd ? formatAppleTime(today.astronomicalTwilightEnd) : null,
+          solarNoon: today.solarNoon ? formatAppleTime(today.solarNoon) : null
+        }
+        console.log('🌅 Twilight times extracted:', twilightTimes)
       }
     } else {
       console.log('⚠️ No forecast daily data or days array')
@@ -178,6 +236,7 @@ export const getCurrentWeatherFromApple = async () => {
       dustLabel: dustInfo.label,
       recommendation: dustInfo.recommendation,
       moonPhase,
+      twilightTimes,
       lastUpdated: new Date().toISOString(),
       source: 'apple-api'
     }
@@ -260,9 +319,9 @@ const getMoonPhaseIcon = (phase) => {
 }
 
 /**
- * Format moon rise/set times
+ * Format Apple Weather timestamp (works for sun, moon, twilight times)
  */
-const formatMoonTime = (timestamp) => {
+const formatAppleTime = (timestamp) => {
   if (!timestamp) return null
   
   const date = new Date(timestamp * 1000)

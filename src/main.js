@@ -13,13 +13,15 @@ import SettingsView from './views/SettingsView.vue'
 import MapSettingsView from './views/MapSettingsView.vue'
 import SearchView from './views/SearchView.vue'
 import ScheduleView from './views/ScheduleView.vue'
-import DustForecastView from './views/DustForecastView.vue'
+// import DustForecastView from './views/DustForecastView.vue'
+import DustForecastView from './views/DustForecastViewClean.vue'
 import ResetView from './views/ResetView.vue'
 import NotFound from './views/NotFound.vue'
 import PromptsView from './views/PromptsView.vue'
 import InfrastructureView from './views/InfrastructureView.vue'
 import InfrastructureDetailView from './views/InfrastructureDetailView.vue'
 import IconViewer from './views/IconViewer.vue'
+import ComponentsView from './views/ComponentsView.vue'
 
 // Import CSS
 import './styles/fonts.css'
@@ -152,6 +154,11 @@ const routes = [
     path: '/icon_viewer',
     name: 'icon-viewer',
     component: IconViewer
+  },
+  {
+    path: '/components',
+    name: 'components',
+    component: ComponentsView
   },
   {
     path: '/reload',

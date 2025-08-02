@@ -8,14 +8,15 @@
           <span class="score-label">Match:</span>
           <span class="score-value">{{ formatSimilarityScore(result.similarity_score) }}%</span>
         </div>
-        <button 
+        <BaseButton 
           @click.stop="$emit('toggleFavorite', result)"
-          class="favorite-btn"
-          :class="{ active: result.isFavorited }"
+          variant="ghost"
+          :icon="result.isFavorited ? '★' : '☆'"
+          :active="result.isFavorited"
+          :uppercase="false"
           :title="result.isFavorited ? 'Remove from favorites' : 'Add to favorites'"
-        >
-          {{ result.isFavorited ? '★' : '☆' }}
-        </button>
+          class="favorite-btn"
+        />
       </div>
     </div>
     
@@ -31,17 +32,19 @@
       <!-- Enhanced metadata for vector search results -->
       <div v-if="result.entities && result.entities.length > 0" class="result-entities">
         <div class="entity-tags">
-          <button 
+          <BaseButton 
             v-for="entity in sortedEntities"
             :key="`${entity.entity_type || entity[0]}-${entity.entity_value || entity[1]}`"
-            class="entity-tag"
-            :class="`entity-${entity.entity_type || entity[0]}`"
+            variant="ghost"
+            size="sm"
+            :uppercase="false"
+            :class="['entity-tag', `entity-${entity.entity_type || entity[0]}`]"
             @click.stop="handleEntityClick(entity.entity_type || entity[0], entity.entity_value || entity[1])"
             :title="getEntityTooltip(entity)"
           >
             {{ entity.entity_value || entity[1] }}
             <span v-if="entity.global_count" class="entity-count">({{ entity.global_count }})</span>
-          </button>
+          </BaseButton>
         </div>
       </div>
     </div>
@@ -54,6 +57,7 @@
 import { computed, defineEmits, defineProps } from 'vue'
 import { getItemName, getItemLocation } from '../../utils.js'
 import { canShowLocations } from '../../stores/globalState.js'
+import BaseButton from '../ui/BaseButton.vue'
 
 const props = defineProps({
   result: {
@@ -224,27 +228,9 @@ const handleEntityClick = (type, value) => {
 }
 
 .favorite-btn {
-  background: none;
-  border: none;
   font-size: 24px;
-  cursor: pointer;
-  color: var(--color-text-secondary);
-  transition: color 0.2s ease;
-  padding: 8px;
-  border-radius: 6px;
   min-width: 44px;
   min-height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.favorite-btn:hover {
-  color: var(--color-accent);
-}
-
-.favorite-btn.active {
-  color: var(--color-accent);
 }
 
 .result-content {
@@ -276,16 +262,10 @@ const handleEntityClick = (type, value) => {
 }
 
 .entity-tag {
-  display: inline-block;
-  padding: 2px 6px;
   border-radius: 12px;
   font-size: 11px;
   font-weight: 500;
   text-transform: capitalize;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  background: none;
-  outline: none;
 }
 
 .entity-location {
@@ -409,15 +389,4 @@ const handleEntityClick = (type, value) => {
   }
 }
 
-/* Touch targets for mobile */
-@media (max-width: 600px) {
-  .favorite-btn {
-    padding: 8px;
-    min-width: 44px;
-    min-height: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-}
 </style>

@@ -5,29 +5,29 @@
         <!-- Theme Selector -->
         <div class="theme-selector-group">
           <label for="footer-theme-selector">Theme:</label>
-          <select 
-            id="footer-theme-selector" 
-            :value="selectedTheme" 
-            @change="$emit('update:selectedTheme', $event.target.value)"
-            class="unified-select"
-          >
-            <option v-for="theme in availableThemes" :key="theme.id" :value="theme.id">
-              {{ theme.name }}
-            </option>
-          </select>
+          <BaseSelect 
+            :modelValue="selectedTheme" 
+            @update:modelValue="$emit('update:selectedTheme', $event)"
+            :options="themeOptions"
+            class="theme-select"
+          />
         </div>
         
         <!-- Reset Button -->
-        <button @click="$emit('reset')" class="reset-btn">
+        <BaseButton @click="$emit('reset')" variant="secondary" class="reset-btn">
           🔄 Reset App
-        </button>
+        </BaseButton>
       </div>
     </div>
   </footer>
 </template>
 
 <script setup>
-defineProps({
+import { computed } from 'vue'
+import BaseButton from '../ui/BaseButton.vue'
+import BaseSelect from '../ui/BaseSelect.vue'
+
+const props = defineProps({
   selectedTheme: {
     type: String,
     required: true
@@ -39,6 +39,14 @@ defineProps({
 })
 
 defineEmits(['update:selectedTheme', 'reset'])
+
+// Transform themes for BaseSelect format
+const themeOptions = computed(() => 
+  props.availableThemes.map(theme => ({
+    value: theme.id,
+    label: theme.name
+  }))
+)
 </script>
 
 <style scoped>
@@ -47,6 +55,8 @@ footer {
   border-top: 1px solid var(--color-border-medium);
   flex-shrink: 0;
   height: 60px;
+  position: relative;
+  z-index: 100;
 }
 
 .footer-content {
@@ -57,6 +67,9 @@ footer {
   display: flex;
   align-items: center;
   justify-content: center;
+  /* Fix Chrome select dropdown positioning bug */
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 .footer-controls {
@@ -77,44 +90,17 @@ footer {
   font-weight: 500;
 }
 
-.unified-select {
-  background-color: var(--color-bg-input);
-  color: var(--color-text-secondary);
-  border: 1px solid var(--color-border-medium);
-  padding: 0.5rem 0.75rem;
-  border-radius: 4px;
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: all 0.2s;
+.theme-select {
   min-width: 120px;
 }
 
-.unified-select:hover {
-  background-color: var(--color-bg-active);
-  border-color: var(--color-primary);
-}
-
-.unified-select:focus {
-  outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px var(--color-primary-alpha);
-}
-
 .reset-btn {
-  background: var(--color-bg-input);
-  color: var(--color-text-secondary);
-  border: 1px solid var(--color-border-medium);
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.2s;
   white-space: nowrap;
 }
 
 .reset-btn:hover {
-  background: var(--color-error);
-  color: var(--color-text-primary);
-  border-color: var(--color-error);
+  --button-bg: var(--color-error);
+  --button-border: var(--color-error);
+  --button-text: var(--color-text-primary);
 }
 </style>

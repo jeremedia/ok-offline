@@ -1,3 +1,8 @@
+/* Import component styles */
+@import './components/buttons.css';
+@import './components/cards.css';
+@import './components/spacing.css';
+
 /* CSS Variables - OKNOTOK Theme (Default) */
 :root {
   /* Primary Brand Colors */
@@ -166,7 +171,13 @@
   box-sizing: border-box;
 }
 
-html, body {
+html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
   margin: 0;
   padding: 0;
   height: 100%;
@@ -175,6 +186,7 @@ html, body {
   color: var(--color-text-secondary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  position: relative; /* Establish positioning context */
 }
 
 /* Ensure all buttons inherit the font */
@@ -184,7 +196,12 @@ button {
 
 body {
   overflow: hidden; /* Prevent all body scrolling for PWA */
-  height: 100vh;
+  /* height inherited from html (100%) - no need for 100vh which causes mobile issues */
+}
+
+#app {
+  height: 100%;
+  overflow: hidden; /* Prevent content from pushing beyond body height */
 }
 
 main {
@@ -237,12 +254,7 @@ nav select {
 }
 
 /* Layout styles */
-main {
-  height: calc(100vh - 88px);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
+/* main height is managed by flexbox in App.vue, no fixed height needed */
 
 /* Map and List sections */
 .map-view {
@@ -405,9 +417,7 @@ textarea:focus {
     font-size: 0.8rem;
   }
   
-  main {
-    height: calc(100vh - 60px);
-  }
+  /* main height is managed by flexbox, no calc needed */
   
   .list-view {
     padding: 0.5rem;
@@ -417,3 +427,69 @@ textarea:focus {
     padding: 0.75rem;
   }
 }
+
+/* ===== BODY-LEVEL MOBILE/DESKTOP CLASSES ===== */
+/* These classes are applied to the body element by App.vue based on device detection */
+
+/* Mobile device styles (when body has .mobile-device class) */
+body.mobile-device {
+  /* Global mobile-specific styles */
+  font-size: 16px; /* Prevent zoom on iOS */
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Example: Make all mobile headers bold */
+body.mobile-device h1,
+body.mobile-device h2,
+body.mobile-device h3,
+body.mobile-device h4,
+body.mobile-device h5,
+body.mobile-device h6 {
+  font-weight: bold;
+}
+
+/* Mobile-specific button adjustments */
+body.mobile-device button {
+  min-height: 44px; /* Touch target size */
+  min-width: 44px;
+}
+
+/* Mobile-specific input adjustments */
+body.mobile-device input,
+body.mobile-device select,
+body.mobile-device textarea {
+  font-size: 16px; /* Prevent zoom on iOS */
+}
+
+/* Desktop device styles (when body has .desktop-device class) */
+body.desktop-device {
+  /* Desktop-specific global styles */
+}
+
+/* Desktop-specific cursor styles */
+body.desktop-device button:hover {
+  cursor: pointer;
+}
+
+body.desktop-device a:hover {
+  cursor: pointer;
+}
+
+/* Example usage patterns:
+ * 
+ * Make mobile navigation text larger:
+ * body.mobile-device .bottom-nav button {
+ *   font-size: 0.9rem;
+ * }
+ * 
+ * Desktop-only hover effects:
+ * body.desktop-device .card:hover {
+ *   transform: translateY(-2px);
+ * }
+ * 
+ * Mobile-specific spacing:
+ * body.mobile-device .modal {
+ *   margin: 1rem;
+ * }
+ */

@@ -27,6 +27,46 @@ Created by Jeremy Roush and brought to you by Mr. OK of OKNOTOK.
 - **Service Workers** - PWA functionality
 - **Berkeley Mono** - Custom monospace font
 
+### Body-Level Mobile Class System
+
+The app uses a sophisticated body-level class system for mobile/desktop targeting that provides precise CSS control without media queries.
+
+#### Implementation (`src/App.vue`)
+- **Enhanced Mobile Detection**: Multi-factor detection using screen width, touch capability, and user agent
+- **Development Mode**: Uses width-only detection (`< 600px`) for easier testing
+- **Production Mode**: Combines screen size + touch/UA for accurate mobile detection
+- **Reactive Classes**: `watchEffect` automatically applies `mobile-device` or `desktop-device` classes to body element
+
+#### Global CSS Integration (`src/styles/global.css`)
+```css
+/* Target mobile devices */
+body.mobile-device h1 { font-weight: bold; }
+body.mobile-device button { min-height: 44px; }
+
+/* Target desktop devices */
+body.desktop-device .card:hover { transform: translateY(-2px); }
+```
+
+#### Key Features
+- **Automatic Updates**: Classes change reactively when viewport resizes
+- **iOS Optimizations**: 16px font size prevents zoom, tap highlight disabled
+- **Touch Targets**: 44px minimum button sizes on mobile
+- **Debug Logging**: Console logs device mode changes during development
+
+#### Usage Patterns
+- **Mobile-Specific Styles**: `body.mobile-device .component { ... }`
+- **Desktop-Only Effects**: `body.desktop-device .hover-effect:hover { ... }`
+- **Responsive Spacing**: Target different devices without media queries
+- **Touch Optimization**: Mobile-specific touch targets and interactions
+
+#### Testing Verified
+| Viewport | Class Applied | Status |
+|----------|---------------|--------|
+| 390px | `mobile-device` | ✅ |
+| 599px | `mobile-device` | ✅ |
+| 600px | `desktop-device` | ✅ |
+| 1920px | `desktop-device` | ✅ |
+
 ## CRITICAL: Screenshot Handling
 
 **MANDATORY RULE FOR ALL CLAUDE CODE SESSIONS:**
@@ -566,6 +606,54 @@ const LOCATION_MESSAGES = {
 }
 ```
 
+## UI Component System
+
+### Core Components
+
+The app uses a custom UI component system for consistency and maintainability:
+
+#### BaseButton
+- **Variants**: primary, secondary, danger, ghost, link
+- **Sizes**: sm, md, lg
+- **Props**: variant, size, fullWidth, loading, disabled, active, icon, uppercase
+- **Usage**: 
+  ```vue
+  <BaseButton variant="secondary" size="md" @click="handleClick">
+    Click Me
+  </BaseButton>
+  ```
+
+#### BaseCard
+- Consistent card styling with header, content, and footer slots
+- Used for data display throughout the app
+
+#### BaseSelect
+- Custom dropdown to fix Chrome positioning bugs
+- Handles keyboard navigation and click-outside
+- **Usage**:
+  ```vue
+  <BaseSelect v-model="selected" :options="options" />
+  ```
+
+#### ButtonGroup
+- Creates connected button groups with proper borders
+- **Directions**: horizontal, vertical
+- Automatically handles border radius on first/last buttons
+- **Usage**:
+  ```vue
+  <ButtonGroup direction="vertical">
+    <BaseButton>First</BaseButton>
+    <BaseButton>Middle</BaseButton>
+    <BaseButton>Last</BaseButton>
+  </ButtonGroup>
+  ```
+
+### Component Best Practices
+1. Always use BaseButton instead of native buttons
+2. Use ButtonGroup for any set of related buttons
+3. Import components from `@/components/ui` index
+4. Maintain consistent spacing and sizing
+
 ## Common Development Tasks
 
 ### Add New View/Route
@@ -905,6 +993,94 @@ The enhanced weather/dust forecast feature requires an OpenWeatherMap API key:
    - Graceful fallback when offline
 
 Without an API key, the app will show a configuration error but all other features remain functional.
+
+## Flexbox Layout Architecture
+
+### Overview
+The app uses a nested flexbox layout system to ensure proper height management and scrolling behavior across all views. This architecture was implemented to fix viewport overflow issues and ensure consistent behavior between mobile and desktop.
+
+### Core Layout Structure
+```
+html (height: 100%)
+└── body (height: 100%)
+    └── #app (height: 100%, overflow: hidden)
+        └── .app-root (height: 100%, flex container)
+            └── .app-container (flex: 1, flex container)
+                ├── AppHeader (flex-shrink: 0)
+                ├── main (flex: 1, overflow: hidden)
+                │   └── View Component (height: 100%, flex container)
+                │       ├── Fixed Content (flex-shrink: 0)
+                │       └── Scrollable Content (flex: 1, overflow-y: auto)
+                └── AppFooter (flex-shrink: 0) [desktop only]
+```
+
+### Key Principles
+1. **Height Inheritance**: Start with `height: 100%` at html/body level
+2. **Flex Containers**: Each level uses flexbox for proper space distribution
+3. **No 100vh**: Avoid viewport units that don't account for mobile browser chrome
+4. **min-height: 0**: Critical on flex children to allow proper shrinking
+5. **Overflow Management**: Only the innermost content area should scroll
+
+### Implementation Details
+
+#### App.vue
+```css
+.app-root {
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-container {
+  flex: 1; /* Fill remaining space, not height: 100% */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0; /* Critical for nested flexbox */
+}
+
+main {
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+```
+
+#### View Components Pattern
+```css
+.view-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.fixed-header {
+  flex-shrink: 0;
+}
+
+.scrollable-content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  min-height: 0;
+}
+```
+
+### Common Issues and Solutions
+
+1. **36px Overflow**: Caused by using `height: 100%` instead of `flex: 1`
+2. **No Scrolling**: Missing `min-height: 0` on flex containers
+3. **Double Scrolling**: Multiple nested scrollable areas
+4. **Footer Hidden**: Improper flex distribution in parent containers
+
+### Testing Checklist
+- [ ] Desktop footer visible at all viewport heights
+- [ ] List views scroll properly without body scroll
+- [ ] No horizontal overflow on any device
+- [ ] Mobile browser chrome doesn't cause layout shift
+- [ ] Nested components maintain proper scroll containment
 
 ## Visual Testing Protocol
 

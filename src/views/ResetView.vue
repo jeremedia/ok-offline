@@ -7,53 +7,59 @@
       </div>
 
       <div class="reset-options">
-        <div class="reset-card">
-          <h3>🎯 Quick Onboarding Reset</h3>
+        <BaseCard variant="elevated" title="🎯 Quick Onboarding Reset">
           <p>Clear onboarding status to see the welcome screen again</p>
-          <button @click="resetOnboarding" class="reset-btn primary" :disabled="resetting">
-            {{ resetting ? 'Resetting...' : 'Reset Onboarding' }}
-          </button>
-        </div>
+          <template #footer>
+            <BaseButton @click="resetOnboarding" variant="primary" :disabled="resetting" :loading="resetting">
+              {{ resetting ? 'Resetting...' : 'Reset Onboarding' }}
+            </BaseButton>
+          </template>
+        </BaseCard>
 
-        <div class="reset-card">
-          <h3>🗄️ Clear Cached Data</h3>
+        <BaseCard variant="elevated" title="🗄️ Clear Cached Data">
           <p>Remove all synced data (camps, art, events) to test sync flow</p>
-          <button @click="clearCachedData" class="reset-btn secondary" :disabled="resetting">
-            {{ resetting ? 'Clearing...' : 'Clear Data Cache' }}
-          </button>
-        </div>
+          <template #footer>
+            <BaseButton @click="clearCachedData" variant="secondary" :disabled="resetting" :loading="resetting">
+              {{ resetting ? 'Clearing...' : 'Clear Data Cache' }}
+            </BaseButton>
+          </template>
+        </BaseCard>
 
-        <div class="reset-card">
-          <h3>💾 Clear Service Worker Cache</h3>
+        <BaseCard variant="elevated" title="💾 Clear Service Worker Cache">
           <p>Remove service worker caches for fresh app load testing</p>
-          <button @click="clearServiceWorkerCache" class="reset-btn secondary" :disabled="resetting">
-            {{ resetting ? 'Clearing...' : 'Clear SW Cache' }}
-          </button>
-        </div>
+          <template #footer>
+            <BaseButton @click="clearServiceWorkerCache" variant="secondary" :disabled="resetting" :loading="resetting">
+              {{ resetting ? 'Clearing...' : 'Clear SW Cache' }}
+            </BaseButton>
+          </template>
+        </BaseCard>
 
-        <div class="reset-card">
-          <h3>🗺️ Clear Map Tiles</h3>
+        <BaseCard variant="elevated" title="🗺️ Clear Map Tiles">
           <p>Remove offline map tiles to test re-downloading</p>
-          <button @click="clearMapTiles" class="reset-btn secondary" :disabled="resetting">
-            {{ resetting ? 'Clearing...' : 'Clear Map Tiles' }}
-          </button>
-        </div>
+          <template #footer>
+            <BaseButton @click="clearMapTiles" variant="secondary" :disabled="resetting" :loading="resetting">
+              {{ resetting ? 'Clearing...' : 'Clear Map Tiles' }}
+            </BaseButton>
+          </template>
+        </BaseCard>
 
-        <div class="reset-card danger">
-          <h3>🚨 Full Reset</h3>
+        <BaseCard variant="danger" title="🚨 Full Reset">
           <p>Clear everything: onboarding, data, caches, and user preferences</p>
-          <button @click="fullReset" class="reset-btn danger" :disabled="resetting">
-            {{ resetting ? 'Resetting...' : 'Full Reset' }}
-          </button>
-        </div>
+          <template #footer>
+            <BaseButton @click="fullReset" variant="danger" :disabled="resetting" :loading="resetting">
+              {{ resetting ? 'Resetting...' : 'Full Reset' }}
+            </BaseButton>
+          </template>
+        </BaseCard>
 
-        <div class="reset-card danger">
-          <h3>🏗️ PWA Test Reset</h3>
+        <BaseCard variant="danger" title="🏗️ PWA Test Reset">
           <p>Complete wipe for testing fresh PWA installation (unregisters service workers)</p>
-          <button @click="pwaTestReset" class="reset-btn danger" :disabled="resetting">
-            {{ resetting ? 'Resetting...' : 'PWA Test Reset' }}
-          </button>
-        </div>
+          <template #footer>
+            <BaseButton @click="pwaTestReset" variant="danger" :disabled="resetting" :loading="resetting">
+              {{ resetting ? 'Resetting...' : 'PWA Test Reset' }}
+            </BaseButton>
+          </template>
+        </BaseCard>
       </div>
 
       <div class="current-status">
@@ -89,20 +95,20 @@
       </div>
 
       <div class="reset-actions">
-        <button @click="refreshStatus" class="refresh-btn" :disabled="resetting">
+        <BaseButton @click="refreshStatus" variant="secondary" :disabled="resetting">
           🔄 Refresh Status
-        </button>
-        <button @click="goHome" class="home-btn">
+        </BaseButton>
+        <BaseButton @click="goHome" variant="primary">
           🏠 Back to App
-        </button>
+        </BaseButton>
       </div>
 
       <div v-if="resetLog.length > 0" class="reset-log">
         <div class="log-header">
           <h3>📝 Reset Log</h3>
-          <button @click="copyLogs" class="copy-logs-btn" title="Copy logs to clipboard">
+          <BaseButton @click="copyLogs" variant="ghost" size="sm" title="Copy logs to clipboard">
             📋 Copy Logs
-          </button>
+          </BaseButton>
         </div>
         <div class="log-entries">
           <div 
@@ -126,6 +132,7 @@ import { clearYear, getSyncStatus } from '../services/staticDataSync'
 import { clearCache } from '../services/storage'
 import { serviceWorkerManager, getCacheInfo } from '../services/serviceWorkerManager'
 import { useToast } from '../composables/useToast'
+import { BaseCard, BaseButton } from '@/components/ui'
 
 const props = defineProps({
   autoReset: {
@@ -581,6 +588,11 @@ onMounted(async () => {
   margin-bottom: 3rem;
 }
 
+/* Ensure BaseButtons in card footers stretch full width */
+.reset-options :deep(.base-card__footer .base-button) {
+  width: 100%;
+}
+
 .reset-card {
   background: var(--color-bg-elevated);
   border: 1px solid var(--color-border);
@@ -615,49 +627,7 @@ onMounted(async () => {
   line-height: 1.4;
 }
 
-.reset-btn {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: all 0.2s;
-}
-
-.reset-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.reset-btn.primary {
-  background: var(--color-primary);
-  color: var(--color-text-primary);
-}
-
-.reset-btn.primary:hover:not(:disabled) {
-  background: var(--color-primary-hover);
-}
-
-.reset-btn.secondary {
-  background: var(--color-bg-input);
-  color: var(--color-text-secondary);
-}
-
-.reset-btn.secondary:hover:not(:disabled) {
-  background: var(--color-bg-hover);
-  color: var(--color-text-primary);
-}
-
-.reset-btn.danger {
-  background: var(--color-primary);
-  color: var(--color-text-primary);
-}
-
-.reset-btn.danger:hover:not(:disabled) {
-  background: var(--color-primary-hover);
-}
+/* Removed old button styles - using BaseButton component */
 
 .current-status {
   background: var(--color-bg-base);
@@ -707,33 +677,7 @@ onMounted(async () => {
   margin-bottom: 2rem;
 }
 
-.refresh-btn, .home-btn {
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: all 0.2s;
-}
-
-.refresh-btn {
-  background: var(--color-bg-input);
-  color: var(--color-text-secondary);
-}
-
-.refresh-btn:hover:not(:disabled) {
-  background: var(--color-bg-hover);
-  color: var(--color-text-primary);
-}
-
-.home-btn {
-  background: var(--color-primary);
-  color: var(--color-text-primary);
-}
-
-.home-btn:hover {
-  background: var(--color-primary-hover);
-}
+/* Removed old action button styles - using BaseButton component */
 
 .reset-log {
   background: var(--color-bg-base);
@@ -754,21 +698,7 @@ onMounted(async () => {
   margin: 0;
 }
 
-.copy-logs-btn {
-  padding: 0.5rem 1rem;
-  background: var(--color-bg-input);
-  color: var(--color-text-secondary);
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.85rem;
-  transition: all 0.2s;
-}
-
-.copy-logs-btn:hover {
-  background: var(--color-bg-hover);
-  color: var(--color-text-primary);
-}
+/* Removed copy logs button styles - using BaseButton component */
 
 .log-entries {
   display: flex;

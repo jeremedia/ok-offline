@@ -17,9 +17,9 @@
         <span class="build-time">Built: {{ buildTime }}</span>
       </p>
       
-      <button @click="showReleaseNotes = true" class="release-notes-button">
+      <BaseButton @click="showReleaseNotes = true" variant="primary">
         📋 View Release Notes
-      </button>
+      </BaseButton>
     </div>
 
     <div class="about-section">
@@ -69,7 +69,7 @@
       <div class="modal-content" @click.stop>
         <div class="modal-header">
           <h2>Release Notes</h2>
-          <button @click="showReleaseNotes = false" class="close-button">×</button>
+          <BaseButton @click="showReleaseNotes = false" variant="ghost" size="sm">×</BaseButton>
         </div>
         <div class="modal-body">
           <div v-for="release in releaseNotes" :key="release.version" class="release-section">
@@ -125,6 +125,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { BaseButton } from '@/components/ui'
 
 // Props
 const props = defineProps({
@@ -157,6 +158,28 @@ onMounted(() => {
 
 // Release notes data
 const releaseNotes = [
+  {
+    version: '3.25.0',
+    date: '2025-08-02',
+    added: [
+      '🚨 Emergency-Ready Khaki Theme - Complete redesign for Rangers & staff',
+      '🌤️ Major Weather UI Enhancements - Accordion system and Light Cycle countdowns',
+      '🎛️ Complete UI Component System - BaseButton, BaseCard, ButtonGroup foundation',
+      '📱 Enhanced Mobile Experience - Body-level mobile class system and better touch targets'
+    ],
+    fixed: [
+      '🖥️ Desktop Scrolling Architecture - Fixed 36px overflow and double-scrolling',
+      '🔘 Button Standardization - All buttons migrated to BaseButton for consistency',
+      '🗂️ List View Improvements - Section headers with thick borders and clear hierarchy',
+      '🎨 Secondary button contrast enhanced for khaki theme visibility'
+    ],
+    changed: [
+      '🎨 Khaki theme transformed from earth tones to high-contrast professional',
+      '📐 Layout Architecture - Modern flexbox-based design with percentage heights',
+      '🌤️ Weather display with Apple WeatherKit integration and trend indicators',
+      '🚨 Emergency color coding: Green=Safe, Yellow=Caution, Orange=Warning, Red=Danger'
+    ]
+  },
   {
     version: '3.24.0',
     date: '2025-08-01',

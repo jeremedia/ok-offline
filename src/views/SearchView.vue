@@ -979,20 +979,23 @@ const ensureAtLeastOneFilter = () => {
 </script>
 
 <style scoped>
-.view {
+#search-section {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
   padding: 1rem;
   color: var(--color-text-primary);
   background: var(--color-bg-base);
-  height: 100%;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+  min-height: 0; /* Important for flexbox children */
 }
 
 .search-header {
+  flex-shrink: 0;
   margin-bottom: 0;
   max-width: 800px;
   margin-left: auto;
   margin-right: auto;
+  width: 100%;
 }
 
 .search-header.entity-search-active {
@@ -1046,8 +1049,13 @@ const ensureAtLeastOneFilter = () => {
 
 /* Search results */
 .search-results {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   max-width: 800px;
   margin: 0 auto;
+  width: 100%;
+  min-height: 0; /* Important for flexbox */
 }
 
 .search-loading {
@@ -1348,7 +1356,7 @@ const ensureAtLeastOneFilter = () => {
 
 /* Mobile optimizations */
 @media (max-width: 600px) {
-  .view {
+  #search-section {
     padding: 0.75rem;
   }
   

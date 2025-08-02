@@ -1,23 +1,26 @@
  <template>
-  <div class="view-container">
-    <section id="schedule-section" class="view">
+  <section id="schedule-section" class="schedule-view-container">
     <h2>My Schedule</h2>
     
     <div class="schedule-controls">
       <div class="day-selector">
-        <button 
+        <BaseButton 
           v-for="day in days" 
           :key="day.date"
           @click="selectedDay = day.date"
-          :class="['day-btn', { active: selectedDay === day.date }]"
+          variant="secondary"
+          :active="selectedDay === day.date"
+          :uppercase="false"
+          class="day-btn"
         >
-          {{ day.label }}
-        </button>
+          <span class="day-full">{{ day.label }}</span>
+          <span class="day-short">{{ day.label.split(' ')[0] }}</span>
+        </BaseButton>
       </div>
       
-      <button @click="clearDaySchedule" class="clear-btn" v-if="hasEventsOnDay">
+      <BaseButton @click="clearDaySchedule" variant="secondary" :uppercase="false" class="clear-btn" v-if="hasEventsOnDay">
         Clear {{ formatDayLabel(selectedDay) }}
-      </button>
+      </BaseButton>
     </div>
     
     <div class="schedule-timeline">
@@ -41,53 +44,54 @@
               ⚠️ Conflicts with other events
             </div>
           </div>
-          <button 
+          <BaseButton 
             @click="removeFromSchedule(event.scheduleId)"
+            variant="ghost"
+            icon="✕"
+            size="sm"
+            :uppercase="false"
             class="remove-btn"
-          >
-            ✕
-          </button>
+          />
         </div>
       </div>
     </div>
     
     <div class="schedule-stats">
-      <h3>Schedule Overview</h3>
       <div class="stats-grid">
         <div class="stat">
           <strong>{{ totalEvents }}</strong>
-          <span>Total Events</span>
+          <span class="stat-label">Events</span>
         </div>
         <div class="stat">
           <strong>{{ uniqueCamps }}</strong>
-          <span>Different Camps</span>
+          <span class="stat-label">Camps</span>
         </div>
         <div class="stat">
           <strong>{{ totalHours }}h</strong>
-          <span>Time Planned</span>
+          <span class="stat-label">Hours</span>
         </div>
         <div class="stat conflicts" v-if="conflictCount > 0">
           <strong>{{ conflictCount }}</strong>
-          <span>Conflicts</span>
+          <span class="stat-label">Conflicts</span>
         </div>
       </div>
     </div>
     
     <div class="export-controls">
-      <button @click="exportSchedule" class="export-btn">
-        📤 Export Schedule
-      </button>
-      <button @click="shareSchedule" class="share-btn">
-        🔗 Share Schedule
-      </button>
+      <BaseButton @click="exportSchedule" variant="secondary" :uppercase="false" class="export-btn">
+        <span class="btn-icon">📤</span> Export Schedule
+      </BaseButton>
+      <BaseButton @click="shareSchedule" variant="secondary" :uppercase="false" class="share-btn">
+        <span class="btn-icon">🔗</span> Share Schedule
+      </BaseButton>
     </div>
-    </section>
-  </div>
+  </section>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import BaseButton from '../components/ui/BaseButton.vue'
 
 const route = useRoute()
 const year = computed(() => route.params.year || localStorage.getItem('selectedYear') || '2025')
@@ -336,32 +340,31 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.view-container {
-  width: 100%;
+.schedule-view-container {
   height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-#schedule-section {
-  padding: 1rem;
-  max-width: 1000px;
+  display: flex;
+  flex-direction: column;
+  max-width: 1200px;
   margin: 0 auto;
-  min-height: 100%;
+  width: 100%;
+  overflow: hidden; /* Prevent outer scrolling */
+  padding: 1rem;
 }
 
 h2 {
   color: var(--color-text-secondary);
-  margin-bottom: 1.5rem;
+  margin: 0 0 1rem 0;
+  flex-shrink: 0;
 }
 
 .schedule-controls {
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
   gap: 1rem;
+  flex-shrink: 0;
 }
 
 .day-selector {
@@ -370,46 +373,18 @@ h2 {
   flex-wrap: wrap;
 }
 
-.day-btn {
-  background: var(--color-bg-elevated);
-  color: var(--color-text-secondary);
-  border: 1px solid var(--color-border);
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
 
-.day-btn:hover {
-  background: var(--color-bg-header);
-}
-
-.day-btn.active {
-  background: var(--color-primary);
-  color: var(--color-text-primary);
-}
-
-.clear-btn {
-  background: var(--color-bg-input);
-  color: var(--color-text-secondary);
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.clear-btn:hover {
-  background: var(--color-bg-hover);
-}
 
 .schedule-timeline {
   background: var(--color-bg-base);
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: 8px 8px 0 0;
+  border-bottom: none;
   padding: 1rem;
-  margin-bottom: 2rem;
-  min-height: 400px;
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  min-height: 0; /* Important for flex containers */
 }
 
 .empty-state {
@@ -482,11 +457,7 @@ h2 {
 }
 
 .remove-btn {
-  background: none;
-  border: none;
   color: var(--color-text-muted);
-  cursor: pointer;
-  padding: 0.25rem;
   font-size: 1.2rem;
 }
 
@@ -497,15 +468,13 @@ h2 {
 .schedule-stats {
   background: var(--color-bg-elevated);
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
   padding: 1.5rem;
-  margin-bottom: 2rem;
-}
-
-.schedule-stats h3 {
-  color: var(--color-text-secondary);
   margin-bottom: 1rem;
 }
+
+/* Schedule Overview header removed */
 
 .stats-grid {
   display: grid;
@@ -523,7 +492,7 @@ h2 {
   color: var(--color-text-primary);
 }
 
-.stat span {
+.stat .stat-label {
   font-size: 0.9rem;
   color: var(--color-text-muted);
 }
@@ -536,22 +505,74 @@ h2 {
   display: flex;
   gap: 1rem;
   justify-content: center;
+  flex-shrink: 0;
+  margin-top: 0;
 }
 
 .export-btn, .share-btn {
-  background: var(--color-bg-elevated);
-  color: var(--color-text-secondary);
-  border: 1px solid var(--color-border);
   padding: 0.75rem 1.5rem;
-  border-radius: 4px;
-  cursor: pointer;
   font-size: 1rem;
-  transition: all 0.2s;
 }
 
-.export-btn:hover, .share-btn:hover {
-  background: var(--color-primary);
-  color: var(--color-text-primary);
+/* Hide button icons on mobile devices using body-level class */
+body.mobile-device .btn-icon {
+  display: none;
+}
+
+/* Show only day abbreviation on mobile */
+.day-short {
+  display: none;
+}
+
+body.mobile-device .day-full {
+  display: none;
+}
+
+body.mobile-device .day-short {
+  display: inline;
+}
+
+body.mobile-device .day-selector {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.25rem;
+  width: 100%;
+}
+
+body.mobile-device .day-btn {
+  padding: 0.5rem 0.25rem;
+  font-size: 0.875rem;
+  width: 100%;
+}
+
+/* Mobile-specific stats display */
+body.mobile-device .schedule-stats {
+  padding: 0.5rem; /* 1/3 of desktop padding (1.5rem) */
+}
+
+body.mobile-device .stats-grid {
+  display: flex;
+  justify-content: space-around;
+  gap: 0.5rem;
+}
+
+body.mobile-device .stat {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+}
+
+body.mobile-device .stat strong {
+  display: inline;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+body.mobile-device .stat span {
+  display: inline;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
 }
 
 @media (max-width: 768px) {

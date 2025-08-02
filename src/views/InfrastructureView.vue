@@ -9,12 +9,14 @@
       <div class="infrastructure-intro" :class="{ collapsed: isIntroCollapsed }">
         <div class="intro-header" @click="toggleIntro">
           <h4>Essential services and structures that make Black Rock City possible</h4>
-          <button 
-            class="collapse-btn"
+          <BaseButton 
+            variant="ghost"
+            size="sm"
+            :icon="isIntroCollapsed ? '▼' : '▲'"
             :aria-label="isIntroCollapsed ? 'Expand introduction' : 'Collapse introduction'"
-          >
-            {{ isIntroCollapsed ? '▼' : '▲' }}
-          </button>
+            :uppercase="false"
+            class="collapse-btn"
+          />
         </div>
         
         <div v-show="!isIntroCollapsed" class="intro-content">
@@ -39,22 +41,28 @@
 
     <!-- Category filters -->
     <div class="category-filters">
-      <button
+      <BaseButton
         v-for="category in categories"
         :key="category.name"
         @click="toggleCategory(category.name)"
-        :class="['category-btn', { active: selectedCategory === category.name }]"
+        variant="secondary"
+        :active="selectedCategory === category.name"
+        :uppercase="false"
+        class="category-btn"
       >
         {{ category.displayName }}
         <span class="count">({{ category.count }})</span>
-      </button>
-      <button
+      </BaseButton>
+      <BaseButton
         @click="selectedCategory = null"
-        :class="['category-btn', 'all-btn', { active: !selectedCategory }]"
+        variant="secondary"
+        :active="!selectedCategory"
+        :uppercase="false"
+        class="category-btn all-btn"
       >
         All
         <span class="count">({{ totalCount }})</span>
-      </button>
+      </BaseButton>
     </div>
 
     <!-- Infrastructure grid -->
@@ -91,6 +99,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import BaseButton from '../components/ui/BaseButton.vue'
 import InfrastructureCard from '../components/infrastructure/InfrastructureCard.vue'
 import { 
   getAllInfrastructure, 
@@ -260,20 +269,7 @@ onMounted(() => {
 }
 
 .intro-header .collapse-btn {
-  background: none;
-  border: none;
-  color: var(--color-text-secondary);
-  font-size: 0.875rem;
-  cursor: pointer;
-  padding: 0.25rem 0.5rem;
   margin-left: 0.5rem;
-  border-radius: 4px;
-  transition: all 0.2s ease;
-}
-
-.intro-header .collapse-btn:hover {
-  background: var(--color-overlay-light);
-  color: var(--color-text-primary);
 }
 
 .intro-content {
@@ -325,24 +321,7 @@ margin-top: 0;
 }
 
 .category-btn {
-  padding: 0.5rem 1rem;
-  background: var(--color-bg-elevated);
-  border: 1px solid var(--color-border-medium);
-  border-radius: 4px;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.category-btn:hover {
-  background: var(--color-bg-header);
-  border-color: var(--color-bg-active);
-}
-
-.category-btn.active {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-  color: var(--color-text-primary);
+  /* BaseButton handles styling */
 }
 
 .category-btn .count {

@@ -20,7 +20,7 @@
       <div class="tour-content">
         <div class="tour-header">
           <h3>{{ currentStep.title }}</h3>
-          <button @click="closeTour" class="tour-close" aria-label="Close tour">×</button>
+          <BaseButton @click="closeTour" variant="ghost" icon="×" size="sm" :uppercase="false" aria-label="Close tour" />
         </div>
         
         <div class="tour-body">
@@ -54,29 +54,35 @@
           </div>
           
           <div class="tour-actions">
-            <button 
+            <BaseButton 
               v-if="currentStepIndex > 0"
               @click="previousStep" 
-              class="tour-btn tour-btn--secondary"
+              variant="secondary"
+              :uppercase="false"
+              class="tour-btn"
             >
               ← Previous
-            </button>
+            </BaseButton>
             
-            <button 
+            <BaseButton 
               v-if="currentStepIndex < tourSteps.length - 1"
               @click="nextStep" 
-              class="tour-btn tour-btn--primary"
+              variant="primary"
+              :uppercase="false"
+              class="tour-btn"
             >
               Next →
-            </button>
+            </BaseButton>
             
-            <button 
+            <BaseButton 
               v-else
               @click="completeTour" 
-              class="tour-btn tour-btn--primary"
+              variant="primary"
+              :uppercase="false"
+              class="tour-btn"
             >
               Finish Tour 🔥
-            </button>
+            </BaseButton>
           </div>
         </div>
       </div>
@@ -87,6 +93,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import BaseButton from './ui/BaseButton.vue'
 
 const props = defineProps({
   tourType: {

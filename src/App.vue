@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="app-root">
     <WelcomeScreen 
       v-if="showOnboarding" 
       @complete="handleOnboardingComplete"
@@ -13,7 +13,6 @@
   <div class="app-container" v-if="!showOnboarding && !showTour">
     <ToastNotification ref="toastRef" />
     <AppHeader 
-      :is-mobile="isMobile"
       :selected-year="selectedYear"
       :is-online="isOnline"
       @update:selected-year="selectedYear = $event"
@@ -51,7 +50,7 @@
 </template>
 
 <script setup>
-import { ref, watch, computed, onMounted, onUnmounted, nextTick, provide } from 'vue'
+import { ref, watch, computed, onMounted, onUnmounted, nextTick, provide, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useKeyboardShortcuts } from './composables/useKeyboardShortcuts'
 import { useSwipeGestures } from './composables/useSwipeGestures'
@@ -85,11 +84,32 @@ const selectedTheme = ref(getCurrentTheme())
 
 // Check if device is truly mobile (phone, not tablet)
 const checkIfMobile = () => {
-  // Simple width-based detection for all environments
-  return window.innerWidth < 600
+  const isSmallScreen = window.innerWidth < 600
+  const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0
+  const mobileRegex = /Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i
+  const isMobileUA = mobileRegex.test(navigator.userAgent)
+  
+  // For development: use screen width only
+  if (import.meta.env.DEV) {
+    return isSmallScreen
+  }
+  
+  // Production mobile detection: small screen + touch capability or mobile UA
+  return isSmallScreen && (hasTouch || isMobileUA)
 }
 
 const isMobile = ref(checkIfMobile())
+
+// Apply body-level mobile class for global CSS targeting
+watchEffect(() => {
+  if (isMobile.value) {
+    document.body.classList.add('mobile-device')
+    document.body.classList.remove('desktop-device')
+  } else {
+    document.body.classList.add('desktop-device')
+    document.body.classList.remove('mobile-device')
+  }
+})
 const showMobileMenu = ref(false)
 
 // Enable keyboard shortcuts - disabled for now
@@ -186,7 +206,13 @@ const handleTourSkip = () => {
 
 // Handle window resize
 const handleResize = () => {
+  const wasMobile = isMobile.value
   isMobile.value = checkIfMobile()
+  
+  // Log mobile state changes for debugging
+  if (wasMobile !== isMobile.value) {
+    console.log(`Device mode changed: ${isMobile.value ? 'mobile' : 'desktop'} (${window.innerWidth}px)`)
+  }
 }
 
 // Store interval reference outside
@@ -349,12 +375,21 @@ provide('mapControlsToggle', mapControlsToggleEvent)
 
 <style scoped>
 /* ===== APP LAYOUT STYLES ===== */
+/* Root element must not exceed parent height */
+.app-root {
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
 /* Full-screen PWA layout */
 .app-container {
-  height: 100vh;
+  flex: 1;
   display: flex;
   flex-direction: column;
   overflow: hidden; /* Prevent body scrolling */
+  min-height: 0; /* Important for nested flexbox */
 }
 
 main {

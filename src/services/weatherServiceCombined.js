@@ -35,7 +35,9 @@ const CACHE_DURATION = 10 * 60 * 1000 // 10 minutes
 /**
  * Rails API endpoint for weather data
  */
-const RAILS_WEATHER_API_URL = '/api/v1/weather/current'
+const RAILS_WEATHER_API_URL = import.meta.env.DEV 
+  ? 'http://100.104.170.10:3555/api/v1/weather/current'
+  : '/api/v1/weather/current'
 
 /**
  * Check if we should try Apple Weather as fallback
@@ -138,6 +140,92 @@ const getDustLevelInfo = (level) => {
   return dustInfo[level] || dustInfo.moderate
 }
 
+/**
+ * Get moon phase icon from phase name
+ */
+const getMoonPhaseIconFromName = (phaseName) => {
+  if (!phaseName) return '🌑'
+  
+  const phase = phaseName.toLowerCase()
+  if (phase.includes('new')) return '🌑' // New Moon
+  if (phase.includes('waxing') && phase.includes('crescent')) return '🌒' // Waxing Crescent
+  if (phase.includes('first') && phase.includes('quarter')) return '🌓' // First Quarter
+  if (phase.includes('waxing') && phase.includes('gibbous')) return '🌔' // Waxing Gibbous
+  if (phase.includes('full')) return '🌕' // Full Moon
+  if (phase.includes('waning') && phase.includes('gibbous')) return '🌖' // Waning Gibbous
+  if (phase.includes('last') && phase.includes('quarter')) return '🌗' // Last Quarter
+  if (phase.includes('waning') && phase.includes('crescent')) return '🌘' // Waning Crescent
+  return '🌑' // Default
+}
+
+/**
+ * Weather history for trends
+ */
+const WEATHER_HISTORY_KEY = 'weather_history'
+const MAX_HISTORY_ITEMS = 24 // Keep 24 hours of data
+
+/**
+ * Save weather data point to history
+ */
+const saveWeatherToHistory = (weatherData) => {
+  try {
+    const history = JSON.parse(localStorage.getItem(WEATHER_HISTORY_KEY) || '[]')
+    
+    // Add timestamp if not present
+    const dataPoint = {
+      ...weatherData,
+      timestamp: weatherData.lastUpdated || new Date().toISOString()
+    }
+    
+    // Add to beginning of array
+    history.unshift(dataPoint)
+    
+    // Keep only last 24 items
+    if (history.length > MAX_HISTORY_ITEMS) {
+      history.splice(MAX_HISTORY_ITEMS)
+    }
+    
+    localStorage.setItem(WEATHER_HISTORY_KEY, JSON.stringify(history))
+  } catch (error) {
+    console.error('Failed to save weather history:', error)
+  }
+}
+
+/**
+ * Calculate trends by comparing current values with previous
+ */
+const calculateTrends = (currentData) => {
+  try {
+    const history = JSON.parse(localStorage.getItem(WEATHER_HISTORY_KEY) || '[]')
+    
+    // Need at least 2 data points for trends
+    if (history.length < 2) {
+      return null
+    }
+    
+    // Get the previous data point (not the most recent, which might be current)
+    const previousData = history.find(item => 
+      new Date(item.timestamp).getTime() < new Date(currentData.lastUpdated).getTime() - 5 * 60 * 1000 // At least 5 minutes old
+    )
+    
+    if (!previousData) {
+      return null
+    }
+    
+    return {
+      temperature: currentData.temperature - previousData.temperature,
+      humidity: currentData.humidity - previousData.humidity,
+      windSpeed: currentData.windSpeed - previousData.windSpeed,
+      visibility: currentData.visibility && previousData.visibility 
+        ? currentData.visibility - previousData.visibility 
+        : null
+    }
+  } catch (error) {
+    console.error('Failed to calculate trends:', error)
+    return null
+  }
+}
+
 const mapAppleIconToStandard = (conditionCode) => {
   const iconMap = {
     'Clear': '01d', 'MostlyClear': '02d', 'PartlyCloudy': '03d',
@@ -174,6 +262,36 @@ export const getCurrentWeatherRobust = async () => {
     const result = await response.json()
     const data = result.data
     
+    // Log full response for exploration (only in development)
+    if (import.meta.env.DEV) {
+      console.log('🌤️ Full Rails/Apple Weather Response:', JSON.stringify(result, null, 2))
+      localStorage.setItem('rails_apple_weather_full_response', JSON.stringify(result, null, 2))
+      console.log('💾 Full response saved to localStorage as "rails_apple_weather_full_response"')
+    }
+    
+    // Extract twilight times if available
+    let twilightTimes = null
+    console.log('🔍 Looking for twilight data in response structure...')
+    console.log('🔍 Available data keys:', Object.keys(data))
+    
+    // Check if the Rails API has sun/twilight data at the root level
+    if (data.sunrise || data.sunset || data.civilTwilight) {
+      console.log('🌅 Found sun/twilight data at root level')
+      twilightTimes = {
+        sunrise: data.sunrise || null,
+        sunset: data.sunset || null,
+        civilTwilightStart: data.civilTwilightStart || null,
+        civilTwilightEnd: data.civilTwilightEnd || null,
+        nauticalTwilightStart: data.nauticalTwilightStart || null,
+        nauticalTwilightEnd: data.nauticalTwilightEnd || null,
+        astronomicalTwilightStart: data.astronomicalTwilightStart || null,
+        astronomicalTwilightEnd: data.astronomicalTwilightEnd || null
+      }
+    } else {
+      console.log('❌ No sun/twilight data found in Rails API response')
+      console.log('💡 Rails API may need to be updated to include forecastDaily data')
+    }
+    
     // Convert Rails API response to our standard format
     const windSpeed = Math.round(data.windSpeed || 0)
     const dustInfo = getDustLevelInfo(data.dustLevel || 'clear')
@@ -192,13 +310,24 @@ export const getCurrentWeatherRobust = async () => {
       dustLevel: data.dustLevel || 'clear',
       dustLabel: dustInfo.label,
       recommendation: dustInfo.recommendation,
-      moonPhase: data.moonPhase,
+      moonPhase: data.moonPhase ? {
+        phase: data.moonPhase.phase || null,
+        phaseName: data.moonPhase.phase || 'Unknown',
+        phaseIcon: getMoonPhaseIconFromName(data.moonPhase.phase),
+        illumination: data.moonPhase.illumination || null,
+        daysUntilNewMoon: data.moonPhase.daysUntilNewMoon || null
+      } : null,
+      twilightTimes,
       lastUpdated: result.meta?.lastUpdated || new Date().toISOString(),
       source: 'rails-apple-api'
     }
     
+    // Save to history and calculate trends
+    saveWeatherToHistory(weatherData)
+    const trends = calculateTrends(weatherData)
+    
     console.log('✅ Rails API (Apple WeatherKit) succeeded')
-    return weatherData
+    return { ...weatherData, trends }
   } catch (error) {
     console.log('❌ Rails API failed:', error.message)
     errors.push(`Rails API: ${error.message}`)
@@ -208,8 +337,12 @@ export const getCurrentWeatherRobust = async () => {
   try {
     console.log('Trying OpenWeatherMap API as fallback...')
     const data = await getOpenWeatherCurrent()
+    // Save to history and calculate trends
+    saveWeatherToHistory(data)
+    const trends = calculateTrends(data)
+    
     console.log('✅ OpenWeatherMap succeeded')
-    return data
+    return { ...data, trends }
   } catch (error) {
     // Only log non-401 errors to reduce console noise
     if (!error.message.includes('401')) {
@@ -225,8 +358,12 @@ export const getCurrentWeatherRobust = async () => {
     try {
       console.log('Trying Apple WeatherKit API directly as final fallback...')
       const data = await getCurrentWeatherFromApple()
+      // Save to history and calculate trends
+      saveWeatherToHistory(data)
+      const trends = calculateTrends(data)
+      
       console.log('✅ Apple WeatherKit direct succeeded')
-      return data
+      return { ...data, trends }
     } catch (error) {
       console.log('❌ Apple WeatherKit direct failed:', error.message)
       errors.push(`Apple Weather direct: ${error.message}`)

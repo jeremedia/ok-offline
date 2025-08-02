@@ -80,22 +80,24 @@
                 </small>
               </span>
               <span class="item-actions">
-                <button
+                <BaseButton
                   v-if="props.type === 'event' && item.occurrence_set && item.occurrence_set.length > 0"
                   @click.stop="handleToggleSchedule(item, item.occurrence_set[0])"
-                  class="schedule-btn"
-                  :class="{ active: isInSchedule(item, item.occurrence_set[0]) }"
+                  variant="ghost"
+                  size="sm"
+                  :active="isInSchedule(item, item.occurrence_set[0])"
                   :title="isInSchedule(item, item.occurrence_set[0]) ? 'Remove from schedule' : 'Add to schedule'"
                 >
                   {{ isInSchedule(item, item.occurrence_set[0]) ? '📅' : '📆' }}
-                </button>
-                <button 
+                </BaseButton>
+                <BaseButton 
                   @click.stop="handleToggleFavorite(item)"
-                  class="favorite-btn"
-                  :class="{ active: favoriteItems.has(item.uid) }"
+                  variant="ghost"
+                  size="sm"
+                  :active="favoriteItems.has(item.uid)"
                 >
                   {{ favoriteItems.has(item.uid) ? '★' : '☆' }}
-                </button>
+                </BaseButton>
               </span>
             </li>
           </template>
@@ -124,22 +126,24 @@
           </small>
         </span>
         <span class="item-actions">
-          <button
+          <BaseButton
             v-if="props.type === 'event' && item.occurrence_set && item.occurrence_set.length > 0"
             @click.stop="handleToggleSchedule(item, item.occurrence_set[0])"
-            class="schedule-btn"
-            :class="{ active: isInSchedule(item, item.occurrence_set[0]) }"
+            variant="ghost"
+            size="sm"
+            :active="isInSchedule(item, item.occurrence_set[0])"
             :title="isInSchedule(item, item.occurrence_set[0]) ? 'Remove from schedule' : 'Add to schedule'"
           >
             {{ isInSchedule(item, item.occurrence_set[0]) ? '📅' : '📆' }}
-          </button>
-          <button 
+          </BaseButton>
+          <BaseButton 
             @click.stop="handleToggleFavorite(item)"
-            class="favorite-btn"
-            :class="{ active: favoriteItems.has(item.uid) }"
+            variant="ghost"
+            size="sm"
+            :active="favoriteItems.has(item.uid)"
           >
             {{ favoriteItems.has(item.uid) ? '★' : '☆' }}
-          </button>
+          </BaseButton>
         </span>
       </li>
     </ul>
@@ -187,6 +191,7 @@ import { useAutoSync } from '../composables/useAutoSync'
 import LoadingSpinner from '../components/LoadingSpinner.vue'
 import SyncDialog from '../components/SyncDialog.vue'
 import PullToRefresh from '../components/PullToRefresh.vue'
+import { BaseButton } from '@/components/ui'
 import ListControls from '../components/ListControls.vue'
 import FloatingActionButton from '../components/FloatingActionButton.vue'
 import CustomCampForm from '../components/forms/CustomCampForm.vue'
@@ -757,8 +762,8 @@ watch(() => [props.type, props.year], () => {
   font-weight: normal; /* Label will be bold, count will be normal */
   padding: 0.75rem 1rem;
   cursor: pointer;
-  border-bottom: 1px solid var(--color-border-medium);
-  color: var(--color-text-muted);
+  border-bottom: 2px solid var(--color-border-heavy);
+  color: var(--color-text-primary);
   font-size: 1.4rem; /* Larger for prominent label */
   display: flex;
   align-items: center;
@@ -776,8 +781,10 @@ watch(() => [props.type, props.year], () => {
 }
 
 .collapse-icon {
-  margin-right: 0.5rem;
-  font-size: 1rem; /* Proportional to header text */
+  margin-right: 0.75rem;
+  font-size: 1.2rem; /* Larger for visibility */
+  color: var(--color-text-primary);
+  font-weight: bold;
 }
 
 .group-label {
@@ -947,5 +954,6 @@ watch(() => [props.type, props.year], () => {
   margin: 0 auto;
   width: 100%;
   overflow: hidden; /* Prevent outer scrolling */
+  min-height: 0; /* Important for nested flexbox */
 }
 </style>

@@ -12,13 +12,15 @@
       @touchstart="startDrag"
     >
       <h4>Map Info</h4>
-      <button 
+      <BaseButton 
         @click.stop="toggleCollapse"
-        class="collapse-btn"
+        variant="ghost"
+        size="sm"
+        :icon="isCollapsed ? '▲' : '▼'"
         :aria-label="isCollapsed ? 'Expand info' : 'Collapse info'"
-      >
-        {{ isCollapsed ? '▲' : '▼' }}
-      </button>
+        :uppercase="false"
+        class="collapse-btn"
+      />
     </div>
     
     <!-- Info Content -->
@@ -100,6 +102,7 @@
 
 <script setup>
 import { ref, reactive, onMounted, computed, watch } from 'vue'
+import BaseButton from '../ui/BaseButton.vue'
 
 const props = defineProps({
   isMobile: Boolean,
@@ -399,25 +402,7 @@ window.addEventListener('resize', constrainToViewport)
 }
 
 .collapse-btn {
-  background: none;
-  border: none;
-  color: var(--color-text-disabled);
-  font-size: 0.625rem;
-  cursor: pointer;
-  padding: 0.25rem 0.5rem;
   margin-left: 0.5rem;
-  border-radius: 4px;
-  transition: all 0.2s ease;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-}
-
-.collapse-btn:hover {
-  background: var(--color-white-alpha-10);
-  color: var(--color-text-primary);
 }
 
 /* Info Content */

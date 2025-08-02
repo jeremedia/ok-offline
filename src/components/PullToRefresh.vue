@@ -104,6 +104,9 @@ onUnmounted(() => {
 .pull-to-refresh-container {
   position: relative;
   overflow: hidden;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .pull-to-refresh-indicator {
