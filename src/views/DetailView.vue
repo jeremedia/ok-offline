@@ -568,7 +568,6 @@ const initMap = async () => {
     detailMap.setView(coords, detailMap.getZoom())
     detailMarker = L.marker(coords, { icon: markerIcon }).addTo(detailMap)
     detailMarker.bindPopup(`
-      <strong>${getItemName(item.value)}</strong><br>
       <em>${locationString}</em>
     `).openPopup()
   } else {
@@ -585,11 +584,10 @@ const initMap = async () => {
     
     // Different message based on whether locations are hidden by policy or just not available
     const locationMessage = !canShow 
-      ? `${itemType} location not yet released`
+      ? `Location Not Released`
       : `${itemType} location not available`
     
     detailMarker.bindPopup(`
-      <strong>${getItemName(item.value)}</strong><br>
       <em>${locationMessage}</em>
     `).openPopup()
   }
@@ -861,8 +859,31 @@ watch(() => props.id, async () => {
   }
 }
 
+/* Mobile layout - ensure single column */
+@media (max-width: 767px) {
+  #detail-content {
+    display: flex !important; /* Override any grid layout */
+    flex-direction: column !important;
+    grid-template-columns: none !important;
+    gap: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    max-width: none !important;
+    margin: 0 !important;
+  }
+}
+
 /* Desktop layout - side by side columns */
 @media (min-width: 768px) {
+  #detail-content {
+    padding-bottom: 0 !important; /* Remove bottom padding to use full space */
+  }
+  
+  .detail-header {
+    margin-top: 1rem; /* Add breathing room from top nav */
+    margin-bottom: 1rem; /* Add breathing room from content */
+  }
+  
   .detail-columns {
     flex-direction: row;
     gap: 0;
@@ -872,7 +893,7 @@ watch(() => props.id, async () => {
   #detail-info {
     flex: 1 1 50%; /* grow: 1, shrink: 1, basis: 50% */
     width: auto;
-    padding: 24px;
+    padding: 24px 24px 0 24px; /* Remove bottom padding for full space usage */
     min-height: 0;
     box-sizing: border-box;
     overflow-y: auto;
@@ -890,6 +911,8 @@ watch(() => props.id, async () => {
     position: relative !important; /* Override sticky */
     top: auto !important;
     max-width: none !important;
+    margin: 0 0 16px 0 !important; /* Add bottom margin to prevent touching footer */
+    padding: 0 !important; /* Remove any padding causing misalignment */
   }
 }
 

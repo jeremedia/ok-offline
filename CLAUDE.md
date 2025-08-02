@@ -912,7 +912,7 @@ git stash pop  # Restore changes after
 ### Deployment Checklist
 Before pushing to main:
 - [ ] Ensure main branch is clean (`git status`)
-- [ ] Test locally with `npm run build && npm run preview`
+- [ ] Test locally with `npm run build` (preview not needed - starts long-running server)
 - [ ] Update CHANGELOG.md following [Keep a Changelog](https://keepachangelog.com/) format
 - [ ] **Update release notes in AboutSettings.vue** - The release notes are hardcoded in `src/components/settings/AboutSettings.vue` in the `releaseNotes` array
 - [ ] **Increment service worker cache version** in `public/sw.js` (e.g., `ok-offline-v18` → `ok-offline-v19`)

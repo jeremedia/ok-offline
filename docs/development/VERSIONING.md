@@ -189,8 +189,8 @@ Track version history through:
 4. **Test Production Build**
    ```bash
    npm run build
-   npm run preview
-   # Test your feature in production mode
+   npm run preview  # Optional - starts server, build test usually sufficient
+   # Test your feature in production mode (if running preview)
    # Verify service worker updates properly
    ```
 

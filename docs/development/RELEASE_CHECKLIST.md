@@ -70,8 +70,8 @@ This checklist ensures smooth, error-free releases to production.
 ### 4. Test Production Build
 ```bash
 - [ ] npm run build
-- [ ] npm run preview
-- [ ] Test all new features in production mode
+- [ ] npm run preview (optional - starts long-running server, build test sufficient)
+- [ ] Test all new features in production mode (if running preview)
 - [ ] Verify service worker updates (check DevTools)
 - [ ] Test offline functionality
 ```

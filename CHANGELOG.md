@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **🖥️ Desktop Detail View Layout** - Improved spacing and alignment
+  - Added proper breathing room between navigation and content (1rem margins)
+  - Fixed map container alignment with content area
+  - Optimized content area to use full available space
+  - All spacing follows 8px grid system (16px, 24px multiples)
+- **📱 Mobile Detail View** - Restored single-column layout
+  - Fixed content overflow issues caused by desktop grid layout bleeding through
+  - Ensured proper single-column display on mobile devices
+- **🗺️ Map Tooltips** - Cleaner, less redundant messaging
+  - Removed redundant camp names from tooltips (already shown in header)
+  - Changed "Camp location not yet released" to concise "Location Not Released"
+
 ## [3.25.0] - 2025-08-02
 
 ### Added

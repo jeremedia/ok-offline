@@ -159,6 +159,17 @@ onMounted(() => {
 // Release notes data
 const releaseNotes = [
   {
+    version: '3.25.1',
+    date: '2025-08-02',
+    added: [],
+    fixed: [
+      '🖥️ Desktop Detail View Layout - Improved spacing and alignment',
+      '📱 Mobile Detail View - Restored single-column layout',
+      '🗺️ Map Tooltips - Cleaner, less redundant messaging'
+    ],
+    changed: []
+  },
+  {
     version: '3.25.0',
     date: '2025-08-02',
     added: [
