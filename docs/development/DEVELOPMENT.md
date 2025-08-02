@@ -135,7 +135,7 @@ npm run dev -- --host
 - [ ] Update CHANGELOG.md if significant
 - [ ] Use conventional commit for version bump
 - [ ] Review console for errors
-- [ ] Test build locally: `npm run build && npm run preview`
+- [ ] Test build locally: `npm run build` (preview starts server, not needed for validation)
 
 ## Useful Commands
 
