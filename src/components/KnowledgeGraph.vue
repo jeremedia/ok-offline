@@ -124,6 +124,7 @@ import forceAtlas2 from 'graphology-layout-forceatlas2';
 import ForceSupervisor from 'graphology-layout-force/worker';
 import { knowledgeGraphService } from '../services/knowledgeGraphService.js';
 import { useGraphRenderer } from './graph/composables/useGraphRenderer.js';
+import { useGraphInteractions } from './graph/composables/useGraphInteractions.js';
 
 export default {
   name: 'KnowledgeGraph',
@@ -137,8 +138,6 @@ export default {
     const viewMode = ref('clusters');
     const selectedPool = ref('experience');
     const entitySearch = ref('');
-    const selectedNode = ref(null);
-    const selectedBridge = ref(null);
     const isFullscreen = ref(false);
     const stats = ref(null);
     
@@ -160,9 +159,16 @@ export default {
       cleanup: cleanupRenderer
     } = useGraphRenderer();
     
-    // Draggable functionality variables
-    let draggedNode = null;
-    let isDragging = false;
+    // Use the graph interactions composable
+    const {
+      selectedBridge,
+      selectedNode,
+      selectBridgeEntity,
+      selectPoolEntity,
+      clearBridgeSelection,
+      setupDraggableNodes,
+      setupClickHandlers
+    } = useGraphInteractions();
     
     // Computed properties - safe access with proper error handling
     // These automatically update when graph changes, triggering UI updates
@@ -234,39 +240,21 @@ export default {
       
       camera = renderer.getCamera();
       
-      // Setup draggable functionality
-      setupDraggableNodes();
+      // REFACTOR: Setup draggable functionality using composable
+      // Now passing graph and renderer as parameters
+      setupDraggableNodes(graph.value, renderer);
       
-      // Handle node clicks (only if not dragging)
-      const renderer = getRenderer();
-      if (!renderer) return;
-      
-      renderer.on('clickNode', (e) => {
-        if (isDragging) return; // Don't trigger click if we just finished dragging
-        
-        const node = graph.value.getNodeAttributes(e.node);
-        selectedNode.value = { ...node, id: e.node };
-        
-        // Special handling for different node types in clusters view
-        if (viewMode.value === 'clusters') {
-          if (node.nodeType === 'bridge') {
-            selectBridgeEntity(e.node, node);
-          } else if (node.nodeType === 'pool') {
-            selectPoolEntity(e.node, node);
-          }
-        }
+      // REFACTOR: Handle node clicks using composable click handlers
+      // The composable now manages all click interactions
+      setupClickHandlers(graph.value, renderer, (nodeId, nodeData) => {
+        // Update selected node for info panel
+        selectedNode.value = { ...nodeData, id: nodeId };
         
         // If in entity mode, load this entity's neighborhood
         if (viewMode.value === 'entity') {
-          entitySearch.value = e.node;
+          entitySearch.value = nodeId;
           loadEntityNeighborhood();
         }
-      });
-      
-      // Handle stage clicks (deselect)
-      renderer.on('clickStage', () => {
-        selectedNode.value = null;
-        clearBridgeSelection();
       });
       
       // Mark loading as complete
@@ -579,7 +567,11 @@ export default {
     // This is the core navigation function that maintains smooth UX
     const onViewModeChange = async () => {
       selectedNode.value = null;  // Clear any selected entity
-      clearBridgeSelection();     // Clear any bridge selection
+      // REFACTOR: Clear bridge selection using composable (need renderer)
+      const renderer = getRenderer();
+      if (renderer) {
+        clearBridgeSelection(graph.value, renderer);
+      }
       stopSmoothLayout();         // Stop any running layout
       loading.value = true;       // Show loading spinner
       
@@ -918,227 +910,8 @@ export default {
       }
     };
     
-    // Bridge entity selection - highlights connected pools and edges
-    const selectBridgeEntity = (bridgeId, bridgeNode) => {
-      // Clear any previous selection
-      clearBridgeSelection();
-      
-      // Store selected bridge
-      selectedBridge.value = { id: bridgeId, ...bridgeNode };
-      
-      // Highlight the selected bridge entity
-      graph.value.setNodeAttribute(bridgeId, 'size', (bridgeNode.size || 20) * 1.3);
-      graph.value.setNodeAttribute(bridgeId, 'borderColor', getVar('--color-accent') || '#FFD700');
-      
-      // Get connected pools for this bridge
-      const connectedPools = bridgeNode.pools || [];
-      
-      // Highlight connected pool nodes
-      connectedPools.forEach(pool => {
-        const poolNodeId = `pool_${pool}`;
-        if (graph.value.hasNode(poolNodeId)) {
-          // Make pool nodes larger and more prominent
-          const currentSize = graph.value.getNodeAttribute(poolNodeId, 'size') || 15;
-          graph.value.setNodeAttribute(poolNodeId, 'size', currentSize * 1.8);
-          graph.value.setNodeAttribute(poolNodeId, 'borderColor', getVar('--color-accent') || '#FFD700');
-          graph.value.setNodeAttribute(poolNodeId, 'selected', true);
-        }
-      });
-      
-      // Highlight edges connecting bridge to pools
-      graph.value.forEachEdge((edge, attributes, source, target) => {
-        if (source === bridgeId || target === bridgeId) {
-          // This edge connects to the selected bridge
-          graph.value.setEdgeAttribute(edge, 'size', (attributes.size || 1) * 2.5);
-          graph.value.setEdgeAttribute(edge, 'color', getVar('--color-accent') || '#FFD700');
-          graph.value.setEdgeAttribute(edge, 'selected', true);
-        } else {
-          // Dim other edges
-          graph.value.setEdgeAttribute(edge, 'color', getVar('--color-border-light') || '#ddd');
-          graph.value.setEdgeAttribute(edge, 'size', (attributes.originalSize || attributes.size || 1) * 0.4);
-        }
-      });
-      
-      // Dim non-connected nodes
-      graph.value.forEachNode((nodeId, attributes) => {
-        if (nodeId !== bridgeId && 
-            !connectedPools.some(pool => nodeId === `pool_${pool}`) &&
-            attributes.nodeType !== 'pool') {
-          // Dim bridge entities not involved in this selection
-          graph.value.setNodeAttribute(nodeId, 'color', getVar('--color-text-muted') || '#666');
-          graph.value.setNodeAttribute(nodeId, 'size', (attributes.originalSize || attributes.size || 15) * 0.6);
-        }
-      });
-      
-      // Refresh renderer to show changes
-      if (renderer) {
-        renderer.refresh();
-      }
-    };
-    
-    // Clear bridge entity selection
-    const clearBridgeSelection = () => {
-      if (!selectedBridge.value) return;
-      
-      selectedBridge.value = null;
-      
-      // Reset all node sizes and colors to original values
-      graph.value.forEachNode((nodeId, attributes) => {
-        // Reset size to original
-        if (attributes.originalSize) {
-          graph.value.setNodeAttribute(nodeId, 'size', attributes.originalSize);
-        }
-        
-        // Reset color to original
-        if (attributes.originalColor) {
-          graph.value.setNodeAttribute(nodeId, 'color', attributes.originalColor);
-        }
-        
-        // Reset border colors based on node type
-        if (attributes.nodeType === 'bridge') {
-          graph.value.setNodeAttribute(nodeId, 'borderColor', getVar('--color-text-primary') || '#fff');
-        } else if (attributes.nodeType === 'pool') {
-          graph.value.setNodeAttribute(nodeId, 'borderColor', getVar('--color-border-heavy') || '#666');
-        }
-        
-        // Remove selection flags
-        graph.value.removeNodeAttribute(nodeId, 'selected');
-      });
-      
-      // Reset all edge sizes and colors to original values
-      graph.value.forEachEdge((edge, attributes) => {
-        if (attributes.originalSize) {
-          graph.value.setEdgeAttribute(edge, 'size', attributes.originalSize);
-        }
-        if (attributes.originalColor) {
-          graph.value.setEdgeAttribute(edge, 'color', attributes.originalColor);
-        }
-        graph.value.removeEdgeAttribute(edge, 'selected');
-      });
-      
-      // Refresh renderer to show changes
-      if (renderer) {
-        renderer.refresh();
-      }
-    };
-    
-    // Pool entity selection - highlights connected bridge entities
-    const selectPoolEntity = (poolId, poolNode) => {
-      // Clear any previous selection
-      clearBridgeSelection();
-      
-      // Store selected pool
-      selectedBridge.value = { id: poolId, ...poolNode, isPool: true };
-      
-      // Highlight the selected pool
-      graph.value.setNodeAttribute(poolId, 'size', (poolNode.originalSize || 15) * 2.2);
-      graph.value.setNodeAttribute(poolId, 'borderColor', getVar('--color-accent') || '#FFD700');
-      
-      // Get the pool name from the node ID (remove 'pool_' prefix)
-      const poolName = poolId.replace('pool_', '');
-      
-      // Find all bridge entities connected to this pool
-      const connectedBridges = [];
-      graph.value.forEachNode((nodeId, attributes) => {
-        if (attributes.nodeType === 'bridge' && attributes.pools && attributes.pools.includes(poolName)) {
-          connectedBridges.push(nodeId);
-        }
-      });
-      
-      // Highlight connected bridge entities
-      connectedBridges.forEach(bridgeId => {
-        const bridgeNode = graph.value.getNodeAttributes(bridgeId);
-        // Make bridge nodes larger and more prominent
-        graph.value.setNodeAttribute(bridgeId, 'size', (bridgeNode.originalSize || 20) * 1.4);
-        graph.value.setNodeAttribute(bridgeId, 'borderColor', getVar('--color-accent') || '#FFD700');
-        graph.value.setNodeAttribute(bridgeId, 'selected', true);
-      });
-      
-      // Highlight edges connecting pool to bridges
-      graph.value.forEachEdge((edge, attributes, source, target) => {
-        if ((source === poolId && connectedBridges.includes(target)) ||
-            (target === poolId && connectedBridges.includes(source))) {
-          // This edge connects the selected pool to a bridge
-          graph.value.setEdgeAttribute(edge, 'size', (attributes.originalSize || 1) * 3);
-          graph.value.setEdgeAttribute(edge, 'color', getVar('--color-accent') || '#FFD700');
-          graph.value.setEdgeAttribute(edge, 'selected', true);
-        } else {
-          // Dim other edges
-          graph.value.setEdgeAttribute(edge, 'color', getVar('--color-border-light') || '#ddd');
-          graph.value.setEdgeAttribute(edge, 'size', (attributes.originalSize || attributes.size || 1) * 0.4);
-        }
-      });
-      
-      // Dim non-connected nodes
-      graph.value.forEachNode((nodeId, attributes) => {
-        if (nodeId !== poolId && 
-            !connectedBridges.includes(nodeId) &&
-            attributes.nodeType !== 'bridge') {
-          // Dim other pool nodes not involved in this selection
-          graph.value.setNodeAttribute(nodeId, 'color', getVar('--color-text-muted') || '#666');
-          graph.value.setNodeAttribute(nodeId, 'size', (attributes.originalSize || attributes.size || 15) * 0.6);
-        }
-      });
-      
-      // Refresh renderer to show changes
-      if (renderer) {
-        renderer.refresh();
-      }
-    };
-    
-    // Setup draggable nodes functionality
-    const setupDraggableNodes = () => {
-      const renderer = getRenderer();
-      if (!renderer) return;
-      
-      // On mouse down on a node - start dragging
-      renderer.on("downNode", (e) => {
-        isDragging = true;
-        draggedNode = e.node;
-        
-        // Optional: highlight the dragged node
-        graph.value.setNodeAttribute(draggedNode, "highlighted", true);
-        
-        // Disable camera movement while dragging
-        renderer.getCamera().disable();
-      });
-      
-      // On mouse move - update node position if dragging
-      renderer.getMouseCaptor().on("mousemovebody", (e) => {
-        if (!isDragging || !draggedNode) return;
-        
-        // Convert mouse position to graph coordinates
-        const pos = renderer.viewportToGraph(e);
-        
-        // Update node position
-        graph.value.setNodeAttribute(draggedNode, "x", pos.x);
-        graph.value.setNodeAttribute(draggedNode, "y", pos.y);
-        
-        // Prevent default camera movement
-        e.preventSigmaDefault();
-      });
-      
-      // On mouse up - stop dragging
-      renderer.getMouseCaptor().on("mouseup", () => {
-        if (draggedNode) {
-          // Remove highlight
-          graph.value.removeNodeAttribute(draggedNode, "highlighted");
-        }
-        
-        isDragging = false;
-        draggedNode = null;
-        
-        // Re-enable camera
-        renderer.getCamera().enable();
-      });
-      
-      // Disable autoscale on first interaction
-      renderer.getMouseCaptor().on("mousedown", () => {
-        if (!renderer.getCustomBBox()) {
-          renderer.setCustomBBox(renderer.getBBox());
-        }
-      });
-    };
+    // REFACTOR: Interaction functions moved to useGraphInteractions composable
+    // These are now imported from the composable above
     
     // Load stats
     const loadStats = async () => {
@@ -1206,13 +979,11 @@ export default {
       runBridgeLayout,
       startSmoothLayout,
       stopSmoothLayout,
-      setupDraggableNodes,
-      selectBridgeEntity,
-      selectPoolEntity,
-      clearBridgeSelection,
       selectedBridge,
       preventNodeOverlaps,
       knowledgeGraphService  // Expose service for template access
+      // REFACTOR: Removed setupDraggableNodes, selectBridgeEntity, selectPoolEntity, clearBridgeSelection
+      // These are now handled internally by the useGraphInteractions composable
     };
   }
 };
