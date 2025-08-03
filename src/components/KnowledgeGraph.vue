@@ -125,6 +125,7 @@ import ForceSupervisor from 'graphology-layout-force/worker';
 import { knowledgeGraphService } from '../services/knowledgeGraphService.js';
 import { useGraphRenderer } from './graph/composables/useGraphRenderer.js';
 import { useGraphInteractions } from './graph/composables/useGraphInteractions.js';
+import { useGraphLayouts } from './graph/composables/useGraphLayouts.js';
 
 export default {
   name: 'KnowledgeGraph',
@@ -144,7 +145,6 @@ export default {
     // Graph instances - initialize immediately to avoid null errors
     // Using Graphology Graph instance wrapped in Vue ref for reactivity
     const graph = ref(new Graph());
-    let forceSupervisor = null; // ForceSupervisor for smooth animated layout
     let camera = null; // Camera instance from renderer
     
     // Use the graph renderer composable
@@ -170,6 +170,20 @@ export default {
       setupDraggableNodes,
       setupClickHandlers
     } = useGraphInteractions();
+    
+    // Use the graph layouts composable
+    const {
+      runForceLayout,
+      runPoolOverviewLayout,
+      runBridgeLayout,
+      calculatePoolPositions,
+      calculateBridgePosition,
+      calculateBridgeColor,
+      startSmoothLayout: startSmoothLayoutFn,
+      stopSmoothLayout: stopSmoothLayoutFn,
+      preventNodeOverlaps,
+      cleanup: cleanupLayouts
+    } = useGraphLayouts();
     
     // Computed properties - safe access with proper error handling
     // These automatically update when graph changes, triggering UI updates
@@ -427,7 +441,7 @@ export default {
         
         // Apply layout before creating renderer
         circular.assign(graph.value);
-        runForceLayout();
+        runForceLayout(graph.value, camera);
         
         // Auto-fit to viewport after layout
         setTimeout(() => zoomToFit(graph.value), 200);
@@ -508,7 +522,7 @@ export default {
           graph.value.setNodeAttribute(data.center.id, 'x', 0);
           graph.value.setNodeAttribute(data.center.id, 'y', 0);
         }
-        runForceLayout();
+        runForceLayout(graph.value, camera);
         
         // Auto-fit to viewport after layout  
         setTimeout(() => zoomToFit(graph.value), 200);
@@ -524,46 +538,8 @@ export default {
       }
     };
     
-    // Run force-directed layout using ForceAtlas2 algorithm
-    // This creates the organic, cluster-like positioning of nodes
-    const runForceLayout = () => {
-      const settings = {
-        iterations: 50,           // Number of layout iterations
-        settings: {
-          gravity: 1,             // Pull nodes toward center
-          scalingRatio: 10,       // Spacing between nodes
-          slowDown: 1,            // Layout convergence speed
-          outboundAttractionDistribution: false  // Classic ForceAtlas2
-        }
-      };
-      
-      // Apply the layout algorithm to position all nodes
-      forceAtlas2.assign(graph.value, settings);
-      
-      // Center the camera view on the newly laid out graph
-      if (camera) {
-        camera.animatedReset();
-      }
-    };
-    
-    // Specialized layout for pool overview - more compact and viewport-fitted
-    const runPoolOverviewLayout = () => {
-      const settings = {
-        iterations: 30,           // Fewer iterations for faster processing
-        settings: {
-          gravity: 2,             // Stronger pull toward center
-          scalingRatio: 6,        // Tighter spacing between pools
-          slowDown: 2,            // Faster convergence
-          outboundAttractionDistribution: false
-        }
-      };
-      
-      // Apply the layout algorithm
-      forceAtlas2.assign(graph.value, settings);
-      
-      // Auto-fit to viewport after layout
-      setTimeout(() => zoomToFit(graph.value), 100);
-    };
+    // REFACTOR: Layout functions moved to useGraphLayouts composable
+    // These are now imported from the composable above
     
     // View mode change - handles switching between the three main views
     // This is the core navigation function that maintains smooth UX
@@ -639,259 +615,21 @@ export default {
       return knowledgeGraphService.getPoolColor(poolName);
     };
     
-    // Calculate semantic positions for Seven Pools based on their relationships
-    const calculatePoolPositions = (pools) => {
-      const positions = [];
-      const radius = 200; // Distance from center
-      
-      // Create meaningful arrangement based on semantic relationships
-      const semanticPositions = {
-        'manifest': { x: 0, y: radius },              // Bottom center - physical manifestation
-        'experience': { x: radius * 0.8, y: radius * 0.6 },   // Bottom-right - direct experience
-        'practical': { x: radius, y: 0 },            // Right - practical application
-        'relational': { x: radius * 0.6, y: -radius * 0.8 },  // Top-right - relationships
-        'idea': { x: 0, y: -radius },                // Top center - abstract concepts
-        'evolutionary': { x: -radius * 0.6, y: -radius * 0.8 }, // Top-left - evolution/growth
-        'emanation': { x: -radius, y: 0 }            // Left - transcendent emergence
-      };
-      
-      // Map each pool to its semantic position
-      pools.forEach(pool => {
-        if (semanticPositions[pool]) {
-          positions.push(semanticPositions[pool]);
-        } else {
-          // Fallback to circle position for any unknown pools
-          const i = pools.indexOf(pool);
-          const angle = (i * 2 * Math.PI) / pools.length;
-          positions.push({
-            x: Math.cos(angle) * radius,
-            y: Math.sin(angle) * radius
-          });
-        }
-      });
-      
-      return positions;
-    };
+    // REFACTOR: Position calculation functions moved to useGraphLayouts composable
     
-    // Calculate bridge position based on semantic relationships
-    const calculateBridgePosition = (bridgePools, poolPositions, allPools, bridgePower) => {
-      // For high-power bridges spanning many pools, place them centrally
-      if (bridgePools.length >= 5) {
-        // Central powerful bridges get positions in the core
-        const angle = Math.random() * Math.PI * 2;
-        const radius = 80 + (Math.random() * 40); // Core zone
-        return {
-          x: Math.cos(angle) * radius,
-          y: Math.sin(angle) * radius
-        };
-      }
-      
-      // For medium bridges spanning 3-4 pools, create bridge zones
-      if (bridgePools.length >= 3) {
-        let totalX = 0, totalY = 0, validPositions = 0;
-        
-        bridgePools.forEach(pool => {
-          const poolIndex = allPools.indexOf(pool);
-          if (poolIndex !== -1 && poolPositions[poolIndex]) {
-            totalX += poolPositions[poolIndex].x;
-            totalY += poolPositions[poolIndex].y;
-            validPositions++;
-          }
-        });
-        
-        if (validPositions > 0) {
-          // Position in the middle of connected pools, but pulled toward center
-          const avgX = totalX / validPositions;
-          const avgY = totalY / validPositions;
-          const pullFactor = 0.4; // Pull toward center to show bridging nature
-          
-          return {
-            x: avgX * (1 - pullFactor),
-            y: avgY * (1 - pullFactor)
-          };
-        }
-      }
-      
-      // For 2-pool bridges, position along the edge between pools
-      if (bridgePools.length === 2) {
-        const pool1Index = allPools.indexOf(bridgePools[0]);
-        const pool2Index = allPools.indexOf(bridgePools[1]);
-        
-        if (pool1Index !== -1 && pool2Index !== -1 && 
-            poolPositions[pool1Index] && poolPositions[pool2Index]) {
-          const pos1 = poolPositions[pool1Index];
-          const pos2 = poolPositions[pool2Index];
-          
-          // Position along the line between pools with some variation
-          const t = 0.4 + (Math.random() * 0.2); // Between 40-60% along the line
-          const offsetAngle = Math.random() * Math.PI * 2;
-          const offsetRadius = 15 + (Math.random() * 15);
-          
-          return {
-            x: pos1.x + (pos2.x - pos1.x) * t + Math.cos(offsetAngle) * offsetRadius,
-            y: pos1.y + (pos2.y - pos1.y) * t + Math.sin(offsetAngle) * offsetRadius
-          };
-        }
-      }
-      
-      // Fallback to center with small radius
-      const angle = Math.random() * Math.PI * 2;
-      const radius = 30 + (Math.random() * 30);
-      return {
-        x: Math.cos(angle) * radius,
-        y: Math.sin(angle) * radius
-      };
-    };
+    // REFACTOR: All layout algorithms and calculations moved to useGraphLayouts composable
+    // These functions are now imported from the composable above:
+    // - calculateBridgePosition, calculateBridgeColor, calculatePoolPositions
+    // - startSmoothLayout, stopSmoothLayout, runBridgeLayout
+    // - runForceLayout, runPoolOverviewLayout, preventNodeOverlaps
     
-    // Calculate bridge color based on pool combination
-    const calculateBridgeColor = (bridgePools) => {
-      if (bridgePools.length === 1) {
-        return knowledgeGraphService.getPoolColor(bridgePools[0]);
-      }
-      
-      // For multi-pool bridges, create a mixed color
-      // Use primary pool color but with accent mixing
-      const primaryPool = bridgePools[0];
-      const baseColor = knowledgeGraphService.getPoolColor(primaryPool);
-      
-      // For powerful multi-pool bridges, use a special enhanced color
-      if (bridgePools.length >= 4) {
-        return getVar('--color-accent') || '#FFD700'; // Gold for powerful bridges
-      } else if (bridgePools.length >= 3) {
-        return getVar('--color-primary') || baseColor; // Primary theme color
-      }
-      
-      return baseColor;
-    };
-    
-    // Smooth animated layout using ForceSupervisor
+    // Wrapper functions to adapt composable functions to local usage
     const startSmoothLayout = () => {
-      // Stop any existing layout
-      if (forceSupervisor) {
-        forceSupervisor.kill();
-        forceSupervisor = null;
-      }
-      
-      // Create ForceSupervisor with settings optimized for bridge entities
-      forceSupervisor = new ForceSupervisor(graph.value, {
-        attraction: 0.0005,      // Light attraction between connected nodes
-        repulsion: 0.15,         // Stronger repulsion to prevent overlaps
-        gravity: 0.01,           // Very light gravity toward center
-        inertia: 0.8,           // Smooth movement
-        maxIterations: 1000,     // Allow longer to converge
-        isNodeFixed: (nodeKey, attributes) => {
-          // Keep pool nodes fixed in their semantic positions
-          return attributes.nodeType === 'pool';
-        }
-      });
-      
-      // Start the animated layout
-      forceSupervisor.start();
+      return startSmoothLayoutFn(graph.value);
     };
     
-    // Stop smooth layout
     const stopSmoothLayout = () => {
-      if (forceSupervisor && forceSupervisor.isRunning()) {
-        forceSupervisor.stop();
-      }
-    };
-    
-    // Legacy bridge layout for fallback
-    const runBridgeLayout = () => {
-      // Apply minimal force layout to adjust only for overlap, preserve semantic positioning
-      const settings = {
-        iterations: 15, // Fewer iterations to preserve our semantic positioning
-        settings: {
-          gravity: 0.1,           // Very low gravity - trust our semantic positioning
-          scalingRatio: 25,       // More spacing for readability  
-          slowDown: 3,            // Fast convergence
-          outboundAttractionDistribution: true, // Better edge handling
-          linLogMode: false,      // Linear mode for smaller graphs
-          adjustSizes: true,      // Account for node sizes
-          edgeWeightInfluence: 0.3, // Moderate edge weight influence
-          strongGravityMode: false
-        }
-      };
-      
-      // Only apply light forces to reduce overlap while preserving semantic structure
-      forceAtlas2.assign(graph.value, settings);
-    };
-    
-    // Overlap prevention using collision detection and adjustment
-    const preventNodeOverlaps = () => {
-      if (!graph.value) return;
-      
-      const nodes = [];
-      graph.value.forEachNode((nodeId, attributes) => {
-        nodes.push({
-          id: nodeId,
-          x: attributes.x || 0,
-          y: attributes.y || 0,
-          size: attributes.size || 10,
-          fixed: attributes.nodeType === 'pool' // Keep pools in their semantic positions
-        });
-      });
-      
-      // Simple collision detection and resolution
-      const iterations = 10;
-      const minDistance = 5; // Minimum distance between node edges
-      
-      for (let iter = 0; iter < iterations; iter++) {
-        let adjusted = false;
-        
-        for (let i = 0; i < nodes.length; i++) {
-          for (let j = i + 1; j < nodes.length; j++) {
-            const nodeA = nodes[i];
-            const nodeB = nodes[j];
-            
-            // Skip if both nodes are fixed (pools)
-            if (nodeA.fixed && nodeB.fixed) continue;
-            
-            const dx = nodeB.x - nodeA.x;
-            const dy = nodeB.y - nodeA.y;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            const minRequiredDistance = (nodeA.size + nodeB.size) / 2 + minDistance;
-            
-            if (distance < minRequiredDistance && distance > 0) {
-              const overlap = minRequiredDistance - distance;
-              const moveDistance = overlap / 2;
-              
-              // Normalize direction vector
-              const moveX = (dx / distance) * moveDistance;
-              const moveY = (dy / distance) * moveDistance;
-              
-              // Move nodes apart (only move non-fixed nodes)
-              if (!nodeA.fixed) {
-                nodeA.x -= moveX;
-                nodeA.y -= moveY;
-                adjusted = true;
-              }
-              if (!nodeB.fixed) {
-                nodeB.x += moveX;
-                nodeB.y += moveY;
-                adjusted = true;
-              }
-            }
-          }
-        }
-        
-        // If no adjustments were made, we're done
-        if (!adjusted) break;
-      }
-      
-      // Apply the adjusted positions back to the graph
-      nodes.forEach(node => {
-        if (!node.fixed) { // Only update non-fixed nodes
-          graph.value.setNodeAttribute(node.id, 'x', node.x);
-          graph.value.setNodeAttribute(node.id, 'y', node.y);
-        }
-      });
-      
-      // Refresh renderer
-      const renderer = getRenderer();
-      if (renderer) {
-        renderer.refresh();
-      }
+      stopSmoothLayoutFn();
     };
     
     // REFACTOR: Interaction functions moved to useGraphInteractions composable
@@ -922,11 +660,8 @@ export default {
     });
     
     onUnmounted(() => {
-      // Clean up ForceSupervisor
-      if (forceSupervisor) {
-        forceSupervisor.kill();
-        forceSupervisor = null;
-      }
+      // Clean up layouts using composable (includes ForceSupervisor)
+      cleanupLayouts();
       
       // Clean up renderer using composable
       cleanupRenderer();
@@ -957,17 +692,12 @@ export default {
       toggleFullscreen,
       searchForEntity,
       getPoolDisplayColor,
-      calculatePoolPositions,
-      calculateBridgePosition,
-      calculateBridgeColor,
-      runBridgeLayout,
       startSmoothLayout,
       stopSmoothLayout,
       selectedBridge,
-      preventNodeOverlaps,
       knowledgeGraphService  // Expose service for template access
-      // REFACTOR: Removed setupDraggableNodes, selectBridgeEntity, selectPoolEntity, clearBridgeSelection
-      // These are now handled internally by the useGraphInteractions composable
+      // REFACTOR: Removed interaction functions - handled internally by useGraphInteractions composable
+      // REFACTOR: Removed layout functions - handled internally by useGraphLayouts composable
     };
   }
 };
