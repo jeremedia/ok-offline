@@ -18,10 +18,45 @@
     
     <!-- Graph Container -->
     <div ref="graphContainer" class="graph-container" :class="{ fullscreen: isFullscreen }">
-      <!-- Loading Spinner -->
-      <Transition name="fade">
-        <div v-if="loading" class="spinner"></div>
-      </Transition>
+      <!-- Phase 5: New View Component Architecture (when enabled) -->
+      <template v-if="useViewComponents">
+        <!-- Pool Overview View Component -->
+        <!-- <PoolOverviewGraph 
+          v-if="viewMode === 'clusters'"
+          :data-loader="loadPoolOverviewData"
+          :layout-config="{ algorithm: 'pools', preventOverlaps: true }"
+          @view-ready="onViewReady"
+          @selection-change="onSelectionChange"
+        /> -->
+        
+        <!-- Single Pool View Component -->
+        <!-- <SinglePoolGraph 
+          v-if="viewMode === 'pool'"
+          :data-loader="loadSinglePoolData"
+          :data-loader-params="{ poolName: selectedPool }"
+          :layout-config="{ algorithm: 'force', iterations: 300 }"
+          @view-ready="onViewReady"
+          @selection-change="onSelectionChange"
+        /> -->
+        
+        <!-- Entity Neighborhood View Component -->
+        <!-- <EntityNeighborhoodGraph 
+          v-if="viewMode === 'entity'"
+          :data-loader="loadEntityNeighborhoodData"
+          :data-loader-params="{ entityName: entitySearch }"
+          :layout-config="{ algorithm: 'force', iterations: 200 }"
+          @view-ready="onViewReady"
+          @selection-change="onSelectionChange"
+        /> -->
+      </template>
+      
+      <!-- Legacy Architecture (current implementation) -->
+      <template v-else>
+        <!-- Loading Spinner -->
+        <Transition name="fade">
+          <div v-if="loading" class="spinner"></div>
+        </Transition>
+      </template>
       
       <!-- About Panel - explains current view -->
       <GraphAboutPanel 
@@ -66,6 +101,11 @@ import GraphInfoPanel from './graph/ui/GraphInfoPanel.vue';
 import GraphAboutPanel from './graph/ui/GraphAboutPanel.vue';
 import GraphControls from './graph/ui/GraphControls.vue';
 
+// View Components (Phase 5b - will be created)
+// import PoolOverviewGraph from './graph/views/PoolOverviewGraph.vue';
+// import SinglePoolGraph from './graph/views/SinglePoolGraph.vue';
+// import EntityNeighborhoodGraph from './graph/views/EntityNeighborhoodGraph.vue';
+
 export default {
   name: 'KnowledgeGraph',
   
@@ -87,6 +127,10 @@ export default {
     const entitySearch = ref('');
     const isFullscreen = ref(false);
     const stats = ref(null);
+    
+    // Phase 5 Architecture: Feature flag for new view component system
+    // TODO: Remove this flag once Phase 5 migration is complete
+    const useViewComponents = ref(false); // Set to true to enable new architecture
     
     // Graph instances - initialize immediately to avoid null errors
     // Using Graphology Graph instance wrapped in Vue ref for reactivity
@@ -262,6 +306,58 @@ export default {
     // END: useGraphRenderer functions
     // REFACTOR: Above functions will be replaced by useGraphRenderer composable
     */
+    
+    // ========================================
+    // Phase 5 Architecture: Data Loader Functions
+    // These functions provide clean interfaces for view components
+    // ========================================
+    
+    /**
+     * Data loader for Pool Overview (clusters) view
+     * Returns bridge entities that demonstrate cross-pool connections
+     */
+    const loadPoolOverviewData = async (params = {}) => {
+      const { minPools = 2, limit = 15 } = params;
+      const bridgeData = await knowledgeGraphService.getBridgeEntities(minPools, limit);
+      return {
+        nodes: bridgeData.nodes || [],
+        edges: bridgeData.edges || []
+      };
+    };
+    
+    /**
+     * Data loader for Single Pool view
+     * Returns entities specific to the selected pool
+     */
+    const loadSinglePoolData = async (params = {}) => {
+      const { poolName = selectedPool.value, limit = 500 } = params;
+      const poolData = await knowledgeGraphService.getPoolGraph(poolName, limit);
+      return {
+        nodes: poolData.nodes || [],
+        edges: poolData.edges || []
+      };
+    };
+    
+    /**
+     * Data loader for Entity Neighborhood view
+     * Returns entities related to the specified entity
+     */
+    const loadEntityNeighborhoodData = async (params = {}) => {
+      const { entityName = entitySearch.value, depth = 2 } = params;
+      if (!entityName.trim()) {
+        return { nodes: [], edges: [] };
+      }
+      const entityData = await knowledgeGraphService.getEntityNeighborhood(entityName.trim(), depth);
+      return {
+        nodes: entityData.nodes || [],
+        edges: entityData.edges || []
+      };
+    };
+    
+    // ========================================
+    // Legacy Functions (Phase 5 transition)
+    // TODO: These will be removed once view components are active
+    // ========================================
     
     // Load bridge entities view - demonstrates enliteracy through cross-pool bridges
     const loadClusters = async () => {
@@ -609,7 +705,30 @@ export default {
       }
     };
     
-    // Lifecycle
+    // ========================================
+    // Phase 5 Architecture: Event Handlers for View Components
+    // ========================================
+    
+    /**
+     * Handle view component ready event
+     */
+    const onViewReady = (viewType) => {
+      console.log(`View component ready: ${viewType}`);
+      // Additional setup if needed when view components are fully loaded
+    };
+    
+    /**
+     * Handle selection changes from view components
+     */
+    const onSelectionChange = (event) => {
+      // Selection is already handled by useGraphSelection composable
+      // This event can be used for additional logic like analytics
+      console.log('Selection changed:', event);
+    };
+    
+    // ========================================
+    // Component Lifecycle
+    // ========================================
     onMounted(async () => {
       initializeGraph(graph.value);
       await loadClusters();
@@ -660,7 +779,16 @@ export default {
       startSmoothLayout,
       stopSmoothLayout,
       selectedBridge,
-      knowledgeGraphService  // Expose service for template access
+      knowledgeGraphService,  // Expose service for template access
+      
+      // Phase 5 Architecture: New view component system
+      useViewComponents,
+      loadPoolOverviewData,
+      loadSinglePoolData,
+      loadEntityNeighborhoodData,
+      onViewReady,
+      onSelectionChange
+      
       // REFACTOR: Removed interaction functions - handled internally by useGraphInteractions composable
       // REFACTOR: Removed layout functions - handled internally by useGraphLayouts composable
     };
