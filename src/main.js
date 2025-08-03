@@ -167,6 +167,11 @@ const routes = [
     component: KnowledgeGraphView
   },
   {
+    path: '/graph-test',
+    name: 'graph-test',
+    component: () => import('./components/graph/GraphRendererTest.vue')
+  },
+  {
     path: '/reload',
     beforeEnter: () => {
       // Force a full page reload

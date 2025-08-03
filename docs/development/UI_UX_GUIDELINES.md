@@ -136,22 +136,86 @@ Before implementing any change, ask:
 
 ## Color & Interaction Language
 
-### 1. Brand Color Palette
-- **Primary Red**: `#8B0000` (hover states, active elements)
-- **Background Dark**: `#2a2a2a` (panels, cards)
-- **Border Subtle**: `#444` (dividers, outlines)
-- **Text Primary**: `#fff` (main content)
-- **Text Secondary**: `#ccc` (labels)
-- **Text Tertiary**: `#999` (supporting info)
+### 1. Global Theme System
 
-### 2. Interaction States
-- **Default**: Neutral colors, clear affordances
-- **Hover**: Brand red background, white text
+The app features a comprehensive theming system with four distinct color schemes, each optimized for different environments and user preferences. All colors are defined as CSS variables that update instantly when themes change.
+
+#### Available Themes
+
+##### OKNOTOK (Dark) - Default
+- **Primary**: `#8B0000` (camp red)
+- **Accent**: `#FFD700` (gold)
+- **Background**: Dark (`#1a1a1a` base)
+- **Use Case**: Night-time viewing, original camp aesthetic
+
+##### Sparkle Pony (Light)
+- **Primary**: `#FF1493` (hot pink)
+- **Accent**: `#FF00FF` (electric magenta)
+- **Background**: Light (`#FFF0F5` lavender blush)
+- **Use Case**: Daylight viewing, fun and fabulous
+
+##### Khaki (Light) - Professional
+- **Primary**: `#007AFF` (iOS blue)
+- **Accent**: `#FF3B30` (iOS red)
+- **Background**: Pure white
+- **Use Case**: Rangers/staff, emergency use, maximum readability in harsh sunlight
+
+##### Mush Love (Dark)
+- **Primary**: `#8B008B` (dark magenta)
+- **Accent**: `#39FF14` (electric lime)
+- **Background**: Deep purple tones
+- **Use Case**: Psychedelic aesthetic while maintaining readability
+
+#### Theme Implementation
+
+```css
+/* All components use CSS variables */
+.component {
+  background: var(--color-bg-elevated);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-medium);
+}
+
+/* Variables update automatically on theme change */
+```
+
+```javascript
+// Theme switching in components
+import { switchTheme, currentTheme } from '@/stores/themeStore'
+
+// Switch theme
+switchTheme('sparkle')
+
+// React to theme changes
+watch(currentTheme, (theme) => {
+  // Update component if needed
+})
+```
+
+### 2. Color System Architecture
+
+#### CSS Variable Categories
+1. **Primary Colors**: `--color-primary`, `--color-accent`
+2. **Backgrounds**: `--color-bg-base`, `--color-bg-elevated`, `--color-bg-header`
+3. **Text**: `--color-text-primary`, `--color-text-secondary`, `--color-text-muted`
+4. **Borders**: `--color-border-light`, `--color-border-medium`, `--color-border-heavy`
+5. **Status**: `--color-success`, `--color-error`, `--color-warning`, `--color-info`
+6. **Special Effects**: Transparencies, overlays, glows
+
+#### Theme-Specific Considerations
+- **Light Themes**: Use colored overlays (purple/pink) instead of black
+- **Dark Themes**: Black overlays work well
+- **All Themes**: Maintain WCAG AA contrast ratios
+- **Mobile**: Touch targets remain 44px+ regardless of theme
+
+### 3. Interaction States
+- **Default**: Theme-appropriate neutral colors
+- **Hover**: Theme primary color background, contrasting text
 - **Active**: Maintained hover state
-- **Disabled**: Reduced opacity, no-cursor
-- **Focus**: Outline or border highlight
+- **Disabled**: Reduced opacity (0.6), no-cursor
+- **Focus**: Theme-specific focus ring color
 
-### 3. Transition Standards
+### 4. Transition Standards
 ```css
 transition: all 0.2s ease;
 ```
@@ -328,6 +392,45 @@ Start with mobile-optimized base experience, enhance for desktop:
 
 ---
 
+## Theme Design Guidelines
+
+### Creating New Themes
+
+When designing a new theme, follow these principles:
+
+1. **Color Selection**
+   - Choose a primary color that works for interactive elements
+   - Select an accent color with sufficient contrast
+   - Ensure text remains readable on all backgrounds
+   - Test color combinations in both bright and dark environments
+
+2. **Background Strategy**
+   - **Dark themes**: Use dark backgrounds (#000-#333) with light text
+   - **Light themes**: Use light backgrounds (#FFF-#F5F5F5) with dark text
+   - Consider the primary usage environment (daylight vs nighttime)
+
+3. **Overlay Colors**
+   - **Dark themes**: Black overlays with opacity
+   - **Light themes**: Colored overlays (match primary color family)
+   - Test modal and overlay readability
+
+4. **Special Considerations**
+   - Weather/dust colors should remain recognizable
+   - Status colors (success/error) need clear differentiation
+   - Map markers must be visible against map tiles
+   - Mobile touch targets maintain 44px minimum
+
+### Theme Testing Checklist
+
+- [ ] All text meets WCAG AA contrast requirements
+- [ ] Interactive elements have clear hover/active states
+- [ ] Form inputs are clearly defined and focused
+- [ ] Map elements remain visible and distinct
+- [ ] Weather indicators are immediately recognizable
+- [ ] Theme works in both bright sunlight and darkness
+- [ ] Mobile interface remains touch-friendly
+- [ ] Theme persists across page reloads
+
 ## Summary
 
 **World-class UI/UX design requires**:
@@ -337,6 +440,7 @@ Start with mobile-optimized base experience, enhance for desktop:
 4. **Cohesive visual language** that unifies the experience
 5. **User-centered approach** that prioritizes task completion
 6. **Technical excellence** in implementation details
+7. **Theme awareness** that adapts to user environment and preferences
 
 **Remember**: Great design is not about following rules blindly, but understanding principles deeply enough to apply them thoughtfully in service of user goals.
 

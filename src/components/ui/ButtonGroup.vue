@@ -18,6 +18,9 @@ defineProps({
 .button-group {
   display: flex;
   width: 100%;
+  border: 1px solid var(--color-border-heavy);
+  border-radius: 4px;
+  overflow: hidden;
 }
 
 /* Horizontal button group */
@@ -26,19 +29,13 @@ defineProps({
 }
 
 .button-group-horizontal > :deep(.btn) {
+  border: none;
   border-radius: 0;
-  margin-left: -1px;
-}
-
-.button-group-horizontal > :deep(.btn:first-child) {
-  margin-left: 0;
-  border-top-left-radius: 4px;
-  border-bottom-left-radius: 4px;
+  border-right: 1px solid var(--color-border-heavy);
 }
 
 .button-group-horizontal > :deep(.btn:last-child) {
-  border-top-right-radius: 4px;
-  border-bottom-right-radius: 4px;
+  border-right: none;
 }
 
 /* Vertical button group */
@@ -48,52 +45,31 @@ defineProps({
 
 .button-group-vertical > :deep(.btn) {
   width: 100%;
+  border: none;
   border-radius: 0;
-  margin-top: -1px;
-  margin-bottom: 0;
-}
-
-.button-group-vertical > :deep(.btn:first-child) {
-  margin-top: 0;
-  border-top-left-radius: 4px;
-  border-top-right-radius: 4px;
+  border-bottom: 1px solid var(--color-border-heavy);
 }
 
 .button-group-vertical > :deep(.btn:last-child) {
-  border-bottom-left-radius: 4px;
-  border-bottom-right-radius: 4px;
+  border-bottom: none;
 }
 
 /* Ensure proper stacking on hover */
-.button-group .btn:hover {
+.button-group > :deep(.btn:hover) {
   z-index: 1;
   position: relative;
 }
 
-/* Fix border overlaps for better appearance */
-.button-group-vertical > :deep(.btn) {
-  border-bottom-width: 0;
-}
-
-.button-group-vertical > :deep(.btn:last-child) {
-  border-bottom-width: 1px;
-}
-
-.button-group-horizontal > :deep(.btn) {
-  border-right-width: 0;
-}
-
-.button-group-horizontal > :deep(.btn:last-child) {
-  border-right-width: 1px;
-}
-
-/* Override any button-specific margins */
+/* Make buttons flex to fill container */
 .button-group > :deep(.btn) {
-  flex: 0 0 auto;
+  flex: 1 1 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* For full-width buttons in vertical groups */
-.button-group-vertical > :deep(.btn-full) {
+.button-group-vertical > :deep(.btn) {
   flex: 1 0 auto;
 }
 </style>
