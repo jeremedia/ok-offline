@@ -58,6 +58,7 @@ import { knowledgeGraphService } from '../services/knowledgeGraphService.js';
 import { useGraphRenderer } from './graph/composables/useGraphRenderer.js';
 import { useGraphInteractions } from './graph/composables/useGraphInteractions.js';
 import { useGraphLayouts } from './graph/composables/useGraphLayouts.js';
+import { useGraphSelection } from './graph/composables/useGraphSelection.js';
 
 // UI Components
 import GraphStats from './graph/ui/GraphStats.vue';
@@ -105,13 +106,20 @@ export default {
       cleanup: cleanupRenderer
     } = useGraphRenderer();
     
-    // Use the graph interactions composable
+    // Use the graph selection composable
     const {
       selectedBridge,
       selectedNode,
       selectBridgeEntity,
       selectPoolEntity,
       clearBridgeSelection,
+      clearAllSelections,
+      selectNode,
+      searchForEntity: searchForEntityFn
+    } = useGraphSelection();
+    
+    // Use the graph interactions composable (drag interactions only)
+    const {
       setupDraggableNodes,
       setupClickHandlers
     } = useGraphInteractions();
@@ -206,14 +214,27 @@ export default {
       
       // REFACTOR: Handle node clicks using composable click handlers
       // The composable now manages all click interactions
-      setupClickHandlers(graph.value, renderer, (nodeId, nodeData) => {
-        // Update selected node for info panel
-        selectedNode.value = { ...nodeData, id: nodeId };
-        
-        // If in entity mode, load this entity's neighborhood
-        if (viewMode.value === 'entity') {
-          entitySearch.value = nodeId;
-          loadEntityNeighborhood();
+      setupClickHandlers(graph.value, renderer, {
+        onNodeClick: (nodeId, nodeData) => {
+          // Handle selection based on node type
+          if (nodeData.nodeType === 'bridge') {
+            selectBridgeEntity(graph.value, renderer, nodeId, nodeData);
+          } else if (nodeData.nodeType === 'pool') {
+            selectPoolEntity(graph.value, renderer, nodeId, nodeData);
+          } else {
+            // Regular entity selection
+            selectNode(nodeId, nodeData);
+          }
+          
+          // If in entity mode, load this entity's neighborhood
+          if (viewMode.value === 'entity') {
+            entitySearch.value = nodeData.label || nodeId;
+            loadEntityNeighborhood();
+          }
+        },
+        onStageClick: () => {
+          // Clear all selections when clicking empty space
+          clearAllSelections(graph.value, renderer);
         }
       });
       
@@ -489,11 +510,10 @@ export default {
     // View mode change - handles switching between the three main views
     // This is the core navigation function that maintains smooth UX
     const onViewModeChange = async () => {
-      selectedNode.value = null;  // Clear any selected entity
-      // REFACTOR: Clear bridge selection using composable (need renderer)
+      // Clear all selections using centralized selection composable
       const renderer = getRenderer();
       if (renderer) {
-        clearBridgeSelection(graph.value, renderer);
+        clearAllSelections(graph.value, renderer);
       }
       stopSmoothLayout();         // Stop any running layout
       loading.value = true;       // Show loading spinner
@@ -546,13 +566,13 @@ export default {
     };
     
     // Search for entity connections - switches to entity neighborhood view
+    // Wrapper for searchForEntity from composable
     const searchForEntity = () => {
-      if (selectedNode.value) {
-        entitySearch.value = selectedNode.value.label;
-        viewMode.value = 'entity';
-        loadEntityNeighborhood();
-        selectedNode.value = null;
-      }
+      searchForEntityFn(
+        (term) => { entitySearch.value = term; },
+        (mode) => { viewMode.value = mode; },
+        loadEntityNeighborhood
+      );
     };
     
     // Get pool colors for the about panel legend

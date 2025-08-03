@@ -1088,14 +1088,9 @@ npm run build
    - Bug fix description
    ```
 
-2. **AboutSettings.vue** - Add release notes to `releaseNotes` array:
-   ```javascript
-   {
-     version: '3.26.0',
-     date: '2025-08-03',
-     added: ['Feature description'],
-     fixed: ['Bug fix description']
-   }
+2. **Release Notes JSONL** - Append ONE line to `public/data/release-notes.jsonl`:
+   ```bash
+   echo '{"version":"3.26.0","date":"2025-08-03","added":["🌊 Seven Pools Knowledge Graph"],"fixed":["🐛 Fixed search bug"],"changed":[],"security":[],"breaking":[],"technical":[]}' >> public/data/release-notes.jsonl
    ```
 
 3. **Service Worker** - Increment cache version in `public/sw.js`:
