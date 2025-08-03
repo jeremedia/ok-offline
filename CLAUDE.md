@@ -1166,7 +1166,7 @@ Without this, users won't receive updates due to aggressive browser caching.
 #### 2. Release Notes Synchronization
 Keep these three files in sync:
 - `CHANGELOG.md` - Official changelog
-- `AboutSettings.vue` - In-app release notes  
+- `public/data/release-notes.jsonl` - In-app release notes (append one line)
 - `public/sw.js` - Cache version with comment
 
 #### 3. Commit Message Conventions

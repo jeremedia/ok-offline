@@ -178,8 +178,9 @@ This checklist ensures smooth, error-free releases to production.
 
 ### Files to Update
 1. `CHANGELOG.md` - Change log
-2. `src/components/settings/AboutSettings.vue` - Release notes
+2. `public/data/release-notes.jsonl` - User-facing release notes (append one line)
 3. `public/sw.js` - Cache version (CRITICAL!)
+4. `public/data/features.json` - Features list (if new features added)
 
 ### Conventional Commits
 - `feat:` - New feature (minor version bump)

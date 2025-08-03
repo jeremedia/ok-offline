@@ -177,7 +177,7 @@ This pattern integrates with the deployment process:
 echo '{"version":"3.26.0","date":"2025-08-03","added":["🌊 Seven Pools Knowledge Graph"],"fixed":[],"changed":[],"security":[],"breaking":[],"technical":[]}' >> public/data/release-notes.jsonl
 
 # Commit all release files
-git add CHANGELOG.md src/components/settings/AboutSettings.vue public/sw.js public/data/release-notes.jsonl
+git add CHANGELOG.md public/data/release-notes.jsonl public/sw.js public/data/features.json
 ```
 
 ## Testing
