@@ -1103,6 +1103,31 @@ npm run build
    const CACHE_NAME = 'ok-offline-v34'; // Brief description of changes
    ```
 
+4. **Features List** - Update `public/data/features.json` for new features:
+   ```javascript
+   // For a new marquee feature (replaces previous marquee):
+   "marquee": {
+     "title": "New Feature Name",
+     "icon": "🎯",
+     "description": "Brief compelling description",
+     "version": "3.26.0",
+     "category": "category-name"
+   }
+   
+   // For regular features, add to the features array:
+   {
+     "title": "Feature Name",
+     "icon": "📱",
+     "description": "One-line description",
+     "details": [
+       "Detailed feature point 1",
+       "Detailed feature point 2"
+     ],
+     "version": "3.26.0",
+     "category": "category-name"
+   }
+   ```
+
 ##### Step 2: Create Release Commit
 ```bash
 # Stage all release files
@@ -1424,6 +1449,61 @@ import { logScreenshotReminder, documentVisualTest } from './utils/screenshotHel
 
 **IMPORTANT**: Never claim to "see" a screenshot without reading the file first. Be explicit when visual verification is needed.
 
+## Feature Tracking System
+
+### Overview
+The app uses a JSON-based feature tracking system (`/public/data/features.json`) that powers the Features tab in Settings. This provides users with a comprehensive, categorized view of all app capabilities while making it easy to keep documentation current.
+
+### Structure
+```javascript
+{
+  "marquee": {
+    // Single featured item shown prominently at top
+    "title": "Seven Pools Knowledge Graph",
+    "icon": "🌊",
+    "description": "Brief compelling description",
+    "version": "3.26.0",
+    "category": "discovery"
+  },
+  "features": [
+    // Array of all features with metadata
+    {
+      "title": "Feature Name",
+      "icon": "📱",
+      "description": "One-line summary",
+      "details": [
+        "Detailed capability 1",
+        "Detailed capability 2"
+      ],
+      "version": "1.0.0",  // Version introduced
+      "category": "navigation"
+    }
+  ],
+  "categories": {
+    // Category definitions with display order
+    "navigation": { "name": "Navigation", "icon": "🧭", "order": 2 }
+  }
+}
+```
+
+### Maintaining Features
+1. **New Features**: Add to `features` array with proper category and version
+2. **Major Features**: Can become the new `marquee` (replaces previous)
+3. **Categories**: Add new categories as needed with unique order numbers
+4. **Icons**: Use emojis that clearly represent the feature/category
+
+### Display Modes
+- **By Category**: Groups features by type (default view)
+- **All Features**: Grid view showing everything at once
+- Click any feature for detailed popup with full capabilities list
+
+### Benefits
+- Single source of truth for app features
+- Automatically stays in sync with releases
+- Professional "No Man's Sky" style interface
+- Easy to update as part of release process
+- Version tracking shows feature evolution
+
 ## Current Project Status (July 2025)
 
 ### ✅ Completed Features
@@ -1435,6 +1515,7 @@ import { logScreenshotReminder, documentVisualTest } from './utils/screenshotHel
 - **Data Management**: Favorites, visits, personal schedule
 - **Emergency Features**: Local storage for critical info
 - **Mobile UX**: Touch-optimized with recent improvements
+- **Feature Showcase**: Dynamic features list with 18+ major capabilities
 
 ### 🔧 Development Environment
 - **Frontend Dev**: http://100.104.170.10:8005 (Tailscale IP)

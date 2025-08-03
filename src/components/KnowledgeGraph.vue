@@ -56,38 +56,12 @@
       </Transition>
       
       <!-- About Panel - explains current view -->
-      <div class="about-panel">
-        <div v-if="viewMode === 'clusters'">
-          <h4>🌉 Bridge Entities - Enliteracy in Action</h4>
-          <p>This demonstrates how the dataset has become <strong>literate</strong> about Burning Man culture by showing the most powerful <strong>bridge entities</strong> - concepts that create meaning across multiple pools.</p>
-          
-          <p><strong>What you're seeing:</strong></p>
-          <ul class="bridge-explanation">
-            <li><strong>Large nodes:</strong> Bridge entities sized by "bridge power" - how well they connect different pools</li>
-            <li><strong>Small background nodes:</strong> The seven pools of enliteracy</li>
-            <li><strong>Golden/Accent colored:</strong> Most powerful bridges (4+ pools)</li>
-            <li><strong>Lines:</strong> Show which pools each bridge connects</li>
-          </ul>
-          
-          <p><strong>Bridge Power Formula:</strong><br>
-          <code>Pool_Count × √Frequency × Cross_Pool_Centrality</code></p>
-          
-          <p>Click any bridge to explore its connections across the knowledge graph. This reveals how the dataset understands cultural interconnections that span traditional boundaries.</p>
-        </div>
-        
-        <div v-if="viewMode === 'pool'">
-          <h4>{{ selectedPool.charAt(0).toUpperCase() + selectedPool.slice(1) }} Pool Deep Dive</h4>
-          <p>Exploring the <strong>{{ selectedPool }}</strong> pool with {{ nodeCount }} entities. Node size reflects how frequently each concept appears in the Burning Man knowledge base.</p>
-          <p><strong>Connections:</strong> Lines show relationships between concepts - thicker lines indicate stronger associations.</p>
-        </div>
-        
-        <div v-if="viewMode === 'entity'">
-          <h4>Entity Neighborhood</h4>
-          <p v-if="!entitySearch.trim()">Enter an entity name to explore its connections across all pools.</p>
-          <p v-else>Showing connections for "<strong>{{ entitySearch }}</strong>" within 2 degrees of separation. The red center node is your search target.</p>
-          <p><strong>Colors:</strong> Each node is colored by its pool classification. <strong>Distance:</strong> Shows how closely related each concept is to your search.</p>
-        </div>
-      </div>
+      <GraphAboutPanel 
+        :view-mode="viewMode"
+        :selected-pool="selectedPool"
+        :entity-search="entitySearch"
+        :node-count="nodeCount"
+      />
       
       <!-- Enhanced Info Panel - positioned within graph area -->
       <GraphInfoPanel 
@@ -120,13 +94,15 @@ import { useGraphLayouts } from './graph/composables/useGraphLayouts.js';
 // UI Components
 import GraphStats from './graph/ui/GraphStats.vue';
 import GraphInfoPanel from './graph/ui/GraphInfoPanel.vue';
+import GraphAboutPanel from './graph/ui/GraphAboutPanel.vue';
 
 export default {
   name: 'KnowledgeGraph',
   
   components: {
     GraphStats,
-    GraphInfoPanel
+    GraphInfoPanel,
+    GraphAboutPanel
   },
   
   setup() {
@@ -860,89 +836,9 @@ export default {
 
 /* REFACTOR: All .info-panel related styles moved to GraphInfoPanel.vue component */
 
-/* About Panel - explains current view */
-.about-panel {
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
-  background: var(--color-bg-elevated);
-  border: 1px solid var(--color-border-medium);
-  border-radius: 8px;
-  padding: 1.5rem;
-  max-width: 350px;
-  z-index: 20;
-  box-shadow: 0 4px 8px var(--color-shadow);
-}
+/* REFACTOR: All .about-panel related styles moved to GraphAboutPanel.vue component */
 
-.about-panel h4 {
-  margin: 0 0 1rem 0;
-  color: var(--color-text-primary);
-  font-size: 1.125rem;
-  font-weight: 600;
-}
-
-.about-panel p {
-  margin: 0.75rem 0;
-  font-size: 0.875rem;
-  color: var(--color-text-secondary);
-  line-height: 1.4;
-}
-
-.pool-legend {
-  list-style: none;
-  padding: 0;
-  margin: 0.5rem 0 0 0;
-}
-
-.pool-legend li {
-  display: flex;
-  align-items: center;
-  margin: 0.5rem 0;
-  font-size: 0.8rem;
-  color: var(--color-text-secondary);
-  line-height: 1.3;
-}
-
-.legend-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  margin-right: 0.5rem;
-  flex-shrink: 0;
-}
-
-.pool-legend strong {
-  color: var(--color-text-primary);
-  margin-right: 0.25rem;
-}
-
-.bridge-explanation {
-  list-style: none;
-  padding: 0;
-  margin: 0.5rem 0;
-}
-
-.bridge-explanation li {
-  margin: 0.5rem 0;
-  font-size: 0.8rem;
-  color: var(--color-text-secondary);
-  line-height: 1.3;
-  padding-left: 0.5rem;
-  border-left: 2px solid var(--color-border-light);
-}
-
-.bridge-explanation strong {
-  color: var(--color-text-primary);
-}
-
-.about-panel code {
-  background: var(--color-bg-base);
-  padding: 0.2rem 0.4rem;
-  border-radius: 3px;
-  font-size: 0.75rem;
-  color: var(--color-accent);
-  border: 1px solid var(--color-border-light);
-}
+/* REFACTOR: .pool-legend, .bridge-explanation, and related styles moved to GraphAboutPanel.vue */
 
 /* REFACTOR: .graph-stats styles moved to GraphStats.vue component */
 
@@ -974,21 +870,6 @@ export default {
   
   /* REFACTOR: .info-panel mobile styles moved to GraphInfoPanel.vue */
   
-  .about-panel {
-    position: static;
-    margin: 0.5rem;
-    max-width: none;
-    order: -1; /* Show above graph on mobile */
-  }
-  
-  .pool-legend li {
-    font-size: 0.75rem;
-    margin: 0.25rem 0;
-  }
-  
-  .legend-dot {
-    width: 10px;
-    height: 10px;
-  }
+  /* REFACTOR: .about-panel and .pool-legend mobile styles moved to GraphAboutPanel.vue */
 }
 </style>
