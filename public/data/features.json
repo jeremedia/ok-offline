@@ -1,0 +1,285 @@
+{
+  "marquee": {
+    "title": "Seven Pools Knowledge Graph",
+    "icon": "🌊",
+    "description": "Interactive visualization of Burning Man's data enliteracy - explore how camps, art, and events connect across semantic domains",
+    "version": "3.26.0",
+    "category": "discovery"
+  },
+  "features": [
+    {
+      "title": "AI-Powered Search",
+      "icon": "🔍",
+      "description": "Three intelligent search modes: Keyword (offline), Semantic (AI understands meaning), and Smart (hybrid approach)",
+      "details": [
+        "Semantic search understands context and meaning",
+        "Smart mode combines keyword and AI for best results",
+        "Similarity scores show match quality",
+        "24-hour result caching for performance",
+        "Shareable search URLs with parameters"
+      ],
+      "version": "3.2.0",
+      "category": "search"
+    },
+    {
+      "title": "Complete Theme System",
+      "icon": "🎨",
+      "description": "Four professionally designed themes optimized for different environments and preferences",
+      "details": [
+        "OKNOTOK: Dark theme with camp colors",
+        "Sparkle Pony: Bright Barbie-inspired for daylight",
+        "Khaki: High-contrast for Rangers & emergency staff",
+        "Mush Love: Psychedelic with electric accents",
+        "Instant switching with smooth transitions",
+        "Themes persist across sessions"
+      ],
+      "version": "3.22.0",
+      "category": "personalization"
+    },
+    {
+      "title": "Interactive Map with GIS Data",
+      "icon": "🗺️",
+      "description": "Professional-grade map with accurate Black Rock City street data and camp placement",
+      "details": [
+        "Accurate camp locations at street intersections",
+        "Toggle layers: camps, art, events, infrastructure",
+        "GIS data: streets, blocks, plazas, trash fence",
+        "Professional rotation (gate at bottom)",
+        "BRC address search (e.g., '7:30 & E')",
+        "Interactive legend with drag support",
+        "2025 satellite imagery basemap",
+        "Porto locations and medical stations"
+      ],
+      "version": "3.11.0",
+      "category": "navigation"
+    },
+    {
+      "title": "Weather & Dust Forecast",
+      "icon": "🌪️",
+      "description": "Real-time weather with intelligent dust predictions and protection recommendations",
+      "details": [
+        "Multi-source weather (Apple WeatherKit + OpenWeatherMap)",
+        "Smart dust level calculations",
+        "5-day detailed forecast",
+        "Light cycle countdowns (sunset, golden hour)",
+        "UV index and protection tips",
+        "Auto-refresh every 15 minutes",
+        "Works offline with cached data"
+      ],
+      "version": "2.0.0",
+      "category": "safety"
+    },
+    {
+      "title": "Infrastructure Navigation",
+      "icon": "🏛️",
+      "description": "Comprehensive guide to 13 core Burning Man infrastructure projects",
+      "details": [
+        "The Man, Temple, Center Camp locations",
+        "Airport, Medical, Rangers information",
+        "DPW, Arctica, DMZ, Hell Station",
+        "Historical context and operations",
+        "Interactive location maps",
+        "Educational content for new burners"
+      ],
+      "version": "3.16.0",
+      "category": "education"
+    },
+    {
+      "title": "Personal Schedule Builder",
+      "icon": "📅",
+      "description": "Build and manage your personal event schedule with conflict detection",
+      "details": [
+        "Add events to personal schedule",
+        "Automatic conflict warnings",
+        "Day-by-day schedule view",
+        "Time-sorted event lists",
+        "Export functionality",
+        "Persistent across sessions"
+      ],
+      "version": "1.0.0",
+      "category": "planning"
+    },
+    {
+      "title": "Favorites & Visit Tracking",
+      "icon": "⭐",
+      "description": "Track your Burning Man journey with favorites and visit notes",
+      "details": [
+        "Star camps, art, and events",
+        "Mark places as visited",
+        "Add personal notes to visits",
+        "Timestamp tracking",
+        "Filter views by favorites",
+        "Visual badges in lists"
+      ],
+      "version": "1.0.0",
+      "category": "personalization"
+    },
+    {
+      "title": "Custom Entries",
+      "icon": "✏️",
+      "description": "Create your own camps, art, and events that persist alongside official data",
+      "details": [
+        "Add custom camps, art installations, events",
+        "GPS coordinate or intersection placement",
+        "Visual indicators for custom entries",
+        "Survive API data refreshes",
+        "Full integration with search and maps"
+      ],
+      "version": "3.16.0",
+      "category": "personalization"
+    },
+    {
+      "title": "Mobile-First Design",
+      "icon": "📱",
+      "description": "Touch-optimized interface with swipe gestures and mobile navigation",
+      "details": [
+        "Bottom navigation for thumb reach",
+        "Swipe between main views",
+        "Pull-to-refresh on mobile",
+        "44px minimum touch targets",
+        "Responsive layouts",
+        "Haptic feedback support"
+      ],
+      "version": "3.2.0",
+      "category": "mobile"
+    },
+    {
+      "title": "Entity Discovery",
+      "icon": "🏷️",
+      "description": "Click entity tags to discover all related camps, art, and events",
+      "details": [
+        "Interactive entity tags with counts",
+        "Find all items sharing a theme",
+        "Popular entities section",
+        "Entity breakdown by type",
+        "URL state for shareable discoveries"
+      ],
+      "version": "3.12.0",
+      "category": "discovery"
+    },
+    {
+      "title": "Progressive Data Sync",
+      "icon": "🔄",
+      "description": "Smart multi-year data downloads with progress tracking",
+      "details": [
+        "Downloads all years (2023-2025) automatically",
+        "Real-time progress visualization",
+        "Background downloads while browsing",
+        "~10-15MB optimized download",
+        "Offline map tile packaging"
+      ],
+      "version": "3.1.0",
+      "category": "data"
+    },
+    {
+      "title": "Emergency Features",
+      "icon": "🚨",
+      "description": "Store critical information locally for emergencies",
+      "details": [
+        "Emergency contacts storage",
+        "Medical information and allergies",
+        "Medications list",
+        "Local storage only for privacy",
+        "Quick access from settings"
+      ],
+      "version": "1.0.0",
+      "category": "safety"
+    },
+    {
+      "title": "Location Services",
+      "icon": "📍",
+      "description": "Find yourself and calculate distances to destinations",
+      "details": [
+        "Current location on map",
+        "Distance calculations",
+        "Sort by proximity",
+        "Works with device GPS"
+      ],
+      "version": "1.0.0",
+      "category": "navigation"
+    },
+    {
+      "title": "Offline-First Architecture",
+      "icon": "📵",
+      "description": "Works completely offline once data is synced - perfect for the playa",
+      "details": [
+        "IndexedDB for data storage",
+        "Service Worker caching",
+        "PWA installation support",
+        "No connectivity required",
+        "Battery-efficient design"
+      ],
+      "version": "1.0.0",
+      "category": "core"
+    },
+    {
+      "title": "Smart Lists & Filtering",
+      "icon": "📋",
+      "description": "Powerful sorting and filtering options for camps, art, and events",
+      "details": [
+        "Sort by name, location, distance",
+        "Filter by sectors (2:00-3:00)",
+        "Collapsible section headers",
+        "Auto-open small groups",
+        "Live search filtering"
+      ],
+      "version": "1.0.0",
+      "category": "organization"
+    },
+    {
+      "title": "Keyboard Shortcuts",
+      "icon": "⌨️",
+      "description": "Quick navigation for power users",
+      "details": [
+        "Number keys 1-8 for navigation",
+        "F to toggle favorites",
+        "L for map layers",
+        "/ for shortcuts help"
+      ],
+      "version": "1.0.0",
+      "category": "productivity"
+    },
+    {
+      "title": "Global Location Privacy",
+      "icon": "🔒",
+      "description": "Smart handling of Burning Man's location data release policy",
+      "details": [
+        "2025 camps hidden until August 17",
+        "Historical years always visible",
+        "Automatic policy enforcement",
+        "Clear messaging when hidden"
+      ],
+      "version": "3.10.0",
+      "category": "privacy"
+    },
+    {
+      "title": "Onboarding Experience",
+      "icon": "🎯",
+      "description": "Beautiful welcome flow for first-time users",
+      "details": [
+        "Feature showcase",
+        "Automatic data sync",
+        "Quick start guide",
+        "Interactive tutorials"
+      ],
+      "version": "3.1.0",
+      "category": "onboarding"
+    }
+  ],
+  "categories": {
+    "discovery": { "name": "Discovery", "icon": "🔍", "order": 1 },
+    "navigation": { "name": "Navigation", "icon": "🧭", "order": 2 },
+    "personalization": { "name": "Personalization", "icon": "⭐", "order": 3 },
+    "safety": { "name": "Safety", "icon": "🚨", "order": 4 },
+    "planning": { "name": "Planning", "icon": "📅", "order": 5 },
+    "mobile": { "name": "Mobile", "icon": "📱", "order": 6 },
+    "search": { "name": "Search", "icon": "🔍", "order": 7 },
+    "education": { "name": "Education", "icon": "📚", "order": 8 },
+    "data": { "name": "Data", "icon": "💾", "order": 9 },
+    "organization": { "name": "Organization", "icon": "📋", "order": 10 },
+    "productivity": { "name": "Productivity", "icon": "⚡", "order": 11 },
+    "privacy": { "name": "Privacy", "icon": "🔒", "order": 12 },
+    "onboarding": { "name": "Onboarding", "icon": "🎯", "order": 13 },
+    "core": { "name": "Core", "icon": "🏗️", "order": 14 }
+  }
+}

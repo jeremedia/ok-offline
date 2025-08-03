@@ -90,26 +90,16 @@
       </div>
       
       <!-- Enhanced Info Panel - positioned within graph area -->
-      <div v-if="selectedNode" class="info-panel">
-        <h3>{{ selectedNode.label }}</h3>
-        <div class="info-details">
-          <p><strong>Pool:</strong> <span class="pool-badge" :style="{backgroundColor: knowledgeGraphService.getPoolColor(selectedNode.pool)}">{{ selectedNode.pool }}</span></p>
-          <p v-if="selectedNode.originalSize"><strong>Occurrences:</strong> {{ selectedNode.originalSize.toLocaleString() }}</p>
-          <p v-if="selectedNode.distance !== undefined"><strong>Distance from center:</strong> {{ selectedNode.distance }}</p>
-          <p v-if="selectedNode.isCenter"><strong>Role:</strong> <span class="center-badge">Search Center</span></p>
-        </div>
-        <div class="info-actions">
-          <button v-if="viewMode !== 'entity'" @click="searchForEntity" class="action-btn">Explore Connections</button>
-          <button @click="selectedNode = null" class="close-btn">Close</button>
-        </div>
-      </div>
+      <GraphInfoPanel 
+        :selected-node="selectedNode" 
+        :view-mode="viewMode"
+        @search-for-entity="searchForEntity"
+        @close="selectedNode = null"
+      />
     </div>
     
     <!-- Stats -->
-    <div v-if="nodeCount > 0" class="graph-stats">
-      <span>Nodes: {{ nodeCount }}</span>
-      <span>Edges: {{ edgeCount }}</span>
-    </div>
+    <GraphStats :node-count="nodeCount" :edge-count="edgeCount" />
   </div>
 </template>
 
@@ -127,8 +117,17 @@ import { useGraphRenderer } from './graph/composables/useGraphRenderer.js';
 import { useGraphInteractions } from './graph/composables/useGraphInteractions.js';
 import { useGraphLayouts } from './graph/composables/useGraphLayouts.js';
 
+// UI Components
+import GraphStats from './graph/ui/GraphStats.vue';
+import GraphInfoPanel from './graph/ui/GraphInfoPanel.vue';
+
 export default {
   name: 'KnowledgeGraph',
+  
+  components: {
+    GraphStats,
+    GraphInfoPanel
+  },
   
   setup() {
     // Utility function for theme CSS variables - shared across all functions
@@ -859,128 +858,7 @@ export default {
   to { transform: translate(-50%, -50%) rotate(360deg); }
 }
 
-.info-panel {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: var(--color-bg-elevated);
-  border: 1px solid var(--color-border-medium);
-  border-radius: 8px;
-  padding: 1.5rem;
-  min-width: 250px;
-  z-index: 20;
-  box-shadow: 0 4px 8px var(--color-shadow);
-}
-
-.info-panel h3 {
-  margin: 0 0 1rem 0;
-  color: var(--color-text-primary);
-  font-size: 1.25rem;
-  font-weight: 600;
-}
-
-.info-panel p {
-  margin: 0.5rem 0;
-  font-size: 0.875rem;
-  color: var(--color-text-secondary);
-  display: flex;
-  justify-content: space-between;
-}
-
-.info-panel p strong {
-  color: var(--color-text-primary);
-  font-weight: 600;
-}
-
-.info-panel button {
-  margin-top: 1rem;
-  padding: 0.5rem 1rem;
-  background: var(--color-bg-header);
-  color: var(--color-text-primary);
-  border: 1px solid var(--color-border-medium);
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.875rem;
-  font-weight: 600;
-  transition: all 0.2s ease;
-  width: 100%;
-}
-
-.info-panel button:hover {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-}
-
-/* Enhanced info panel styling */
-.info-details {
-  margin: 1rem 0;
-}
-
-.info-details p {
-  margin: 0.75rem 0;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.pool-badge {
-  color: white;
-  padding: 0.25rem 0.5rem;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.center-badge {
-  background: var(--color-accent);
-  color: white;
-  padding: 0.25rem 0.5rem;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-.info-actions {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 1rem;
-}
-
-.action-btn {
-  flex: 1;
-  padding: 0.5rem 1rem;
-  background: var(--color-accent);
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.875rem;
-  font-weight: 600;
-  transition: all 0.2s ease;
-}
-
-.action-btn:hover {
-  background: var(--color-primary);
-  transform: translateY(-1px);
-}
-
-.close-btn {
-  padding: 0.5rem 1rem;
-  background: var(--color-bg-header);
-  color: var(--color-text-primary);
-  border: 1px solid var(--color-border-medium);
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.875rem;
-  font-weight: 600;
-  transition: all 0.2s ease;
-}
-
-.close-btn:hover {
-  background: var(--color-border-medium);
-}
+/* REFACTOR: All .info-panel related styles moved to GraphInfoPanel.vue component */
 
 /* About Panel - explains current view */
 .about-panel {
@@ -1066,19 +944,7 @@ export default {
   border: 1px solid var(--color-border-light);
 }
 
-.graph-stats {
-  position: absolute;
-  bottom: 1rem;
-  left: 1rem;
-  background: var(--color-background-tertiary);
-  border: 1px solid var(--color-border-medium);
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  font-size: 0.875rem;
-  display: flex;
-  gap: 1rem;
-  color: var(--color-text-secondary);
-}
+/* REFACTOR: .graph-stats styles moved to GraphStats.vue component */
 
 /* Mobile optimizations */
 @media (max-width: 768px) {
@@ -1106,13 +972,7 @@ export default {
     display: none; /* Hide labels on mobile to save space */
   }
   
-  .info-panel {
-    top: auto;
-    bottom: 1rem;
-    right: 0.5rem;
-    left: 0.5rem;
-    min-width: auto;
-  }
+  /* REFACTOR: .info-panel mobile styles moved to GraphInfoPanel.vue */
   
   .about-panel {
     position: static;
