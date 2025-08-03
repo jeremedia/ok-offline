@@ -21,33 +21,38 @@
       <!-- Phase 5: New View Component Architecture (when enabled) -->
       <template v-if="useViewComponents">
         <!-- Pool Overview View Component -->
-        <!-- <PoolOverviewGraph 
+        <PoolOverviewGraph 
           v-if="viewMode === 'clusters'"
           :data-loader="loadPoolOverviewData"
-          :layout-config="{ algorithm: 'pools', preventOverlaps: true }"
+          :enable-smooth-layout="false"
+          :min-pools="2"
+          :limit="15"
           @view-ready="onViewReady"
           @selection-change="onSelectionChange"
-        /> -->
+          @smooth-layout-started="loading = false"
+        />
         
         <!-- Single Pool View Component -->
-        <!-- <SinglePoolGraph 
+        <SinglePoolGraph 
           v-if="viewMode === 'pool'"
           :data-loader="loadSinglePoolData"
-          :data-loader-params="{ poolName: selectedPool }"
-          :layout-config="{ algorithm: 'force', iterations: 300 }"
+          :pool-name="selectedPool"
+          :limit="500"
           @view-ready="onViewReady"
           @selection-change="onSelectionChange"
-        /> -->
+          @pool-changed="loading = false"
+        />
         
         <!-- Entity Neighborhood View Component -->
-        <!-- <EntityNeighborhoodGraph 
+        <EntityNeighborhoodGraph 
           v-if="viewMode === 'entity'"
           :data-loader="loadEntityNeighborhoodData"
-          :data-loader-params="{ entityName: entitySearch }"
-          :layout-config="{ algorithm: 'force', iterations: 200 }"
+          :entity-name="entitySearch"
+          :depth="2"
           @view-ready="onViewReady"
           @selection-change="onSelectionChange"
-        /> -->
+          @entity-changed="loading = false"
+        />
       </template>
       
       <!-- Legacy Architecture (current implementation) -->
@@ -101,10 +106,10 @@ import GraphInfoPanel from './graph/ui/GraphInfoPanel.vue';
 import GraphAboutPanel from './graph/ui/GraphAboutPanel.vue';
 import GraphControls from './graph/ui/GraphControls.vue';
 
-// View Components (Phase 5b - will be created)
-// import PoolOverviewGraph from './graph/views/PoolOverviewGraph.vue';
-// import SinglePoolGraph from './graph/views/SinglePoolGraph.vue';
-// import EntityNeighborhoodGraph from './graph/views/EntityNeighborhoodGraph.vue';
+// View Components (Phase 5b)
+import PoolOverviewGraph from './graph/views/PoolOverviewGraph.vue';
+import SinglePoolGraph from './graph/views/SinglePoolGraph.vue';
+import EntityNeighborhoodGraph from './graph/views/EntityNeighborhoodGraph.vue';
 
 export default {
   name: 'KnowledgeGraph',
@@ -113,7 +118,11 @@ export default {
     GraphStats,
     GraphInfoPanel,
     GraphAboutPanel,
-    GraphControls
+    GraphControls,
+    // View Components
+    PoolOverviewGraph,
+    SinglePoolGraph,
+    EntityNeighborhoodGraph
   },
   
   setup() {
@@ -130,7 +139,7 @@ export default {
     
     // Phase 5 Architecture: Feature flag for new view component system
     // TODO: Remove this flag once Phase 5 migration is complete
-    const useViewComponents = ref(false); // Set to true to enable new architecture
+    const useViewComponents = ref(true); // ENABLED: Using new view component architecture
     
     // Graph instances - initialize immediately to avoid null errors
     // Using Graphology Graph instance wrapped in Vue ref for reactivity
@@ -721,8 +730,12 @@ export default {
      * Handle selection changes from view components
      */
     const onSelectionChange = (event) => {
-      // Selection is already handled by useGraphSelection composable
-      // This event can be used for additional logic like analytics
+      // Update selectedNode for GraphInfoPanel based on selection event
+      if (event.type === 'node' && event.nodeData) {
+        selectedNode.value = { id: event.nodeId, ...event.nodeData };
+      } else if (event.type === 'clear') {
+        selectedNode.value = null;
+      }
       console.log('Selection changed:', event);
     };
     

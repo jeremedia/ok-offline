@@ -7,14 +7,14 @@
  * It validates the JSON structure and ensures proper formatting.
  * 
  * Usage:
- *   node scripts/add-release-notes.js <version> <date> [options]
+ *   node scripts/add-release-notes.mjs <version> <date> [options]
  * 
  * Examples:
  *   # Basic usage with minimal data
- *   node scripts/add-release-notes.js 3.26.0 2025-08-03 --added "🌊 Seven Pools Knowledge Graph"
+ *   node scripts/add-release-notes.mjs 3.26.0 2025-08-03 --added "🌊 Seven Pools Knowledge Graph"
  *   
  *   # Multiple items per category
- *   node scripts/add-release-notes.js 3.26.0 2025-08-03 \
+ *   node scripts/add-release-notes.mjs 3.26.0 2025-08-03 \
  *     --added "🌊 Seven Pools Knowledge Graph" \
  *     --added "🎯 Smart search with context" \
  *     --fixed "🐛 Fixed search bug" \
@@ -22,11 +22,15 @@
  *   
  *   # Using JSON input
  *   echo '{"version":"3.26.0","date":"2025-08-03","added":["🌊 Seven Pools"]}' | \
- *     node scripts/add-release-notes.js --json
+ *     node scripts/add-release-notes.mjs --json
  */
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const RELEASE_NOTES_FILE = path.join(__dirname, '../public/data/release-notes.jsonl');
 
@@ -41,8 +45,8 @@ function parseArgs() {
   
   // Parse standard arguments
   if (args.length < 2) {
-    console.error('Usage: add-release-notes.js <version> <date> [options]');
-    console.error('   or: add-release-notes.js --json < release.json');
+    console.error('Usage: add-release-notes.mjs <version> <date> [options]');
+    console.error('   or: add-release-notes.mjs --json < release.json');
     process.exit(1);
   }
   
@@ -196,6 +200,4 @@ async function main() {
 }
 
 // Run the script
-if (require.main === module) {
-  main();
-}
+main();

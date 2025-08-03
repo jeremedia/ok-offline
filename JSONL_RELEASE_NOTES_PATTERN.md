@@ -74,7 +74,28 @@ const openReleaseNotes = async () => {
 
 ## Adding New Releases
 
-### The Efficient Way
+### Method 1: Using the Script (Recommended)
+Use the provided script for safer, validated release additions:
+
+```bash
+# Basic usage
+node scripts/add-release-notes.mjs 3.26.0 2025-08-03 \
+  --added "🌊 Seven Pools Knowledge Graph" \
+  --fixed "🐛 Fixed search bug"
+
+# Multiple items per category
+node scripts/add-release-notes.mjs 3.26.0 2025-08-03 \
+  --added "🌊 Seven Pools Knowledge Graph" \
+  --added "🎯 Smart search with context" \
+  --fixed "🐛 Fixed search bug" \
+  --changed "⚡ Improved performance"
+
+# Using JSON input
+echo '{"version":"3.26.0","date":"2025-08-03","added":["🌊 Seven Pools"]}' | \
+  node scripts/add-release-notes.mjs --json
+```
+
+### Method 2: Direct Append (Quick & Simple)
 For new releases, simply append ONE line to the JSONL file:
 
 ```bash
@@ -180,14 +201,50 @@ echo '{"version":"3.26.0","date":"2025-08-03","added":["🌊 Seven Pools Knowled
 git add CHANGELOG.md public/data/release-notes.jsonl public/sw.js public/data/features.json
 ```
 
+## Scripts for Release Management
+
+### Available Scripts
+
+1. **add-release-notes.mjs** - Add new releases with validation
+2. **validate-release-notes.mjs** - Validate and display releases
+
+### Script Usage
+
+#### Validating Release Notes
+```bash
+# Show latest 5 releases (default)
+node scripts/validate-release-notes.mjs
+
+# Show all releases
+node scripts/validate-release-notes.mjs --show
+
+# Show latest N releases
+node scripts/validate-release-notes.mjs --latest 10
+
+# Fix any formatting issues
+node scripts/validate-release-notes.mjs --fix
+
+# Show specific version
+node scripts/validate-release-notes.mjs --version 3.26.0
+```
+
 ## Testing
 
-### Validate JSONL Format
+### Validate JSONL Format (Manual)
 ```bash
 # Check each line parses as valid JSON
 while IFS= read -r line; do
   echo "$line" | jq . >/dev/null || echo "Invalid JSON: $line"
 done < public/data/release-notes.jsonl
+```
+
+### Validate with Script
+```bash
+# Validate and show summary
+node scripts/validate-release-notes.mjs
+
+# Fix any issues automatically
+node scripts/validate-release-notes.mjs --fix
 ```
 
 ### Test Service Loading
