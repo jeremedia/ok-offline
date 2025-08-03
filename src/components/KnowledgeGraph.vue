@@ -145,6 +145,7 @@ export default {
     // Using Graphology Graph instance wrapped in Vue ref for reactivity
     const graph = ref(new Graph());
     let forceSupervisor = null; // ForceSupervisor for smooth animated layout
+    let camera = null; // Camera instance from renderer
     
     // Use the graph renderer composable
     const {
@@ -280,6 +281,7 @@ export default {
     
     // END: useGraphRenderer functions
     // REFACTOR: Above functions will be replaced by useGraphRenderer composable
+    */
     
     // Load bridge entities view - demonstrates enliteracy through cross-pool bridges
     const loadClusters = async () => {
@@ -604,29 +606,8 @@ export default {
       }
     };
     
-    // REFACTOR: Camera control functions - will be part of useGraphRenderer
-    // START: Camera controls
-    
-    // Reset view
-    const resetView = () => {
-      if (camera) {
-        camera.animatedReset();
-      }
-    };
-    
-    // Zoom to fit all nodes in viewport using @sigma/utils
-    const zoomToFit = () => {
-      if (!renderer || !graph.value) return;
-      
-      const nodes = graph.value.nodes();
-      if (nodes.length === 0) return;
-      
-      // Use the official sigma utils function to fit viewport to all nodes
-      fitViewportToNodes(renderer, nodes, { animate: true, duration: 500 });
-    };
-    
-    // END: Camera controls
-    // REFACTOR: Above camera functions will be part of useGraphRenderer
+    // REFACTOR: Camera control functions - now using useGraphRenderer composable
+    // The resetView and zoomToFit functions are imported from the composable
     
     // Toggle fullscreen
     const toggleFullscreen = () => {
@@ -634,9 +615,11 @@ export default {
       
       // Force renderer resize after DOM update
       setTimeout(() => {
+        const renderer = getRenderer();
         if (renderer) {
           renderer.refresh();
-          camera.animatedReset();
+          const cam = getCamera();
+          if (cam) cam.animatedReset();
         }
       }, 100);
     };
@@ -905,6 +888,7 @@ export default {
       });
       
       // Refresh renderer
+      const renderer = getRenderer();
       if (renderer) {
         renderer.refresh();
       }
