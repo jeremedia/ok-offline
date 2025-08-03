@@ -1,52 +1,20 @@
 <template>
   <div class="knowledge-graph">
-    <!-- Header with integrated controls -->
-    <header class="app-header">
-      <h1 class="graph-title">Seven Pools Knowledge Graph</h1>
-      
-      <div class="graph-controls">
-        <div class="control-group">
-          <label>View Mode:</label>
-          <select v-model="viewMode" @change="onViewModeChange">
-            <option value="clusters">Pool Overview</option>
-            <option value="pool">Single Pool</option>
-            <option value="entity">Entity Neighborhood</option>
-          </select>
-        </div>
-        
-        <div v-if="viewMode === 'pool'" class="control-group">
-          <label>Pool:</label>
-          <select v-model="selectedPool" @change="loadPoolGraph">
-            <option value="manifest">Manifest</option>
-            <option value="experience">Experience</option>
-            <option value="relational">Relational</option>
-            <option value="practical">Practical</option>
-            <option value="idea">Idea/Philosophical</option>
-            <option value="evolutionary">Evolutionary</option>
-            <option value="emanation">Emanation</option>
-          </select>
-        </div>
-        
-        <div v-if="viewMode === 'entity'" class="control-group">
-          <label>Entity:</label>
-          <input 
-            v-model="entitySearch" 
-            @keyup.enter="loadEntityNeighborhood"
-            placeholder="Enter entity name..."
-          >
-          <button @click="loadEntityNeighborhood">Search</button>
-        </div>
-        
-        <div class="control-group">
-          <button @click="zoomToFit">Zoom to Fit</button>
-          <button @click="resetView">Reset View</button>
-          <button v-if="viewMode === 'clusters'" @click="startSmoothLayout">Smooth Layout</button>
-          <button @click="toggleFullscreen">
-            {{ isFullscreen ? 'Exit Fullscreen' : 'Fullscreen' }}
-          </button>
-        </div>
-      </div>
-    </header>
+    <!-- Header Controls Component -->
+    <GraphControls
+      v-model:view-mode="viewMode"
+      v-model:selected-pool="selectedPool" 
+      v-model:entity-search="entitySearch"
+      :is-fullscreen="isFullscreen"
+      :loading="loading"
+      @view-mode-change="onViewModeChange"
+      @load-pool-graph="loadPoolGraph"
+      @load-entity-neighborhood="loadEntityNeighborhood"
+      @zoom-to-fit="zoomToFit"
+      @reset-view="resetView"
+      @start-smooth-layout="startSmoothLayout"
+      @toggle-fullscreen="toggleFullscreen"
+    />
     
     <!-- Graph Container -->
     <div ref="graphContainer" class="graph-container" :class="{ fullscreen: isFullscreen }">
@@ -95,6 +63,7 @@ import { useGraphLayouts } from './graph/composables/useGraphLayouts.js';
 import GraphStats from './graph/ui/GraphStats.vue';
 import GraphInfoPanel from './graph/ui/GraphInfoPanel.vue';
 import GraphAboutPanel from './graph/ui/GraphAboutPanel.vue';
+import GraphControls from './graph/ui/GraphControls.vue';
 
 export default {
   name: 'KnowledgeGraph',
@@ -102,7 +71,8 @@ export default {
   components: {
     GraphStats,
     GraphInfoPanel,
-    GraphAboutPanel
+    GraphAboutPanel,
+    GraphControls
   },
   
   setup() {
@@ -687,85 +657,7 @@ export default {
   color: var(--color-text-primary);
 }
 
-.app-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1rem;
-  background: var(--color-bg-elevated);
-  border-bottom: 1px solid var(--color-border-medium);
-  gap: 2rem;
-}
-
-.graph-title {
-  margin: 0;
-  font-size: 1.25rem;
-  color: var(--color-accent);
-  font-weight: 600;
-  flex-shrink: 0;
-}
-
-.graph-controls {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-  flex: 1;
-  justify-content: flex-end;
-}
-
-.control-group {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.control-group label {
-  font-size: 0.875rem;
-  color: var(--color-text-secondary);
-  text-transform: uppercase;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-}
-
-.control-group select,
-.control-group input {
-  padding: 0.5rem 0.75rem;
-  background: var(--color-bg-header);
-  color: var(--color-text-primary);
-  border: 1px solid var(--color-border-medium);
-  border-radius: 4px;
-  font-size: 0.875rem;
-  transition: all 0.2s ease;
-}
-
-.control-group select:hover,
-.control-group input:hover {
-  border-color: var(--color-border-heavy);
-}
-
-.control-group select:focus,
-.control-group input:focus {
-  outline: none;
-  border-color: var(--color-border-focus);
-}
-
-.control-group button {
-  padding: 0.5rem 1rem;
-  background: var(--color-bg-header);
-  color: var(--color-text-primary);
-  border: 1px solid var(--color-border-medium);
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.875rem;
-  font-weight: 600;
-  transition: all 0.2s ease;
-}
-
-.control-group button:hover {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-  color: var(--color-text-primary);
-}
+/* REFACTOR: Header, title, and control styles moved to GraphControls.vue component */
 
 .graph-container {
   flex: 1;
@@ -844,29 +736,7 @@ export default {
 
 /* Mobile optimizations */
 @media (max-width: 768px) {
-  .app-header {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 1rem;
-  }
-  
-  .graph-title {
-    font-size: 1.125rem;
-    text-align: center;
-  }
-  
-  .graph-controls {
-    justify-content: center;
-    gap: 0.5rem;
-  }
-  
-  .control-group {
-    flex: 1 0 auto;
-  }
-  
-  .control-group label {
-    display: none; /* Hide labels on mobile to save space */
-  }
+  /* REFACTOR: Mobile header and control styles moved to GraphControls.vue component */
   
   /* REFACTOR: .info-panel mobile styles moved to GraphInfoPanel.vue */
   
