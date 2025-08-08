@@ -1,10 +1,10 @@
 {
   "marquee": {
-    "title": "Seven Pools Knowledge Graph",
-    "icon": "🌊",
-    "description": "Interactive visualization of Burning Man's data enliteracy - explore how camps, art, and events connect across semantic domains",
-    "version": "3.26.0",
-    "category": "discovery"
+    "title": "Theme Authoring UI",
+    "icon": "🎨",
+    "description": "Create and customize your own themes with a visual editor - real-time preview, JSON import/export, and professional color picker",
+    "version": "3.27.0",
+    "category": "personalization"
   },
   "features": [
     {
@@ -34,6 +34,36 @@
         "Themes persist across sessions"
       ],
       "version": "3.22.0",
+      "category": "personalization"
+    },
+    {
+      "title": "Seven Pools Knowledge Graph",
+      "icon": "🌊",
+      "description": "Interactive visualization of Burning Man's data enliteracy across semantic domains",
+      "details": [
+        "Bridge entities connect multiple knowledge pools",
+        "Three view modes: Pool Overview, Single Pool, Entity Neighborhood",
+        "Smooth animated layouts with overlap prevention",
+        "Theme-aware colors and styling",
+        "Cached data for instant loading",
+        "Demonstrates cross-domain understanding"
+      ],
+      "version": "3.26.0",
+      "category": "discovery"
+    },
+    {
+      "title": "Theme Authoring UI",
+      "icon": "🎨",
+      "description": "Create and customize your own themes with a visual editor",
+      "details": [
+        "Real-time preview of color changes",
+        "Professional color picker with opacity",
+        "JSON import/export for sharing",
+        "Theme validation and error checking",
+        "Automatic CSS variable generation",
+        "Save and manage multiple custom themes"
+      ],
+      "version": "3.27.0",
       "category": "personalization"
     },
     {

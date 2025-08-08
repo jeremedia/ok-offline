@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ok-offline-v33'; // Desktop detail view improvements and mobile layout fixes
+const CACHE_NAME = 'ok-offline-v35'; // Theme authoring UI and Seven Pools enhancements
 const urlsToCache = [
   // Core app files
   '/',
