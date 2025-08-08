@@ -192,12 +192,18 @@ const router = createRouter({
   routes
 })
 
-// Initialize theme before creating app
-initializeTheme()
-
+// Create app first but don't mount yet
 const app = createApp(App)
 app.use(router)
-app.mount('#app')
+
+// Initialize theme asynchronously before mounting
+initializeTheme().then(() => {
+  app.mount('#app')
+}).catch(error => {
+  console.error('Failed to initialize theme:', error)
+  // Mount anyway with fallback
+  app.mount('#app')
+})
 
 // Hide the initial loader once Vue app is mounted
 // But delay slightly more to ensure smooth transition

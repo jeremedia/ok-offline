@@ -40,10 +40,30 @@ export function useToast() {
     }
   }
   
+  // Generic showToast function that routes to specific functions based on type
+  const showToast = (message, type = 'info', duration) => {
+    switch (type) {
+      case 'success':
+        showSuccess(message, duration)
+        break
+      case 'error':
+        showError(message, duration)
+        break
+      case 'warning':
+        showWarning(message, duration)
+        break
+      case 'info':
+      default:
+        showInfo(message, duration)
+        break
+    }
+  }
+  
   return {
     showSuccess,
     showError,
     showWarning,
-    showInfo
+    showInfo,
+    showToast
   }
 }

@@ -5,6 +5,29 @@
 
 /* CSS Variables - OKNOTOK Theme (Default) */
 :root {
+  /* Typography Variables */
+  --font-family-base: 'Berkeley Mono', monospace;
+  --font-family-display: 'Berkeley Mono', monospace;
+  --font-size-base: 16px;
+  --line-height-base: 1.5;
+  --letter-spacing-base: 0;
+  --heading-scale: 1.25;
+  
+  /* Font Weights */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+  
+  /* Computed Typography Sizes */
+  --font-size-sm: calc(var(--font-size-base) * 0.875);
+  --font-size-lg: calc(var(--font-size-base) * 1.125);
+  --font-size-xl: calc(var(--font-size-base) * 1.25);
+  --font-size-2xl: calc(var(--font-size-base) * 1.5);
+  --font-size-h1: calc(var(--font-size-base) * var(--heading-scale) * var(--heading-scale) * var(--heading-scale));
+  --font-size-h2: calc(var(--font-size-base) * var(--heading-scale) * var(--heading-scale));
+  --font-size-h3: calc(var(--font-size-base) * var(--heading-scale));
+  --font-size-h4: var(--font-size-base);
+  
   /* Primary Brand Colors */
   --color-primary: #8B0000;              /* OKNOTOK red */
   --color-primary-dark: #680000;         /* Darker red variant */
@@ -181,7 +204,10 @@ body {
   margin: 0;
   padding: 0;
   height: 100%;
-  font-family: 'Berkeley Mono', monospace;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
+  letter-spacing: var(--letter-spacing-base);
   background: var(--color-bg-base);
   color: var(--color-text-secondary);
   -webkit-font-smoothing: antialiased;
@@ -239,9 +265,9 @@ nav button, nav select {
   padding: 0.5rem 1rem;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 0.875rem;
-  font-family: 'Berkeley Mono', monospace;
-  font-weight: normal;
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family-base);
+  font-weight: var(--font-weight-normal);
   transition: background 0.2s;
 }
 
@@ -323,10 +349,10 @@ button:disabled {
 .filter-controls input[type="text"] {
   width: 100%;
   padding: 0.5rem;
-  font-size: 1rem;
+  font-size: var(--font-size-base);
   border: 1px solid var(--color-border-medium);
   border-radius: 4px;
-  font-family: 'Berkeley Mono', monospace;
+  font-family: var(--font-family-base);
 }
 
 /* Settings page styles */
@@ -356,9 +382,39 @@ input[type="email"],
 input[type="tel"],
 textarea,
 select {
-  font-family: 'Berkeley Mono', monospace;
-  font-size: 0.875rem;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-sm);
 }
+
+/* Heading Styles */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-family-display);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.2;
+  margin: 0 0 1rem 0;
+  color: var(--color-text-primary);
+}
+
+h1 { font-size: var(--font-size-h1); }
+h2 { font-size: var(--font-size-h2); }
+h3 { font-size: var(--font-size-h3); }
+h4 { font-size: var(--font-size-h4); }
+h5 { font-size: var(--font-size-base); }
+h6 { font-size: var(--font-size-sm); }
+
+/* Typography Utility Classes */
+.text-sm { font-size: var(--font-size-sm); }
+.text-base { font-size: var(--font-size-base); }
+.text-lg { font-size: var(--font-size-lg); }
+.text-xl { font-size: var(--font-size-xl); }
+.text-2xl { font-size: var(--font-size-2xl); }
+
+.font-normal { font-weight: var(--font-weight-normal); }
+.font-medium { font-weight: var(--font-weight-medium); }
+.font-bold { font-weight: var(--font-weight-bold); }
+
+.font-base { font-family: var(--font-family-base); }
+.font-display { font-family: var(--font-family-display); }
 
 /* Focus styles */
 button:focus,
