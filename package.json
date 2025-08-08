@@ -8,6 +8,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@sigma/node-border": "^3.0.0",
+    "@sigma/utils": "^3.0.0",
     "hammerjs": "^2.0.8",
     "jose": "^6.0.12",
     "jszip": "^3.10.1",
