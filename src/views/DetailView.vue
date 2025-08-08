@@ -34,6 +34,26 @@
           <div class="value">{{ item.description }}</div>
         </div>
         
+        <!-- Camp Image Gallery -->
+        <div class="detail-field image-gallery" v-if="props.type === 'camp' && item.images && item.images.length > 0">
+          <label>Photos</label>
+          <div class="image-gallery-container">
+            <div 
+              v-for="(image, index) in item.images" 
+              :key="index"
+              class="image-wrapper"
+            >
+              <ImageLoader
+                :src="image.thumbnail_url"
+                :camp-id="item.uid"
+                :alt="`${getItemName(item)} - Photo ${index + 1}`"
+                class="gallery-image"
+                :eager="index === 0"
+              />
+            </div>
+          </div>
+        </div>
+        
         <!-- Camp: Hometown, Location, Camp Size on one line -->
         <div class="detail-fields-row" v-if="props.type === 'camp' && (item.hometown || item.location_string || item.location?.dimensions)">
           <div class="detail-field" v-if="item.hometown">
@@ -258,6 +278,7 @@ import { addEventToSchedule, removeEventFromSchedule, isEventScheduled } from '.
 import { useAutoSync } from '../composables/useAutoSync'
 import SyncDialog from '../components/SyncDialog.vue'
 import { canShowLocations } from '../stores/globalState'
+import ImageLoader from '../components/ImageLoader.vue'
 
 const props = defineProps(['type', 'year', 'id'])
 const router = useRouter()
@@ -1382,4 +1403,48 @@ h2 {
 }
 
 /* Popup styles remain interactive */
+
+/* Image Gallery Styles */
+.image-gallery {
+  margin-bottom: 1rem;
+}
+
+.image-gallery-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.image-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 8px;
+  background: var(--color-background-secondary);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.image-wrapper:hover {
+  transform: scale(1.02);
+}
+
+.gallery-image {
+  width: 100%;
+  height: 100%;
+}
+
+/* Mobile styles for image gallery */
+@media (max-width: 600px) {
+  .image-gallery-container {
+    grid-template-columns: 1fr;
+    max-width: 100%;
+  }
+  
+  .image-wrapper {
+    aspect-ratio: 16/9;
+  }
+}
 </style>

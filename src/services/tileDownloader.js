@@ -22,7 +22,7 @@ const TILE_URL_TEMPLATE = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
 // API tile package URL
 const TILE_PACKAGE_URL = import.meta.env.PROD 
   ? 'https://offline.oknotok.com/api/v1/tiles/package.zip'
-  : 'http://100.104.170.10:3555/api/v1/tiles/package.zip'
+  : 'https://offline.oknotok.com/api/v1/tiles/package.zip'
 
 // Database version - must match leaflet.offline expectation
 const DB_VERSION = 2

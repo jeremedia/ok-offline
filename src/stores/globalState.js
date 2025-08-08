@@ -1,4 +1,5 @@
 import { reactive, computed } from 'vue'
+import { IS_DEV } from '@/config'
 
 // Global state for the application
 export const globalState = reactive({
@@ -58,7 +59,7 @@ export function updateShowLocationFlag(year = null) {
     // For 2025, apply the policy
     if (yr === '2025') {
       // In development, always show location data if available
-      if (import.meta.env.DEV) {
+      if (IS_DEV) {
         globalState.show_location_data['2025'] = globalState.location_data_available['2025']
         return
       }
@@ -142,7 +143,7 @@ export function shouldShowLocation(item) {
 
 // Debug function to log current state (dev only)
 export function debugLocationState() {
-  if (import.meta.env.DEV) {
+  if (IS_DEV) {
     console.log('🌍 Location Data State:', {
       available: globalState.location_data_available,
       showable: globalState.show_location_data,

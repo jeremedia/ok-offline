@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ok-offline-v29'; // Complete theme system overhaul with 4 themes
+const CACHE_NAME = 'ok-offline-v30'; // Added camp image display support
 const urlsToCache = [
   // Core app files
   '/',
@@ -198,6 +198,39 @@ self.addEventListener('fetch', event => {
     return;
   }
 
+  // Handle Burning Man CDN images
+  if (url.hostname.includes('burningman.widen.net')) {
+    event.respondWith(
+      caches.open(CACHE_NAME).then(cache => {
+        return cache.match(request).then(response => {
+          if (response) {
+            // Serve from cache if available
+            return response;
+          }
+          
+          // Network request with cache fallback
+          return fetch(request).then(networkResponse => {
+            // Only cache successful image responses
+            if (networkResponse.status === 200 && 
+                networkResponse.type === 'cors' &&
+                networkResponse.headers.get('content-type')?.includes('image')) {
+              const responseToCache = networkResponse.clone();
+              cache.put(request, responseToCache);
+            }
+            return networkResponse;
+          }).catch(() => {
+            // Return a placeholder response when offline
+            return new Response('', { 
+              status: 503, 
+              statusText: 'Image unavailable offline' 
+            });
+          });
+        });
+      })
+    );
+    return;
+  }
+  
   // Handle OpenStreetMap tiles for Black Rock City area
   if (url.hostname.includes('tile.openstreetmap.org')) {
     // console.log(`[SW] Tile request: ${url.href}`);

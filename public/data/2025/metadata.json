@@ -1,0 +1,12 @@
+{
+  "year": "2025",
+  "downloadedAt": "2025-08-08T14:47:25.908Z",
+  "counts": {
+    "camps": 1393,
+    "art": 317,
+    "events": 3994,
+    "enrichedEvents": 3699
+  },
+  "source": "Burning Man Public API",
+  "enriched": true
+}
