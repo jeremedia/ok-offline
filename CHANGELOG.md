@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.26.0] - 2025-08-08
+
+### Added
+- **🖼️ Camp Images Display** - View photos from camps that have uploaded images
+  - 928 camps have images available (66.6% of all camps)
+  - Images cached for true offline viewing using IndexedDB
+  - Lazy loading for performance with loading states
+  - Service worker caching for Burning Man CDN images
+- **📝 JSONL Release Notes Pattern** - Efficient release management system
+  - Append-only pattern eliminates context pollution
+  - Scripts for safe release note additions
+  - No more reading/writing 800+ lines to add one release
+- **📍 2025 Location Data** - Camp placements are now available!
+  - 1377 out of 1393 camps have location data (98.9%)
+  - OKNOTOK is at 3:30 & A on the Esplanade
+  - All data refreshed from official Burning Man API
+
 ### Fixed
 - **🖥️ Desktop Detail View Layout** - Improved spacing and alignment
   - Added proper breathing room between navigation and content (1rem margins)
@@ -19,6 +36,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **🗺️ Map Tooltips** - Cleaner, less redundant messaging
   - Removed redundant camp names from tooltips (already shown in header)
   - Changed "Camp location not yet released" to concise "Location Not Released"
+
+### Changed
+- **🔄 Data Management** - Refreshed all 2023-2025 data with latest API information
+  - Added metadata tracking for data downloads
+  - Updated event enrichment with location data
+
+### Technical
+- **🏗️ Image Service Architecture** - New service for offline image support
+  - ImageLoader component with lazy loading
+  - Two-tier caching: Service Worker + IndexedDB
+  - Cache management with size limits
 
 ## [3.25.0] - 2025-08-02
 
