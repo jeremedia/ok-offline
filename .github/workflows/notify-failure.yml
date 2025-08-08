@@ -1,0 +1,40 @@
+name: Notify on Deployment Failure
+
+on:
+  workflow_run:
+    workflows: ["Deploy to Production"]
+    types:
+      - completed
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    
+    steps:
+      - name: Send notification
+        run: |
+          echo "🚨 Deployment Failed!"
+          echo "Repository: ${{ github.repository }}"
+          echo "Failed workflow: ${{ github.event.workflow_run.name }}"
+          echo "Commit: ${{ github.event.workflow_run.head_commit.message }}"
+          echo "Author: ${{ github.event.workflow_run.head_commit.author.name }}"
+          echo "View run: ${{ github.event.workflow_run.html_url }}"
+      
+      # Uncomment and configure for Slack notifications
+      # - name: Slack Notification
+      #   uses: 8398a7/action-slack@v3
+      #   with:
+      #     status: failure
+      #     text: 'Deployment failed for OK-OFFLINE!'
+      #     webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+      #   if: always()
+      
+      # Uncomment and configure for Discord notifications  
+      # - name: Discord Notification
+      #   uses: sarisia/actions-status-discord@v1
+      #   with:
+      #     webhook: ${{ secrets.DISCORD_WEBHOOK }}
+      #     title: "Deployment Failed"
+      #     description: "OK-OFFLINE deployment failed on commit: ${{ github.event.workflow_run.head_sha }}"
+      #     color: 0xff0000

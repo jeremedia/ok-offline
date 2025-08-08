@@ -3,6 +3,7 @@
 [![Version](https://img.shields.io/badge/version-3.9.1-blue.svg)](https://github.com/jeremedia/ok-offline)
 [![Status](https://img.shields.io/badge/status-production-green.svg)](https://offline.oknotok.com)
 [![PWA](https://img.shields.io/badge/PWA-enabled-orange.svg)](https://offline.oknotok.com)
+[![Deploy](https://github.com/jeremedia/ok-offline/actions/workflows/deploy.yml/badge.svg)](https://github.com/jeremedia/ok-offline/actions/workflows/deploy.yml)
 
 Offline-first Progressive Web App for Burning Man participants. Access camps, art installations, events, and essential tools without connectivity in Black Rock City.
 
