@@ -1,0 +1,114 @@
+# Capacitor Build Workflow Example
+# Rename to capacitor-build.yml when ready to use
+
+name: Build Mobile Apps
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+    
+    - name: Setup Java
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Build web assets
+      run: npm run build
+      
+    - name: Sync Capacitor
+      run: |
+        npx cap sync android
+    
+    - name: Build Android APK
+      working-directory: android
+      run: |
+        ./gradlew assembleRelease
+    
+    - name: Upload APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: app-release.apk
+        path: android/app/build/outputs/apk/release/app-release-unsigned.apk
+
+  build-ios:
+    runs-on: macos-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Build web assets
+      run: npm run build
+      
+    - name: Sync Capacitor
+      run: |
+        npx cap sync ios
+    
+    - name: Build iOS app
+      working-directory: ios/App
+      run: |
+        xcodebuild -workspace App.xcworkspace \
+          -scheme App \
+          -sdk iphonesimulator \
+          -configuration Release \
+          -archivePath $PWD/build/App.xcarchive \
+          archive
+    
+    - name: Export IPA
+      working-directory: ios/App
+      run: |
+        xcodebuild -exportArchive \
+          -archivePath $PWD/build/App.xcarchive \
+          -exportOptionsPlist ExportOptions.plist \
+          -exportPath $PWD/build
+    
+    - name: Upload IPA
+      uses: actions/upload-artifact@v3
+      with:
+        name: App.ipa
+        path: ios/App/build/App.ipa
+
+  # Optional: Auto-deploy to TestFlight / Play Console
+  deploy:
+    needs: [build-android, build-ios]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    
+    steps:
+    - name: Download artifacts
+      uses: actions/download-artifact@v3
+    
+    # Add deployment steps here:
+    # - Google Play: fastlane or google-play-publisher
+    # - TestFlight: fastlane or app-store-connect-api
