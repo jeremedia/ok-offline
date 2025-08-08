@@ -17,7 +17,7 @@
         <span class="build-time">Built: {{ buildTime }}</span>
       </p>
       
-      <BaseButton @click="showReleaseNotes = true" variant="primary">
+      <BaseButton @click="openReleaseNotes" variant="primary" :loading="loadingReleases">
         📋 View Release Notes
       </BaseButton>
     </div>
@@ -126,6 +126,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { BaseButton } from '@/components/ui'
+import { loadReleaseNotes } from '@/services/releaseNotesService'
 
 // Props
 const props = defineProps({
@@ -148,16 +149,34 @@ const buildTime = new Date(__BUILD_TIME__).toLocaleDateString('en-US', {
 
 // Modal state
 const showReleaseNotes = ref(false)
+const loadingReleases = ref(false)
+const releaseNotes = ref([])
 
 // Auto-show release notes if prop is true
 onMounted(() => {
   if (props.showReleaseNotes) {
-    showReleaseNotes.value = true
+    openReleaseNotes()
   }
 })
 
-// Release notes data
-const releaseNotes = [
+// Open release notes modal
+const openReleaseNotes = async () => {
+  showReleaseNotes.value = true
+  if (releaseNotes.value.length === 0) {
+    loadingReleases.value = true
+    try {
+      releaseNotes.value = await loadReleaseNotes(20)
+    } catch (error) {
+      console.error('Failed to load release notes:', error)
+    } finally {
+      loadingReleases.value = false
+    }
+  }
+}
+
+// Legacy release notes - now loaded from JSONL
+// (keeping for reference during migration)
+const legacyReleaseNotes = [
   {
     version: '3.25.1',
     date: '2025-08-02',

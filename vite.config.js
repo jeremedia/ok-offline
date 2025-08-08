@@ -56,7 +56,18 @@ export default defineConfig({
     __BUILD_TIME__: JSON.stringify(new Date().toISOString())
   },
   server: {
-    port: 8000,
+    port: 8005,
+    strictPort: true,
+    host: '0.0.0.0',
+    allowedHosts: [
+      'localhost',
+      'dev.offline.oknotok.com',
+      '100.104.170.10',
+      '.oknotok.com' // This allows any subdomain of oknotok.com
+    ],
+    hmr: {
+      host: 'dev.offline.oknotok.com'
+    },
     proxy: {
       '/api/v1': {
         target: 'http://localhost:3020',

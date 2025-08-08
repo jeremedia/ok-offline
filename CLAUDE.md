@@ -13,7 +13,7 @@ Created by Jeremy Roush and brought to you by Mr. OK of OKNOTOK.
 - **Dev server is ALWAYS running** - The Vite development server is persistent and automatically hot-reloads all code changes
 - **Never attempt to start the dev server** - It's already running and trying to start it wastes time
 - **Code updates are instant** - Vite ensures browser code is updated immediately with every file save
-- **Access the app at**: http://100.104.170.10:8005
+- **Access the app at**: http://dev.offline.oknotok.com
 - No need to restart server for testing or development
 
 ## Current Architecture (Vue 3 + Vite)
@@ -387,8 +387,8 @@ Database: bm2025-db (version: 2)
 
 ## Development Server
 
-**IMPORTANT**: The development server runs on port 8005 with Tailscale IP.
-- **URL**: http://100.104.170.10:8005
+**IMPORTANT**: The development server runs on port 8005 (proxied via Caddy).
+- **URL**: http://dev.offline.oknotok.com
 - **Status**: Always available during development
 - **No need to start**: The server is persistent and ready to use
 - If you need to restart: `npm run dev -- --host 0.0.0.0 --port 8005`
@@ -1148,7 +1148,7 @@ import { logScreenshotReminder, documentVisualTest } from './utils/screenshotHel
 - **Mobile UX**: Touch-optimized with recent improvements
 
 ### 🔧 Development Environment
-- **Frontend Dev**: http://100.104.170.10:8005 (Tailscale IP)
+- **Frontend Dev**: http://dev.offline.oknotok.com
 - **API Dev**: http://100.104.170.10:3555/api/v1/ (Tailscale IP)
 - **Production**: https://offline.oknotok.com
 

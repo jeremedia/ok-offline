@@ -3,10 +3,10 @@
  * Integrates with Rails API backend for intelligent search capabilities
  */
 
+import { API_URLS } from '@/config'
+
 // API configuration
-const API_BASE_URL = import.meta.env.DEV 
-  ? 'http://localhost:3555/api/v1' 
-  : 'https://offline.oknotok.com/api/v1'
+const API_BASE_URL = API_URLS.VECTOR_API
 
 // Cache configuration
 const CACHE_DURATION = 24 * 60 * 60 * 1000 // 24 hours

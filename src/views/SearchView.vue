@@ -209,6 +209,7 @@ import { getFromCache } from '../services/storage.js'
 import { isFavorite, toggleFavorite as toggleFav } from '../services/favorites.js'
 import { getItemName, getItemLocation } from '../utils.js'
 import { getItemNotes } from '../services/visits.js'
+import { API_URLS } from '../config.js'
 import SearchInput from '../components/search/SearchInput.vue'
 import UnifiedSearchBar from '../components/search/UnifiedSearchBar.vue'
 import SearchOptions from '../components/search/SearchOptions.vue'
@@ -380,7 +381,7 @@ const fetchEntityCounts = async () => {
   if (!isOnline.value) return
   
   try {
-    const response = await fetch(`${import.meta.env.DEV ? 'http://localhost:3555' : 'https://offline.oknotok.com'}/api/v1/search/entity_counts?year=${year.value}`)
+    const response = await fetch(`${API_URLS.VECTOR_API}/search/entity_counts?year=${year.value}`)
     if (response.ok) {
       const data = await response.json()
       entityCounts.value = data.entity_type_counts || {}
@@ -397,9 +398,9 @@ const fetchPopularEntities = async () => {
   try {
     // Fetch popular themes, activities, and locations
     const [themeRes, activityRes, locationRes] = await Promise.all([
-      fetch(`${import.meta.env.DEV ? 'http://localhost:3555' : 'https://offline.oknotok.com'}/api/v1/search/entity_counts?entity_type=theme&limit=8&year=${year.value}`),
-      fetch(`${import.meta.env.DEV ? 'http://localhost:3555' : 'https://offline.oknotok.com'}/api/v1/search/entity_counts?entity_type=activity&limit=6&year=${year.value}`),
-      fetch(`${import.meta.env.DEV ? 'http://localhost:3555' : 'https://offline.oknotok.com'}/api/v1/search/entity_counts?entity_type=location&limit=4&year=${year.value}`)
+      fetch(`${API_URLS.VECTOR_API}/search/entity_counts?entity_type=theme&limit=8&year=${year.value}`),
+      fetch(`${API_URLS.VECTOR_API}/search/entity_counts?entity_type=activity&limit=6&year=${year.value}`),
+      fetch(`${API_URLS.VECTOR_API}/search/entity_counts?entity_type=location&limit=4&year=${year.value}`)
     ])
     
     if (themeRes.ok && activityRes.ok && locationRes.ok) {
