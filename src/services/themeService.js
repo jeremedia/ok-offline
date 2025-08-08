@@ -6,14 +6,82 @@
  * - Sparkle Pony (Light): "Barbie" theme - bright, magical, fabulous with light backgrounds  
  * - Khaki (Light): Desert earth tones - practical and sun-readable
  * - Mush Love (Dark): Psychedelic and groovy - but toned down for usability
+ * - Additional themes can be added to themes.json
  */
 
-// Theme definitions with all CSS variable values
-export const themes = {
+// Theme storage - will be populated from JSON
+export let themes = {};
+
+// Default theme data (fallback if JSON fails to load)
+// Available fonts for the typography system
+export const availableFonts = {
+  'berkeley-mono': { 
+    name: 'Berkeley Mono', 
+    type: 'monospace', 
+    bundled: true,
+    fallback: 'monospace',
+    description: 'Current default - Clean monospace for technical precision'
+  },
+  'system-ui': { 
+    name: 'System UI', 
+    type: 'sans-serif', 
+    system: true,
+    fallback: 'system-ui, -apple-system, sans-serif',
+    description: 'Native system font - Fast and familiar'
+  },
+  'inter': { 
+    name: 'Inter', 
+    type: 'sans-serif', 
+    googleFont: 'Inter:400,500,700',
+    fallback: 'system-ui, sans-serif',
+    description: 'Modern sans-serif optimized for screens'
+  },
+  'work-sans': { 
+    name: 'Work Sans', 
+    type: 'sans-serif', 
+    googleFont: 'Work+Sans:400,500,700',
+    fallback: 'system-ui, sans-serif',
+    description: 'Friendly and readable - great for long content'
+  }
+}
+
+// Display fonts for headers (optional)
+export const displayFonts = {
+  'none': { name: 'Same as base', description: 'Use base font for everything' },
+  'bebas-neue': { 
+    name: 'Bebas Neue', 
+    type: 'display', 
+    googleFont: 'Bebas+Neue',
+    fallback: 'system-ui, sans-serif',
+    description: 'Bold condensed - perfect for impactful headers'
+  },
+  'oswald': { 
+    name: 'Oswald', 
+    type: 'display', 
+    googleFont: 'Oswald:400,500,700',
+    fallback: 'system-ui, sans-serif',
+    description: 'Strong and modern display font'
+  }
+}
+
+const defaultThemes = {
   oknotok: {
     id: 'oknotok',
     name: 'OKNOTOK',
     description: 'Red, black, and gold - the original camp theme',
+    typography: {
+      fontFamily: 'berkeley-mono',
+      fontFamilyDisplay: 'none',
+      baseFontSize: '16',
+      baseLineHeight: '1.5',
+      letterSpacing: '0',
+      headingScale: '1.25',
+      fontWeight: {
+        normal: '400',
+        medium: '500',
+        bold: '700'
+      }
+    },
     colors: {
       // Primary Brand Colors
       primary: '#8B0000',              // OKNOTOK red
@@ -77,6 +145,19 @@ export const themes = {
     id: 'sparkle',
     name: 'Sparkle Pony',
     description: 'Bright, magical, and fabulous - Barbie vibes!',
+    typography: {
+      fontFamily: 'work-sans',
+      fontFamilyDisplay: 'none',
+      baseFontSize: '16',
+      baseLineHeight: '1.6',
+      letterSpacing: '0.01em',
+      headingScale: '1.35',
+      fontWeight: {
+        normal: '400',
+        medium: '500',
+        bold: '700'
+      }
+    },
     colors: {
       // Primary Brand Colors
       primary: '#FF1493',              // Deep Pink (Barbie Pink)
@@ -140,6 +221,19 @@ export const themes = {
     id: 'khaki',
     name: 'Khaki',
     description: 'RANGERS/STAFF: Max contrast professional theme for emergency use',
+    typography: {
+      fontFamily: 'system-ui',
+      fontFamilyDisplay: 'none',
+      baseFontSize: '16',
+      baseLineHeight: '1.4',
+      letterSpacing: '0',
+      headingScale: '1.2',
+      fontWeight: {
+        normal: '400',
+        medium: '500',
+        bold: '700'
+      }
+    },
     // KHAKI THEME - RANGER & STAFF OPTIMIZED
     // ====================================
     // This theme is specifically designed for Black Rock Rangers, Medical, Law Enforcement, 
@@ -229,6 +323,19 @@ export const themes = {
     id: 'mush',
     name: 'Mush Love',
     description: 'Psychedelic and groovy - but readable!',
+    typography: {
+      fontFamily: 'inter',
+      fontFamilyDisplay: 'oswald',
+      baseFontSize: '16',
+      baseLineHeight: '1.6',
+      letterSpacing: '0.02em',
+      headingScale: '1.4',
+      fontWeight: {
+        normal: '400',
+        medium: '500',
+        bold: '700'
+      }
+    },
     colors: {
       // Primary Brand Colors
       primary: '#8B008B',              // Dark Magenta
@@ -290,11 +397,48 @@ export const themes = {
 };
 
 /**
+ * Load themes from JSON file
+ * @returns {Promise<Object>} Theme definitions
+ */
+export async function loadThemes() {
+  try {
+    // In development, try API first
+    if (import.meta.env.DEV) {
+      try {
+        const response = await fetch('http://100.104.170.10:3555/api/v1/themes');
+        
+        if (response.ok) {
+          const data = await response.json();
+          themes = data.themes || {};
+          console.log(`Loaded ${Object.keys(themes).length} themes from API`);
+          return themes;
+        }
+      } catch (apiError) {
+        console.warn('Failed to load themes from API, falling back to static file:', apiError);
+      }
+    }
+    
+    // Fallback to static file
+    const response = await fetch('/data/themes.json');
+    const data = await response.json();
+    themes = data.themes || defaultThemes;
+    console.log(`Loaded ${Object.keys(themes).length} themes from themes.json`);
+    return themes;
+  } catch (error) {
+    console.error('Failed to load themes from JSON, using defaults:', error);
+    themes = defaultThemes;
+    return themes;
+  }
+}
+
+/**
  * Apply a theme by updating CSS variables
  * @param {string} themeName - The theme ID to apply
  */
 export function applyTheme(themeName) {
-  const theme = themes[themeName];
+  // If themes haven't loaded yet, try defaults
+  const availableThemes = Object.keys(themes).length > 0 ? themes : defaultThemes;
+  const theme = availableThemes[themeName];
   if (!theme) {
     console.error(`Theme "${themeName}" not found`);
     return;
@@ -445,11 +589,112 @@ export function applyTheme(themeName) {
   root.style.setProperty('--color-dark-red', colors.primaryDark);
   root.style.setProperty('--color-dark-red-original', colors.primary);
   
+  // Apply typography if available
+  if (theme.typography) {
+    applyTypography(theme.typography);
+  }
+  
   // Save preference
   localStorage.setItem('selectedTheme', themeName);
   
   // Dispatch event for other components to react
   window.dispatchEvent(new CustomEvent('themeChanged', { detail: { theme: themeName } }));
+}
+
+/**
+ * Apply typography settings to CSS variables
+ * @param {Object} typography - Typography configuration object
+ */
+export function applyTypography(typography) {
+  const root = document.documentElement;
+  
+  // Get font families with fallbacks
+  const baseFont = getFontFamily(typography.fontFamily);
+  const displayFont = typography.fontFamilyDisplay === 'none' 
+    ? baseFont 
+    : getFontFamily(typography.fontFamilyDisplay);
+  
+  // Set base typography variables
+  root.style.setProperty('--font-family-base', baseFont);
+  root.style.setProperty('--font-family-display', displayFont);
+  root.style.setProperty('--font-size-base', `${typography.baseFontSize}px`);
+  root.style.setProperty('--line-height-base', typography.baseLineHeight);
+  root.style.setProperty('--letter-spacing-base', typography.letterSpacing);
+  root.style.setProperty('--heading-scale', typography.headingScale);
+  
+  // Set font weight variables
+  if (typography.fontWeight) {
+    Object.entries(typography.fontWeight).forEach(([weight, value]) => {
+      root.style.setProperty(`--font-weight-${weight}`, value);
+    });
+  }
+  
+  // Load Google Fonts if needed
+  loadFontsForTheme(typography);
+}
+
+/**
+ * Get font family string with fallbacks
+ * @param {string} fontId - Font identifier
+ * @returns {string} CSS font-family value
+ */
+function getFontFamily(fontId) {
+  const font = availableFonts[fontId] || displayFonts[fontId];
+  if (!font) return "'Berkeley Mono', monospace"; // Fallback
+  
+  if (font.system) {
+    return font.fallback;
+  }
+  
+  return `'${font.name}', ${font.fallback}`;
+}
+
+/**
+ * Load Google Fonts dynamically
+ * @param {Object} typography - Typography configuration
+ */
+function loadFontsForTheme(typography) {
+  const fontsToLoad = [];
+  
+  // Check base font
+  const baseFont = availableFonts[typography.fontFamily];
+  if (baseFont && baseFont.googleFont) {
+    fontsToLoad.push(baseFont.googleFont);
+  }
+  
+  // Check display font
+  if (typography.fontFamilyDisplay !== 'none') {
+    const displayFont = displayFonts[typography.fontFamilyDisplay];
+    if (displayFont && displayFont.googleFont) {
+      fontsToLoad.push(displayFont.googleFont);
+    }
+  }
+  
+  // Load fonts via Google Fonts API
+  if (fontsToLoad.length > 0) {
+    loadGoogleFonts(fontsToLoad);
+  }
+}
+
+/**
+ * Load Google Fonts via CSS import
+ * @param {Array} fonts - Array of Google Font family strings
+ */
+function loadGoogleFonts(fonts) {
+  const fontUrl = `https://fonts.googleapis.com/css2?${fonts.map(f => `family=${f}`).join('&')}&display=swap`;
+  
+  // Check if already loaded
+  if (document.querySelector(`link[href="${fontUrl}"]`)) {
+    return;
+  }
+  
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = fontUrl;
+  link.crossOrigin = 'anonymous';
+  document.head.appendChild(link);
+  
+  console.log(`Loading Google Fonts: ${fonts.join(', ')}`);
 }
 
 /**
@@ -465,13 +710,23 @@ export function getCurrentTheme() {
  * @returns {Object} All theme definitions
  */
 export function getAvailableThemes() {
-  return themes;
+  // Return themes if loaded, otherwise return defaults
+  return Object.keys(themes).length > 0 ? themes : defaultThemes;
 }
 
 /**
  * Initialize theme on app load
  */
-export function initializeTheme() {
+export async function initializeTheme() {
+  // Load themes from JSON first
+  await loadThemes();
+  
   const savedTheme = getCurrentTheme();
-  applyTheme(savedTheme);
+  // Validate saved theme exists in loaded themes
+  if (!themes[savedTheme]) {
+    console.warn(`Saved theme "${savedTheme}" not found in themes.json, using oknotok`);
+    applyTheme('oknotok');
+  } else {
+    applyTheme(savedTheme);
+  }
 }

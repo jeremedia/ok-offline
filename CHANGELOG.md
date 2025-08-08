@@ -7,6 +7,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.27.0] - 2025-08-08
+
+### Added
+- **🎨 Theme Authoring UI** - Create and customize your own themes
+  - Visual theme editor with real-time preview
+  - JSON-based theme storage and management
+  - Import/export themes for sharing
+  - Professional color picker with opacity support
+  - Theme validation and error checking
+- **🌊 Seven Pools Knowledge Graph Enhancements** - Multiple view modes for entity exploration
+  - Pool Overview: Interactive bridge visualization showing enliteracy across domains
+  - Single Pool: Deep dive into specific knowledge domains
+  - Entity Neighborhood: Explore connections between related entities
+  - Modular architecture with reusable graph components
+  - Enhanced interactivity with selection state management
+
+### Fixed
+- **🖥️ Desktop Detail View Layout** - Improved spacing and alignment
+  - Added proper breathing room between navigation and content (1rem margins)
+  - Fixed map container alignment with content area
+  - Optimized content area to use full available space
+  - All spacing follows 8px grid system (16px, 24px multiples)
+- **📱 Mobile Detail View** - Restored single-column layout
+  - Fixed content overflow issues caused by desktop grid layout bleeding through
+  - Ensured proper single-column display on mobile devices
+- **🗺️ Map Tooltips** - Cleaner, less redundant messaging
+  - Removed redundant camp names from tooltips (already shown in header)
+  - Changed "Camp location not yet released" to concise "Location Not Released"
+
+### Technical
+- **🏗️ Graph Architecture Refactor** - Modularized Knowledge Graph implementation
+  - Extracted reusable composables for graph rendering and interactions
+  - Created abstract BaseGraphView component for consistent behavior
+  - Separated UI components (GraphControls, GraphStats, GraphInfoPanel)
+  - Improved performance with optimized render cycles
+  - Better code organization with clear separation of concerns
+
 ## [3.26.0] - 2025-08-08
 
 ### Added

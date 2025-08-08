@@ -44,8 +44,11 @@
       :available-themes="availableThemes"
       @update:selected-theme="selectedTheme = $event; onThemeChange()"
       @reset="navigateToReset"
+      @openThemeEditor="openThemeEditor"
     />
   </div>
+  <!-- Theme Editor (Development Only) -->
+  <ThemeEditor v-if="isDevelopment" ref="themeEditorRef" />
   </div>
 </template>
 
@@ -64,7 +67,9 @@ import AppFooter from './components/layout/AppFooter.vue'
 import MobileMenu from './components/layout/MobileMenu.vue'
 import { setToastRef } from './composables/useToast'
 import packageJson from '../package.json'
-import { themes, getCurrentTheme, applyTheme } from './services/themeService'
+import { getCurrentTheme, applyTheme } from './services/themeService'
+import { availableThemes as storeAvailableThemes } from './stores/themeStore'
+import ThemeEditor from './components/ThemeEditor.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -99,6 +104,8 @@ const checkIfMobile = () => {
 }
 
 const isMobile = ref(checkIfMobile())
+const isDevelopment = ref(import.meta.env.DEV)
+const themeEditorRef = ref(null)
 
 // Apply body-level mobile class for global CSS targeting
 watchEffect(() => {
@@ -160,7 +167,7 @@ const formatLastSync = computed(() => {
 
 // Get available themes for selector
 const availableThemes = computed(() => {
-  return Object.values(themes)
+  return Object.values(storeAvailableThemes.value)
 })
 
 // Check if user needs onboarding
@@ -218,6 +225,17 @@ const handleResize = () => {
 // Store interval reference outside
 let syncInterval = null
 
+// Handle keyboard shortcuts for theme editor
+const handleKeyPress = (e) => {
+  // Cmd/Ctrl + Shift + T to toggle theme editor
+  if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'T') {
+    e.preventDefault()
+    if (themeEditorRef.value) {
+      themeEditorRef.value.toggle()
+    }
+  }
+}
+
 onMounted(async () => {
   // Set up toast notifications after component is fully mounted
   await nextTick()
@@ -229,6 +247,7 @@ onMounted(async () => {
   }, 100)
   
   window.addEventListener('online', updateOnlineStatus)
+  window.addEventListener('keydown', handleKeyPress)
   window.addEventListener('offline', updateOnlineStatus)
   window.addEventListener('resize', handleResize)
   updateLastSyncTime()
@@ -242,6 +261,7 @@ onUnmounted(() => {
   window.removeEventListener('online', updateOnlineStatus)
   window.removeEventListener('offline', updateOnlineStatus)
   window.removeEventListener('resize', handleResize)
+  window.removeEventListener('keydown', handleKeyPress)
   if (syncInterval) {
     clearInterval(syncInterval)
   }
@@ -294,6 +314,12 @@ const navigateToDataSync = () => {
 
 const navigateToReset = () => {
   router.push('/reset')
+}
+
+const openThemeEditor = () => {
+  if (themeEditorRef.value) {
+    themeEditorRef.value.show()
+  }
 }
 
 const handleHeaderNavigate = (path) => {

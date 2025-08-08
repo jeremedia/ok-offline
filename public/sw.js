@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ok-offline-v34'; // Camp images support, JSONL release notes, and refreshed data with locations
+const CACHE_NAME = 'ok-offline-v35'; // Theme authoring UI and Seven Pools enhancements
 const urlsToCache = [
   // Core app files
   '/',

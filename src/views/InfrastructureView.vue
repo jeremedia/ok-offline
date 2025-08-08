@@ -1,31 +1,22 @@
 <template>
   <div class="view-container">
     <div class="infrastructure-view">
-    <!-- Header with search -->
+    <!-- Header with integrated intro toggle -->
     <div class="header-section">
-      <h2 class="view-title">Infrastructure</h2>
+      <div class="view-header" @click="toggleIntro">
+        <span class="disclosure-arrow" :class="{ rotated: isIntroCollapsed }">▼</span>
+        <h2 class="view-title">Infrastructure</h2>
+      </div>
       
-      <!-- Poetic introduction -->
-      <div class="infrastructure-intro" :class="{ collapsed: isIntroCollapsed }">
-        <div class="intro-header" @click="toggleIntro">
-          <h4>Essential services and structures that make Black Rock City possible</h4>
-          <BaseButton 
-            variant="ghost"
-            size="sm"
-            :icon="isIntroCollapsed ? '▼' : '▲'"
-            :aria-label="isIntroCollapsed ? 'Expand introduction' : 'Collapse introduction'"
-            :uppercase="false"
-            class="collapse-btn"
-          />
-        </div>
+      <!-- Introduction content (appears below when toggled) -->
+      <div v-show="!isIntroCollapsed" class="intro-content" @click="toggleIntro">
+        <p class="intro-subtitle">Essential services and structures that make Black Rock City possible</p>
         
-        <div v-show="!isIntroCollapsed" class="intro-content">
-          <p>Step into the dust and you step into a living experiment—part carnival, part civic lab—where wooden effigies and desert silence conspire to wake us up. At the center stands the Man, a beacon that asks nothing more than your curiosity, while the Temple offers room for all the stories we carry but cannot keep. Around them, an invisible lattice of care takes shape. Rangers ride the city's heartbeat, medics carry cool shade in their hands, and the Department of Public Works stitches roads and rebar into a map we can follow back to ourselves.</p>
-          
-          <p>This network is built by volunteers who trade comfort for possibility. It keeps the ice melting slowly, the sound camps thundering after midnight, and the night sky clear enough to remind you why we bother with stars. It is not infrastructure in the municipal sense. It is a promise we make to one another: that radical self‑expression works best when everyone has water, shelter, and a way home.</p>
-          
-          <p>So wander. Get lost. Let the city hold you for a while. Then lend a hand. Every stake driven, every radio check, every art car's taillight is part of the same quiet collaboration that turns empty playa into a place we call home for one improbable week each year.</p>
-        </div>
+        <p>Step into the dust and you step into a living experiment—part carnival, part civic lab—where wooden effigies and desert silence conspire to wake us up. At the center stands the Man, a beacon that asks nothing more than your curiosity, while the Temple offers room for all the stories we carry but cannot keep. Around them, an invisible lattice of care takes shape. Rangers ride the city's heartbeat, medics carry cool shade in their hands, and the Department of Public Works stitches roads and rebar into a map we can follow back to ourselves.</p>
+        
+        <p>This network is built by volunteers who trade comfort for possibility. It keeps the ice melting slowly, the sound camps thundering after midnight, and the night sky clear enough to remind you why we bother with stars. It is not infrastructure in the municipal sense. It is a promise we make to one another: that radical self‑expression works best when everyone has water, shelter, and a way home.</p>
+        
+        <p>So wander. Get lost. Let the city hold you for a while. Then lend a hand. Every stake driven, every radio check, every art car's taillight is part of the same quiet collaboration that turns empty playa into a place we call home for one improbable week each year.</p>
       </div>
       
       <div class="search-controls">
@@ -40,7 +31,18 @@
     </div>
 
     <!-- Category filters -->
-    <div class="category-filters">
+    <ButtonGroup class="category-filters">
+      <BaseButton
+        @click="selectedCategory = null"
+        variant="secondary"
+        :active="!selectedCategory"
+        :uppercase="false"
+        class="category-btn all-btn"
+      >
+        <span class="desktop-only">ALL</span>
+        <span class="mobile-only">ALL</span>
+        <span class="count desktop-only">({{ totalCount }})</span>
+      </BaseButton>
       <BaseButton
         v-for="category in categories"
         :key="category.name"
@@ -50,20 +52,11 @@
         :uppercase="false"
         class="category-btn"
       >
-        {{ category.displayName }}
-        <span class="count">({{ category.count }})</span>
+        <span class="mobile-only">{{ getCategoryIcon(category.name) }}</span>
+        <span class="desktop-only">{{ category.displayName }}</span>
+        <span class="count desktop-only">({{ category.count }})</span>
       </BaseButton>
-      <BaseButton
-        @click="selectedCategory = null"
-        variant="secondary"
-        :active="!selectedCategory"
-        :uppercase="false"
-        class="category-btn all-btn"
-      >
-        All
-        <span class="count">({{ totalCount }})</span>
-      </BaseButton>
-    </div>
+    </ButtonGroup>
 
     <!-- Infrastructure grid -->
     <div class="infrastructure-grid" v-if="filteredItems.length > 0">
@@ -100,6 +93,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import BaseButton from '../components/ui/BaseButton.vue'
+import ButtonGroup from '../components/ui/ButtonGroup.vue'
 import InfrastructureCard from '../components/infrastructure/InfrastructureCard.vue'
 import { 
   getAllInfrastructure, 
@@ -155,6 +149,18 @@ const sortedItems = computed(() => {
   }
   return filteredItems.value
 })
+
+// Helper functions
+const getCategoryIcon = (categoryName) => {
+  const iconMap = {
+    'civic': '🏛️',
+    'infrastructure': '🏗️', 
+    'services': '🛠️',
+    'commerce': '🛒',
+    'default': '📍'
+  }
+  return iconMap[categoryName] || iconMap.default
+}
 
 // Methods
 const handleSearch = () => {
@@ -219,61 +225,63 @@ onMounted(() => {
 }
 
 .header-section {
-  text-align: center;
   margin-bottom: 2rem;
+}
+
+.view-header {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.view-header:hover .view-title {
+  color: var(--color-primary);
+}
+
+.disclosure-arrow {
+  font-size: 1rem;
+  margin-right: 0.75rem;
+  color: var(--color-text-secondary);
+  transition: transform 0.2s ease, color 0.2s ease;
+  font-weight: bold;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+}
+
+.disclosure-arrow.rotated {
+  transform: rotate(-90deg);
+}
+
+.view-header:hover .disclosure-arrow {
+  color: var(--color-primary);
 }
 
 .view-title {
   font-size: 2rem;
-  margin-bottom: 0.5rem;
-  color: var(--color-text-primary);
-}
-
-
-.infrastructure-intro {
-  margin: 2rem auto;
-  background: var(--color-overlay-subtle);
-  border-radius: 8px;
-  border: 1px solid var(--color-border-medium);
-  max-width: 800px;
-  overflow: hidden;
-}
-
-.infrastructure-intro.collapsed .intro-header {
-  border-radius: 8px;
-  border-bottom: none;
-}
-
-.intro-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.75rem 1rem;
-  background: var(--color-overlay-subtle);
-  border-bottom: 1px solid var(--color-border-medium);
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
-
-.intro-header:hover {
-  background: var(--color-overlay-medium);
-}
-
-.intro-header h4 {
   margin: 0;
-  color: var(--color-accent);
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-  line-height: 1.3;
-}
-
-.intro-header .collapse-btn {
-  margin-left: 0.5rem;
+  margin-bottom: 0 !important;
+  color: var(--color-text-primary);
+  transition: color 0.2s ease;
+  line-height: 1;
 }
 
 .intro-content {
+  margin-bottom: 1.5rem;
   padding: 1.5rem;
+  cursor: pointer;
+}
+
+.intro-subtitle {
+  color: var(--color-accent);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin-bottom: 1rem;
+  font-weight: 600;
 }
 
 .intro-content p {
@@ -313,21 +321,14 @@ margin-top: 0;
 }
 
 .category-filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  justify-content: center;
   margin-bottom: 2rem;
-}
-
-.category-btn {
-  /* BaseButton handles styling */
 }
 
 .category-btn .count {
   opacity: 0.7;
   font-size: 0.9em;
   margin-left: 0.25rem;
+  color: var(--color-accent);
 }
 
 .infrastructure-grid {
@@ -417,5 +418,40 @@ margin-top: 0;
     right: 10px;
     padding: 0.75rem;
   }
+}
+
+/* Mobile layout adjustments */
+@media (max-width: 767px) {
+  .disclosure-arrow {
+    margin-left: 0.5rem; /* Add left spacing for mobile */
+  }
+  
+  .mobile-only {
+    display: inline;
+  }
+  
+  .desktop-only {
+    display: none;
+  }
+}
+
+/* Desktop layout improvements */
+@media (min-width: 768px) {
+  .infrastructure-view {
+    padding-top: calc(1rem + 1rem); /* Add 1rem breathing room from top nav */
+  }
+  
+  .mobile-only {
+    display: none;
+  }
+  
+  .desktop-only {
+    display: inline;
+  }
+}
+
+/* Fix click handling for nested spans in buttons */
+.category-btn span {
+  pointer-events: none; /* Allow clicks to pass through to button */
 }
 </style>

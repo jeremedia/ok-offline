@@ -52,7 +52,6 @@ const formatDistance = (dist) => {
   background: var(--color-bg-elevated);
   border: 1px solid var(--color-border-medium);
   border-radius: 8px;
-  padding: 1.5rem;
   cursor: pointer;
   transition: all 0.2s ease;
   height: 100%;
@@ -123,7 +122,7 @@ const formatDistance = (dist) => {
 /* Mobile styles */
 @media (max-width: 600px) {
   .infrastructure-card {
-    padding: 1rem;
+    /* No padding - edge-to-edge design on mobile too */
   }
   
   .card-icon {

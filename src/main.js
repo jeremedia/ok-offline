@@ -22,6 +22,7 @@ import InfrastructureView from './views/InfrastructureView.vue'
 import InfrastructureDetailView from './views/InfrastructureDetailView.vue'
 import IconViewer from './views/IconViewer.vue'
 import ComponentsView from './views/ComponentsView.vue'
+import KnowledgeGraphView from './views/KnowledgeGraphView.vue'
 
 // Import CSS
 import './styles/fonts.css'
@@ -161,6 +162,16 @@ const routes = [
     component: ComponentsView
   },
   {
+    path: '/knowledge',
+    name: 'knowledge-graph',
+    component: KnowledgeGraphView
+  },
+  {
+    path: '/graph-test',
+    name: 'graph-test',
+    component: () => import('./components/graph/GraphRendererTest.vue')
+  },
+  {
     path: '/reload',
     beforeEnter: () => {
       // Force a full page reload
@@ -181,12 +192,18 @@ const router = createRouter({
   routes
 })
 
-// Initialize theme before creating app
-initializeTheme()
-
+// Create app first but don't mount yet
 const app = createApp(App)
 app.use(router)
-app.mount('#app')
+
+// Initialize theme asynchronously before mounting
+initializeTheme().then(() => {
+  app.mount('#app')
+}).catch(error => {
+  console.error('Failed to initialize theme:', error)
+  // Mount anyway with fallback
+  app.mount('#app')
+})
 
 // Hide the initial loader once Vue app is mounted
 // But delay slightly more to ensure smooth transition

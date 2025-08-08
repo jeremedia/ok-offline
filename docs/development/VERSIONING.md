@@ -175,8 +175,8 @@ Track version history through:
    # Update CHANGELOG.md with your changes
    # Categories: Added, Fixed, Changed, Technical
    
-   # Update src/components/settings/AboutSettings.vue
-   # Add new release entry to releaseNotes array
+   # Append to public/data/release-notes.jsonl (ONE line)
+   echo '{"version":"X.X.X","date":"YYYY-MM-DD","added":["🎨 Feature"],"fixed":[],"changed":[],"security":[],"breaking":[],"technical":[]}' >> public/data/release-notes.jsonl
    ```
 
 3. **Increment Service Worker Cache** (CRITICAL!)
@@ -204,7 +204,7 @@ git commit -m "feat: Add your feature with release notes"
 gh pr create --title "feat: Your feature" --body "
 ## Summary
 - Feature implementation
-- Release notes updated
+- Release notes appended to JSONL file
 - Service worker cache bumped to vXX
 
 Closes #issue-number
@@ -219,7 +219,8 @@ gh pr merge --merge
 
 # 2. After merge, update release docs
 git checkout main && git pull
-# Update CHANGELOG.md, AboutSettings.vue, sw.js
+# Update CHANGELOG.md, append to release-notes.jsonl, sw.js
+echo '{"version":"X.X.X","date":"YYYY-MM-DD","added":["🎨 Feature"],"fixed":[],"changed":[],"security":[],"breaking":[],"technical":[]}' >> public/data/release-notes.jsonl
 git commit -m "chore: Release vX.X.X"
 git push origin main
 ```
@@ -251,14 +252,15 @@ git push origin main
 2. **Only merge to main** when ready to deploy
 3. **Use conventional commits** for automatic versioning
 4. **Test production build** before creating PR
-5. **Update all release docs together** (CHANGELOG + AboutSettings + sw.js)
+5. **Update all release docs together** (CHANGELOG + release-notes.jsonl + sw.js + features.json if needed)
 6. **Keep main branch clean** - no uncommitted changes
 7. **Review the deployment** after merge
 
 ### Release Documentation Files
 - `CHANGELOG.md` - User-facing change log
-- `src/components/settings/AboutSettings.vue` - In-app release notes
+- `public/data/release-notes.jsonl` - In-app release notes (append one line)
 - `public/sw.js` - Service worker cache version (CRITICAL!)
+- `public/data/features.json` - Features list (if new features added)
 
 ### Post-Release Verification
 1. Check GitHub Actions for successful deployment

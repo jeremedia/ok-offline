@@ -13,6 +13,17 @@
           />
         </div>
         
+        <!-- Theme Editor Button (Dev Only) -->
+        <BaseButton 
+          v-if="isDevelopment" 
+          @click="$emit('openThemeEditor')" 
+          variant="secondary" 
+          class="theme-editor-btn"
+          title="Open Theme Editor (Cmd+Shift+T)"
+        >
+          🎨 Theme Editor
+        </BaseButton>
+        
         <!-- Reset Button -->
         <BaseButton @click="$emit('reset')" variant="secondary" class="reset-btn">
           🔄 Reset App
@@ -27,6 +38,8 @@ import { computed } from 'vue'
 import BaseButton from '../ui/BaseButton.vue'
 import BaseSelect from '../ui/BaseSelect.vue'
 
+const isDevelopment = import.meta.env.DEV
+
 const props = defineProps({
   selectedTheme: {
     type: String,
@@ -38,7 +51,7 @@ const props = defineProps({
   }
 })
 
-defineEmits(['update:selectedTheme', 'reset'])
+defineEmits(['update:selectedTheme', 'reset', 'openThemeEditor'])
 
 // Transform themes for BaseSelect format
 const themeOptions = computed(() => 

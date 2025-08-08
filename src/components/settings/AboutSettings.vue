@@ -72,6 +72,12 @@
           <BaseButton @click="showReleaseNotes = false" variant="ghost" size="sm">×</BaseButton>
         </div>
         <div class="modal-body">
+          <div v-if="loadingReleases" class="loading-state">
+            <p>Loading release notes...</p>
+          </div>
+          <div v-else-if="releaseNotes.length === 0" class="empty-state">
+            <p>No release notes available.</p>
+          </div>
           <div v-for="release in releaseNotes" :key="release.version" class="release-section">
             <h3>Version {{ release.version }} - {{ release.date }}</h3>
             
@@ -152,20 +158,13 @@ const showReleaseNotes = ref(false)
 const loadingReleases = ref(false)
 const releaseNotes = ref([])
 
-// Auto-show release notes if prop is true
-onMounted(() => {
-  if (props.showReleaseNotes) {
-    openReleaseNotes()
-  }
-})
-
-// Open release notes modal
+// Load release notes when modal opens
 const openReleaseNotes = async () => {
   showReleaseNotes.value = true
-  if (releaseNotes.value.length === 0) {
+  if (releaseNotes.value.length === 0 && !loadingReleases.value) {
     loadingReleases.value = true
     try {
-      releaseNotes.value = await loadReleaseNotes(20)
+      releaseNotes.value = await loadReleaseNotes(20) // Load recent 20 releases
     } catch (error) {
       console.error('Failed to load release notes:', error)
     } finally {
@@ -173,6 +172,13 @@ const openReleaseNotes = async () => {
     }
   }
 }
+
+// Auto-show release notes if prop is true
+onMounted(async () => {
+  if (props.showReleaseNotes) {
+    openReleaseNotes()
+  }
+})
 
 // Legacy release notes - now loaded from JSONL
 // (keeping for reference during migration)
@@ -981,5 +987,35 @@ const legacyReleaseNotes = [
 .camp-link:hover {
   color: var(--color-error);
   text-decoration: underline;
+}
+
+/* Loading and empty states */
+.loading-state,
+.empty-state {
+  text-align: center;
+  padding: 2rem;
+  color: var(--color-text-muted);
+}
+
+.loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.loading-state::before {
+  content: '';
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid var(--color-border-light);
+  border-top: 2px solid var(--color-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 </style>

@@ -33,30 +33,19 @@ This checklist ensures smooth, error-free releases to production.
 - [ ] Use bullet points with clear descriptions
 - [ ] Include issue numbers where applicable
 
-#### AboutSettings.vue Release Notes
-- [ ] Open `src/components/settings/AboutSettings.vue`
-- [ ] Add new object to beginning of `releaseNotes` array
-- [ ] Include version (will be determined by auto-versioning)
+#### Release Notes (JSONL Pattern)
+- [ ] Append ONE line to `public/data/release-notes.jsonl`
+- [ ] Use echo command to append (never edit the file directly)
+- [ ] Include all arrays even if empty
 - [ ] Format with emojis for visual appeal:
-  ```javascript
-  {
-    version: '3.15.0',
-    date: '2025-07-30',
-    added: [
-      '✏️ Custom Entries - Create and manage your own camps, art, and events',
-      '➕ Floating action button on list views'
-    ],
-    fixed: [
-      '🎨 Dark theme styling issues'
-    ],
-    changed: [
-      '📋 List view behavior improvements'
-    ],
-    technical: [
-      '🏗️ New component architecture'
-    ]
-  }
+  ```bash
+  # Template:
+  echo '{"version":"X.X.X","date":"YYYY-MM-DD","added":["🎨 Feature with emoji"],"fixed":["🐛 Bug fix"],"changed":[],"security":[],"breaking":[],"technical":[]}' >> public/data/release-notes.jsonl
+  
+  # Example:
+  echo '{"version":"3.15.0","date":"2025-07-30","added":["✏️ Custom Entries - Create and manage your own camps, art, and events","➕ Floating action button on list views"],"fixed":["🎨 Dark theme styling issues"],"changed":["📋 List view behavior improvements"],"technical":["🏗️ New component architecture"]}' >> public/data/release-notes.jsonl
   ```
+- [ ] NEVER read/edit the entire file (avoids context pollution)
 
 #### Service Worker Cache Version (CRITICAL!)
 - [ ] Open `public/sw.js`
@@ -98,7 +87,7 @@ This checklist ensures smooth, error-free releases to production.
   
   ## Release Notes
   - ✅ CHANGELOG.md updated
-  - ✅ AboutSettings.vue release notes added
+  - ✅ Release notes appended to release-notes.jsonl
   - ✅ Service worker cache bumped to vXX
   
   Closes #issue-number
@@ -174,8 +163,8 @@ This checklist ensures smooth, error-free releases to production.
 - **Fix**: Increment version, force refresh with Shift+Reload
 
 ### Release Notes Not Showing
-- **Cause**: AboutSettings.vue not updated
-- **Fix**: Add release entry, ensure proper formatting
+- **Cause**: release-notes.jsonl not updated or malformed JSON
+- **Fix**: Append release entry using echo command, verify JSON syntax
 
 ### Version Not Bumping
 - **Cause**: Non-conventional commit message
@@ -189,8 +178,9 @@ This checklist ensures smooth, error-free releases to production.
 
 ### Files to Update
 1. `CHANGELOG.md` - Change log
-2. `src/components/settings/AboutSettings.vue` - Release notes
+2. `public/data/release-notes.jsonl` - User-facing release notes (append one line)
 3. `public/sw.js` - Cache version (CRITICAL!)
+4. `public/data/features.json` - Features list (if new features added)
 
 ### Conventional Commits
 - `feat:` - New feature (minor version bump)

@@ -3,22 +3,30 @@
  */
 
 import { ref, watchEffect } from 'vue'
-import { themes, applyTheme, getCurrentTheme } from '@/services/themeService'
+import { getAvailableThemes, applyTheme, getCurrentTheme, loadThemes } from '@/services/themeService'
 
 // Current theme reactive reference
 export const currentTheme = ref(getCurrentTheme())
 
-// Available themes
-export const availableThemes = ref(themes)
+// Available themes - will be populated from JSON
+export const availableThemes = ref({})
 
-// Watch for theme changes and apply them
+// Load themes on store initialization
+loadThemes().then(themes => {
+  availableThemes.value = themes
+})
+
+// Watch for theme changes and apply them (only after themes are loaded)
 watchEffect(() => {
-  applyTheme(currentTheme.value)
+  // Only apply theme if themes are loaded
+  if (Object.keys(availableThemes.value).length > 0) {
+    applyTheme(currentTheme.value)
+  }
 })
 
 // Theme switching function
 export function switchTheme(themeName) {
-  if (themes[themeName]) {
+  if (availableThemes.value[themeName]) {
     currentTheme.value = themeName
   } else {
     console.error(`Theme "${themeName}" not found`)
@@ -27,10 +35,17 @@ export function switchTheme(themeName) {
 
 // Get theme info
 export function getThemeInfo(themeName) {
-  return themes[themeName] || themes.oknotok
+  return availableThemes.value[themeName] || availableThemes.value.oknotok || {}
 }
 
 // Check if theme is currently active
 export function isActiveTheme(themeName) {
   return currentTheme.value === themeName
+}
+
+// Refresh themes from JSON (useful for theme editor)
+export async function refreshThemes() {
+  const themes = await loadThemes()
+  availableThemes.value = themes
+  return themes
 }
