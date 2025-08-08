@@ -2,6 +2,14 @@
   <div class="tab-content features-content">
     <h2>Features</h2>
     
+    <!-- Loading state -->
+    <div v-if="loading" class="loading-state">
+      <p>Loading features...</p>
+    </div>
+    
+    <!-- Features content -->
+    <template v-else>
+    
     <!-- Marquee Feature -->
     <div class="marquee-feature" v-if="featuresData?.marquee">
       <div class="marquee-badge">NEW</div>
@@ -71,7 +79,7 @@
     <div v-else class="all-features-view">
       <div class="features-grid">
         <div 
-          v-for="feature in featuresData?.features" 
+          v-for="feature in featuresData?.features || []" 
           :key="feature.title"
           class="feature-card"
           @click="selectedFeature = feature"
@@ -112,8 +120,10 @@
         </div>
       </div>
     </div>
+    
+    </template>
 
-    <!-- Keyboard Shortcuts -->
+    <!-- Keyboard Shortcuts always visible -->
     <div class="keyboard-shortcuts">
       <h3>⌨️ Keyboard Shortcuts</h3>
       <table>
@@ -138,9 +148,10 @@
 import { ref, computed, onMounted } from 'vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import ButtonGroup from '@/components/ui/ButtonGroup.vue'
-// TEMP FIX: Import issue during build - commenting out for now
-// import featuresData from '/data/features.json'
-const featuresData = []
+
+// State for features data
+const featuresData = ref(null)
+const loading = ref(true)
 
 // State
 const viewMode = ref('category')
@@ -149,20 +160,20 @@ const selectedFeature = ref(null)
 
 // Computed
 const sortedCategories = computed(() => {
-  if (!featuresData?.categories) return []
-  return Object.entries(featuresData.categories)
+  if (!featuresData.value?.categories) return []
+  return Object.entries(featuresData.value.categories)
     .map(([id, data]) => ({ id, ...data }))
     .sort((a, b) => a.order - b.order)
 })
 
 // Methods
 const getCategoryFeatures = (categoryId) => {
-  if (!featuresData?.features) return []
-  return featuresData.features.filter(f => f.category === categoryId)
+  if (!featuresData.value?.features) return []
+  return featuresData.value.features.filter(f => f.category === categoryId)
 }
 
 const getCategoryName = (categoryId) => {
-  return featuresData?.categories?.[categoryId]?.name || categoryId
+  return featuresData.value?.categories?.[categoryId]?.name || categoryId
 }
 
 const toggleCategory = (categoryId) => {
@@ -170,10 +181,21 @@ const toggleCategory = (categoryId) => {
 }
 
 // Initialize with first 3 categories expanded
-onMounted(() => {
-  sortedCategories.value.slice(0, 3).forEach(cat => {
-    expandedCategories.value[cat.id] = true
-  })
+onMounted(async () => {
+  // Load features data
+  try {
+    const response = await fetch('/data/features.json')
+    featuresData.value = await response.json()
+    
+    // Expand first 3 categories
+    sortedCategories.value.slice(0, 3).forEach(cat => {
+      expandedCategories.value[cat.id] = true
+    })
+  } catch (error) {
+    console.error('Failed to load features data:', error)
+  } finally {
+    loading.value = false
+  }
 })
 </script>
 
@@ -507,6 +529,13 @@ onMounted(() => {
   font-size: 0.9rem;
   border: 1px solid var(--color-border-medium);
   box-shadow: 0 1px 2px var(--color-shadow-light);
+}
+
+/* Loading State */
+.loading-state {
+  text-align: center;
+  padding: 3rem;
+  color: var(--color-text-muted);
 }
 
 /* Mobile Adjustments */
