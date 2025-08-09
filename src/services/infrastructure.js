@@ -4,13 +4,95 @@
  */
 
 import infrastructureData from '../data/infrastructure.json'
+import { API_URLS } from '../config'
+
+// Cache management
+const CACHE_KEY = 'infrastructure_data'
+const CACHE_DURATION = 24 * 60 * 60 * 1000 // 24 hours
+
+let infrastructureCache = null
+
+/**
+ * Load infrastructure from API or cache
+ * @param {string} year - Year to load infrastructure for
+ * @returns {Promise<Array>} Array of infrastructure objects
+ */
+export async function loadInfrastructure(year) {
+  // Check in-memory cache first
+  if (infrastructureCache) {
+    return infrastructureCache
+  }
+  
+  // Check localStorage cache
+  const cached = getCachedData()
+  if (cached && !isExpired(cached)) {
+    infrastructureCache = cached.data.infrastructure
+    return infrastructureCache
+  }
+  
+  try {
+    // Fetch from API
+    const response = await fetch(
+      `${API_URLS.VECTOR_API}/infrastructures?year=${year || new Date().getFullYear()}`
+    )
+    
+    if (response.ok) {
+      const data = await response.json()
+      // Cache the response
+      setCachedData(data)
+      infrastructureCache = data.infrastructure
+      return infrastructureCache
+    }
+  } catch (error) {
+    console.warn('Failed to fetch infrastructure from API:', error)
+  }
+  
+  // Fallback to static JSON if API fails
+  console.log('Using static infrastructure data')
+  infrastructureCache = infrastructureData.infrastructure || []
+  return infrastructureCache
+}
 
 /**
  * Get all infrastructure items
  * @returns {Array} Array of infrastructure objects
  */
 export function getAllInfrastructure() {
-  return infrastructureData.infrastructure || []
+  // Return cached data or static fallback
+  return infrastructureCache || infrastructureData.infrastructure || []
+}
+
+// Cache helper functions
+function getCachedData() {
+  try {
+    const cached = localStorage.getItem(CACHE_KEY)
+    return cached ? JSON.parse(cached) : null
+  } catch {
+    return null
+  }
+}
+
+function setCachedData(data) {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify({
+      data,
+      timestamp: Date.now()
+    }))
+  } catch (error) {
+    console.warn('Failed to cache infrastructure data:', error)
+  }
+}
+
+function isExpired(cached) {
+  return Date.now() - cached.timestamp > CACHE_DURATION
+}
+
+/**
+ * Clear infrastructure cache
+ */
+export function clearInfrastructureCache() {
+  infrastructureCache = null
+  localStorage.removeItem(CACHE_KEY)
 }
 
 /**
