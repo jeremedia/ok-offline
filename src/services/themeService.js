@@ -396,39 +396,94 @@ const defaultThemes = {
   }
 };
 
+// Cache management for themes
+const CACHE_KEY = 'themes_data'
+const CACHE_DURATION = 24 * 60 * 60 * 1000 // 24 hours
+
 /**
- * Load themes from JSON file
+ * Load themes from API or cache with fallback to static file
  * @returns {Promise<Object>} Theme definitions
  */
 export async function loadThemes() {
-  try {
-    // In development, try API first
-    if (import.meta.env.DEV) {
-      try {
-        const response = await fetch('http://100.104.170.10:3555/api/v1/themes');
-        
-        if (response.ok) {
-          const data = await response.json();
-          themes = data.themes || {};
-          console.log(`Loaded ${Object.keys(themes).length} themes from API`);
-          return themes;
-        }
-      } catch (apiError) {
-        console.warn('Failed to load themes from API, falling back to static file:', apiError);
-      }
-    }
-    
-    // Fallback to static file
-    const response = await fetch('/data/themes.json');
-    const data = await response.json();
-    themes = data.themes || defaultThemes;
-    console.log(`Loaded ${Object.keys(themes).length} themes from themes.json`);
-    return themes;
-  } catch (error) {
-    console.error('Failed to load themes from JSON, using defaults:', error);
-    themes = defaultThemes;
-    return themes;
+  // Check in-memory cache first
+  if (Object.keys(themes).length > 0) {
+    return themes
   }
+  
+  // Check localStorage cache
+  const cached = getCachedThemes()
+  if (cached && !isThemeCacheExpired(cached)) {
+    themes = cached.data.themes || {}
+    console.log(`Loaded ${Object.keys(themes).length} themes from cache`)
+    return themes
+  }
+  
+  try {
+    // Fetch from API (will be proxied in production, direct in development)
+    const apiUrl = import.meta.env.DEV 
+      ? 'http://100.104.170.10:3555/api/v1/themes'  
+      : '/api/v1/themes'
+    const response = await fetch(apiUrl)
+    
+    if (response.ok) {
+      const data = await response.json()
+      // Cache the response
+      setCachedThemes(data)
+      themes = data.themes || {}
+      console.log(`Loaded ${Object.keys(themes).length} themes from API`)
+      return themes
+    }
+  } catch (error) {
+    console.warn('Failed to fetch themes from API:', error)
+  }
+  
+  try {
+    // Fallback to static JSON if API fails
+    console.log('Using static themes data')
+    const response = await fetch('/data/themes.json')
+    const data = await response.json()
+    themes = data.themes || defaultThemes
+    console.log(`Loaded ${Object.keys(themes).length} themes from static file`)
+    return themes
+  } catch (error) {
+    // Final fallback to hardcoded defaults
+    console.error('Failed to load themes from any source, using defaults:', error)
+    themes = defaultThemes
+    return themes
+  }
+}
+
+// Cache helper functions
+function getCachedThemes() {
+  try {
+    const cached = localStorage.getItem(CACHE_KEY)
+    return cached ? JSON.parse(cached) : null
+  } catch {
+    return null
+  }
+}
+
+function setCachedThemes(data) {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify({
+      data,
+      timestamp: Date.now()
+    }))
+  } catch (error) {
+    console.warn('Failed to cache themes data:', error)
+  }
+}
+
+function isThemeCacheExpired(cached) {
+  return Date.now() - cached.timestamp > CACHE_DURATION
+}
+
+/**
+ * Clear themes cache
+ */
+export function clearThemesCache() {
+  themes = {}
+  localStorage.removeItem(CACHE_KEY)
 }
 
 /**
