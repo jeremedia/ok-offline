@@ -51,18 +51,9 @@
                   </button>
                 </div>
                 <div class="color-input-group">
-                  <input
-                    :id="`color-${varName}`"
-                    type="color"
-                    :value="getColorHex(currentColors[varName])"
-                    @input="updateColor(varName, $event.target.value)"
-                    class="color-picker"
-                  />
-                  <input
-                    type="text"
-                    :value="expandHexColor(currentColors[varName])"
-                    @input="updateColor(varName, $event.target.value)"
-                    class="color-text"
+                  <AlphaColorPicker
+                    :modelValue="currentColors[varName]"
+                    @update:modelValue="updateColor(varName, $event)"
                   />
                 </div>
               </div>
@@ -74,26 +65,28 @@
         <div class="editor-section">
           <h4>Typography</h4>
           <div class="typography-controls">
-            <!-- Font Family -->
+            <!-- Font Family Controls (Base and Display on same line) -->
             <div class="control-group">
-              <label>Base Font</label>
-              <select v-model="currentTypography.fontFamily" @change="updateTypography">
-                <option v-for="(font, id) in availableFonts" :key="id" :value="id">
-                  {{ font.name }} ({{ font.type }})
-                </option>
-              </select>
-              <span class="control-description">{{ availableFonts[currentTypography.fontFamily]?.description }}</span>
-            </div>
-            
-            <!-- Display Font -->
-            <div class="control-group">
-              <label>Display Font (Headers)</label>
-              <select v-model="currentTypography.fontFamilyDisplay" @change="updateTypography">
-                <option v-for="(font, id) in displayFonts" :key="id" :value="id">
-                  {{ font.name }}
-                </option>
-              </select>
-              <span class="control-description">{{ displayFonts[currentTypography.fontFamilyDisplay]?.description }}</span>
+              <div class="font-controls-row">
+                <div class="font-control">
+                  <label>Base Font</label>
+                  <select v-model="currentTypography.fontFamily" @change="updateTypography">
+                    <option v-for="(font, id) in availableFonts" :key="id" :value="id">
+                      {{ font.name }} ({{ font.type }})
+                    </option>
+                  </select>
+                  <span class="control-description">{{ availableFonts[currentTypography.fontFamily]?.description }}</span>
+                </div>
+                <div class="font-control">
+                  <label>Display Font (Headers)</label>
+                  <select v-model="currentTypography.fontFamilyDisplay" @change="updateTypography">
+                    <option v-for="(font, id) in displayFonts" :key="id" :value="id">
+                      {{ font.name }}
+                    </option>
+                  </select>
+                  <span class="control-description">{{ displayFonts[currentTypography.fontFamilyDisplay]?.description }}</span>
+                </div>
+              </div>
             </div>
             
             <!-- Font Size -->
@@ -144,14 +137,77 @@
               </div>
             </div>
             
+            <!-- Font Size Multipliers -->
+            <div class="control-group">
+              <label>Font Size Multipliers</label>
+              <div class="multiplier-controls">
+                <div class="multiplier-row">
+                  <label class="multiplier-label">Small (sm)</label>
+                  <input 
+                    type="range" 
+                    min="0.7" 
+                    max="1.0" 
+                    step="0.025"
+                    v-model="currentTypography.fontSizeMultipliers.sm" 
+                    @input="updateTypography"
+                    class="multiplier-slider"
+                  />
+                  <span class="multiplier-value">{{ currentTypography.fontSizeMultipliers?.sm || '0.875' }}×</span>
+                </div>
+                <div class="multiplier-row">
+                  <label class="multiplier-label">Large (lg)</label>
+                  <input 
+                    type="range" 
+                    min="1.0" 
+                    max="1.4" 
+                    step="0.025"
+                    v-model="currentTypography.fontSizeMultipliers.lg" 
+                    @input="updateTypography"
+                    class="multiplier-slider"
+                  />
+                  <span class="multiplier-value">{{ currentTypography.fontSizeMultipliers?.lg || '1.125' }}×</span>
+                </div>
+                <div class="multiplier-row">
+                  <label class="multiplier-label">Extra Large (xl)</label>
+                  <input 
+                    type="range" 
+                    min="1.1" 
+                    max="1.6" 
+                    step="0.025"
+                    v-model="currentTypography.fontSizeMultipliers.xl" 
+                    @input="updateTypography"
+                    class="multiplier-slider"
+                  />
+                  <span class="multiplier-value">{{ currentTypography.fontSizeMultipliers?.xl || '1.25' }}×</span>
+                </div>
+                <div class="multiplier-row">
+                  <label class="multiplier-label">2X Large (2xl)</label>
+                  <input 
+                    type="range" 
+                    min="1.3" 
+                    max="2.0" 
+                    step="0.025"
+                    v-model="currentTypography.fontSizeMultipliers['2xl']" 
+                    @input="updateTypography"
+                    class="multiplier-slider"
+                  />
+                  <span class="multiplier-value">{{ currentTypography.fontSizeMultipliers?.['2xl'] || '1.5' }}×</span>
+                </div>
+              </div>
+            </div>
+            
             <!-- Typography Preview -->
             <div class="typography-preview">
               <h5>Preview</h5>
               <div class="preview-content">
                 <h1 class="preview-h1">Heading 1 Text</h1>
                 <h2 class="preview-h2">Heading 2 Text</h2>
+                <h3 class="preview-h3">Heading 3 Text</h3>
                 <p class="preview-body">Body text: The quick brown fox jumps over the lazy dog. 1234567890</p>
-                <small class="preview-small">Small text and special characters: !@#$%^&*()</small>
+                <p class="preview-2xl">2XL Text: Large display text for emphasis</p>
+                <p class="preview-xl">XL Text: Extra large for important content</p>
+                <p class="preview-lg">Large Text: Prominent but readable content</p>
+                <p class="preview-sm">Small Text: Secondary information and fine print</p>
               </div>
             </div>
           </div>
@@ -220,13 +276,16 @@
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { availableThemes, currentTheme, switchTheme, refreshThemes } from '@/stores/themeStore'
-import { applyTheme, availableFonts, displayFonts, applyTypography } from '@/services/themeService'
+import { applyTheme, availableFonts, displayFonts, applyTypography, refreshThemesFromServer } from '@/services/themeService'
 import { useToast } from '@/composables/useToast'
+import { API_URLS } from '@/config'
+import AlphaColorPicker from '@/components/ui/AlphaColorPicker.vue'
 
 const { showToast } = useToast()
 
-// Editor state
-const isVisible = ref(false)
+// Editor state - load saved visibility state
+const savedVisibility = localStorage.getItem('themeEditorVisible')
+const isVisible = ref(savedVisibility === 'true')
 const isDocked = ref(false) // Start in floating mode
 const selectedTheme = ref('')
 const currentColors = ref({})
@@ -241,6 +300,12 @@ const currentTypography = ref({
   baseLineHeight: '1.5',
   letterSpacing: '0',
   headingScale: '1.25',
+  fontSizeMultipliers: {
+    sm: '0.875',
+    lg: '1.125',
+    xl: '1.25',
+    '2xl': '1.5'
+  },
   fontWeight: {
     normal: '400',
     medium: '500',
@@ -262,7 +327,7 @@ const isDragging = ref(false)
 const dragStart = ref({ x: 0, y: 0 })
 const position = ref({ x: 0, y: 0 })
 
-// Load saved position
+// Load saved position and docked state
 const savedPosition = localStorage.getItem('themeEditorPosition')
 if (savedPosition) {
   try {
@@ -272,11 +337,17 @@ if (savedPosition) {
   }
 }
 
+// Load saved docked state
+const savedDocked = localStorage.getItem('themeEditorDocked')
+if (savedDocked) {
+  isDocked.value = savedDocked === 'true'
+}
+
 // Color groups for organization
 const colorGroups = [
   {
     name: 'Primary Colors',
-    vars: ['primary', 'primaryDark', 'primaryDarker', 'accent', 'accentDark']
+    vars: ['primary', 'primaryDark', 'primaryDarker', 'accent', 'accentDark', 'hoverBg']
   },
   {
     name: 'Backgrounds',
@@ -354,14 +425,17 @@ const handleKeyboard = (e) => {
 // Public methods for external control
 const show = () => {
   isVisible.value = true
+  saveEditorState()
 }
 
 const hide = () => {
   isVisible.value = false
+  saveEditorState()
 }
 
 const toggle = () => {
   isVisible.value = !isVisible.value
+  saveEditorState()
 }
 
 const close = () => {
@@ -378,9 +452,9 @@ const toggleDocked = () => {
         x: (window.innerWidth - rect.width) / 2,
         y: (window.innerHeight - rect.height) / 2
       }
-      savePosition()
     }
   }
+  saveEditorState()
 }
 
 // Dragging functions
@@ -415,6 +489,15 @@ const savePosition = () => {
   localStorage.setItem('themeEditorPosition', JSON.stringify(position.value))
 }
 
+// Save editor state to localStorage
+const saveEditorState = () => {
+  localStorage.setItem('themeEditorVisible', isVisible.value.toString())
+  localStorage.setItem('themeEditorDocked', isDocked.value.toString())
+  if (!isDocked.value) {
+    savePosition()
+  }
+}
+
 // Load theme colors and typography
 const loadTheme = () => {
   const theme = availableThemes.value[selectedTheme.value]
@@ -431,8 +514,17 @@ const loadTheme = () => {
   
   // Load typography if available
   if (theme.typography) {
-    currentTypography.value = { ...theme.typography }
-    originalTypography.value = { ...theme.typography }
+    currentTypography.value = { 
+      ...theme.typography,
+      // Ensure fontSizeMultipliers exists with default values
+      fontSizeMultipliers: theme.typography.fontSizeMultipliers || {
+        sm: '0.875',
+        lg: '1.125', 
+        xl: '1.25',
+        '2xl': '1.5'
+      }
+    }
+    originalTypography.value = { ...currentTypography.value }
   }
   
   // Store factory colors on first load
@@ -525,6 +617,9 @@ const applyColorsToCSS = () => {
   root.style.setProperty('--color-bg-hover', colors.bgHover)
   root.style.setProperty('--color-bg-active', colors.bgActive)
   
+  // Interactive Colors - NEW semantic hover variable
+  root.style.setProperty('--color-hover-bg', colors.hoverBg)
+  
   root.style.setProperty('--color-text-primary', colors.textPrimary)
   root.style.setProperty('--color-text-secondary', colors.textSecondary)
   root.style.setProperty('--color-text-muted', colors.textMuted)
@@ -577,6 +672,9 @@ const updateTypography = () => {
 
 // Save theme to JSON
 const saveTheme = async () => {
+  let serverUpdateSuccessful = false
+  let serverUpdateAttempted = false
+  
   try {
     const themeData = {
       id: selectedTheme.value,
@@ -588,9 +686,18 @@ const saveTheme = async () => {
     
     // In development, save to API
     if (import.meta.env.DEV) {
+      serverUpdateAttempted = true
       try {
-        const response = await fetch('http://100.104.170.10:3555/api/v1/themes', {
-          method: 'POST',
+        // Check if theme exists to determine method (PUT for update, POST for create)
+        const themeExists = availableThemes.value[selectedTheme.value]
+        showToast(`${themeExists ? 'Updating' : 'Creating'} theme on server...`, 'info')
+        const method = themeExists ? 'PUT' : 'POST'
+        const url = themeExists 
+          ? `${API_URLS.VECTOR_API}/themes/${selectedTheme.value}`
+          : `${API_URLS.VECTOR_API}/themes`
+        
+        const response = await fetch(url, {
+          method: method,
           headers: {
             'Content-Type': 'application/json',
           },
@@ -599,8 +706,10 @@ const saveTheme = async () => {
         
         if (response.ok) {
           const result = await response.json()
-          showToast('Theme saved to file!', 'success')
+          serverUpdateSuccessful = true
+          showToast(`✅ Theme ${themeExists ? 'updated' : 'created'} successfully on server!`, 'success')
           originalColors.value = { ...currentColors.value }
+          originalTypography.value = { ...currentTypography.value }
           
           // Refresh themes from server
           await refreshThemes()
@@ -610,19 +719,32 @@ const saveTheme = async () => {
         }
       } catch (apiError) {
         console.error('API save failed:', apiError)
-        showToast(`API save failed: ${apiError.message}`, 'error')
+        serverUpdateSuccessful = false
+        showToast(`⚠️  Server update failed: ${apiError.message}`, 'error')
+        showToast('💾 Falling back to clipboard export...', 'info')
         
         // Fall back to clipboard
         await copyThemeToClipboard(themeData)
       }
     } else {
-      // Production: only clipboard
+      // Production: only clipboard available
+      showToast('💾 Saving theme to clipboard (server not available in production)...', 'info')
       await copyThemeToClipboard(themeData)
+      showToast('📋 Theme saved to clipboard! Paste into themes.json to make permanent.', 'success')
+    }
+    
+    // Show server update status if attempted
+    if (serverUpdateAttempted) {
+      if (serverUpdateSuccessful) {
+        showToast('🔄 Theme changes now live on server', 'success')
+      } else {
+        showToast('⚠️  Changes saved locally but not synced to server', 'warning')
+      }
     }
     
   } catch (error) {
     console.error('Failed to save theme:', error)
-    showToast('Failed to save theme', 'error')
+    showToast('❌ Failed to save theme - please try again', 'error')
   }
 }
 
@@ -745,66 +867,81 @@ const cancelDuplicate = () => {
 }
 
 const confirmDuplicate = async () => {
-  // Create new theme object
-  const baseTheme = availableThemes.value[selectedTheme.value]
-  const newTheme = {
-    id: newThemeId.value,
-    name: newThemeName.value,
-    description: newThemeDescription.value || `Custom theme based on ${baseTheme.name}`,
-    colors: { ...baseTheme.colors }
-  }
+  let serverUpdateSuccessful = false
   
-  // In development, save to API
-  if (import.meta.env.DEV) {
-    try {
-      const response = await fetch('http://100.104.170.10:3555/api/v1/themes', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(newTheme)
-      })
-      
-      if (response.ok) {
-        showToast(`Created and saved new theme: ${newThemeName.value}`, 'success')
+  try {
+    // Create new theme object
+    const baseTheme = availableThemes.value[selectedTheme.value]
+    const newTheme = {
+      id: newThemeId.value,
+      name: newThemeName.value,
+      description: newThemeDescription.value || `Custom theme based on ${baseTheme.name}`,
+      colors: { ...baseTheme.colors }
+    }
+    
+    // In development, save to API
+    if (import.meta.env.DEV) {
+      try {
+        showToast(`Creating theme "${newThemeName.value}" on server...`, 'info')
         
-        // Refresh themes from server
-        await refreshThemes()
+        const response = await fetch(`${API_URLS.VECTOR_API}/themes`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(newTheme)
+        })
         
-        // Switch to the new theme
+        if (response.ok) {
+          serverUpdateSuccessful = true
+          showToast(`✅ Theme "${newThemeName.value}" created successfully on server!`, 'success')
+          
+          // Refresh themes from server
+          await refreshThemes()
+          
+          // Switch to the new theme
+          selectedTheme.value = newThemeId.value
+          switchTheme(newThemeId.value)
+          loadTheme()
+          
+          showToast(`🎨 Now editing your new theme: ${newThemeName.value}`, 'success')
+        } else {
+          const error = await response.json()
+          throw new Error(error.error || 'Failed to save new theme')
+        }
+      } catch (apiError) {
+        console.error('API save failed:', apiError)
+        serverUpdateSuccessful = false
+        showToast(`⚠️  Server creation failed: ${apiError.message}`, 'error')
+        
+        // Still add locally
+        availableThemes.value[newThemeId.value] = newTheme
         selectedTheme.value = newThemeId.value
         switchTheme(newThemeId.value)
         loadTheme()
-      } else {
-        const error = await response.json()
-        throw new Error(error.error || 'Failed to save new theme')
+        showToast(`📝 Theme "${newThemeName.value}" created locally (not saved to server)`, 'warning')
       }
-    } catch (apiError) {
-      console.error('API save failed:', apiError)
-      showToast(`Failed to save new theme: ${apiError.message}`, 'error')
-      
-      // Still add locally
+    } else {
+      // Production: only add locally
       availableThemes.value[newThemeId.value] = newTheme
       selectedTheme.value = newThemeId.value
       switchTheme(newThemeId.value)
       loadTheme()
-      showToast(`Created new theme locally: ${newThemeName.value}`, 'warning')
+      showToast(`🎨 Created new theme: ${newThemeName.value}`, 'success')
+      showToast(`💾 Theme created locally - use "Save Theme" to export`, 'info')
     }
-  } else {
-    // Production: only add locally
-    availableThemes.value[newThemeId.value] = newTheme
-    selectedTheme.value = newThemeId.value
-    switchTheme(newThemeId.value)
-    loadTheme()
-    showToast(`Created new theme: ${newThemeName.value}`, 'success')
+    
+    showDuplicateModal.value = false
+    
+    // Clear form
+    newThemeName.value = ''
+    newThemeId.value = ''
+    newThemeDescription.value = ''
+    
+  } catch (error) {
+    console.error('Failed to create theme:', error)
+    showToast(`❌ Failed to create theme "${newThemeName.value}" - please try again`, 'error')
   }
-  
-  showDuplicateModal.value = false
-  
-  // Clear form
-  newThemeName.value = ''
-  newThemeId.value = ''
-  newThemeDescription.value = ''
 }
 
 // Expose methods for external use
@@ -913,7 +1050,7 @@ defineExpose({
 }
 
 .duplicate-button {
-  background: var(--color-accent);
+  background: var(--color-primary);
   color: var(--color-text-inverse);
   border: none;
   border-radius: 4px;
@@ -925,7 +1062,7 @@ defineExpose({
 }
 
 .duplicate-button:hover {
-  background: var(--color-accent-dark);
+  background: var(--color-primary-dark);
 }
 
 .color-variables-section {
@@ -1066,12 +1203,12 @@ defineExpose({
 }
 
 .copy-button {
-  background: var(--color-accent);
-  color: var(--color-bg-base);
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
 }
 
 .copy-button:hover {
-  background: var(--color-accent-dark);
+  background: var(--color-primary-dark);
 }
 
 /* Mobile responsiveness */
@@ -1290,6 +1427,90 @@ body.mobile-device .color-grid {
   text-align: right;
 }
 
+/* Font Controls Row Layout */
+.font-controls-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.font-control {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.font-control label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.font-control select {
+  width: 100%;
+}
+
+/* Font Size Multiplier Controls */
+.multiplier-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: var(--color-bg-elevated);
+  border-radius: 6px;
+  border: 1px solid var(--color-border-light);
+}
+
+.multiplier-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.multiplier-label {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  min-width: 90px;
+  margin: 0;
+}
+
+.multiplier-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 3px;
+  background: var(--color-bg-hover);
+  border-radius: 2px;
+  outline: none;
+}
+
+.multiplier-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  background: var(--color-accent);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.multiplier-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  background: var(--color-accent);
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+}
+
+.multiplier-value {
+  font-size: 0.8rem;
+  color: var(--color-accent);
+  min-width: 45px;
+  text-align: right;
+  font-weight: 500;
+}
+
 /* Typography Preview */
 .typography-preview {
   margin-top: 1rem;
@@ -1339,9 +1560,33 @@ body.mobile-device .color-grid {
   color: var(--color-text-secondary);
 }
 
-.preview-small {
+.preview-sm {
   font-family: var(--font-family-base);
   font-size: var(--font-size-sm);
+  line-height: var(--line-height-base);
+  letter-spacing: var(--letter-spacing-base);
+  margin: 0;
+}
+
+.preview-lg {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-base);
+  letter-spacing: var(--letter-spacing-base);
+  margin: 0;
+}
+
+.preview-xl {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-xl);
+  line-height: var(--line-height-base);
+  letter-spacing: var(--letter-spacing-base);
+  margin: 0;
+}
+
+.preview-2xl {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-2xl);
   line-height: var(--line-height-base);
   letter-spacing: var(--letter-spacing-base);
   margin: 0;

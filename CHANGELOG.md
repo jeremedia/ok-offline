@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.28.0] - 2025-08-10
+
+### Added
+- **🎯 Font Size Multiplier System** - Fine-tune font scaling ratios for different typefaces
+  - Separate controls for sm, lg, xl, and 2xl font size multipliers
+  - Font-specific optimized default values for better typography
+  - Real-time preview in theme editor
+- **🎨 Alpha Color Picker with RGBA Support** - Professional transparency controls
+  - Full RGBA color space support (not just RGB hex)
+  - Alpha sliders with 0-100% transparency control
+  - Visual transparency previews with checkered backgrounds
+  - Automatic format switching between hex and rgba
+  - Perfect for modal overlays, glows, and subtle backgrounds
+
+### Improved
+- **📐 Theme Editor Layout** - Base Font and Display Font now share same row for better space usage
+- **🔧 Typography Controls** - Enhanced font size multiplier integration with live CSS variable updates
+
 ## [3.27.0] - 2025-08-08
 
 ### Added

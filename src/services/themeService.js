@@ -32,14 +32,14 @@ export const availableFonts = {
   'inter': { 
     name: 'Inter', 
     type: 'sans-serif', 
-    googleFont: 'Inter:400,500,700',
+    googleFont: 'Inter:wght@400;500;700',
     fallback: 'system-ui, sans-serif',
     description: 'Modern sans-serif optimized for screens'
   },
   'work-sans': { 
     name: 'Work Sans', 
     type: 'sans-serif', 
-    googleFont: 'Work+Sans:400,500,700',
+    googleFont: 'Work+Sans:wght@400;500;700',
     fallback: 'system-ui, sans-serif',
     description: 'Friendly and readable - great for long content'
   }
@@ -58,7 +58,7 @@ export const displayFonts = {
   'oswald': { 
     name: 'Oswald', 
     type: 'display', 
-    googleFont: 'Oswald:400,500,700',
+    googleFont: 'Oswald:wght@400;500;700',
     fallback: 'system-ui, sans-serif',
     description: 'Strong and modern display font'
   }
@@ -76,6 +76,13 @@ const defaultThemes = {
       baseLineHeight: '1.5',
       letterSpacing: '0',
       headingScale: '1.25',
+      // Font size multipliers for computed sizes
+      fontSizeMultipliers: {
+        sm: '0.875',      // Small text (14px at 16px base)
+        lg: '1.125',      // Large text (18px at 16px base)
+        xl: '1.25',       // Extra large (20px at 16px base)
+        '2xl': '1.5'      // 2x large (24px at 16px base)
+      },
       fontWeight: {
         normal: '400',
         medium: '500',
@@ -109,6 +116,9 @@ const defaultThemes = {
       borderLight: '#333',             // Subtle borders
       borderMedium: '#444',            // Standard borders
       borderHeavy: '#555',             // Emphasized borders
+      
+      // Interactive Colors
+      hoverBg: '#555',                 // Hover background for interactive elements
       
       // Status Colors
       success: '#4CAF50',              // Success states
@@ -152,6 +162,13 @@ const defaultThemes = {
       baseLineHeight: '1.6',
       letterSpacing: '0.01em',
       headingScale: '1.35',
+      // Font size multipliers for computed sizes - Work Sans optimized
+      fontSizeMultipliers: {
+        sm: '0.85',       // Small text - slightly larger for Work Sans readability
+        lg: '1.15',       // Large text - slightly smaller for Work Sans
+        xl: '1.3',        // Extra large - matches heading scale
+        '2xl': '1.55'     // 2x large - slightly more dramatic
+      },
       fontWeight: {
         normal: '400',
         medium: '500',
@@ -185,6 +202,9 @@ const defaultThemes = {
       borderLight: '#FFE4E6',          // Very light pink
       borderMedium: '#FFCDD2',         // Light pink
       borderHeavy: '#F8BBD9',          // Medium pink
+      
+      // Interactive Colors  
+      hoverBg: '#F8BBD9',              // Hover background for interactive elements
       
       // Status Colors - Bright but readable
       success: '#4CAF50',              // Keep green recognizable
@@ -228,6 +248,13 @@ const defaultThemes = {
       baseLineHeight: '1.4',
       letterSpacing: '0',
       headingScale: '1.2',
+      // Font size multipliers for computed sizes - System UI optimized for emergency readability
+      fontSizeMultipliers: {
+        sm: '0.9',        // Small text - larger for emergency readability
+        lg: '1.1',        // Large text - conservative scaling
+        xl: '1.2',        // Extra large - matches heading scale
+        '2xl': '1.4'      // 2x large - professional, not dramatic
+      },
       fontWeight: {
         normal: '400',
         medium: '500',
@@ -280,6 +307,9 @@ const defaultThemes = {
       borderMedium: '#999999',         // Medium gray borders
       borderHeavy: '#666666',          // Dark gray borders
       
+      // Interactive Colors
+      hoverBg: '#666666',              // Hover background for interactive elements
+      
       // Status Colors - Emergency Levels
       success: '#34C759',              // iOS Green (all clear)
       error: '#FF3B30',                // iOS Red (emergency)
@@ -330,6 +360,13 @@ const defaultThemes = {
       baseLineHeight: '1.6',
       letterSpacing: '0.02em',
       headingScale: '1.4',
+      // Font size multipliers for computed sizes - Inter + Oswald psychedelic scaling
+      fontSizeMultipliers: {
+        sm: '0.88',       // Small text - Inter needs slightly larger small text
+        lg: '1.12',       // Large text - balanced scaling
+        xl: '1.4',        // Extra large - matches dramatic heading scale
+        '2xl': '1.75'     // 2x large - psychedelic dramatic scaling
+      },
       fontWeight: {
         normal: '400',
         medium: '500',
@@ -363,6 +400,9 @@ const defaultThemes = {
       borderLight: '#6A0DAD',          // Purple (toned down from electric)
       borderMedium: '#32CD32',         // Lime Green (readable)
       borderHeavy: '#DA70D6',          // Orchid (softer than pure magenta)
+      
+      // Interactive Colors
+      hoverBg: '#DA70D6',              // Hover background for interactive elements
       
       // Status Colors - Psychedelic but usable
       success: '#39FF14',              // Electric Lime (same as accent)
@@ -401,40 +441,43 @@ const CACHE_KEY = 'themes_data'
 const CACHE_DURATION = 24 * 60 * 60 * 1000 // 24 hours
 
 /**
- * Load themes from API or cache with fallback to static file
+ * Load themes from API with fallback to cache, then static file
+ * Priority: Server → Cache → Static File
+ * This ensures theme editor changes are immediately visible on refresh
  * @returns {Promise<Object>} Theme definitions
  */
 export async function loadThemes() {
-  // Check in-memory cache first
+  // Check in-memory cache first (but only for subsequent calls, not page refresh)
   if (Object.keys(themes).length > 0) {
     return themes
   }
   
-  // Check localStorage cache
-  const cached = getCachedThemes()
-  if (cached && !isThemeCacheExpired(cached)) {
-    themes = cached.data.themes || {}
-    console.log(`Loaded ${Object.keys(themes).length} themes from cache`)
-    return themes
-  }
-  
+  // ALWAYS try server first to get latest theme changes
   try {
-    // Fetch from API (will be proxied in production, direct in development)
-    const apiUrl = import.meta.env.DEV 
-      ? 'http://100.104.170.10:3555/api/v1/themes'  
-      : '/api/v1/themes'
-    const response = await fetch(apiUrl)
+    console.log('Checking server for latest themes...')
+    const response = await fetch('/api/v1/themes')
     
     if (response.ok) {
       const data = await response.json()
-      // Cache the response
+      // Cache the fresh server data
       setCachedThemes(data)
       themes = data.themes || {}
-      console.log(`Loaded ${Object.keys(themes).length} themes from API`)
+      console.log(`✅ Loaded ${Object.keys(themes).length} themes from server (latest)`)
       return themes
+    } else {
+      console.warn(`Server returned ${response.status}, falling back to cache`)
     }
   } catch (error) {
-    console.warn('Failed to fetch themes from API:', error)
+    console.warn('Server unavailable, falling back to cache:', error.message)
+  }
+  
+  // Server failed - try cache as fallback
+  const cached = getCachedThemes()
+  if (cached) {
+    themes = cached.data.themes || {}
+    const cacheAge = Math.round((Date.now() - cached.timestamp) / (1000 * 60))
+    console.log(`📦 Using cached themes (${cacheAge} minutes old) - ${Object.keys(themes).length} themes`)
+    return themes
   }
   
   try {
@@ -487,6 +530,34 @@ export function clearThemesCache() {
 }
 
 /**
+ * Force refresh themes from server (bypasses cache)
+ * Useful after saving theme changes in the theme editor
+ */
+export async function refreshThemesFromServer() {
+  console.log('🔄 Force refreshing themes from server...')
+  
+  // Clear in-memory cache to force fresh fetch
+  themes = {}
+  
+  try {
+    const response = await fetch('/api/v1/themes')
+    
+    if (response.ok) {
+      const data = await response.json()
+      setCachedThemes(data)
+      themes = data.themes || {}
+      console.log(`✅ Refreshed ${Object.keys(themes).length} themes from server`)
+      return themes
+    } else {
+      throw new Error(`Server returned ${response.status}`)
+    }
+  } catch (error) {
+    console.error('Failed to refresh themes from server:', error)
+    throw error
+  }
+}
+
+/**
  * Apply a theme by updating CSS variables
  * @param {string} themeName - The theme ID to apply
  */
@@ -502,38 +573,56 @@ export function applyTheme(themeName) {
   const root = document.documentElement;
   const colors = theme.colors;
   
-  // Primary Brand Colors
-  root.style.setProperty('--color-primary', colors.primary);
-  root.style.setProperty('--color-primary-dark', colors.primaryDark);
-  root.style.setProperty('--color-primary-darker', colors.primaryDarker);
-  root.style.setProperty('--color-accent', colors.accent);
-  root.style.setProperty('--color-accent-dark', colors.accentDark);
+  // ========================================
+  // BRAND COLORS - Core theme identity
+  // ========================================
   
-  // Background Colors
-  root.style.setProperty('--color-bg-base', colors.bgBase);
-  root.style.setProperty('--color-bg-elevated', colors.bgElevated);
-  root.style.setProperty('--color-bg-header', colors.bgHeader);
-  root.style.setProperty('--color-bg-input', colors.bgInput);
-  root.style.setProperty('--color-bg-hover', colors.bgHover);
-  root.style.setProperty('--color-bg-active', colors.bgActive);
+  // PRIMARY: Main brand color - USE FOR: button backgrounds, active states, primary actions
+  root.style.setProperty('--color-primary', colors.primary);
+  root.style.setProperty('--color-primary-dark', colors.primaryDark);    // Hover states, darker variants
+  root.style.setProperty('--color-primary-darker', colors.primaryDarker); // Deep shadows, darkest variant
+  
+  // ACCENT: Highlight color - USE FOR: text highlights, icons, borders ONLY (never backgrounds)
+  root.style.setProperty('--color-accent', colors.accent);
+  root.style.setProperty('--color-accent-dark', colors.accentDark);      // Darker accent for text contrast
+  
+  // ========================================
+  // SURFACE COLORS - App structure layers  
+  // ========================================
+  
+  // Background hierarchy (light to dark for dark themes, dark to light for light themes)
+  root.style.setProperty('--color-bg-base', colors.bgBase);             // Main app background
+  root.style.setProperty('--color-bg-elevated', colors.bgElevated);     // Cards, modals, elevated surfaces
+  root.style.setProperty('--color-bg-header', colors.bgHeader);         // Navigation, headers
+  root.style.setProperty('--color-bg-input', colors.bgInput);           // Form inputs, text fields
+  root.style.setProperty('--color-bg-hover', colors.bgHover);           // Hover states for surfaces
+  root.style.setProperty('--color-bg-active', colors.bgActive);         // Active/selected states
   
   // Background Aliases (CRITICAL - these were missing!)
   root.style.setProperty('--color-background-secondary', colors.bgBase);  // Alias for bg-base
   root.style.setProperty('--color-background-tertiary', colors.bgElevated);  // Alias for bg-elevated  
   root.style.setProperty('--color-background-form-focus', colors.bgHover);  // Form focus state
   
-  // Text Colors
-  root.style.setProperty('--color-text-primary', colors.textPrimary);
-  root.style.setProperty('--color-text-secondary', colors.textSecondary);
-  root.style.setProperty('--color-text-muted', colors.textMuted);
-  root.style.setProperty('--color-text-disabled', colors.textDisabled);
-  root.style.setProperty('--color-text-inverse', colors.textInverse);
+  // ========================================
+  // TEXT COLORS - Content readability hierarchy
+  // ========================================
   
-  // Border Colors
-  root.style.setProperty('--color-border-light', colors.borderLight);
-  root.style.setProperty('--color-border-medium', colors.borderMedium);
-  root.style.setProperty('--color-border-heavy', colors.borderHeavy);
-  root.style.setProperty('--color-border-focus', colors.primary);
+  // Text hierarchy (high to low contrast)
+  root.style.setProperty('--color-text-primary', colors.textPrimary);     // Main headings, important text
+  root.style.setProperty('--color-text-secondary', colors.textSecondary); // Body text, secondary content
+  root.style.setProperty('--color-text-muted', colors.textMuted);         // Helper text, less important info
+  root.style.setProperty('--color-text-disabled', colors.textDisabled);   // Disabled form elements, inactive text
+  root.style.setProperty('--color-text-inverse', colors.textInverse);     // Text on colored backgrounds
+  
+  // ========================================
+  // BORDER COLORS - Visual separation system
+  // ========================================
+  
+  // Border hierarchy (subtle to emphasized)
+  root.style.setProperty('--color-border-light', colors.borderLight);     // Subtle divisions, grid lines
+  root.style.setProperty('--color-border-medium', colors.borderMedium);   // Standard borders, cards
+  root.style.setProperty('--color-border-heavy', colors.borderHeavy);     // Emphasized borders, sections
+  root.style.setProperty('--color-border-focus', colors.primary);         // Focus rings, active borders
   
   // Border Aliases (CRITICAL - these were missing!)
   root.style.setProperty('--color-border', colors.borderMedium);  // Main border alias
@@ -541,28 +630,43 @@ export function applyTheme(themeName) {
   root.style.setProperty('--color-border-secondary', colors.borderHeavy);  // Alias for emphasized
   root.style.setProperty('--color-border-subtle', colors.borderLight);  // Alias for subtle
   
-  // Status Colors
-  root.style.setProperty('--color-success', colors.success);
-  root.style.setProperty('--color-error', colors.error);
-  root.style.setProperty('--color-warning', colors.warning);
-  root.style.setProperty('--color-info', colors.info);
-  root.style.setProperty('--color-danger', colors.error);  // Alias for error
+  // ========================================
+  // STATUS COLORS - Semantic feedback system
+  // ========================================
+  
+  // Status colors for user feedback (use consistently across themes)
+  root.style.setProperty('--color-success', colors.success);             // Positive actions, completion states
+  root.style.setProperty('--color-error', colors.error);                 // Errors, destructive actions, validation failures
+  root.style.setProperty('--color-warning', colors.warning);             // Cautions, important notices, attention needed
+  root.style.setProperty('--color-info', colors.info);                   // Information, helpful tips, neutral feedback
+  root.style.setProperty('--color-danger', colors.error);                // Alias for error (legacy support)
   
   // Additional important aliases
   root.style.setProperty('--color-text', colors.textPrimary);  // Text alias
   root.style.setProperty('--color-purple', colors.primary);  // Purple fallback
   
-  // Interactive States
-  root.style.setProperty('--color-link', colors.accent);
-  root.style.setProperty('--color-link-hover', colors.textPrimary);
-  root.style.setProperty('--color-focus-ring', colors.primary);
-  root.style.setProperty('--color-selection-bg', colors.primary);
-  root.style.setProperty('--color-selection-text', colors.textPrimary);
+  // ========================================
+  // INTERACTIVE STATES - User interaction feedback
+  // ========================================
   
-  // Component-Specific Colors
-  root.style.setProperty('--color-nav-bg', colors.bgHeader);
-  root.style.setProperty('--color-nav-hover', colors.primary);
-  root.style.setProperty('--color-card-bg', colors.bgElevated);
+  // Interactive backgrounds and states
+  root.style.setProperty('--color-hover-bg', colors.hoverBg);            // Hover background for interactive elements
+  
+  // Link and selection colors
+  root.style.setProperty('--color-link', colors.accent);                 // Text links - accent for visibility
+  root.style.setProperty('--color-link-hover', colors.textPrimary);      // Hover state for links
+  root.style.setProperty('--color-focus-ring', colors.primary);          // Focus indicators, accessibility
+  root.style.setProperty('--color-selection-bg', colors.primary);        // Text selection background
+  root.style.setProperty('--color-selection-text', colors.textPrimary);  // Text selection color
+  
+  // ========================================
+  // COMPONENT-SPECIFIC COLORS - Specialized UI elements
+  // ========================================
+  
+  // Navigation and layout components
+  root.style.setProperty('--color-nav-bg', colors.bgHeader);             // Navigation bar backgrounds
+  root.style.setProperty('--color-nav-hover', colors.primary);           // Navigation hover states
+  root.style.setProperty('--color-card-bg', colors.bgElevated);          // Card backgrounds
   root.style.setProperty('--color-modal-overlay', 'rgba(0, 0, 0, 0.7)');
   
   // Map Colors
@@ -589,16 +693,20 @@ export function applyTheme(themeName) {
   root.style.setProperty('--color-weather-card-bg', colors.weatherCardBg);
   root.style.setProperty('--color-weather-icon', colors.weatherIcon);
   
-  // Transparency Effects
-  root.style.setProperty('--color-primary-alpha-20', colors.primaryAlpha20);
-  root.style.setProperty('--color-success-glow', colors.successGlow);
-  root.style.setProperty('--color-error-glow', colors.errorGlow);
-  root.style.setProperty('--color-bg-input-alpha-50', colors.bgInputAlpha50);
-  root.style.setProperty('--color-shadow-light', colors.shadowLight);
-  root.style.setProperty('--color-shadow-medium', colors.shadowMedium);
-  root.style.setProperty('--color-overlay-dark', colors.overlayDark);
-  root.style.setProperty('--color-white-alpha-10', colors.whiteAlpha10);
-  root.style.setProperty('--color-modal-overlay', colors.modalOverlay);
+  // ========================================
+  // TRANSPARENCY EFFECTS - Alpha blended colors
+  // ========================================
+  
+  // Pre-defined alpha variants (defined in theme data)
+  root.style.setProperty('--color-primary-alpha-20', colors.primaryAlpha20);   // Primary with 20% opacity
+  root.style.setProperty('--color-success-glow', colors.successGlow);           // Success color for glows/highlights
+  root.style.setProperty('--color-error-glow', colors.errorGlow);               // Error color for glows/validation
+  root.style.setProperty('--color-bg-input-alpha-50', colors.bgInputAlpha50);   // Semi-transparent input backgrounds
+  root.style.setProperty('--color-shadow-light', colors.shadowLight);          // Light shadow for subtle depth
+  root.style.setProperty('--color-shadow-medium', colors.shadowMedium);        // Medium shadow for cards/modals
+  root.style.setProperty('--color-overlay-dark', colors.overlayDark);          // Dark overlay for modals
+  root.style.setProperty('--color-white-alpha-10', colors.whiteAlpha10);       // Light overlay/highlight
+  root.style.setProperty('--color-modal-overlay', colors.modalOverlay);        // Modal backdrop
   
   // Overlay Colors (CRITICAL - these were missing!)
   root.style.setProperty('--color-overlay-subtle', colors.overlaySubtle);
@@ -639,10 +747,100 @@ export function applyTheme(themeName) {
   root.style.setProperty('--color-error-bg', colors.errorGlow.replace('0.5', '0.1'));
   root.style.setProperty('--color-warning-bg', colors.errorGlow.replace(colors.error, colors.warning).replace('0.5', '0.1'));
   
-  // Legacy support
-  root.style.setProperty('--color-gold', colors.accent);
-  root.style.setProperty('--color-dark-red', colors.primaryDark);
-  root.style.setProperty('--color-dark-red-original', colors.primary);
+  // ========================================
+  // LEGACY SUPPORT - Deprecated colors (avoid in new code)
+  // ========================================
+  
+  // Legacy color names for backwards compatibility (use semantic names above)
+  root.style.setProperty('--color-gold', colors.accent);                // Use --color-accent instead
+  root.style.setProperty('--color-dark-red', colors.primaryDark);       // Use --color-primary-dark instead  
+  root.style.setProperty('--color-dark-red-original', colors.primary);  // Use --color-primary instead
+  
+  /* 
+  ====================================================================
+  ADDING NEW COLOR VARIABLES - Complete Process Documentation
+  ====================================================================
+  
+  Follow this systematic process when adding new color variables to the theme system:
+  
+  1. IDENTIFY THE NEED
+     - Find repeated color values across components
+     - Identify semantic use cases (e.g., hover states, interactive elements)
+     - Look for hard-coded colors that should be themeable
+  
+  2. ADD TO THEME DEFINITIONS (lines 67-397)
+     - Add the new property to ALL theme objects (oknotok, sparkle, khaki, mush)
+     - Use semantic naming: hoverBg, not lightGray
+     - Add descriptive comment explaining usage
+     - Example: hoverBg: '#555', // Hover background for interactive elements
+  
+  3. ADD CSS VARIABLE IN applyTheme() FUNCTION (lines 502+)
+     - Add root.style.setProperty() call in appropriate section
+     - Include descriptive comment about usage
+     - Example: root.style.setProperty('--color-hover-bg', colors.hoverBg);
+  
+  4. UPDATE COMPONENT USAGE
+     - Search for hard-coded values: Grep pattern: "background.*#[0-9a-fA-F]"
+     - Search for existing similar patterns: Grep pattern: ":hover.*background"
+     - Replace with new semantic variable: var(--color-hover-bg)
+     - Test across all themes to ensure proper appearance
+  
+  5. VALIDATION CHECKLIST
+     ✅ All 4 themes have the new property defined
+     ✅ CSS variable is set in applyTheme() function  
+     ✅ All relevant components use the new variable
+     ✅ Theme switching works correctly for new variable
+     ✅ Colors are semantically appropriate for each theme
+  
+  EXAMPLE: Adding --color-hover-bg Variable
+  
+  Theme definitions:
+    oknotok:   { hoverBg: '#555' }      // Dark theme: medium gray
+    sparkle:   { hoverBg: '#F8BBD9' }   // Light theme: soft pink  
+    khaki:     { hoverBg: '#666666' }   // Professional: dark gray
+    mush:      { hoverBg: '#DA70D6' }   // Psychedelic: orchid
+  
+  CSS Variable:
+    root.style.setProperty('--color-hover-bg', colors.hoverBg);
+  
+  Component Usage:
+    .interactive-item:hover { background: var(--color-hover-bg); }
+  
+  ====================================================================
+  COLOR SYSTEM DESIGN PHILOSOPHY
+  ====================================================================
+  
+  This system provides consistent theming across 4+ themes with different
+  light/dark backgrounds and color schemes. Key principles:
+  
+  1. SEMANTIC NAMING: Colors are named by function, not appearance
+     - Good: --color-text-primary, --color-bg-elevated
+     - Bad: --color-red, --color-light-gray
+  
+  2. HIERARCHY: Each category has clear hierarchy (primary > secondary > muted)
+     - Text: primary (headings) > secondary (body) > muted (helper) > disabled
+     - Backgrounds: base (main) > elevated (cards) > header (nav) > input (forms)
+     - Borders: light (subtle) > medium (standard) > heavy (emphasized)
+  
+  3. ACCENT COLORS: Only for text, icons, and borders - NEVER backgrounds
+     - Use primary colors for button backgrounds and interactive elements
+  
+  4. ALPHA VARIANTS: Pre-defined in themes for consistency
+     - Avoid computing colors on-the-fly when possible
+     - Each theme can define custom alpha values for better appearance
+  
+  5. STATUS COLORS: Universal semantic meaning across all themes
+     - Success (green): completion, positive feedback
+     - Error (red): failures, destructive actions  
+     - Warning (orange): caution, attention needed
+     - Info (blue): helpful information, neutral feedback
+     
+  6. THEME COVERAGE: All themes should define the same base set of variables
+     - Specialized colors (like map markers) can be theme-specific
+     - Use fallbacks for missing variables in computed sections
+  
+  ====================================================================
+  */
   
   // Apply typography if available
   if (theme.typography) {
@@ -676,6 +874,30 @@ export function applyTypography(typography) {
   root.style.setProperty('--line-height-base', typography.baseLineHeight);
   root.style.setProperty('--letter-spacing-base', typography.letterSpacing);
   root.style.setProperty('--heading-scale', typography.headingScale);
+  
+  // Set font size multipliers and computed sizes
+  if (typography.fontSizeMultipliers) {
+    const baseSize = parseFloat(typography.baseFontSize);
+    const multipliers = typography.fontSizeMultipliers;
+    
+    // Set multiplier variables for theme editor
+    Object.entries(multipliers).forEach(([size, multiplier]) => {
+      root.style.setProperty(`--font-size-multiplier-${size}`, multiplier);
+    });
+    
+    // Calculate and set computed font sizes
+    root.style.setProperty('--font-size-sm', `${baseSize * parseFloat(multipliers.sm)}px`);
+    root.style.setProperty('--font-size-lg', `${baseSize * parseFloat(multipliers.lg)}px`);
+    root.style.setProperty('--font-size-xl', `${baseSize * parseFloat(multipliers.xl)}px`);
+    root.style.setProperty('--font-size-2xl', `${baseSize * parseFloat(multipliers['2xl'])}px`);
+    
+    // Calculate heading sizes using the heading scale and multipliers
+    const headingScale = parseFloat(typography.headingScale);
+    root.style.setProperty('--font-size-h1', `${baseSize * Math.pow(headingScale, 3)}px`);
+    root.style.setProperty('--font-size-h2', `${baseSize * Math.pow(headingScale, 2)}px`);
+    root.style.setProperty('--font-size-h3', `${baseSize * headingScale}px`);
+    root.style.setProperty('--font-size-h4', `${baseSize}px`);
+  }
   
   // Set font weight variables
   if (typography.fontWeight) {

@@ -67,6 +67,35 @@
       "category": "personalization"
     },
     {
+      "title": "Font Size Multiplier System",
+      "icon": "🎯",
+      "description": "Fine-tune font scaling ratios for optimal typography across different typefaces",
+      "details": [
+        "Separate controls for sm, lg, xl, and 2xl font sizes",
+        "Font-specific optimized default multiplier values",
+        "Real-time preview in theme editor",
+        "Perfect scaling for Berkeley Mono, Helvetica, etc.",
+        "Live CSS variable updates for immediate feedback"
+      ],
+      "version": "3.28.0",
+      "category": "personalization"
+    },
+    {
+      "title": "Alpha Color Picker with RGBA Support",
+      "icon": "🎨",
+      "description": "Professional transparency controls for advanced theme customization",
+      "details": [
+        "Full RGBA color space support (not just RGB hex)",
+        "Alpha sliders with precise 0-100% transparency control",
+        "Visual transparency previews with checkered backgrounds",
+        "Automatic format switching between hex and rgba",
+        "Perfect for modal overlays, glows, and subtle backgrounds",
+        "Real-time theme updates with alpha channel support"
+      ],
+      "version": "3.28.0",
+      "category": "personalization"
+    },
+    {
       "title": "Interactive Map with GIS Data",
       "icon": "🗺️",
       "description": "Professional-grade map with accurate Black Rock City street data and camp placement",

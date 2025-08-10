@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ok-offline-v35'; // Theme authoring UI and Seven Pools enhancements
+const CACHE_NAME = 'ok-offline-v37'; // Added font size multipliers and alpha color picker
 const urlsToCache = [
   // Core app files
   '/',
