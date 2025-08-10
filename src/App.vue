@@ -425,5 +425,27 @@ main {
   min-height: 0; /* Important for nested flex containers */
 }
 
+/* Global content width constraint */
+.content-container {
+  height: 100%;
+  max-width: 1200px; /* Match header width constraint */
+  margin: 0 auto;
+  position: relative;
+  overflow: hidden; /* Let views handle scrolling */
+}
+
+/* Desktop borders for content container */
+body.desktop-device .content-container {
+  border-left: 1px solid var(--color-border-medium);
+  border-right: 1px solid var(--color-border-medium);
+}
+
+/* Map view should fill full width without borders */
+main.map-view .content-container {
+  max-width: none;
+  border-left: none;
+  border-right: none;
+}
+
 /* Landscape mode adjustments moved to component files */
 </style>

@@ -1,28 +1,31 @@
 <template>
-  <div class="prompts-view">
-    <div class="header">
-      <h1>OK-OFFLINE PROMPT HISTORY</h1>
-      <div class="stats">
-        <span>{{ filteredPrompts.length }} prompts</span>
-        <span v-if="searchQuery">matching "{{ searchQuery }}"</span>
+  <div class="view-container">
+    <div class="fixed-header">
+      <div class="header">
+        <h1>OK-OFFLINE PROMPT HISTORY</h1>
+        <div class="stats">
+          <span>{{ filteredPrompts.length }} prompts</span>
+          <span v-if="searchQuery">matching "{{ searchQuery }}"</span>
+        </div>
+      </div>
+
+      <div class="controls">
+        <input 
+          v-model="searchQuery"
+          type="search"
+          placeholder="Search prompts..."
+          class="search-input"
+        >
+        
+        <div class="actions">
+          <button @click="exportJSON" class="btn">Export JSON</button>
+          <button @click="exportCSV" class="btn">Export CSV</button>
+        </div>
       </div>
     </div>
 
-    <div class="controls">
-      <input 
-        v-model="searchQuery"
-        type="search"
-        placeholder="Search prompts..."
-        class="search-input"
-      >
-      
-      <div class="actions">
-        <button @click="exportJSON" class="btn">Export JSON</button>
-        <button @click="exportCSV" class="btn">Export CSV</button>
-      </div>
-    </div>
-
-    <div class="prompts-list">
+    <div class="scrollable-content">
+      <div class="prompts-list">
       <div v-if="loading" class="loading">Loading prompts...</div>
       
       <div v-else-if="error" class="error">
@@ -68,6 +71,7 @@
           >
             Next
           </button>
+        </div>
         </div>
       </div>
     </div>
@@ -205,13 +209,33 @@ export default {
 </script>
 
 <style scoped>
-.prompts-view {
+/* Standard flexbox layout pattern */
+.view-container {
+  height: 100%;
   display: flex;
   flex-direction: column;
-  min-height: calc(100vh - 120px);
-  padding: 2rem;
+  min-height: 0;
+}
+
+.fixed-header {
+  flex-shrink: 0;
+  padding: 2rem 2rem 0;
   max-width: 1200px;
   margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.scrollable-content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  min-height: 0;
+  padding: 0 2rem 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .header {
@@ -284,7 +308,6 @@ export default {
 }
 
 .prompts-list {
-  flex: 1;
   background: var(--color-bg-base);
   border-radius: 8px;
   padding: 1.5rem;
@@ -312,7 +335,7 @@ export default {
 }
 
 .prompt-item:hover {
-  background: var(--color-bg-header);
+  background: var(--color-hover-bg);
   border-color: var(--color-border-heavy);
 }
 
@@ -366,7 +389,7 @@ export default {
 
 .prompt-content {
   color: var(--color-text-primary);
-  font-size: 0.95rem;
+  font-size: 1.95rem;
   line-height: 1.6;
   white-space: pre-wrap;
   word-break: break-word;
@@ -390,9 +413,12 @@ export default {
 
 /* Mobile responsiveness */
 @media (max-width: 768px) {
-  .prompts-view {
+  .fixed-header {
     padding: 1rem;
-    min-height: calc(100vh - 100px);
+  }
+  
+  .scrollable-content {
+    padding: 0 1rem 1rem;
   }
   
   .header h1 {

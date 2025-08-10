@@ -14,7 +14,10 @@ export const API_URLS = {
   VECTOR_API: '/api/v1',
   
   // Search analytics API  
-  SEARCH_API: ''  // Empty string for root-relative paths
+  SEARCH_API: '',  // Empty string for root-relative paths
+  
+  // Tile API for map tile downloads
+  TILES_API: '/api/v1/tiles'
 }
 
 // Debug configuration

@@ -173,7 +173,7 @@ const setActiveTab = (tab) => {
 }
 
 .tab-btn:hover {
-  background: var(--color-bg-header);
+  background: var(--color-hover-bg);
   color: var(--color-text-primary);
 }
 

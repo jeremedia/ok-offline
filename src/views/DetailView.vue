@@ -898,6 +898,8 @@ watch(() => props.id, async () => {
 @media (min-width: 768px) {
   #detail-content {
     padding-bottom: 0 !important; /* Remove bottom padding to use full space */
+    width: 100% !important; /* Full width on desktop - override any parent constraints */
+    max-width: none !important; /* Ensure no max-width constraints */
   }
   
   .detail-header {
@@ -932,7 +934,7 @@ watch(() => props.id, async () => {
     position: relative !important; /* Override sticky */
     top: auto !important;
     max-width: none !important;
-    margin: 0 0 16px 0 !important; /* Add bottom margin to prevent touching footer */
+    margin: 0 1rem 16px 0 !important; /* Add standard right margin on desktop */
     padding: 0 !important; /* Remove any padding causing misalignment */
   }
 }

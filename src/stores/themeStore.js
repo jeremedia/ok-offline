@@ -3,7 +3,7 @@
  */
 
 import { ref, watchEffect } from 'vue'
-import { getAvailableThemes, applyTheme, getCurrentTheme, loadThemes } from '@/services/themeService'
+import { getAvailableThemes, applyTheme, getCurrentTheme, loadThemes, refreshThemesFromServer } from '@/services/themeService'
 
 // Current theme reactive reference
 export const currentTheme = ref(getCurrentTheme())
@@ -43,9 +43,10 @@ export function isActiveTheme(themeName) {
   return currentTheme.value === themeName
 }
 
-// Refresh themes from JSON (useful for theme editor)
+// Refresh themes from server (useful for theme editor)
 export async function refreshThemes() {
-  const themes = await loadThemes()
+  // Force refresh from server by using the dedicated refresh function
+  const themes = await refreshThemesFromServer()
   availableThemes.value = themes
   return themes
 }

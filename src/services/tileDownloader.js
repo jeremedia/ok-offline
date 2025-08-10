@@ -20,9 +20,11 @@ const ZOOM_LEVELS = {
 const TILE_URL_TEMPLATE = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
 
 // API tile package URL
-const TILE_PACKAGE_URL = import.meta.env.PROD 
-  ? 'https://offline.oknotok.com/api/v1/tiles/package.zip'
-  : 'https://offline.oknotok.com/api/v1/tiles/package.zip'
+import { API_URLS } from '../config'
+console.log('[TileDownloader] API_URLS:', API_URLS)
+console.log('[TileDownloader] API_URLS.TILES_API:', API_URLS.TILES_API)
+const TILE_PACKAGE_URL = `${API_URLS.TILES_API}/package.zip`
+console.log('[TileDownloader] TILE_PACKAGE_URL:', TILE_PACKAGE_URL)
 
 // Database version - must match leaflet.offline expectation
 const DB_VERSION = 2
@@ -204,6 +206,7 @@ class TileDownloader {
     this.totalTiles = this.calculateTileCount()
     
     try {
+      console.log('[TileDownloader] Download package: ' + TILE_PACKAGE_URL)
       // Download the ZIP file with progress tracking
       const response = await fetch(TILE_PACKAGE_URL)
       

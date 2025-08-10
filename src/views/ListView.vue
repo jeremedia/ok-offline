@@ -772,12 +772,12 @@ watch(() => [props.type, props.year], () => {
 }
 
 .section-header:hover {
-  background-color: var(--color-primary);
-  color: var(--color-text-inverse);
+  background-color: var(--color-hover-bg);
+  color: var(--color-text-primary);
 }
 
 .section-header:hover .group-count {
-  color: var(--color-text-inverse);
+  color: var(--color-text-primary);
 }
 
 .collapse-icon {
@@ -805,6 +805,12 @@ watch(() => [props.type, props.year], () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+/* Override global hover style with semantic color */
+#items-list li:hover {
+  background-color: var(--color-hover-bg);
+  cursor: pointer;
 }
 
 #items-list li .item-content {
@@ -950,8 +956,6 @@ watch(() => [props.type, props.year], () => {
   height: 100%;
   display: flex;
   flex-direction: column;
-  max-width: 1000px;
-  margin: 0 auto;
   width: 100%;
   overflow: hidden; /* Prevent outer scrolling */
   min-height: 0; /* Important for nested flexbox */

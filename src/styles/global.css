@@ -44,6 +44,9 @@
   --color-bg-hover: #555;                /* Hover states */
   --color-bg-active: #666;               /* Active/selected states */
   
+  /* Interactive Colors */
+  --color-hover-bg: #555;                /* Semantic hover background for all interactive elements */
+  
   /* Background Color Aliases for map components */
   --color-background-secondary: #1a1a1a;  /* Alias for bg-base */
   --color-background-secondary-alpha-90: rgba(26, 26, 26, 0.9);  /* 90% opacity */

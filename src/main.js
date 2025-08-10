@@ -23,6 +23,9 @@ import InfrastructureDetailView from './views/InfrastructureDetailView.vue'
 import IconViewer from './views/IconViewer.vue'
 import ComponentsView from './views/ComponentsView.vue'
 import KnowledgeGraphView from './views/KnowledgeGraphView.vue'
+import CampDashboardView from './views/CampDashboardView.vue'
+import CampTimelineView from './views/CampTimelineView.vue'
+import CampEditorView from './views/CampEditorView.vue'
 
 // Import CSS
 import './styles/fonts.css'
@@ -90,6 +93,24 @@ const routes = [
     path: '/:year/infrastructure/:id',
     name: 'infrastructure-detail',
     component: InfrastructureDetailView,
+    props: true
+  },
+  {
+    path: '/:year/camp/:slug',
+    name: 'camp-dashboard',
+    component: CampDashboardView,
+    props: true
+  },
+  {
+    path: '/:year/camp/:slug/timeline',
+    name: 'camp-timeline',
+    component: CampTimelineView,
+    props: true
+  },
+  {
+    path: '/:year/camp/:slug/edit',
+    name: 'camp-editor',
+    component: CampEditorView,
     props: true
   },
   {

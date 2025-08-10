@@ -1,11 +1,24 @@
 <template>
   <div class="view-container">
     <div class="infrastructure-view">
-    <!-- Header with integrated intro toggle -->
+    <!-- Header with integrated intro toggle and search -->
     <div class="header-section">
-      <div class="view-header" @click="toggleIntro">
-        <span class="disclosure-arrow" :class="{ rotated: isIntroCollapsed }">▼</span>
-        <h2 class="view-title">Infrastructure</h2>
+      <div class="view-header-row">
+        <div class="view-header" @click="toggleIntro">
+          <span class="disclosure-arrow" :class="{ rotated: isIntroCollapsed }">▼</span>
+          <h2 class="view-title">Infrastructure</h2>
+        </div>
+        
+        <!-- Desktop search in header row -->
+        <div class="header-search-controls desktop-only">
+          <input
+            type="text"
+            v-model="searchQuery"
+            placeholder="Search infrastructure..."
+            class="header-search-input"
+            @input="handleSearch"
+          >
+        </div>
       </div>
       
       <!-- Introduction content (appears below when toggled) -->
@@ -19,7 +32,7 @@
         <p>So wander. Get lost. Let the city hold you for a while. Then lend a hand. Every stake driven, every radio check, every art car's taillight is part of the same quiet collaboration that turns empty playa into a place we call home for one improbable week each year.</p>
       </div>
       
-      <div class="search-controls">
+      <div class="search-controls mobile-only">
         <input
           type="text"
           v-model="searchQuery"
@@ -119,6 +132,11 @@ const userLocation = ref(null)
 const allItems = ref([])
 const categories = ref([])
 const isIntroCollapsed = ref(true)
+
+// Mobile detection
+const isMobile = computed(() => {
+  return window.innerWidth < 768
+})
 
 // Check for user location
 const hasLocation = computed(() => {
@@ -228,13 +246,20 @@ onMounted(() => {
   margin-bottom: 2rem;
 }
 
+.view-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
 .view-header {
   display: flex;
   align-items: center;
   cursor: pointer;
   user-select: none;
-  margin-top: 1rem;
-  margin-bottom: 1rem;
 }
 
 .view-header:hover .view-title {
@@ -320,8 +345,39 @@ margin-top: 0;
   border-color: var(--color-primary);
 }
 
+/* Header search controls (desktop only) */
+.header-search-controls {
+  flex-shrink: 0;
+}
+
+.header-search-input {
+  width: 300px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9rem;
+  background: var(--color-bg-input);
+  border: 1px solid var(--color-border-medium);
+  border-radius: 4px;
+  color: var(--color-text-primary);
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.header-search-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  background: var(--color-bg-elevated);
+}
+
+.header-search-input::placeholder {
+  color: var(--color-text-muted);
+}
+
 .category-filters {
   margin-bottom: 2rem;
+}
+
+.category-btn {
+  white-space: nowrap;
+  min-width: fit-content;
 }
 
 .category-btn .count {
@@ -427,11 +483,17 @@ margin-top: 0;
   }
   
   .mobile-only {
-    display: inline;
+    display: block;
   }
   
   .desktop-only {
     display: none;
+  }
+  
+  .view-header-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
   }
 }
 

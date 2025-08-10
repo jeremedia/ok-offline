@@ -1283,7 +1283,7 @@ body.mobile-device .countdown-desc {
 }
 
 .accordion-header:hover {
-  background: var(--color-bg-elevated);
+  background: var(--color-hover-bg);
 }
 
 .accordion-header h3 {

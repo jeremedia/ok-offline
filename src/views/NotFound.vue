@@ -170,7 +170,7 @@ h1 {
 }
 
 .link-card:hover {
-  background: var(--color-bg-header);
+  background: var(--color-hover-bg);
   border-color: var(--color-primary);
   transform: translateY(-2px);
 }

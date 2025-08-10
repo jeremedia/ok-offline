@@ -3,6 +3,17 @@
     <div class="header-row">
       <!-- Desktop Navigation -->
       <div class="nav-section desktop-only">
+        <!-- OK Camp Link -->
+        <BaseButton 
+          @click="navigate('camp/oknotok')" 
+          variant="ghost"
+          :active="isActive('camp/oknotok')"
+          class="ok-nav-btn"
+          title="OKNOTOK Camp Dashboard"
+        >
+          🆗
+        </BaseButton>
+        
         <div class="year-selector-group">
           <select 
             id="year-selector" 
@@ -17,7 +28,7 @@
         </div>
         <nav class="main-nav">
           <BaseButton 
-            v-for="item in navItems" 
+            v-for="item in mainNavItems" 
             :key="item.route"
             @click="navigate(item.route)" 
             variant="ghost"
@@ -89,7 +100,7 @@ const router = useRouter()
 // Development mode indicator
 const isDev = computed(() => import.meta.env.DEV)
 
-const navItems = [
+const mainNavItems = [
   { route: 'map', label: 'MAP' },
   { route: 'search', label: 'SEARCH' },
   { route: 'camps', label: 'CAMPS' },
@@ -152,6 +163,11 @@ header {
   flex-shrink: 0;
 }
 
+/* Desktop bottom border to match content container borders */
+body.desktop-device header {
+  border-bottom: 1px solid var(--color-border-medium);
+}
+
 .header-row {
   display: flex;
   align-items: center;
@@ -206,6 +222,13 @@ header {
   font-size: 0.85rem;
   font-weight: 500;
   white-space: nowrap;
+}
+
+.ok-nav-btn {
+  font-size: 1.2rem;
+  margin-right: 0.5rem;
+  min-width: auto;
+  padding: 0.5rem 0.75rem;
 }
 
 /* App Title Section */
