@@ -7,7 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [3.28.0] - 2025-08-10
+## [3.28.0] - 2025-08-11
+
+### Added
+- **🏕️ Complete Camp Schedule Management System** - Professional event coordination tools
+  - Six event categories: Public Events, Meals, Arrivals (🆗), Departures (🚫), Services, Meetings
+  - Team member assignment with role-specific notes and responsible person designation
+  - PST timezone handling with precise start/end times and duration calculation
+  - Category filtering and two-column layout for efficient management
+- **📋 Enhanced Camp Editor Interface** - Comprehensive coordination tools
+  - PersonalSpaceEditor with collapsible sections for member space management
+  - CampMapEditor for map placement coordination
+  - BaseLoader component preventing CSS conflicts across the application
+- **⚡ Advanced State Management** - useCampEditor composable for camp coordination
+  - Smart cache invalidation and change detection
+  - Props-down/events-up architecture for reliable data flow
+  - Integration with backend CampScheduleItem API system
+
+### Fixed
+- **🐛 Schedule Editor Integration** - Fixed data structure mismatch preventing event creation
+- **🎨 Consistent UI Patterns** - All editor sections now use collapsible interface pattern
+- **📱 Mobile Optimization** - Improved responsive behavior for camp management tools
+
+### Changed
+- **🔄 Interface Standardization** - All camp management sections follow consistent design patterns
+
+## [3.27.6] - 2025-08-10
 
 ### Added
 - **🎯 Font Size Multiplier System** - Fine-tune font scaling ratios for different typefaces

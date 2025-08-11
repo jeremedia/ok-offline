@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ok-offline-v37'; // Added font size multipliers and alpha color picker
+const CACHE_NAME = 'ok-offline-v38'; // Complete camp schedule management system
 const urlsToCache = [
   // Core app files
   '/',
