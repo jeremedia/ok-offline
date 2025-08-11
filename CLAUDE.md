@@ -16,6 +16,9 @@ Created by Jeremy Roush and brought to you by Mr. OK of OKNOTOK.
 - **Access the app at**: http://dev.offline.oknotok.com
 - No need to restart server for testing or development
 
+### 🚨 CRITICAL Vue Pattern (Read First)
+**NEVER use `{ immediate: true }` in watch statements** - this breaks the app's initialization pattern and causes temporal dead zone errors. Always use `onMounted()` for initial loading and `watch()` without immediate for reactive changes. See "Vue Component Patterns" section below for full details.
+
 ## Current Architecture (Vue 3 + Vite)
 
 ### Tech Stack
@@ -827,6 +830,24 @@ The app uses a custom UI component system for consistency and maintainability:
   </BaseButton>
   ```
 
+#### BaseLoader
+- **Display modes**: inline, block, center, overlay
+- **Sizes**: xs, sm, md, lg, xl
+- **Spinner types**: ring, dots, pulse
+- **Props**: message, size, display, spinnerType, minHeight, show
+- **Usage**:
+  ```vue
+  <!-- Center loading with message -->
+  <BaseLoader message="Loading data..." size="lg" display="center" />
+  
+  <!-- Inline loader -->
+  <BaseLoader size="sm" display="inline" />
+  
+  <!-- Full-screen overlay -->
+  <BaseLoader message="Processing..." display="overlay" />
+  ```
+- **Benefits**: Prevents global CSS conflicts, consistent theming, accessibility support
+
 #### BaseCard
 - Consistent card styling with header, content, and footer slots
 - Used for data display throughout the app
@@ -854,9 +875,85 @@ The app uses a custom UI component system for consistency and maintainability:
 
 ### Component Best Practices
 1. Always use BaseButton instead of native buttons
-2. Use ButtonGroup for any set of related buttons
-3. Import components from `@/components/ui` index
-4. Maintain consistent spacing and sizing
+2. Always use BaseLoader instead of custom loading states
+3. Use ButtonGroup for any set of related buttons
+4. Import components from `@/components/ui` index
+5. Maintain consistent spacing and sizing
+
+**Loading States Pattern:**
+```vue
+<script setup>
+import { BaseLoader } from '@/components/ui'
+</script>
+
+<template>
+  <BaseLoader 
+    v-if="loading" 
+    message="Loading..." 
+    display="center" 
+    size="md" 
+  />
+</template>
+```
+
+## Vue Component Patterns (CRITICAL)
+
+### Initialization & Reactivity Pattern
+**MANDATORY**: All view components in this app follow a consistent pattern for data loading and prop watching. This pattern prevents temporal dead zone errors and maintains consistency across the codebase.
+
+#### ✅ CORRECT Pattern (Used by ListView, DetailView, SearchView, etc.)
+```javascript
+// 1. Setup reactive state and functions
+const data = ref(null)
+const loading = ref(false)
+
+// 2. Data loading function (declared BEFORE watch)
+const loadData = async () => {
+  // Load data logic
+}
+
+// 3. Watch for prop changes (NO immediate: true)
+watch(() => props.someValue, (newValue) => {
+  if (newValue) {
+    loadData() // Safe to call - function already declared
+  }
+}) // ← No immediate: true option
+
+// 4. Initial loading in onMounted
+onMounted(() => {
+  if (props.someValue) {
+    loadData() // Initial load
+  }
+})
+```
+
+#### ❌ ANTI-PATTERN (DO NOT USE)
+```javascript
+// BAD: This causes "Cannot access before initialization" errors
+watch(() => props.someValue, (newValue) => {
+  if (newValue) {
+    loadData() // ERROR: loadData not yet declared!
+  }
+}, { immediate: true }) // ← This triggers the error
+
+const loadData = async () => { // Declared AFTER watch
+  // Too late - already caused temporal dead zone error
+}
+```
+
+### Why This Pattern Exists
+1. **Temporal Dead Zone**: `{ immediate: true }` executes watch callback during component setup, before function expressions are declared
+2. **Consistency**: Every view component uses this exact pattern
+3. **Clarity**: Separates initial loading (onMounted) from reactive updates (watch)
+4. **Reliability**: Prevents initialization order bugs
+
+### Key Rules for Future Development
+1. **Never use `{ immediate: true }`** in watch statements
+2. **Always use `onMounted()`** for initial data loading
+3. **Declare functions BEFORE watches** if you must use immediate
+4. **Follow existing component patterns** - check ListView.vue or DetailView.vue as examples
+
+This pattern is enforced throughout the entire codebase. Violating it will cause runtime errors and break the UI.
 
 ## Common Development Tasks
 
@@ -962,6 +1059,46 @@ When updating existing components to use the global location state system:
 3. **Large datasets**: Consider pagination for better performance
 4. **Service Worker**: Must be served over HTTPS for PWA features
 5. **Location Visibility**: 2025 locations follow strict API timing policies
+
+## Date Handling Best Practices
+
+### PST Timezone Requirement
+**CRITICAL**: All dates and times in the app should display in PST/PDT (America/Los_Angeles timezone) regardless of server timezone. This ensures consistent experience for Burning Man participants.
+
+#### ✅ CORRECT Pattern (PST Display)
+```javascript
+// PST timezone-aware date parsing and formatting
+const parseDateToPST = (dateStr) => {
+  if (!dateStr) return null
+  const [year, month, day] = dateStr.split('-').map(Number)
+  return new Date(year, month - 1, day, 12, 0, 0) // Use noon to avoid DST issues
+}
+
+const formatDateInPST = (date) => {
+  if (!date) return 'Invalid'
+  return date.toLocaleDateString('en-US', { 
+    month: 'numeric', 
+    day: 'numeric',
+    timeZone: 'America/Los_Angeles' // Force PST/PDT display
+  })
+}
+
+// Usage
+const date = parseDateToPST('2025-08-19')
+const displayText = formatDateInPST(date) // Always shows Aug 19 in PST
+```
+
+#### ❌ ANTI-PATTERN (Server Timezone Dependent)
+```javascript
+// BAD: Shows different dates depending on server timezone
+const displayDate = new Date('2025-08-19').toLocaleDateString() // May show Aug 18!
+
+// BAD: Uses server's local timezone instead of PST
+const date = new Date(year, month - 1, day)
+const display = date.toLocaleDateString() // Not guaranteed to be PST
+```
+
+**Why**: Burning Man happens in Nevada (PST/PDT). All dates should be consistent regardless of where servers are hosted. Use `timeZone: 'America/Los_Angeles'` to force PST display.
 
 ## Future Enhancements (from todo list)
 

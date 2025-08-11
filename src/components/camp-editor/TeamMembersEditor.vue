@@ -277,21 +277,60 @@ const deleteMember = (memberId) => {
   }
 }
 
-// Utility functions
+// Utility functions - PST timezone handling
 const formatDateRange = (arrival, departure) => {
   if (!arrival) return 'No dates set'
-  const arrivalStr = new Date(arrival).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' })
+  
+  // Parse date strings safely and display in PST
+  // Input format is YYYY-MM-DD from date inputs
+  const parseDateToPST = (dateStr) => {
+    if (!dateStr) return null
+    const [year, month, day] = dateStr.split('-').map(Number)
+    // Create date in PST timezone explicitly
+    const date = new Date(year, month - 1, day, 12, 0, 0) // Use noon to avoid DST issues
+    return date
+  }
+  
+  const formatDateInPST = (date) => {
+    if (!date) return 'Invalid'
+    // Force PST display regardless of server timezone
+    return date.toLocaleDateString('en-US', { 
+      month: 'numeric', 
+      day: 'numeric',
+      timeZone: 'America/Los_Angeles' // Force PST/PDT
+    })
+  }
+  
+  const arrivalDate = parseDateToPST(arrival)
+  const arrivalStr = formatDateInPST(arrivalDate)
+  
   if (!departure) return `${arrivalStr} - TBD`
-  const departureStr = new Date(departure).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' })
+  
+  const departureDate = parseDateToPST(departure)
+  const departureStr = formatDateInPST(departureDate)
+  
   return `${arrivalStr} - ${departureStr}`
 }
 
 const calculateDuration = (arrival, departure) => {
   if (!arrival || !departure) return 'TBD'
-  const arrivalDate = new Date(arrival)
-  const departureDate = new Date(departure)
-  const diffTime = departureDate.getTime() - arrivalDate.getTime()
-  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1
+  
+  // Use PST timezone-aware date parsing
+  const parseDateToPST = (dateStr) => {
+    if (!dateStr) return null
+    const [year, month, day] = dateStr.split('-').map(Number)
+    return new Date(year, month - 1, day, 12, 0, 0) // Use noon PST to avoid DST issues
+  }
+  
+  const arrivalDate = parseDateToPST(arrival)
+  const departureDate = parseDateToPST(departure)
+  
+  if (!arrivalDate || !departureDate) return 'Invalid dates'
+  
+  const diffTime = departureDate - arrivalDate
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+  
+  if (diffDays === 1) return '1 day'
   return `${diffDays} days`
 }
 

@@ -35,9 +35,12 @@
     
     <div class="scrollable-content">
       <div class="editor-container">
-        <div v-if="loading" class="loading">
-          <div class="loading-text">Loading camp data...</div>
-        </div>
+        <BaseLoader 
+          v-if="loading" 
+          message="Loading camp data..."
+          display="center"
+          size="lg"
+        />
         
         <div v-else-if="error" class="error">
           <p>{{ error }}</p>
@@ -46,26 +49,49 @@
         <div v-else-if="camp" class="editor-layout">
           <!-- Camp Information Section -->
           <CampInfoEditor 
-            :camp-data="editingData"
+            :camp-data="campData"
             @update:camp-data="updateCampData"
           />
 
           <!-- Team Members Section -->
           <TeamMembersEditor 
-            :team-members="editingData.team_members || []"
+            :team-members="campData?.team_members || []"
             :selected-member-id="selectedMemberId"
             @update:team-members="updateTeamMembers"
             @update:selected-member-id="updateSelectedMemberId"
           />
 
+          <!-- Personal Space Section -->
+          <PersonalSpaceEditor
+            v-if="selectedMember"
+            :member="selectedMember"
+            :team-members="campData?.team_members || []"
+            @create="handlePersonalSpaceCreate"
+            @update="handlePersonalSpaceUpdate"
+            @delete="handlePersonalSpaceDelete"
+          />
+
           <!-- Kitchen Section -->
-          <KitchenEditor />
+          <KitchenEditor 
+            :kitchen-data="campData?.kitchen || {}"
+            :team-members="campData?.team_members || []"
+            @update:kitchen-data="updateKitchenData"
+          />
 
           <!-- Schedule Section -->
-          <ScheduleEditor />
+          <ScheduleEditor 
+            :schedule-data="campData?.schedule || { schedule_items: [] }"
+            :team-members="campData?.team_members || []"
+            @update:schedule-data="updateScheduleData"
+          />
 
-          <!-- Map Section -->
-          <MapEditor />
+          <!-- Camp Map Section -->
+          <CampMapEditor 
+            :camp-map="campData?.camp_map || { map_placements: [] }"
+            :team-members="campData?.team_members || []"
+            @update:camp-map="updateCampMap"
+            @update:map-placements="updateMapPlacements"
+          />
         </div>
       </div>
     </div>
@@ -75,16 +101,19 @@
 <script setup>
 import { ref, onMounted, watch, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getThemeCamp } from '../services/campService'
-import BaseButton from '../components/ui/BaseButton.vue'
+import { useCampEditor } from '../composables/useCampEditor'
+import { useToast } from '../composables/useToast'
+import { BaseButton, BaseLoader } from '../components/ui'
 import CampInfoEditor from '../components/camp-editor/CampInfoEditor.vue'
 import TeamMembersEditor from '../components/camp-editor/TeamMembersEditor.vue'
+import PersonalSpaceEditor from '../components/camp-editor/PersonalSpaceEditor.vue'
+import CampMapEditor from '../components/camp-editor/CampMapEditor.vue'
 import KitchenEditor from '../components/camp-editor/KitchenEditor.vue'
 import ScheduleEditor from '../components/camp-editor/ScheduleEditor.vue'
-import MapEditor from '../components/camp-editor/MapEditor.vue'
 
 const route = useRoute()
 const router = useRouter()
+const { showSuccess, showError } = useToast()
 
 // Props
 const props = defineProps({
@@ -98,46 +127,70 @@ const props = defineProps({
   }
 })
 
-// State
-const loading = ref(false)
-const error = ref(null)
-const camp = ref(null)
-const originalData = ref(null)
-const editingData = ref(null)
-const selectedMemberId = ref(null)
-const isSaving = ref(false)
+// Use the comprehensive camp editor composable
+const {
+  // Core state
+  campData,
+  isLoading,
+  isSaving,
+  isDirty,
+  errors,
+  
+  // Core operations
+  loadCamp,
+  saveAll,
+  validate,
+  clearErrors,
+  
+  // History operations
+  canUndo,
+  canRedo,
+  undo,
+  redo,
+  
+  // Team member operations
+  addTeamMember,
+  updateTeamMember,
+  removeTeamMember,
+  
+  // Map placement operations
+  addMapPlacement,
+  removeMapPlacement,
+  
+  // Change detection
+  getAllChanges
+} = useCampEditor(props.slug)
 
-// Load camp data
-const loadCamp = async (slug) => {
-  if (!slug) return
-  
-  loading.value = true
-  error.value = null
-  
+// Local state for UI
+const selectedMemberId = ref(null)
+const error = ref(null)
+
+// Watch for prop changes - load camp data when slug changes
+// IMPORTANT: Do NOT use { immediate: true } here - follows app-wide pattern
+// - onMounted() handles initial loading (see below)
+// - immediate: true would cause temporal dead zone error (loadCampData called before declaration)
+// - All other views (ListView, DetailView, SearchView) use this same pattern
+watch(() => props.slug, (newSlug) => {
+  if (newSlug) {
+    loadCampData()
+  }
+})
+
+// Load camp data using the composable
+const loadCampData = async () => {
   try {
-    const campData = await getThemeCamp(slug)
-    camp.value = campData
-    originalData.value = JSON.parse(JSON.stringify(campData))
-    editingData.value = JSON.parse(JSON.stringify(campData))
+    await loadCamp()
     
     // Select first member by default
-    if (campData.team_members && campData.team_members.length > 0) {
-      selectedMemberId.value = campData.team_members[0].id
+    if (campData.value?.team_members && campData.value.team_members.length > 0) {
+      selectedMemberId.value = campData.value.team_members[0].id
     }
   } catch (err) {
     error.value = err.message || 'Failed to load camp data'
     console.error('Failed to load camp:', err)
-  } finally {
-    loading.value = false
+    showError(error.value)
   }
 }
-
-// Watch for prop changes
-watch(() => props.slug, (newSlug) => {
-  if (newSlug) {
-    loadCamp(newSlug)
-  }
-}, { immediate: true })
 
 // Navigation
 const goBack = () => {
@@ -149,15 +202,14 @@ const goBack = () => {
 }
 
 // Computed properties
-const isDirty = computed(() => {
-  if (!originalData.value || !editingData.value) return false
-  return JSON.stringify(originalData.value) !== JSON.stringify(editingData.value)
+const selectedMember = computed(() => {
+  if (!selectedMemberId.value || !campData.value?.team_members) return null
+  return campData.value.team_members.find(m => m.id === selectedMemberId.value)
 })
 
-const selectedMember = computed(() => {
-  if (!selectedMemberId.value || !editingData.value?.team_members) return null
-  return editingData.value.team_members.find(m => m.id === selectedMemberId.value)
-})
+const camp = computed(() => campData.value)
+const loading = computed(() => isLoading.value)
+const editingData = computed(() => campData.value)
 
 const saveStatusText = computed(() => {
   if (isSaving.value) return '💾 Saving...'
@@ -171,39 +223,110 @@ const saveStatusClass = computed(() => {
   return 'saved'
 })
 
-// Component event handlers
-const updateCampData = (newCampData) => {
-  editingData.value = { ...editingData.value, ...newCampData }
-}
-
-const updateTeamMembers = (newTeamMembers) => {
-  editingData.value = { ...editingData.value, team_members: newTeamMembers }
-}
-
+// Component event handlers for UI interactions
 const updateSelectedMemberId = (memberId) => {
   selectedMemberId.value = memberId
 }
 
-// Save functionality (placeholder for now)
-const saveChanges = async () => {
-  isSaving.value = true
+// Camp data updates using composable methods
+const updateCampData = (newCampData) => {
+  if (!campData.value) return
+  Object.assign(campData.value, newCampData)
+}
+
+const updateTeamMembers = (members) => {
+  if (!campData.value) return
+  campData.value.team_members = [...members]
+}
+
+// Kitchen data updates
+const updateKitchenData = (kitchenData) => {
+  if (!campData.value) return
+  campData.value.kitchen = { ...kitchenData }
+}
+
+// Schedule data updates
+const updateScheduleData = (scheduleData) => {
+  if (!campData.value) return
+  campData.value.schedule = { ...scheduleData }
+}
+
+// Camp map updates
+const updateCampMap = (mapData) => {
+  if (!campData.value) return
+  campData.value.camp_map = { ...mapData }
+}
+
+// Map placement updates
+const updateMapPlacements = (placements) => {
+  if (!campData.value) return
+  if (!campData.value.camp_map) campData.value.camp_map = {}
+  campData.value.camp_map.map_placements = [...placements]
+}
+
+// Personal space updates
+const handlePersonalSpaceCreate = async (spaceData) => {
   try {
-    // TODO: Implement API save logic
-    await new Promise(resolve => setTimeout(resolve, 1000)) // Simulate save
-    originalData.value = JSON.parse(JSON.stringify(editingData.value))
-    console.log('Changes saved successfully')
+    if (selectedMember.value) {
+      await addTeamMember(props.slug, {
+        ...selectedMember.value,
+        personal_space: spaceData
+      })
+    }
   } catch (err) {
-    console.error('Failed to save changes:', err)
-    alert('Failed to save changes. Please try again.')
-  } finally {
-    isSaving.value = false
+    console.error('Failed to create personal space:', err)
+    showError('Failed to create personal space')
   }
 }
 
-// Load on mount
+const handlePersonalSpaceUpdate = async (spaceData) => {
+  try {
+    if (selectedMember.value) {
+      await updateTeamMember(props.slug, selectedMember.value.id, {
+        ...selectedMember.value,
+        personal_space: spaceData
+      })
+    }
+  } catch (err) {
+    console.error('Failed to update personal space:', err)
+    showError('Failed to update personal space')
+  }
+}
+
+const handlePersonalSpaceDelete = async () => {
+  try {
+    if (selectedMember.value) {
+      await removeTeamMember(selectedMember.value.id)
+    }
+  } catch (err) {
+    console.error('Failed to delete personal space:', err)
+    showError('Failed to delete personal space')
+  }
+}
+
+// Enhanced save functionality using the composable
+const saveChanges = async () => {
+  try {
+    await saveAll()
+    const changes = getAllChanges()
+    const changeCount = changes.length
+    
+    if (changeCount > 0) {
+      showSuccess(`${changeCount} change${changeCount > 1 ? 's' : ''} saved successfully!`)
+    }
+  } catch (err) {
+    console.error('Failed to save changes:', err)
+    showError(err.message || 'Failed to save changes. Please try again.')
+  }
+}
+
+// Load on mount - APP PATTERN: onMounted() handles initial loading
+// This is the consistent pattern across all views in the app:
+// - onMounted() for initial data loading
+// - watch() without immediate: true for reactive prop changes
 onMounted(() => {
   if (props.slug) {
-    loadCamp(props.slug)
+    loadCampData()
   }
 })
 </script>
@@ -286,20 +409,13 @@ onMounted(() => {
   color: var(--color-primary);
 }
 
-/* Loading/error states */
-.loading, .error {
+/* Error states */
+.error {
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 4rem 2rem;
   min-height: 200px;
-}
-
-.loading-text {
-  color: var(--color-text-secondary);
-}
-
-.error {
   color: var(--color-error);
 }
 

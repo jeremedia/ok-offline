@@ -138,13 +138,13 @@ const goBack = () => {
   router.push(`/${props.year}/camp/${props.slug}`)
 }
 
-// Date range computation - Fixed date range from Aug 18 to Sep 2
+// Date range computation - Fixed date range from Aug 18 to Sep 2 (PST)
 const dateRange = computed(() => {
   const dates = []
   
-  // Burning Man 2025: August 18 - September 2
-  const startDate = new Date(2025, 7, 18) // Aug 18 (month is 0-indexed)
-  const endDate = new Date(2025, 8, 2)    // Sep 2
+  // Burning Man 2025: August 18 - September 2 (PST)
+  const startDate = new Date(2025, 7, 18, 12, 0, 0) // Aug 18 noon PST
+  const endDate = new Date(2025, 8, 2, 12, 0, 0)    // Sep 2 noon PST
   
   // Generate date range
   const current = new Date(startDate)
@@ -165,9 +165,13 @@ const sortedMembers = computed(() => {
     if (a.role === 'camp_lead') return -1
     if (b.role === 'camp_lead') return 1
     
-    // Then by arrival date
+    // Then by arrival date (PST comparison)
     if (a.arrival_date && b.arrival_date) {
-      return new Date(a.arrival_date) - new Date(b.arrival_date)
+      const parseDateToPST = (dateStr) => {
+        const [year, month, day] = dateStr.split('-').map(Number)
+        return new Date(year, month - 1, day, 12, 0, 0)
+      }
+      return parseDateToPST(a.arrival_date) - parseDateToPST(b.arrival_date)
     }
     if (a.arrival_date) return -1
     if (b.arrival_date) return 1
@@ -177,13 +181,20 @@ const sortedMembers = computed(() => {
   })
 })
 
-// Utility functions
+// Utility functions - PST timezone handling
 const formatDay = (date) => {
-  return date.toLocaleDateString('en-US', { weekday: 'short' })
+  return date.toLocaleDateString('en-US', { 
+    weekday: 'short',
+    timeZone: 'America/Los_Angeles'
+  })
 }
 
 const formatDateShort = (date) => {
-  return date.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' })
+  return date.toLocaleDateString('en-US', { 
+    month: 'numeric', 
+    day: 'numeric',
+    timeZone: 'America/Los_Angeles'
+  })
 }
 
 const formatRole = (role) => {
@@ -198,8 +209,15 @@ const formatRole = (role) => {
 
 const getMemberDuration = (member) => {
   if (!member.arrival_date || !member.departure_date) return 'TBD'
-  const arrival = new Date(member.arrival_date)
-  const departure = new Date(member.departure_date)
+  
+  // Parse dates safely in PST
+  const parseDateToPST = (dateStr) => {
+    const [year, month, day] = dateStr.split('-').map(Number)
+    return new Date(year, month - 1, day, 12, 0, 0) // noon PST
+  }
+  
+  const arrival = parseDateToPST(member.arrival_date)
+  const departure = parseDateToPST(member.departure_date)
   
   // Calculate the difference in days (inclusive of both arrival and departure days)
   const diffTime = departure.getTime() - arrival.getTime()
@@ -210,21 +228,41 @@ const getMemberDuration = (member) => {
 
 const isOnPlaya = (member, date) => {
   if (!member.arrival_date) return false
-  const arrival = new Date(member.arrival_date)
-  const departure = member.departure_date ? new Date(member.departure_date) : null
   
+  // Parse member dates safely in PST
+  const parseDateToPST = (dateStr) => {
+    const [year, month, day] = dateStr.split('-').map(Number)
+    return new Date(year, month - 1, day, 12, 0, 0) // noon PST
+  }
+  
+  const arrival = parseDateToPST(member.arrival_date)
+  const departure = member.departure_date ? parseDateToPST(member.departure_date) : null
+  
+  // Include both arrival and departure days (<=, not <)
   return date >= arrival && (departure ? date <= departure : true)
 }
 
 const isArrivalDate = (member, date) => {
   if (!member.arrival_date) return false
-  const arrival = new Date(member.arrival_date)
+  
+  const parseDateToPST = (dateStr) => {
+    const [year, month, day] = dateStr.split('-').map(Number)
+    return new Date(year, month - 1, day, 12, 0, 0)
+  }
+  
+  const arrival = parseDateToPST(member.arrival_date)
   return date.getTime() === arrival.getTime()
 }
 
 const isDepartureDate = (member, date) => {
   if (!member.departure_date) return false
-  const departure = new Date(member.departure_date)
+  
+  const parseDateToPST = (dateStr) => {
+    const [year, month, day] = dateStr.split('-').map(Number)
+    return new Date(year, month - 1, day, 12, 0, 0)
+  }
+  
+  const departure = parseDateToPST(member.departure_date)
   return date.getTime() === departure.getTime()
 }
 

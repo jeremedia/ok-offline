@@ -78,7 +78,7 @@
             
             <div class="section-card">
               <div class="timeline-header">
-                <h4>Arrival & Departure Timeline</h4>
+                <h4>Arrive & Depart</h4>
                 <BaseButton 
                   variant="secondary" 
                   size="sm" 
@@ -91,10 +91,26 @@
               <div v-if="arrivalTimeline.length > 0" class="timeline">
                 <div v-for="day in arrivalTimeline" :key="day.date" class="timeline-day">
                   <div class="timeline-date">{{ formatDate(day.date) }}</div>
-                  <div class="timeline-members">
-                    <span v-for="member in day.members" :key="member.id" class="timeline-member">
-                      {{ member.display_name || `${member.first_name} ${member.last_name}` }}
-                    </span>
+                  <div class="timeline-events">
+                    <!-- Arrivals -->
+                    <div v-if="day.arrivals && day.arrivals.length > 0" class="timeline-section arrivals">
+                      <span class="timeline-label">🆗 Arrive:</span>
+                      <div class="timeline-members">
+                        <span v-for="member in day.arrivals" :key="`arr-${member.id}`" class="timeline-member">
+                          {{ member.playa_name || member.first_name }}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <!-- Departures -->
+                    <div v-if="day.departures && day.departures.length > 0" class="timeline-section departures">
+                      <span class="timeline-label">🚫 Depart:</span>
+                      <div class="timeline-members">
+                        <span v-for="member in day.departures" :key="`dep-${member.id}`" class="timeline-member">
+                          {{ member.playa_name || member.first_name }}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -203,29 +219,55 @@ const arrivalTimeline = computed(() => {
   
   const timeline = {}
   
+  // Add arrival entries
   camp.value.team_members.forEach(member => {
     if (member.arrival_date) {
       const date = member.arrival_date
       if (!timeline[date]) {
-        timeline[date] = []
+        timeline[date] = { arrivals: [], departures: [] }
       }
-      timeline[date].push(member)
+      timeline[date].arrivals.push(member)
     }
   })
   
+  // Add departure entries
+  camp.value.team_members.forEach(member => {
+    if (member.departure_date) {
+      const date = member.departure_date
+      if (!timeline[date]) {
+        timeline[date] = { arrivals: [], departures: [] }
+      }
+      timeline[date].departures.push(member)
+    }
+  })
+  
+  // Filter out dates with no events and sort
   return Object.entries(timeline)
-    .map(([date, members]) => ({ date, members }))
-    .sort((a, b) => new Date(a.date) - new Date(b.date))
+    .filter(([date, events]) => events.arrivals.length > 0 || events.departures.length > 0)
+    .map(([date, events]) => ({ date, ...events }))
+    .sort((a, b) => {
+      // Safe date comparison in PST
+      const parseDateToPST = (dateStr) => {
+        const [year, month, day] = dateStr.split('-').map(Number)
+        return new Date(year, month - 1, day, 12, 0, 0)
+      }
+      return parseDateToPST(a.date) - parseDateToPST(b.date)
+    })
 })
 
-// Utility functions
+// Utility functions - PST timezone handling
 const formatDate = (dateString) => {
   if (!dateString) return null
-  const date = new Date(dateString)
+  
+  // Parse date safely and display in PST (America/Los_Angeles)
+  const [year, month, day] = dateString.split('-').map(Number)
+  const date = new Date(year, month - 1, day, 12, 0, 0) // Use noon to avoid DST issues
+  
   return date.toLocaleDateString('en-US', { 
     weekday: 'short',
     month: 'short', 
-    day: 'numeric'
+    day: 'numeric',
+    timeZone: 'America/Los_Angeles' // Force PST/PDT display
   })
 }
 
@@ -241,8 +283,15 @@ const formatRole = (role) => {
 
 const calculateDuration = (arrivalDate, departureDate) => {
   if (!arrivalDate || !departureDate) return null
-  const arrival = new Date(arrivalDate)
-  const departure = new Date(departureDate)
+  
+  // Parse dates safely in PST
+  const parseDateToPST = (dateStr) => {
+    const [year, month, day] = dateStr.split('-').map(Number)
+    return new Date(year, month - 1, day, 12, 0, 0)
+  }
+  
+  const arrival = parseDateToPST(arrivalDate)
+  const departure = parseDateToPST(departureDate)
   const diffTime = departure.getTime() - arrival.getTime()
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1
   return diffDays
@@ -584,8 +633,8 @@ const navigateToEditor = () => {
 
 .timeline-day {
   display: flex;
-  align-items: center;
-  gap: 1rem;
+  flex-direction: column;
+  gap: 0.75rem;
   padding: 0.75rem;
   background: var(--color-bg-base);
   border: 1px solid var(--color-border-light);
@@ -596,13 +645,52 @@ const navigateToEditor = () => {
   font-size: 0.9rem;
   font-weight: 600;
   color: var(--color-primary);
-  min-width: 80px;
+  width: 100%;
+  text-align: left;
+  padding: 0 0 0.5rem 0;
+  border-bottom: 1px dotted var(--color-border-medium);
 }
 
 .timeline-members {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
+}
+
+.timeline-events {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.timeline-section {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.timeline-section.arrivals .timeline-label {
+  color: var(--color-success);
+}
+
+.timeline-section.departures .timeline-label {
+  color: var(--color-warning);
+}
+
+.timeline-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  min-width: 70px;
+  flex-shrink: 0;
+}
+
+.timeline-members {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  flex: 1;
 }
 
 .timeline-member {
