@@ -13,22 +13,22 @@ const CACHE_DURATION = 60 * 60 * 1000 // 1 hour for camp data
 const CAMP_CACHE_KEY = 'camp_management_cache'
 const CAMP_STATE_KEY = 'camp_management_state'
 
+// Advanced caching with relationships
+const CACHE_RELATIONSHIPS = {
+  'theme_camp': ['team_members', 'camp_map', 'personal_spaces', 'schedule_items'],
+  'team_members': ['personal_spaces', 'schedule_items'],
+  'camp_map': ['map_placements'],
+  'personal_spaces': ['team_members'],
+  'map_placements': ['camp_map'],
+  'schedule_items': ['team_members']
+}
+
 /**
  * Check if we're online and the API is available
  */
 const isOnlineAndApiAvailable = async () => {
-  if (!navigator.onLine) return false
-  
-  try {
-    const response = await fetch(`${API_BASE_URL}/theme_camps`, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-      signal: AbortSignal.timeout(3000) // 3 second timeout
-    })
-    return response.ok
-  } catch {
-    return false
-  }
+  // Simply trust navigator.onLine - if system says we're online, we're online
+  return navigator.onLine
 }
 
 /**
@@ -52,6 +52,16 @@ const apiRequest = async (endpoint, options = {}) => {
   }
   
   return response.json()
+}
+
+/**
+ * Smart cache invalidation with relationships
+ */
+const invalidateRelatedCaches = (entityType, campSlug) => {
+  const related = CACHE_RELATIONSHIPS[entityType] || []
+  related.forEach(relatedType => {
+    cache.clear(`${relatedType}_${campSlug}`)
+  })
 }
 
 /**
@@ -93,6 +103,12 @@ const cache = {
         }
       })
     }
+  },
+  
+  // Smart cache invalidation
+  invalidate: (entityType, campSlug) => {
+    cache.clear(`${entityType}_${campSlug}`)
+    invalidateRelatedCaches(entityType, campSlug)
   }
 }
 
@@ -261,10 +277,35 @@ export const addTeamMember = async (campSlug, memberData) => {
     body: JSON.stringify({ team_member: memberData })
   })
   
-  // Clear cache
-  cache.clear(`team_members_${campSlug}`)
+  // Smart cache invalidation
+  cache.invalidate('team_members', campSlug)
   
   return member
+}
+
+/**
+ * Clean team member data for API (only send permitted fields)
+ */
+const cleanTeamMemberData = (memberData) => {
+  const allowedFields = [
+    'first_name', 'last_name', 'playa_name', 'email', 'role', 'phone', 'skills',
+    'arrival_date', 'departure_date', 'emergency_contact_name', 'emergency_contact_phone',
+    'dietary_restrictions', 'is_verified', 'photo'
+  ]
+  
+  const cleanData = {}
+  allowedFields.forEach(field => {
+    if (memberData[field] !== undefined) {
+      cleanData[field] = memberData[field]
+    }
+  })
+  
+  // Handle emergency_contact field mapping if needed
+  if (memberData.emergency_contact && !cleanData.emergency_contact_name) {
+    cleanData.emergency_contact_name = memberData.emergency_contact
+  }
+  
+  return cleanData
 }
 
 /**
@@ -275,14 +316,34 @@ export const updateTeamMember = async (campSlug, memberId, memberData) => {
     throw new Error('Cannot update team member while offline')
   }
   
+  // Clean the data to only include permitted fields
+  const cleanData = cleanTeamMemberData(memberData)
+  
   const member = await apiRequest(`/theme_camps/${campSlug}/team_members/${memberId}`, {
     method: 'PUT',
-    body: JSON.stringify({ team_member: memberData })
+    body: JSON.stringify({ team_member: cleanData })
   })
   
-  cache.clear(`team_members_${campSlug}`)
+  // Smart cache invalidation
+  cache.invalidate('team_members', campSlug)
   
   return member
+}
+
+/**
+ * Update multiple team members efficiently
+ */
+export const updateTeamMembers = async (campSlug, teamMembers) => {
+  if (!(await isOnlineAndApiAvailable())) {
+    throw new Error('Cannot update team members while offline')
+  }
+  
+  const updatePromises = teamMembers.map(member => 
+    updateTeamMember(campSlug, member.id, member)
+  )
+  
+  const updatedMembers = await Promise.all(updatePromises)
+  return updatedMembers
 }
 
 // ==================== Personal Space Management ====================
@@ -328,10 +389,53 @@ export const updatePersonalSpace = async (campSlug, memberId, spaceData) => {
     body: JSON.stringify({ personal_space: spaceData })
   })
   
+  cache.invalidate('personal_spaces', campSlug)
   cache.clear(`personal_space_${campSlug}_${memberId}`)
-  cache.clear(`team_members_${campSlug}`)
   
   return space
+}
+
+/**
+ * Delete personal space
+ */
+export const deletePersonalSpace = async (campSlug, memberId) => {
+  if (!(await isOnlineAndApiAvailable())) {
+    throw new Error('Cannot delete personal space while offline')
+  }
+  
+  await apiRequest(`/theme_camps/${campSlug}/team_members/${memberId}/personal_space`, {
+    method: 'DELETE'
+  })
+  
+  cache.invalidate('personal_spaces', campSlug)
+  cache.clear(`personal_space_${campSlug}_${memberId}`)
+}
+
+/**
+ * Get all personal spaces for camp
+ */
+export const getAllPersonalSpaces = async (campSlug, useCache = true) => {
+  const cacheKey = `personal_spaces_${campSlug}`
+  
+  if (useCache) {
+    const cached = cache.get(cacheKey)
+    if (cached) return cached
+  }
+  
+  try {
+    // Get team members with their personal spaces
+    const teamMembers = await getTeamMembers(campSlug, useCache)
+    const spaces = teamMembers
+      .filter(member => member.personal_space)
+      .map(member => ({ ...member.personal_space, member_name: `${member.first_name} ${member.last_name}` }))
+    
+    cache.set(cacheKey, spaces)
+    return spaces
+  } catch (error) {
+    const cached = cache.get(cacheKey)
+    if (cached) return cached
+    throw error
+  }
 }
 
 // ==================== Camp Map Management ====================
@@ -407,8 +511,68 @@ export const addMapPlacement = async (campSlug, placementData) => {
   })
   
   cache.clear(`camp_map_${campSlug}`)
+  cache.clear(`theme_camp_${campSlug}`)
   
   return placement
+}
+
+/**
+ * Update map placement
+ */
+export const updateMapPlacement = async (campSlug, placementId, placementData) => {
+  if (!(await isOnlineAndApiAvailable())) {
+    throw new Error('Cannot update placement while offline')
+  }
+  
+  const placement = await apiRequest(`/theme_camps/${campSlug}/map/placements/${placementId}`, {
+    method: 'PUT',
+    body: JSON.stringify({ map_placement: placementData })
+  })
+  
+  cache.clear(`camp_map_${campSlug}`)
+  cache.clear(`theme_camp_${campSlug}`)
+  
+  return placement
+}
+
+/**
+ * Delete map placement
+ */
+export const deleteMapPlacement = async (campSlug, placementId) => {
+  if (!(await isOnlineAndApiAvailable())) {
+    throw new Error('Cannot delete placement while offline')
+  }
+  
+  await apiRequest(`/theme_camps/${campSlug}/map/placements/${placementId}`, {
+    method: 'DELETE'
+  })
+  
+  cache.clear(`camp_map_${campSlug}`)
+  cache.clear(`theme_camp_${campSlug}`)
+}
+
+/**
+ * Batch update map placements
+ */
+export const batchUpdateMapPlacements = async (campSlug, placements) => {
+  if (!(await isOnlineAndApiAvailable())) {
+    throw new Error('Cannot update placements while offline')
+  }
+  
+  const updatePromises = placements.map(placement => {
+    if (placement.id && placement.id.toString().startsWith('new_')) {
+      // New placement - create
+      const { id, ...data } = placement
+      return addMapPlacement(campSlug, data)
+    } else if (placement.id) {
+      // Existing placement - update
+      const { id, ...data } = placement
+      return updateMapPlacement(campSlug, id, data)
+    }
+  })
+  
+  const results = await Promise.all(updatePromises)
+  return results
 }
 
 // ==================== 3D Models Management ====================
@@ -467,6 +631,298 @@ export const getGltfModelsByCategory = async (category, useCache = true) => {
     if (cached) return cached
     throw error
   }
+}
+
+/**
+ * Get model categories
+ */
+export const getGltfModelCategories = async (useCache = true) => {
+  const cacheKey = 'gltf_model_categories'
+  
+  if (useCache) {
+    const cached = cache.get(cacheKey)
+    if (cached) return cached
+  }
+  
+  try {
+    const models = await getGltfModels(useCache)
+    const categories = [...new Set(models.map(model => model.category))].sort()
+    cache.set(cacheKey, categories)
+    return categories
+  } catch (error) {
+    const cached = cache.get(cacheKey)
+    if (cached) return cached
+    throw error
+  }
+}
+
+/**
+ * Search models by name/description
+ */
+export const searchGltfModels = async (query, category = null) => {
+  const models = category 
+    ? await getGltfModelsByCategory(category)
+    : await getGltfModels()
+    
+  const searchTerm = query.toLowerCase()
+  return models.filter(model => 
+    model.name.toLowerCase().includes(searchTerm) ||
+    (model.description && model.description.toLowerCase().includes(searchTerm))
+  )
+}
+
+// ==================== Schedule Management ====================
+
+/**
+ * Get schedule items for a camp
+ */
+export const getScheduleItems = async (campSlug, options = {}) => {
+  const { useCache = true, category, date, startDate, endDate, includeInactive = false } = options
+  
+  // Build cache key with options
+  const optionsKey = JSON.stringify({ category, date, startDate, endDate, includeInactive })
+  const cacheKey = `schedule_items_${campSlug}_${btoa(optionsKey)}`
+  
+  if (useCache) {
+    const cached = cache.get(cacheKey)
+    if (cached) return cached
+  }
+  
+  if (!(await isOnlineAndApiAvailable())) {
+    const cached = cache.get(cacheKey)
+    if (cached) return cached
+    throw new Error('Unable to load schedule items - check your connection')
+  }
+  
+  try {
+    // Build query parameters
+    const params = new URLSearchParams()
+    if (category) params.append('category', category)
+    if (date) params.append('date', date)
+    if (startDate) params.append('start_date', startDate)
+    if (endDate) params.append('end_date', endDate)
+    if (includeInactive) params.append('include_inactive', 'true')
+    
+    const queryString = params.toString()
+    const endpoint = `/theme_camps/${campSlug}/schedule_items${queryString ? `?${queryString}` : ''}`
+    
+    const items = await apiRequest(endpoint)
+    cache.set(cacheKey, items)
+    return items
+  } catch (error) {
+    const cached = cache.get(cacheKey)
+    if (cached) return cached
+    throw error
+  }
+}
+
+/**
+ * Get single schedule item
+ */
+export const getScheduleItem = async (campSlug, itemId, useCache = true) => {
+  const cacheKey = `schedule_item_${campSlug}_${itemId}`
+  
+  if (useCache) {
+    const cached = cache.get(cacheKey)
+    if (cached) return cached
+  }
+  
+  if (!(await isOnlineAndApiAvailable())) {
+    const cached = cache.get(cacheKey)
+    if (cached) return cached
+    throw new Error('Unable to load schedule item - check your connection')
+  }
+  
+  try {
+    const item = await apiRequest(`/theme_camps/${campSlug}/schedule_items/${itemId}`)
+    cache.set(cacheKey, item)
+    return item
+  } catch (error) {
+    const cached = cache.get(cacheKey)
+    if (cached) return cached
+    throw error
+  }
+}
+
+/**
+ * Create new schedule item
+ */
+export const createScheduleItem = async (campSlug, itemData, teamMemberIds = []) => {
+  if (!(await isOnlineAndApiAvailable())) {
+    throw new Error('Cannot create schedule item while offline')
+  }
+  
+  const payload = {
+    camp_schedule_item: itemData
+  }
+  
+  if (teamMemberIds.length > 0) {
+    payload.team_member_ids = teamMemberIds
+  }
+  
+  const item = await apiRequest(`/theme_camps/${campSlug}/schedule_items`, {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  })
+  
+  // Clear relevant caches
+  cache.invalidate('schedule_items', campSlug)
+  cache.clear(`theme_camp_${campSlug}`)
+  
+  return item
+}
+
+/**
+ * Update schedule item
+ */
+export const updateScheduleItem = async (campSlug, itemId, itemData, teamMemberIds = null) => {
+  if (!(await isOnlineAndApiAvailable())) {
+    throw new Error('Cannot update schedule item while offline')
+  }
+  
+  const payload = {
+    camp_schedule_item: itemData
+  }
+  
+  if (teamMemberIds !== null) {
+    payload.team_member_ids = teamMemberIds
+  }
+  
+  const item = await apiRequest(`/theme_camps/${campSlug}/schedule_items/${itemId}`, {
+    method: 'PUT',
+    body: JSON.stringify(payload)
+  })
+  
+  // Clear relevant caches
+  cache.invalidate('schedule_items', campSlug)
+  cache.clear(`schedule_item_${campSlug}_${itemId}`)
+  cache.clear(`theme_camp_${campSlug}`)
+  
+  return item
+}
+
+/**
+ * Delete schedule item
+ */
+export const deleteScheduleItem = async (campSlug, itemId) => {
+  if (!(await isOnlineAndApiAvailable())) {
+    throw new Error('Cannot delete schedule item while offline')
+  }
+  
+  await apiRequest(`/theme_camps/${campSlug}/schedule_items/${itemId}`, {
+    method: 'DELETE'
+  })
+  
+  // Clear relevant caches
+  cache.invalidate('schedule_items', campSlug)
+  cache.clear(`schedule_item_${campSlug}_${itemId}`)
+  cache.clear(`theme_camp_${campSlug}`)
+}
+
+/**
+ * Assign team members to schedule item
+ */
+export const assignMembersToScheduleItem = async (campSlug, itemId, memberAssignments) => {
+  if (!(await isOnlineAndApiAvailable())) {
+    throw new Error('Cannot assign members while offline')
+  }
+  
+  const payload = {
+    team_member_ids: memberAssignments.map(a => a.member_id),
+    assignments: {}
+  }
+  
+  // Build assignments object with notes
+  memberAssignments.forEach(assignment => {
+    if (assignment.notes) {
+      payload.assignments[assignment.member_id] = assignment.notes
+    }
+  })
+  
+  const result = await apiRequest(`/theme_camps/${campSlug}/schedule_items/${itemId}/assign_members`, {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  })
+  
+  // Clear relevant caches
+  cache.invalidate('schedule_items', campSlug)
+  cache.clear(`schedule_item_${campSlug}_${itemId}`)
+  
+  return result
+}
+
+/**
+ * Remove team member from schedule item
+ */
+export const unassignMemberFromScheduleItem = async (campSlug, itemId, memberId) => {
+  if (!(await isOnlineAndApiAvailable())) {
+    throw new Error('Cannot unassign member while offline')
+  }
+  
+  const result = await apiRequest(`/theme_camps/${campSlug}/schedule_items/${itemId}/unassign_member/${memberId}`, {
+    method: 'DELETE'
+  })
+  
+  // Clear relevant caches
+  cache.invalidate('schedule_items', campSlug)
+  cache.clear(`schedule_item_${campSlug}_${itemId}`)
+  
+  return result
+}
+
+/**
+ * Check for schedule conflicts
+ */
+export const checkScheduleConflicts = async (campSlug, startDatetime, endDatetime, teamMemberIds) => {
+  if (!(await isOnlineAndApiAvailable())) {
+    throw new Error('Cannot check conflicts while offline')
+  }
+  
+  const params = new URLSearchParams({
+    start_datetime: startDatetime,
+    end_datetime: endDatetime
+  })
+  
+  teamMemberIds.forEach(id => params.append('team_member_ids[]', id))
+  
+  return await apiRequest(`/theme_camps/${campSlug}/schedule_items/conflicts?${params.toString()}`)
+}
+
+/**
+ * Get schedule items by category
+ */
+export const getScheduleItemsByCategory = async (campSlug, category, useCache = true) => {
+  return getScheduleItems(campSlug, { useCache, category })
+}
+
+/**
+ * Get schedule items for date range
+ */
+export const getScheduleItemsForDateRange = async (campSlug, startDate, endDate, useCache = true) => {
+  return getScheduleItems(campSlug, { useCache, startDate, endDate })
+}
+
+/**
+ * Get schedule items for specific date
+ */
+export const getScheduleItemsForDate = async (campSlug, date, useCache = true) => {
+  return getScheduleItems(campSlug, { useCache, date })
+}
+
+/**
+ * Batch operations for schedule items
+ */
+export const batchUpdateScheduleItems = async (campSlug, updates) => {
+  if (!(await isOnlineAndApiAvailable())) {
+    throw new Error('Cannot update schedule items while offline')
+  }
+  
+  const updatePromises = updates.map(update => 
+    updateScheduleItem(campSlug, update.id, update.data, update.team_member_ids)
+  )
+  
+  const results = await Promise.all(updatePromises)
+  return results
 }
 
 // ==================== Offline State Management ====================
@@ -571,20 +1027,42 @@ export default {
   getTeamMembers,
   addTeamMember,
   updateTeamMember,
+  updateTeamMembers,
   
   // Personal spaces
   getPersonalSpace,
   updatePersonalSpace,
+  deletePersonalSpace,
+  getAllPersonalSpaces,
   
   // Camp maps
   getCampMap,
   getCampMapStats,
   updateCampMap,
   addMapPlacement,
+  updateMapPlacement,
+  deleteMapPlacement,
+  batchUpdateMapPlacements,
+  
+  // Schedule management
+  getScheduleItems,
+  getScheduleItem,
+  createScheduleItem,
+  updateScheduleItem,
+  deleteScheduleItem,
+  assignMembersToScheduleItem,
+  unassignMemberFromScheduleItem,
+  checkScheduleConflicts,
+  getScheduleItemsByCategory,
+  getScheduleItemsForDateRange,
+  getScheduleItemsForDate,
+  batchUpdateScheduleItems,
   
   // 3D models
   getGltfModels,
   getGltfModelsByCategory,
+  getGltfModelCategories,
+  searchGltfModels,
   
   // Offline utilities
   isAvailableOffline,
