@@ -106,7 +106,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, reactive, watch, inject } from 'vue'
+import { ref, onMounted, onUnmounted, computed, reactive, watch, inject } from 'vue'
 import { useRoute } from 'vue-router'
 import { useGeolocation } from '../composables/useGeolocation'
 import { useSimulation } from '../composables/useSimulation'
@@ -196,6 +196,164 @@ const {
 let userLocationMarker = null
 let radiusCircle = null
 let routeLine = null
+
+// Performance optimization: Cache nearby events with pre-calculated distances
+let cachedNearbyEvents = []
+let lastCacheLocation = null
+let radiusUpdateTimeout = null
+
+// Live countdown tracking for event popups
+let countdownIntervals = new Map() // Track active countdown intervals by marker ID
+let openPopups = new Set() // Track which popups are currently open
+
+// Format event time for display
+const formatEventTime = (occurrence) => {
+  if (!occurrence) return 'Time TBD'
+  
+  const startTime = new Date(occurrence.start_time)
+  const endTime = occurrence.end_time ? new Date(occurrence.end_time) : null
+  
+  const timeFormat = { 
+    weekday: 'short', 
+    month: 'short', 
+    day: 'numeric', 
+    hour: 'numeric', 
+    minute: '2-digit',
+    hour12: true 
+  }
+  
+  let timeString = startTime.toLocaleDateString('en-US', timeFormat)
+  if (endTime && endTime.getTime() !== startTime.getTime()) {
+    const endFormat = startTime.toDateString() === endTime.toDateString() 
+      ? { hour: 'numeric', minute: '2-digit', hour12: true }
+      : timeFormat
+    timeString += ` - ${endTime.toLocaleDateString('en-US', endFormat)}`
+  }
+  
+  return timeString
+}
+
+// Calculate countdown to event start
+const calculateCountdown = (startTime) => {
+  const now = getCurrentTime()
+  const start = new Date(startTime)
+  const diffMs = start - now
+  
+  if (diffMs <= 0) return 'Started'
+  
+  const minutes = Math.floor(diffMs / (1000 * 60))
+  const hours = Math.floor(minutes / 60)
+  const remainingMinutes = minutes % 60
+  
+  if (hours > 0) {
+    return `${hours}h ${remainingMinutes}m`
+  } else {
+    return `${minutes}m`
+  }
+}
+
+// Check if event starts within an hour
+const isStartingSoon = (startTime) => {
+  const now = getCurrentTime()
+  const start = new Date(startTime)
+  const diffMs = start - now
+  return diffMs > 0 && diffMs <= 60 * 60 * 1000 // 1 hour in milliseconds
+}
+
+// Generate event-specific popup content
+const getEventPopupContent = (event) => {
+  const nextOccurrence = getNextOccurrence(event)
+  if (!nextOccurrence) return ''
+  
+  const eventType = event.event_type?.label || 'Event'
+  const formattedTime = formatEventTime(nextOccurrence)
+  const startingSoon = isStartingSoon(nextOccurrence.start_time)
+  
+  let eventInfo = `
+    <div class="event-info">
+      <div class="event-type">📅 ${eventType}</div>
+      <div class="event-time">${formattedTime}</div>
+  `
+  
+  if (startingSoon) {
+    const countdown = calculateCountdown(nextOccurrence.start_time)
+    eventInfo += `
+      <div class="event-countdown">
+        🚨 Starting in <span class="countdown-text" data-start-time="${nextOccurrence.start_time}">${countdown}</span>
+      </div>
+    `
+  }
+  
+  eventInfo += '</div>'
+  return eventInfo
+}
+
+// Start countdown interval for a popup
+const startCountdownInterval = (markerId, startTime) => {
+  // Clear existing interval if any
+  if (countdownIntervals.has(markerId)) {
+    clearInterval(countdownIntervals.get(markerId))
+  }
+  
+  const interval = setInterval(() => {
+    const countdownElement = document.querySelector(`[data-marker-id="${markerId}"] .countdown-text`)
+    if (countdownElement && openPopups.has(markerId)) {
+      const newCountdown = calculateCountdown(startTime)
+      countdownElement.textContent = newCountdown
+      
+      // Stop countdown if event has started
+      if (newCountdown === 'Started') {
+        countdownElement.closest('.event-countdown').innerHTML = '🎉 <strong>Event Started!</strong>'
+        clearInterval(interval)
+        countdownIntervals.delete(markerId)
+      }
+    } else {
+      // Cleanup if popup is closed or element not found
+      clearInterval(interval)
+      countdownIntervals.delete(markerId)
+    }
+  }, 30000) // Update every 30 seconds
+  
+  countdownIntervals.set(markerId, interval)
+}
+
+// Pre-calculate and cache events within reasonable distance (performance optimization)
+const cacheNearbyEvents = () => {
+  if (!userLocation.value || !items.events.length) {
+    cachedNearbyEvents = []
+    return
+  }
+
+  console.log('🔄 Pre-calculating distances for Soon & Near optimization...')
+  const maxReasonableDistance = 1500 // Cache events within 1500ft (beyond max slider range)
+  
+  cachedNearbyEvents = items.events
+    .map(event => {
+      const distanceData = getDistanceTo(getItemLocation(event))
+      return {
+        event,
+        distanceInFeet: distanceData?.feet || 99999
+      }
+    })
+    .filter(item => item.distanceInFeet <= maxReasonableDistance)
+    .sort((a, b) => a.distanceInFeet - b.distanceInFeet) // Sort by distance for faster filtering
+
+  lastCacheLocation = [...userLocation.value] // Store current location
+  console.log(`⚡ Cached ${cachedNearbyEvents.length} nearby events (from ${items.events.length} total)`)
+}
+
+// Debounced radius update using cached data (performance optimization)
+const debouncedRadiusUpdate = () => {
+  // Clear existing timeout
+  if (radiusUpdateTimeout) {
+    clearTimeout(radiusUpdateTimeout)
+  }
+
+  // Debounce rapid slider changes (100ms delay)
+  radiusUpdateTimeout = setTimeout(() => {
+    updateMarkers()
+  }, 100)
+}
 
 // Add or update user location marker
 const updateUserLocationMarker = () => {
@@ -331,13 +489,39 @@ const getTimeDistanceScore = (event) => {
 }
 
 // Check if an event is within the specified radius (for Soon & Near filtering)
+// OPTIMIZED: Uses cached pre-calculated distances when available
 const isEventWithinRadius = (event) => {
   if (!userLocation.value) return false
   
+  // Try to use cached data first (performance optimization)
+  const cachedItem = cachedNearbyEvents.find(item => item.event.uid === event.uid)
+  if (cachedItem) {
+    return cachedItem.distanceInFeet <= soonAndNearRadius.value
+  }
+  
+  // Fall back to real-time calculation if not in cache
   const distanceData = getDistanceTo(getItemLocation(event))
   const distanceInFeet = distanceData?.feet || 99999
   
   return distanceInFeet <= soonAndNearRadius.value
+}
+
+// Get events within radius using cached data (performance optimization)
+const getEventsWithinRadius = () => {
+  if (!userLocation.value) return []
+  
+  // Use cached data if available and valid
+  if (cachedNearbyEvents.length > 0 && lastCacheLocation && 
+      userLocation.value[0] === lastCacheLocation[0] && 
+      userLocation.value[1] === lastCacheLocation[1]) {
+    // Ultra-fast: Filter pre-calculated distances
+    return cachedNearbyEvents
+      .filter(item => item.distanceInFeet <= soonAndNearRadius.value)
+      .map(item => item.event)
+  }
+  
+  // Fall back to original method if cache is invalid
+  return items.events.filter(event => isEventWithinRadius(event))
 }
 
 // Get event marker style based on urgency
@@ -725,20 +909,45 @@ watch(mapControlsToggle, () => {
   }
 })
 
-// Watch for user location changes to update marker and radius circle
-watch(userLocation, () => {
+// Watch for user location changes to update marker, radius circle, and cache
+watch(userLocation, (newLocation, oldLocation) => {
   updateUserLocationMarker()
   updateRadiusCircle()
+  
+  // Invalidate cache if user location has changed significantly (performance optimization)
+  if (newLocation && oldLocation && mapControls.showEventsSoonAndNear) {
+    const locationChangedSignificantly = 
+      Math.abs(newLocation[0] - oldLocation[0]) > 0.0001 ||  // ~30ft change in lat
+      Math.abs(newLocation[1] - oldLocation[1]) > 0.0001     // ~30ft change in lng
+    
+    if (locationChangedSignificantly) {
+      console.log('📍 User location changed significantly, recaching nearby events...')
+      cacheNearbyEvents()
+    }
+  }
 })
 
-// Watch for radius changes to update circle
+// Watch for radius changes to update circle and markers (OPTIMIZED with debouncing)
 watch(soonAndNearRadius, () => {
   updateRadiusCircle()
+  // If Soon & Near is enabled, use debounced update for smooth performance
+  if (mapControls.showEventsSoonAndNear) {
+    debouncedRadiusUpdate()
+  }
 })
 
-// Watch for Soon & Near toggle to update circle
-watch(() => mapControls.showEventsSoonAndNear, () => {
+// Watch for Soon & Near toggle to update circle and cache nearby events
+watch(() => mapControls.showEventsSoonAndNear, (isEnabled) => {
   updateRadiusCircle()
+  
+  if (isEnabled && userLocation.value) {
+    // Cache nearby events when enabling Soon & Near for optimal performance
+    cacheNearbyEvents()
+  } else {
+    // Clear cache when disabling
+    cachedNearbyEvents = []
+    lastCacheLocation = null
+  }
 })
 
 // Watch for route changes to update route line
@@ -979,6 +1188,31 @@ onMounted(async () => {
       // Update markers to reflect new route state
       loadData()
     }
+  }
+  
+  // Create global function for popup favorite buttons
+  window.toggleFavoriteFromPopup = async (itemId, itemType) => {
+    const { toggleFavorite, isFavorite } = await import('../services/favorites')
+    toggleFavorite(itemType, itemId)
+    
+    console.log(`⭐ Toggled favorite for ${itemType} ${itemId}`)
+    
+    // Update the button text immediately
+    const favoriteBtn = document.querySelector(`[data-favorite-btn="${itemType}-${itemId}"]`)
+    if (favoriteBtn) {
+      const isNowFavorited = isFavorite(itemType, itemId)
+      
+      if (isNowFavorited) {
+        favoriteBtn.innerHTML = '<span class="star-icon favorited-star">⭐</span> Favorited'
+      } else {
+        favoriteBtn.innerHTML = '<span class="star-icon">⭐</span> Favorite'
+      }
+      favoriteBtn.className = `favorite-popup-btn ${isNowFavorited ? 'favorite-active' : ''}`
+      favoriteBtn.title = isNowFavorited ? 'Remove from favorites' : 'Add to favorites'
+    }
+    
+    // Update markers to reflect new favorite state (stars on map markers)
+    loadData()
   }
 })
 
@@ -1336,8 +1570,8 @@ const updateMarkers = () => {
     
     // Apply Soon & Near filtering if enabled
     if (mapControls.showEventsSoonAndNear && userLocation.value) {
-      // First filter by radius, then apply time-distance scoring
-      const eventsInRadius = items.events.filter(event => isEventWithinRadius(event))
+      // OPTIMIZED: Use cached pre-calculated distances for fast filtering
+      const eventsInRadius = getEventsWithinRadius()
       filteredEvents += items.events.length - eventsInRadius.length // Count radius-filtered events
       
       eventsToShow = eventsInRadius
@@ -1383,6 +1617,7 @@ const addMarker = (item, type, icon, color = null) => {
     ? `<div class="marker-icon" style="color: ${color}; filter: drop-shadow(0 0 3px ${color}40);">${icon}</div>`
     : `<div class="marker-icon">${icon}</div>`
   
+  const markerId = `${type}-${item.uid}`
   const marker = L.marker(coords, {
     icon: L.divIcon({
       className: `${type}-marker${color ? ' urgent-event' : ''}`,
@@ -1399,17 +1634,29 @@ const addMarker = (item, type, icon, color = null) => {
   const canCreateRouteToItem = userLocation.value && location !== 'Unknown Location'
   const hasExistingRoute = hasActiveRoute.value && routeDetails.value?.target.uid === item.uid
   
+  // Get event-specific content if this is an event
+  const eventContent = type === 'event' ? getEventPopupContent(item) : ''
+  
   marker.bindPopup(`
-    <div class="map-popup">
-      <strong>${name}</strong>
-      ${favorited ? '<span class="favorited">★</span>' : ''}
-      <br>
-      <small>${location}</small>
-      <br>
-      <small>Lat: ${coords[0].toFixed(6)}, Lng: ${coords[1].toFixed(6)}</small>
-      ${item.description ? `<br><br>${item.description.substring(0, 100)}...` : ''}
-      ${canCreateRouteToItem ? `
-        <div class="popup-actions">
+    <div class="map-popup" data-marker-id="${markerId}">
+      ${location} <strong>${name}</strong>
+
+      ${eventContent}
+
+      <div><small>Lat: ${coords[0].toFixed(6)}, Lng: ${coords[1].toFixed(6)}</small></div>
+
+      ${item.description ? `<div class="item-description">${item.description.substring(0, 300)}</div>` : ''}
+      
+      <div class="popup-actions">
+        <button 
+          onclick="window.toggleFavoriteFromPopup('${item.uid}', '${type}')" 
+          class="favorite-popup-btn ${favorited ? 'favorite-active' : ''}"
+          title="${favorited ? 'Remove from favorites' : 'Add to favorites'}"
+          data-favorite-btn="${type}-${item.uid}"
+        >
+          ${favorited ? '<span class="star-icon favorited-star">⭐</span> Favorited' : '<span class="star-icon">⭐</span> Favorite'}
+        </button>
+        ${canCreateRouteToItem ? `
           <button 
             onclick="window.createRouteFromPopup('${item.uid}', '${type}')" 
             class="route-popup-btn ${hasExistingRoute ? 'route-active' : ''}"
@@ -1417,10 +1664,36 @@ const addMarker = (item, type, icon, color = null) => {
           >
             ${hasExistingRoute ? '🗺️ Route Active' : '🗺️ Route Here'}
           </button>
-        </div>
-      ` : ''}
+        ` : ''}
+      </div>
     </div>
-  `)
+  `, {
+    autoClose: false,
+    closeOnClick: false  // Prevent popup from closing when clicking inside it
+  })
+  
+  // Handle popup open/close events for countdown management
+  marker.on('popupopen', () => {
+    openPopups.add(markerId)
+    
+    // Start countdown if this is an event starting soon
+    if (type === 'event') {
+      const nextOccurrence = getNextOccurrence(item)
+      if (nextOccurrence && isStartingSoon(nextOccurrence.start_time)) {
+        startCountdownInterval(markerId, nextOccurrence.start_time)
+      }
+    }
+  })
+  
+  marker.on('popupclose', () => {
+    openPopups.delete(markerId)
+    
+    // Clear countdown interval
+    if (countdownIntervals.has(markerId)) {
+      clearInterval(countdownIntervals.get(markerId))
+      countdownIntervals.delete(markerId)
+    }
+  })
   
   markersLayer.addLayer(marker)
 }
@@ -1654,6 +1927,25 @@ const updateGISLayers = () => {
     }
   }
 }
+
+// Cleanup on unmount
+onUnmounted(() => {
+  // Clear radius update timeout to prevent memory leaks
+  if (radiusUpdateTimeout) {
+    clearTimeout(radiusUpdateTimeout)
+  }
+  
+  // Clear all countdown intervals
+  countdownIntervals.forEach((interval) => {
+    clearInterval(interval)
+  })
+  countdownIntervals.clear()
+  openPopups.clear()
+  
+  // Clear cached data
+  cachedNearbyEvents = []
+  lastCacheLocation = null
+})
 
 const toggleBasemap = () => {
   if (year.value !== '2025') return // Don't allow toggle for non-2025 years
@@ -2002,7 +2294,7 @@ const applyRotation = () => {
 }
 
 :deep(.map-popup small) {
-  color: var(--color-text-disabled);
+  color: var(--color-text-secondary);
   font-size: 12px;
 }
 
@@ -2010,6 +2302,50 @@ const applyRotation = () => {
   color: var(--color-accent);
   font-size: 16px;
   margin-left: 8px;
+}
+
+/* Event-specific popup styling */
+:deep(.map-popup .event-info) {
+  margin: 8px 0;
+  padding: 8px;
+  background: var(--color-bg-elevated);
+  border-radius: 4px;
+  border-left: 3px solid var(--color-accent);
+}
+
+:deep(.map-popup .event-type) {
+  font-weight: 600;
+  color: var(--color-accent);
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+:deep(.map-popup .event-time) {
+  font-size: 12px;
+  color: var(--color-text-primary);
+
+}
+
+:deep(.map-popup .event-countdown) {
+  font-size: 12px;
+  color: var(--color-warning);
+  font-weight: 600;
+  background: var(--color-warning-alpha-20);
+  padding: 4px 6px;
+  border-radius: 3px;
+  margin-top: 4px;
+}
+
+:deep(.map-popup .countdown-text) {
+  font-weight: 700;
+  color: var(--color-warning-dark);
+}
+
+:deep(.map-popup .item-description) {
+  margin: 8px 0;
+  font-size: 1.2rem;
+  color: var(--color-text-secondary);
+  line-height: normal;
 }
 
 /* Map background styling */
@@ -2142,42 +2478,137 @@ const applyRotation = () => {
   margin-bottom: 0.5rem;
 }
 
-/* Map popup routing styles */
+/* Map popup action buttons */
 :deep(.popup-actions) {
   margin-top: 0.75rem;
   padding-top: 0.5rem;
   border-top: 1px solid var(--color-border-light);
+  display: flex;
+  gap: 0.5rem;
 }
 
+/* Base button styles for both favorite and route buttons - following BaseButton patterns */
+:deep(.favorite-popup-btn),
 :deep(.route-popup-btn) {
-  background: var(--color-primary);
-  color: var(--color-text-primary);
-  border: none;
-  border-radius: 4px;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.75rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  width: 100%;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.25rem;
+  font-family: 'Berkeley Mono', monospace;
+  font-weight: 500;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  text-decoration: none;
+  position: relative;
+  outline: none;
+  line-height: 1.2;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.875rem;
+  min-height: 32px;
+  flex: 1;
 }
 
-:deep(.route-popup-btn:hover) {
+:deep(.favorite-popup-btn:focus-visible),
+:deep(.route-popup-btn:focus-visible) {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+/* Favorite button styles - secondary variant when inactive */
+:deep(.favorite-popup-btn) {
+  background: var(--color-bg-elevated);
+  color: var(--color-text-primary);
+  border-color: var(--color-border-heavy);
+  border-width: 2px;
+}
+
+:deep(.favorite-popup-btn:hover:not(:disabled)) {
+  background: var(--color-bg-hover);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+:deep(.favorite-popup-btn:active:not(:disabled)) {
+  background: var(--color-bg-active);
+  border-color: var(--color-primary-dark);
+  color: var(--color-primary-dark);
+}
+
+/* Favorite button active state - primary variant */
+:deep(.favorite-popup-btn.favorite-active) {
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  border-color: var(--color-primary);
+}
+
+:deep(.favorite-popup-btn.favorite-active:hover:not(:disabled)) {
+  background: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+}
+
+:deep(.favorite-popup-btn.favorite-active:active:not(:disabled)) {
   background: var(--color-primary-dark);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px var(--color-black-alpha-20);
+  border-color: var(--color-primary-dark);
 }
 
+/* Route button styles - secondary variant by default (matches standard buttons) */
+:deep(.route-popup-btn) {
+  background: var(--color-bg-elevated);
+  color: var(--color-text-primary);
+  border-color: var(--color-border-heavy);
+  border-width: 2px;
+}
+
+:deep(.route-popup-btn:hover:not(:disabled)) {
+  background: var(--color-bg-hover);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+:deep(.route-popup-btn:active:not(:disabled)) {
+  background: var(--color-bg-active);
+  border-color: var(--color-primary-dark);
+  color: var(--color-primary-dark);
+}
+
+/* Route button active state - success color for active routes */
 :deep(.route-popup-btn.route-active) {
   background: var(--color-success);
-  color: var(--color-text-primary);
+  color: var(--color-text-inverse);
+  border-color: var(--color-success);
 }
 
-:deep(.route-popup-btn.route-active:hover) {
+:deep(.route-popup-btn.route-active:hover:not(:disabled)) {
+  background: var(--color-success);
+  border-color: var(--color-success);
+  opacity: 0.9;
+}
+
+:deep(.route-popup-btn.route-active:active:not(:disabled)) {
   background: var(--color-success-dark);
+  border-color: var(--color-success-dark);
+}
+
+/* Single button takes full width when only one present */
+:deep(.popup-actions:has(button:only-child) button) {
+  flex: none;
+  width: 100%;
+}
+
+/* Star icon styling - normal size by default */
+:deep(.popup-actions .star-icon) {
+  display: inline-block;
+  transform-origin: center;
+  line-height: 1;
+  transition: transform 0.2s ease;
+}
+
+/* Make favorited star prominent with 2x scale */
+:deep(.popup-actions .star-icon.favorited-star) {
+  transform: scale(1.5);
+  line-height: 0.67;
 }
 </style>
