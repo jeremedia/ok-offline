@@ -104,12 +104,14 @@ export function createStraightLineRoute(from, to) {
 
 /**
  * Calculate route from user location to any item (camp, art, event)
+ * Enhanced with intelligent routing that automatically chooses the best route type
  * @param {Array} userLocation - [lat, lng] of user
  * @param {Object} item - Item with location data
  * @param {Function} getItemLocation - Function to extract location from item
- * @returns {Object|null} Route object or null if no location available
+ * @param {string} mode - 'walking' or 'biking' (optional, defaults to 'walking')
+ * @returns {Promise<Object>|Object|null} Enhanced route object or null if no location available
  */
-export function calculateRouteToItem(userLocation, item, getItemLocation) {
+export async function calculateRouteToItem(userLocation, item, getItemLocation, mode = 'walking') {
   if (!userLocation) {
     return null
   }
@@ -121,6 +123,49 @@ export function calculateRouteToItem(userLocation, item, getItemLocation) {
   }
 
   // Convert BRC address to coordinates
+  const destinationCoords = brcAddressToLatLon(locationString)
+  if (!destinationCoords) {
+    return null
+  }
+
+  // Try enhanced routing first, fall back to straight-line
+  try {
+    const enhancedRoute = await calculateStreetRoute(userLocation, destinationCoords, mode)
+    
+    // Add item context to enhanced route
+    if (enhancedRoute?.isIntelligentRoute) {
+      enhancedRoute.itemContext = {
+        name: item.name || item.title,
+        type: item.event_type ? 'event' : (item.artist ? 'art' : 'camp'),
+        location: locationString,
+        uid: item.uid
+      }
+      
+      console.log(`🧠 Enhanced route to ${enhancedRoute.itemContext.name}: ${enhancedRoute.routingMethod}`)
+    }
+    
+    return enhancedRoute
+    
+  } catch (error) {
+    console.warn('Enhanced routing failed for item, using straight-line fallback:', error)
+    return createStraightLineRoute(userLocation, destinationCoords)
+  }
+}
+
+/**
+ * Synchronous version for backward compatibility
+ * @deprecated Use calculateRouteToItem (async) for enhanced routing
+ */
+export function calculateRouteToItemSync(userLocation, item, getItemLocation) {
+  if (!userLocation) {
+    return null
+  }
+
+  const locationString = getItemLocation(item)
+  if (!locationString) {
+    return null
+  }
+
   const destinationCoords = brcAddressToLatLon(locationString)
   if (!destinationCoords) {
     return null
@@ -148,18 +193,45 @@ export function formatRouteInfo(route) {
 }
 
 /**
- * Create route waypoints for smooth line drawing on map
- * Future: This could be enhanced to follow BRC streets
+ * Create route waypoints for enhanced map visualization
+ * Handles three-segment hybrid routes with proper segmentation
  * @param {Object} route - Route object
- * @returns {Array} Array of [lat, lng] coordinates
+ * @returns {Array} Array of route segments with coordinates and metadata
  */
 export function getRouteWaypoints(route) {
-  if (!route || !route.geometry) {
+  if (!route) {
     return []
   }
 
-  // For straight-line routes, just return the start and end points
-  return route.geometry
+  // Enhanced hybrid routes with segments
+  if (route.enhancedRoute?.segments && route.enhancedRoute.segments.length > 1) {
+    console.log('🎨 Generating enhanced route visualization with', route.enhancedRoute.segments.length, 'segments')
+    
+    return route.enhancedRoute.segments.map((segment, index) => ({
+      id: `segment-${index}`,
+      type: segment.type,
+      subType: segment.subType || segment.type,
+      coordinates: segment.coordinates.map(([lng, lat]) => [lat, lng]), // Convert to [lat, lng]
+      distance: segment.distance,
+      duration: segment.duration,
+      instructions: segment.instructions || segment.instruction,
+      style: getSegmentStyle(segment.type, route.mode || 'walking'),
+      isWaypoint: index > 0 && index < route.enhancedRoute.segments.length - 1
+    }))
+  }
+
+  // Legacy straight-line routes
+  if (route.geometry) {
+    return [{
+      id: 'straight-line',
+      type: 'straight_line',
+      coordinates: route.geometry,
+      style: getRouteStyle(route.mode || 'walking'),
+      isWaypoint: false
+    }]
+  }
+
+  return []
 }
 
 /**
@@ -191,16 +263,220 @@ export function getRouteStyle(mode = 'walking') {
   }
 }
 
-// Future enhancement: Street-following route calculation
-// This would use the existing GIS street data to create more realistic routes
-export function calculateStreetRoute(from, to) {
-  // TODO: Implement street-following route calculation
-  // This would:
-  // 1. Find nearest streets to start/end points
-  // 2. Calculate route following radial and circumferential streets
-  // 3. Account for BRC's unique circular layout
-  // 4. Return multi-segment route with turn-by-turn directions
+/**
+ * Get segment-specific style for hybrid routes
+ * @param {string} segmentType - 'urban_navigation', 'playa_crossing', etc.
+ * @param {string} mode - 'walking' or 'biking'
+ * @returns {Object} Leaflet polyline style options
+ */
+export function getSegmentStyle(segmentType, mode = 'walking') {
+  const baseStyle = {
+    weight: 4,
+    opacity: 0.9,
+    lineCap: 'round',
+    lineJoin: 'round'
+  }
+
+  // Revolutionary hybrid route colors following UI guidelines
+  switch (segmentType) {
+    case 'urban_navigation':
+      return {
+        ...baseStyle,
+        color: mode === 'biking' ? '#E74C3C' : '#D32F2F', // Red/orange for urban streets
+        weight: mode === 'biking' ? 5 : 4,
+        dashArray: '5, 3', // Dashed for urban complexity
+        opacity: 0.85
+      }
+      
+    case 'playa_crossing':
+      return {
+        ...baseStyle,
+        color: mode === 'biking' ? '#00BCD4' : '#2196F3', // Cyan/blue for playa freedom
+        weight: mode === 'biking' ? 6 : 5, // Thicker for the revolutionary shortcut
+        opacity: 0.95, // More prominent
+        dashArray: null // Solid line for direct crossing
+      }
+      
+    case 'straight_line':
+    default:
+      return getRouteStyle(mode) // Fallback to basic style
+  }
+}
+
+/**
+ * Get waypoint marker style for hybrid routes
+ * @param {string} waypointType - 'exit', 'entry', 'intermediate'
+ * @returns {Object} Leaflet marker style options
+ */
+export function getWaypointStyle(waypointType) {
+  const baseStyle = {
+    radius: 8,
+    fillOpacity: 0.9,
+    weight: 2,
+    opacity: 1,
+    color: '#fff'
+  }
+
+  switch (waypointType) {
+    case 'exit':
+      return {
+        ...baseStyle,
+        fillColor: '#FF5722', // Orange-red for urban exit
+        radius: 10
+      }
+      
+    case 'entry':
+      return {
+        ...baseStyle,
+        fillColor: '#4CAF50', // Green for urban entry
+        radius: 10
+      }
+      
+    case 'intermediate':
+    default:
+      return {
+        ...baseStyle,
+        fillColor: '#FFC107', // Yellow for intermediate points
+        radius: 6
+      }
+  }
+}
+
+// Enhanced routing with BRC intelligence
+import { EnhancedRoutingService } from './routing/enhancedRoutingService.js'
+
+let enhancedRouter = null
+
+/**
+ * Get or create enhanced routing service instance
+ */
+async function getEnhancedRouter() {
+  if (!enhancedRouter) {
+    enhancedRouter = new EnhancedRoutingService()
+    // Ensure it's initialized on first use
+    await enhancedRouter.initialize()
+  }
+  return enhancedRouter
+}
+
+/**
+ * Enhanced street-following route calculation with hybrid routing
+ * Uses intelligent zone detection and hybrid urban/playa routing
+ * @param {Array} from - [lat, lng] of starting point
+ * @param {Array} to - [lat, lng] of destination 
+ * @param {string} mode - 'walking' or 'biking'
+ * @returns {Object} Enhanced route object
+ */
+export async function calculateStreetRoute(from, to, mode = 'walking') {
+  try {
+    const router = await getEnhancedRouter()
+    
+    // Use consistent [lat, lng] format throughout the system
+    const enhancedRoute = await router.calculateIntelligentRoute(from, to, mode)
+    
+    // Convert enhanced route to legacy format for compatibility
+    return convertToLegacyRoute(enhancedRoute, from, to)
+    
+  } catch (error) {
+    console.error('Enhanced routing failed, falling back to straight-line:', error)
+    return createStraightLineRoute(from, to)
+  }
+}
+
+/**
+ * Convert enhanced route format to legacy route format for compatibility
+ */
+function convertToLegacyRoute(enhancedRoute, originalFrom, originalTo) {
+  // Convert coordinates back to [lat, lng] format
+  const convertedGeometry = enhancedRoute.coordinates.map(([lng, lat]) => [lat, lng])
   
-  // For now, fall back to straight-line
-  return createStraightLineRoute(from, to)
+  // Calculate distance and times using legacy format
+  const distance = {
+    feet: enhancedRoute.distance,
+    miles: enhancedRoute.distance / 5280
+  }
+  
+  // Convert duration (enhanced service uses minutes, legacy uses hours)
+  const walkingTime = {
+    minutes: enhancedRoute.mode === 'walking' ? enhancedRoute.duration : Math.round(enhancedRoute.duration * 1.5),
+    formatted: formatDuration(enhancedRoute.mode === 'walking' ? enhancedRoute.duration : Math.round(enhancedRoute.duration * 1.5))
+  }
+  
+  const bikingTime = {
+    minutes: enhancedRoute.mode === 'biking' ? enhancedRoute.duration : Math.round(enhancedRoute.duration * 0.67),
+    formatted: formatDuration(enhancedRoute.mode === 'biking' ? enhancedRoute.duration : Math.round(enhancedRoute.duration * 0.67))
+  }
+
+  return {
+    // Legacy compatibility fields
+    type: enhancedRoute.type === 'hybrid' ? 'intelligent-hybrid' : enhancedRoute.type,
+    from: originalFrom,
+    to: originalTo,
+    geometry: convertedGeometry,
+    distance,
+    travelTimes: {
+      walking: walkingTime,
+      biking: bikingTime
+    },
+    distanceText: distance.feet < 1000 
+      ? `${Math.round(distance.feet)} ft`
+      : `${distance.miles.toFixed(1)} mi`,
+    walkingText: `🚶 ${walkingTime.formatted}`,
+    bikingText: `🚴 ${bikingTime.formatted}`,
+    
+    // Enhanced routing fields
+    enhancedRoute: {
+      routeType: enhancedRoute.type,
+      segments: enhancedRoute.segments,
+      directions: enhancedRoute.directions,
+      summary: enhancedRoute.summary,
+      zoneAnalysis: enhancedRoute.zoneAnalysis,
+      hybridAnalysis: enhancedRoute.hybridAnalysis
+    },
+    
+    // Routing metadata
+    isIntelligentRoute: true,
+    routingMethod: enhancedRoute.type === 'hybrid' ? 'Urban→Playa→Urban' : 
+                   enhancedRoute.type === 'straight_line' ? 'Direct Playa' : 
+                   'Street Following'
+  }
+}
+
+/**
+ * Format duration in minutes to readable string
+ */
+function formatDuration(minutes) {
+  if (minutes < 60) {
+    return `${minutes} min`
+  } else {
+    const hours = Math.floor(minutes / 60)
+    const mins = minutes % 60
+    return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`
+  }
+}
+
+/**
+ * Check if enhanced routing is available
+ * @returns {boolean} True if enhanced routing is ready
+ */
+export async function isEnhancedRoutingReady() {
+  try {
+    const router = await getEnhancedRouter()
+    return router.isReady()
+  } catch (error) {
+    return false
+  }
+}
+
+/**
+ * Get enhanced routing system status for debugging
+ * @returns {Object} System status information
+ */
+export async function getEnhancedRoutingStatus() {
+  try {
+    const router = await getEnhancedRouter()
+    return router.getStatus()
+  } catch (error) {
+    return { error: error.message }
+  }
 }
