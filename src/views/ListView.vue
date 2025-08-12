@@ -42,6 +42,8 @@
       :visible-items="sortedItems.length"
       :total-items="items.length"
       @clear-all-filters="handleClearAllFilters"
+      :show-past-events="showPastEvents"
+      @toggle-past-events="showPastEvents = !showPastEvents"
     />
     <ul id="items-list">
       <li v-if="sortedItems.length === 0" class="empty-state">
@@ -90,6 +92,15 @@
                 >
                   {{ isInSchedule(item, item.occurrence_set[0]) ? '📅' : '📆' }}
                 </BaseButton>
+                <RouteButton 
+                  :item="item"
+                  size="sm"
+                  compact
+                  :navigate-to-map="true"
+                  @click.stop
+                  @route-created="handleRouteCreated"
+                  @route-cleared="handleRouteCleared"
+                />
                 <BaseButton 
                   @click.stop="handleToggleFavorite(item)"
                   variant="ghost"
@@ -136,6 +147,15 @@
           >
             {{ isInSchedule(item, item.occurrence_set[0]) ? '📅' : '📆' }}
           </BaseButton>
+          <RouteButton 
+            :item="item"
+            size="sm"
+            compact
+            :navigate-to-map="true"
+            @click.stop
+            @route-created="handleRouteCreated"
+            @route-cleared="handleRouteCleared"
+          />
           <BaseButton 
             @click.stop="handleToggleFavorite(item)"
             variant="ghost"
@@ -179,7 +199,7 @@
 <script setup>
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getItemName, getItemLocation, extractClockPosition, extractAvenue, clockPositionToNumber, getSector, formatEventTime, isHappeningNow, getNextOccurrence } from '../utils'
+import { getItemName, getItemLocation, extractClockPosition, extractAvenue, clockPositionToNumber, getSector, formatEventTime, isHappeningNow, getNextOccurrence, isEventPast } from '../utils'
 import { getFromCache } from '../services/storage'
 import { getCombinedData } from '../services/customEntries'
 import { isFavorite, toggleFavorite, getFavorites } from '../services/favorites'
@@ -188,12 +208,15 @@ import { getVisitInfo } from '../services/visits'
 import { isEventScheduled, addEventToSchedule, removeEventFromSchedule } from '../services/schedule'
 import { useToast } from '../composables/useToast'
 import { useAutoSync } from '../composables/useAutoSync'
+import { useDateOverride } from '../composables/useDateOverride'
+import { useSoonAndNear } from '../composables/useSoonAndNear'
 import LoadingSpinner from '../components/LoadingSpinner.vue'
 import SyncDialog from '../components/SyncDialog.vue'
 import PullToRefresh from '../components/PullToRefresh.vue'
 import { BaseButton } from '@/components/ui'
 import ListControls from '../components/ListControls.vue'
 import FloatingActionButton from '../components/FloatingActionButton.vue'
+import RouteButton from '../components/RouteButton.vue'
 import CustomCampForm from '../components/forms/CustomCampForm.vue'
 import CustomArtForm from '../components/forms/CustomArtForm.vue'
 import CustomEventForm from '../components/forms/CustomEventForm.vue'
@@ -207,7 +230,12 @@ const { showSyncDialog, checkAndAutoSync } = useAutoSync()
 const items = ref([])
 const loading = ref(true)
 const error = ref(null)
-const sortBy = ref('name')
+// Initialize sortBy with type-specific defaults, then load from localStorage
+const getDefaultSort = (type) => {
+  return type === 'event' ? 'date' : 'name'
+}
+
+const sortBy = ref(getDefaultSort(props.type))
 const searchQuery = ref('')
 const selectedId = computed(() => route.params.id)
 const syncStatus = ref('Checking for data...')
@@ -236,8 +264,17 @@ const globalFiltersCollapsed = ref(true) // Unified filters collapsed state
 const showFavoritesOnly = ref(false)
 const favoriteItems = ref(new Set())
 
-// Geolocation
-const { userLocation, locationLoading, getCurrentLocation, getDistanceTo, sortByDistance } = useGeolocation()
+// Past events visibility (events only) - default to false (hide past events)
+const showPastEvents = ref(false)
+
+// Geolocation  
+const { userLocation, locationLoading, getCurrentLocation, getDistanceTo, sortByDistance, checkLocationPermission } = useGeolocation()
+
+// Date override for testing
+const { getCurrentTime } = useDateOverride()
+
+// Soon & Near radius filtering
+const { radius: soonAndNearRadius } = useSoonAndNear()
 
 // Load saved sector filters from localStorage
 const savedSectors = localStorage.getItem(`selectedSectors_${props.type}`)
@@ -262,6 +299,34 @@ if (savedEventTypes) {
 } else {
   // Default to all types
   selectedEventTypes.value = availableEventTypes.value.map(t => t.value)
+}
+
+// Load saved past events visibility from localStorage (events only)
+if (props.type === 'event') {
+  const savedShowPastEvents = localStorage.getItem(`showPastEvents_${props.year}`)
+  if (savedShowPastEvents !== null) {
+    try {
+      showPastEvents.value = JSON.parse(savedShowPastEvents)
+    } catch (e) {
+      console.error('Failed to load saved showPastEvents:', e)
+    }
+  }
+}
+
+// Load saved sort order from localStorage
+const savedSortBy = localStorage.getItem(`sortBy_${props.type}`)
+if (savedSortBy) {
+  try {
+    // Validate the saved sort option is valid for this type
+    const validSorts = ['name', 'location', 'sector', 'avenue', 'distance']
+    if (props.type === 'event') validSorts.push('date', 'time-distance')
+    
+    if (validSorts.includes(savedSortBy)) {
+      sortBy.value = savedSortBy
+    }
+  } catch (e) {
+    console.error('Failed to load saved sortBy:', e)
+  }
 }
 
 // Load saved collapsed groups from localStorage
@@ -358,6 +423,11 @@ const handleClearAllFilters = () => {
   
   // Clear favorites filter
   showFavoritesOnly.value = false
+  
+  // Clear past events filter (events only) 
+  if (props.type === 'event') {
+    showPastEvents.value = false
+  }
 }
 
 // Watch for sort changes to load appropriate collapsed state
@@ -381,6 +451,59 @@ watch(sortBy, (newSort) => {
 watch(globalFiltersCollapsed, (newValue) => {
   localStorage.setItem(`filtersCollapsed_${props.type}`, JSON.stringify(newValue))
 })
+
+// Watch for sortBy changes and persist to localStorage
+watch(sortBy, (newSort) => {
+  localStorage.setItem(`sortBy_${props.type}`, newSort)
+})
+
+// Watch for showPastEvents changes and persist to localStorage (events only)
+watch(showPastEvents, (newValue) => {
+  if (props.type === 'event') {
+    localStorage.setItem(`showPastEvents_${props.year}`, JSON.stringify(newValue))
+  }
+})
+
+// Time-Distance composite scoring for "Soon + Near" sort
+const getTimeDistanceScore = (event) => {
+  const now = getCurrentTime()
+  const nextOccurrence = getNextOccurrence(event)
+  
+  if (!nextOccurrence) return 999999 // No future occurrences - bottom of list
+  
+  const startTime = new Date(nextOccurrence.start_time)
+  const hoursUntilStart = (startTime - now) / (1000 * 60 * 60)
+  
+  // Events too far in future (48+ hours) get deprioritized
+  if (hoursUntilStart > 48) return 999999
+  
+  const distanceData = getDistanceTo(getItemLocation(event))
+  const distanceInFeet = distanceData?.feet || 10000 // Default for no location
+  
+  // HAPPENING NOW: Highest priority, sorted by distance only
+  if (isHappeningNow(event)) {
+    return -(10000 - Math.min(distanceInFeet, 9999))
+  }
+  
+  // FUTURE EVENTS: Weight time more heavily than distance
+  // Time weight: Hours * 1000 (events starting sooner = lower scores)
+  const timeScore = Math.max(0, hoursUntilStart) * 1000
+  
+  // Distance weight: Feet (closer = lower scores)  
+  const distanceScore = Math.min(distanceInFeet, 9999)
+  
+  return timeScore + distanceScore
+}
+
+// Check if an event is within the specified radius (for Soon & Near filtering)
+const isEventWithinRadius = (event) => {
+  if (!userLocation.value) return false
+  
+  const distanceData = getDistanceTo(getItemLocation(event))
+  const distanceInFeet = distanceData?.feet || 99999
+  
+  return distanceInFeet <= soonAndNearRadius.value
+}
 
 const sortedItems = computed(() => {
   let filtered = [...items.value]
@@ -416,6 +539,12 @@ const sortedItems = computed(() => {
     filtered = filtered.filter(item => favoriteItems.value.has(item.uid))
   }
   
+  // Apply past events filter (events only)
+  // OR automatically hide past events when using time-distance sort ("starting soon")
+  if (props.type === 'event' && (!showPastEvents.value || sortBy.value === 'time-distance')) {
+    filtered = filtered.filter(item => !isEventPast(item))
+  }
+  
   // Apply sorting
   if (sortBy.value === 'name') {
     filtered.sort((a, b) => 
@@ -445,6 +574,10 @@ const sortedItems = computed(() => {
     })
   } else if (sortBy.value === 'distance' && userLocation.value) {
     filtered = sortByDistance(filtered, getItemLocation)
+  } else if (sortBy.value === 'time-distance' && props.type === 'event' && userLocation.value) {
+    // Filter by radius first, then sort by composite time + distance score (Soon + Near)
+    filtered = filtered.filter(event => isEventWithinRadius(event))
+    filtered.sort((a, b) => getTimeDistanceScore(a) - getTimeDistanceScore(b))
   } else if (sortBy.value === 'date' && props.type === 'event') {
     // Sort by date/time
     filtered.sort((a, b) => {
@@ -657,6 +790,16 @@ const handleToggleFavorite = (item) => {
   favoriteItems.value = new Set(favoriteItems.value)
 }
 
+// Route event handlers
+const handleRouteCreated = ({ item, route }) => {
+  console.log(`🗺️ Route created in ListView to ${item.name || item.title}`)
+  // Navigation to MapView is handled by RouteButton component
+}
+
+const handleRouteCleared = ({ item }) => {
+  console.log(`🗺️ Route cleared in ListView for ${item.name || item.title}`)
+}
+
 const loadFavorites = () => {
   const favs = getFavorites(props.type)
   favoriteItems.value = new Set(favs)
@@ -725,6 +868,8 @@ onMounted(() => {
   console.log(`ListView mounted with type: ${props.type}, year: ${props.year}`)
   loadData()
   loadFavorites()
+  // Check if location permission was previously granted and auto-restore
+  checkLocationPermission()
 })
 watch(() => [props.type, props.year], () => {
   console.log(`ListView props changed - type: ${props.type}, year: ${props.year}`)

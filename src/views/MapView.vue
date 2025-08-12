@@ -23,6 +23,7 @@
         :gisLoadingState="gisLoadingState"
         :initialControls="mapControls"
         :showResetView="showResetView"
+        :userLocation="userLocation"
         @update:controls="handleControlUpdate"
         @reset-view="resetMapView"
       />
@@ -36,6 +37,7 @@
       :gisLoadingState="gisLoadingState"
       :controls="mapControls"
       :showResetView="showResetView"
+      :userLocation="userLocation"
       @update:controls="handleControlUpdate"
       @reset-view="resetMapView"
     />
@@ -56,7 +58,49 @@
       :mapState="mapInfoState"
       :markerStats="markerStats"
       :layerStatus="layerStatus"
+      :userLocation="userLocation"
+      :locationLoading="locationLoading"
+      @center-on-location="centerOnUserLocation"
+      @enable-location="enableLocationAndCenter"
     />
+    
+    <!-- Route Info Panel -->
+    <div 
+      v-if="hasActiveRoute" 
+      class="route-info-panel"
+      :class="{ 'mobile': isMobile, 'route-mode': isInRouteMode }"
+    >
+      <div class="route-header">
+        <span class="route-icon">🗺️</span>
+        <div class="route-details">
+          <div class="route-mode-indicator" v-if="isInRouteMode">
+            <span class="mode-badge">🎯 ROUTE MODE</span>
+          </div>
+          <div class="route-target">{{ routeDetails?.target.name }}</div>
+          <div class="route-summary">{{ routeSummary }}</div>
+        </div>
+        <div class="route-controls">
+          <BaseButton 
+            @click="toggleRouteMode"
+            variant="ghost"
+            size="sm"
+            :title="`Switch to ${routeModeInfo.label === 'Walking' ? 'biking' : 'walking'} mode`"
+            class="mode-toggle-btn"
+          >
+            {{ routeModeInfo.label === 'Walking' ? '🚴' : '🚶' }}
+          </BaseButton>
+          <BaseButton 
+            @click="clearRouteAndRestore"
+            variant="ghost"
+            size="sm"
+            title="Clear route"
+            class="clear-route-btn"
+          >
+            ✕
+          </BaseButton>
+        </div>
+      </div>
+    </div>
     </section>
   </div>
 </template>
@@ -64,13 +108,17 @@
 <script setup>
 import { ref, onMounted, computed, reactive, watch, inject } from 'vue'
 import { useRoute } from 'vue-router'
+import { useGeolocation } from '../composables/useGeolocation'
+import { useSimulation } from '../composables/useSimulation'
+import { useSoonAndNear } from '../composables/useSoonAndNear'
+import { useRouting } from '../composables/useRouting'
 import L from 'leaflet'
 import 'leaflet-rotate'
 import 'leaflet.offline'
 import { BRC_CENTER } from '../config'
 import { getFromCache } from '../services/storage'
 import { isFavorite } from '../services/favorites'
-import { getItemName, getItemLocation } from '../utils'
+import { getItemName, getItemLocation, getNextOccurrence, isHappeningNow } from '../utils'
 import { brcAddressToLatLon, getSpecialLocationCoords, calculateCityAlignmentAngle, analyzeCityGeometry } from '../utils/geocoding'
 import { 
   initializeGISData, 
@@ -89,6 +137,7 @@ import MapControlTabs from '../components/map/MapControlTabs.vue'
 import MapBottomSheet from '../components/map/MapBottomSheet.vue'
 import MapLegend from '../components/map/MapLegend.vue'
 import MapInfo from '../components/map/MapInfo.vue'
+import BaseButton from '../components/ui/BaseButton.vue'
 
 const route = useRoute()
 const mapContainer = ref(null)
@@ -122,6 +171,196 @@ const getCSSColor = (varName) => {
   return getComputedStyle(document.documentElement).getPropertyValue(varName).trim()
 }
 
+// Geolocation integration for "Soon & Near" features
+const { userLocation, locationLoading, getCurrentLocation, getDistanceTo, checkLocationPermission } = useGeolocation()
+const { getCurrentTime } = useSimulation()
+const { isEnabled: soonAndNearEnabled, radius: soonAndNearRadius, setEnabled: setSoonAndNearEnabled, setRadius: setSoonAndNearRadius } = useSoonAndNear()
+
+// Routing integration
+const { 
+  currentRoute, 
+  routeWaypoints, 
+  routeStyle, 
+  routeSummary, 
+  routeDetails,
+  createRoute,
+  clearRoute,
+  hasActiveRoute,
+  routeModeInfo,
+  toggleRouteMode,
+  isInRouteMode,
+  isInBrowseMode
+} = useRouting()
+
+// User location marker, radius circle, and route line
+let userLocationMarker = null
+let radiusCircle = null
+let routeLine = null
+
+// Add or update user location marker
+const updateUserLocationMarker = () => {
+  if (!map) return
+  
+  // Remove existing marker
+  if (userLocationMarker) {
+    map.removeLayer(userLocationMarker)
+    userLocationMarker = null
+  }
+  
+  // Add new marker if location is available
+  if (userLocation.value) {
+    userLocationMarker = L.marker(userLocation.value, {
+      icon: L.divIcon({
+        className: 'user-location-marker',
+        html: '<div class="user-marker-icon">📍</div>',
+        iconSize: [30, 30],
+        iconAnchor: [15, 15]
+      }),
+      zIndexOffset: 1000  // Ensure user marker is always on top
+    })
+    
+    userLocationMarker.bindPopup(`
+      <div class="map-popup">
+        <strong>Your Location</strong><br>
+        <small>Lat: ${userLocation.value[0].toFixed(6)}<br>
+        Lng: ${userLocation.value[1].toFixed(6)}</small>
+      </div>
+    `)
+    
+    userLocationMarker.addTo(map)
+    console.log('Added user location marker at:', userLocation.value)
+  }
+}
+
+// Add or update radius circle for Soon & Near filtering
+const updateRadiusCircle = () => {
+  if (!map) return
+  
+  // Remove existing circle
+  if (radiusCircle) {
+    map.removeLayer(radiusCircle)
+    radiusCircle = null
+  }
+  
+  // Add circle if Soon & Near is enabled and user location is available
+  if (mapControls.showEventsSoonAndNear && userLocation.value) {
+    // Convert feet to meters for Leaflet (1 foot = 0.3048 meters)
+    const radiusInMeters = soonAndNearRadius.value * 0.3048
+    
+    radiusCircle = L.circle(userLocation.value, {
+      radius: radiusInMeters,
+      fillColor: getCSSColor('--color-accent') || '#8B0000',
+      color: getCSSColor('--color-accent') || '#8B0000',
+      weight: 2,
+      opacity: 0.8,
+      fillOpacity: 0.1,
+      dashArray: '5, 10' // Dashed line for subtle appearance
+    })
+    
+    radiusCircle.addTo(map)
+    console.log(`Added radius circle: ${soonAndNearRadius.value}ft (${radiusInMeters.toFixed(1)}m)`)
+  }
+}
+
+// Add or update route line on map
+const updateRouteLine = () => {
+  if (!map) return
+  
+  // Remove existing route line
+  if (routeLine) {
+    map.removeLayer(routeLine)
+    routeLine = null
+  }
+  
+  // Add route line if route exists
+  if (hasActiveRoute.value && routeWaypoints.value.length > 1) {
+    routeLine = L.polyline(routeWaypoints.value, {
+      ...routeStyle.value,
+      zIndexOffset: 1000 // Ensure route appears on top
+    })
+    
+    // Add popup with route info
+    const routeInfo = routeDetails.value
+    if (routeInfo) {
+      routeLine.bindPopup(`
+        <div class="route-popup">
+          <strong>Route to ${routeInfo.target.name}</strong><br>
+          <div style="margin-top: 0.5rem;">
+            📏 ${routeInfo.distance}<br>
+            🚶 ${routeInfo.walkingTime}<br>
+            🚴 ${routeInfo.bikingTime}<br>
+          </div>
+          <div style="margin-top: 0.5rem; font-size: 0.875rem; color: #666;">
+            Current mode: ${routeInfo.currentMode.icon} ${routeInfo.currentMode.label}
+          </div>
+        </div>
+      `)
+    }
+    
+    routeLine.addTo(map)
+    console.log(`🗺️ Route line added: ${routeWaypoints.value.length} waypoints`)
+  }
+}
+
+// Time-Distance composite scoring for "Soon & Near" events (same as ListView)
+const getTimeDistanceScore = (event) => {
+  const now = getCurrentTime()
+  const nextOccurrence = getNextOccurrence(event)
+  
+  if (!nextOccurrence) return 999999 // No future occurrences
+  
+  const startTime = new Date(nextOccurrence.start_time)
+  const hoursUntilStart = (startTime - now) / (1000 * 60 * 60)
+  
+  // Events too far in future (48+ hours) get deprioritized
+  if (hoursUntilStart > 48) return 999999
+  
+  const distanceData = getDistanceTo(getItemLocation(event))
+  const distanceInFeet = distanceData?.feet || 10000
+  
+  // HAPPENING NOW: Highest priority
+  if (isHappeningNow(event)) {
+    return -(10000 - Math.min(distanceInFeet, 9999))
+  }
+  
+  // FUTURE EVENTS: Weight time more heavily than distance
+  const timeScore = Math.max(0, hoursUntilStart) * 1000
+  const distanceScore = Math.min(distanceInFeet, 9999)
+  
+  return timeScore + distanceScore
+}
+
+// Check if an event is within the specified radius (for Soon & Near filtering)
+const isEventWithinRadius = (event) => {
+  if (!userLocation.value) return false
+  
+  const distanceData = getDistanceTo(getItemLocation(event))
+  const distanceInFeet = distanceData?.feet || 99999
+  
+  return distanceInFeet <= soonAndNearRadius.value
+}
+
+// Get event marker style based on urgency
+const getEventMarkerStyle = (event) => {
+  const now = getCurrentTime()
+  const nextOccurrence = getNextOccurrence(event)
+  
+  if (!nextOccurrence) return { icon: '⏰', color: '#666' } // No future occurrence
+  
+  const startTime = new Date(nextOccurrence.start_time)
+  const hoursUntilStart = (startTime - now) / (1000 * 60 * 60)
+  
+  if (isHappeningNow(event)) {
+    return { icon: '🔴', color: '#ff0000', priority: 1 } // Happening NOW
+  } else if (hoursUntilStart <= 2) {
+    return { icon: '🟠', color: '#ff8800', priority: 2 } // Starting soon (2 hours)
+  } else if (hoursUntilStart <= 12) {
+    return { icon: '🟡', color: '#ffaa00', priority: 3 } // Later today
+  } else {
+    return { icon: '⏰', color: '#666', priority: 4 } // Tomorrow+
+  }
+}
+
 // Consolidated map controls
 const mapControls = reactive({
   // Content controls
@@ -129,6 +368,7 @@ const mapControls = reactive({
   showArt: true,
   showEvents: true,
   showFavoritesOnly: false,
+  showEventsSoonAndNear: false, // NEW: Soon & Near events filter
   showInfrastructure: true,
   // Infrastructure subcategories
   showTheMan: true,
@@ -234,7 +474,8 @@ const handleControlUpdate = (newControls) => {
   
   // Update markers based on content controls
   if ('showCamps' in newControls || 'showArt' in newControls || 
-      'showEvents' in newControls || 'showFavoritesOnly' in newControls) {
+      'showEvents' in newControls || 'showFavoritesOnly' in newControls ||
+      'showEventsSoonAndNear' in newControls) {
     updateMarkers()
   }
   
@@ -412,6 +653,31 @@ const resetMapView = () => {
   }, 1600)
 }
 
+// Center map on user location
+const centerOnUserLocation = () => {
+  if (!map || !userLocation.value) return
+  
+  map.flyTo(userLocation.value, 16, {
+    duration: 1.0
+  })
+}
+
+// Enable location and center on it once obtained
+const enableLocationAndCenter = async () => {
+  if (locationLoading.value) return
+  
+  try {
+    await getCurrentLocation()
+    // Once location is obtained, center on it
+    if (userLocation.value) {
+      centerOnUserLocation()
+    }
+  } catch (error) {
+    console.error('Failed to get location:', error)
+    // You could show a user-friendly error message here
+  }
+}
+
 // Watch for year changes and reload data
 watch(year, async (newYear, oldYear) => {
   if (!map || newYear === oldYear) return
@@ -459,10 +725,82 @@ watch(mapControlsToggle, () => {
   }
 })
 
+// Watch for user location changes to update marker and radius circle
+watch(userLocation, () => {
+  updateUserLocationMarker()
+  updateRadiusCircle()
+})
+
+// Watch for radius changes to update circle
+watch(soonAndNearRadius, () => {
+  updateRadiusCircle()
+})
+
+// Watch for Soon & Near toggle to update circle
+watch(() => mapControls.showEventsSoonAndNear, () => {
+  updateRadiusCircle()
+})
+
+// Watch for route changes to update route line
+watch(currentRoute, () => {
+  updateRouteLine()
+})
+
+// Watch for route mode changes to update route line style
+watch(routeModeInfo, () => {
+  updateRouteLine()
+})
+
+// Watch for route mode switching (Browse Mode ↔ Route Mode)
+watch(isInRouteMode, (newRouteMode) => {
+  if (newRouteMode) {
+    // Entering Route Mode - apply minimal settings
+    console.log('🎯 Switching to Route Mode - applying minimal display')
+    applyRouteModeSettings()
+  } else {
+    // Exiting Route Mode - this is handled by clearRoute() returning saved state
+    console.log('🌍 Switching to Browse Mode')
+  }
+  
+  // Reload data to reflect new mode
+  loadData()
+})
+
+// Apply minimal settings for Route Mode (like Apple Maps navigation)
+const applyRouteModeSettings = () => {
+  // Turn off all the clutter - focus only on the route
+  mapControls.showCamps = false
+  mapControls.showArt = false
+  mapControls.showEvents = false
+  mapControls.showEventsSoonAndNear = false  // Turn off Soon & Near
+  mapControls.showFavoritesOnly = false
+  mapControls.showInfrastructure = false
+  
+  // Keep only essential elements
+  // Keep user location and the route line (handled by route visualization)
+  // Keep minimal GIS (streets might be helpful for navigation)
+  
+  console.log('🎯 Route Mode settings applied - minimal display active')
+}
+
+// Custom clearRoute wrapper to handle state restoration
+const clearRouteAndRestore = () => {
+  const savedState = clearRoute()
+  
+  if (savedState) {
+    console.log('🔄 Restoring saved map state:', savedState)
+    Object.assign(mapControls, savedState)
+    loadData() // Reload to apply restored settings
+  }
+}
+
 onMounted(async () => {
   console.log('MapView: Component mounted')
   console.log('MapView: bottomSheet ref on mount:', bottomSheet.value)
   console.log('MapView: isMobile on mount:', isMobile.value)
+  
+  // Check for location permission for Soon & Near features
+  checkLocationPermission()
   
   // Load saved control state from localStorage
   const savedState = localStorage.getItem('mapControlState')
@@ -606,6 +944,9 @@ onMounted(async () => {
     console.log('Second map invalidation')
   }, 500)
   
+  // Initialize user location marker
+  updateUserLocationMarker()
+  
   // Add resize event listener
   window.addEventListener('resize', handleResize)
   
@@ -613,6 +954,32 @@ onMounted(async () => {
   window.addEventListener('orientationchange', () => {
     setTimeout(() => map.invalidateSize(), 200)
   })
+  
+  // Create global function for popup route buttons
+  window.createRouteFromPopup = (itemId, itemType) => {
+    // Find the item by ID in the correct array
+    let item = null
+    if (itemType === 'camp' && items.camps) {
+      item = items.camps.find(i => i.uid === itemId)
+    } else if (itemType === 'art' && items.art) {
+      item = items.art.find(i => i.uid === itemId)
+    } else if (itemType === 'event' && items.events) {
+      item = items.events.find(i => i.uid === itemId)
+    }
+    
+    if (!item || !userLocation.value) {
+      console.warn('Cannot create route: item or user location not found', { itemId, itemType, hasUserLocation: !!userLocation.value })
+      return
+    }
+    
+    // Create the route
+    const route = createRoute(userLocation.value, item, getItemLocation, mapControls)
+    if (route) {
+      console.log(`🗺️ Route created from popup to ${item.name || item.title}`)
+      // Update markers to reflect new route state
+      loadData()
+    }
+  }
 })
 
 const addInfrastructureMarkers = () => {
@@ -935,8 +1302,13 @@ const updateMarkers = () => {
   let filteredEvents = 0
   
   // Add camp markers
-  if (mapControls.showCamps) {
+  if (mapControls.showCamps || (isInRouteMode.value && routeTarget.value?.type === 'camp')) {
     items.camps.forEach(camp => {
+      // In route mode, only show the destination camp
+      if (isInRouteMode.value && routeTarget.value?.uid !== camp.uid) {
+        return
+      }
+      
       if (mapControls.showFavoritesOnly && !isFavorite('camp', camp.uid)) {
         filteredCamps++
         return
@@ -960,12 +1332,31 @@ const updateMarkers = () => {
   
   // Add event markers
   if (mapControls.showEvents) {
-    items.events.forEach(event => {
+    let eventsToShow = items.events
+    
+    // Apply Soon & Near filtering if enabled
+    if (mapControls.showEventsSoonAndNear && userLocation.value) {
+      // First filter by radius, then apply time-distance scoring
+      const eventsInRadius = items.events.filter(event => isEventWithinRadius(event))
+      filteredEvents += items.events.length - eventsInRadius.length // Count radius-filtered events
+      
+      eventsToShow = eventsInRadius
+        .map(event => ({ event, score: getTimeDistanceScore(event) }))
+        .filter(({ score }) => score < 999999) // Remove events with no future occurrences
+        .sort((a, b) => a.score - b.score) // Sort by urgency
+        .slice(0, 50) // Limit to top 50 most relevant events to avoid clutter
+        .map(({ event }) => event)
+    }
+    
+    eventsToShow.forEach(event => {
       if (mapControls.showFavoritesOnly && !isFavorite('event', event.uid)) {
         filteredEvents++
         return
       }
-      addMarker(event, 'event', '🎉')
+      
+      // Use urgency-based marker style for Soon & Near mode, default icon otherwise
+      const markerStyle = mapControls.showEventsSoonAndNear ? getEventMarkerStyle(event) : { icon: '🎉' }
+      addMarker(event, 'event', markerStyle.icon, markerStyle.color)
       visibleEvents++
     })
   }
@@ -980,17 +1371,22 @@ const updateMarkers = () => {
   markerStats.totalVisible = visibleCamps + visibleArt + visibleEvents
 }
 
-const addMarker = (item, type, icon) => {
+const addMarker = (item, type, icon, color = null) => {
   const location = getItemLocation(item)
   if (!location || location === 'Unknown Location' || location === 'Location Not Released') return
   
   const coords = brcAddressToLatLon(location)
   if (!coords) return
   
+  // Create custom styling for Soon & Near events with urgency colors
+  const markerHtml = color 
+    ? `<div class="marker-icon" style="color: ${color}; filter: drop-shadow(0 0 3px ${color}40);">${icon}</div>`
+    : `<div class="marker-icon">${icon}</div>`
+  
   const marker = L.marker(coords, {
     icon: L.divIcon({
-      className: `${type}-marker`,
-      html: `<div class="marker-icon">${icon}</div>`,
+      className: `${type}-marker${color ? ' urgent-event' : ''}`,
+      html: markerHtml,
       iconSize: [25, 25],
       iconAnchor: [12, 12]
     })
@@ -999,13 +1395,30 @@ const addMarker = (item, type, icon) => {
   const name = getItemName(item)
   const favorited = isFavorite(type, item.uid)
   
+  // Check if user can create routes
+  const canCreateRouteToItem = userLocation.value && location !== 'Unknown Location'
+  const hasExistingRoute = hasActiveRoute.value && routeDetails.value?.target.uid === item.uid
+  
   marker.bindPopup(`
     <div class="map-popup">
       <strong>${name}</strong>
       ${favorited ? '<span class="favorited">★</span>' : ''}
       <br>
       <small>${location}</small>
+      <br>
+      <small>Lat: ${coords[0].toFixed(6)}, Lng: ${coords[1].toFixed(6)}</small>
       ${item.description ? `<br><br>${item.description.substring(0, 100)}...` : ''}
+      ${canCreateRouteToItem ? `
+        <div class="popup-actions">
+          <button 
+            onclick="window.createRouteFromPopup('${item.uid}', '${type}')" 
+            class="route-popup-btn ${hasExistingRoute ? 'route-active' : ''}"
+            title="${hasExistingRoute ? 'View route details' : 'Create route to this location'}"
+          >
+            ${hasExistingRoute ? '🗺️ Route Active' : '🗺️ Route Here'}
+          </button>
+        </div>
+      ` : ''}
     </div>
   `)
   
@@ -1341,6 +1754,13 @@ const applyRotation = () => {
   max-height: calc(100% - 20px); /* Account for top/bottom margins */
   display: flex;
   flex-direction: column;
+  /* When collapsed, don't consume clicks on empty space */
+  pointer-events: none;
+}
+
+/* Enable pointer events on the actual control component */
+.map-controls-desktop > * {
+  pointer-events: auto;
 }
 
 /* Mobile controls toggle button */
@@ -1436,10 +1856,49 @@ const applyRotation = () => {
   background: var(--color-warning-alpha-90);
 }
 
+/* Urgent event markers for Soon & Near mode */
+:deep(.urgent-event .marker-icon) {
+  font-size: 18px !important;
+  font-weight: bold;
+  border-width: 3px;
+  box-shadow: 0 0 8px rgba(0,0,0,0.4);
+  transform: scale(1.1);
+  z-index: 1000 !important;
+  background: rgba(255,255,255,0.95) !important;
+}
+
+:deep(.urgent-event:hover .marker-icon) {
+  transform: scale(1.3);
+  box-shadow: 0 0 12px rgba(0,0,0,0.6);
+}
+
 :deep(.plaza-marker .marker-icon) {
   background: var(--color-purple-alpha-90);
 }
 
+/* User location marker */
+:deep(.user-location-marker .user-marker-icon) {
+  background: var(--color-accent);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  border: 3px solid var(--color-text-primary);
+  box-shadow: 0 0 12px var(--color-accent-alpha-50);
+  animation: pulse-location 2s infinite;
+}
+
+@keyframes pulse-location {
+  0%, 100% { 
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% { 
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
 
 .loading-indicator {
   margin-top: 10px;
@@ -1560,5 +2019,165 @@ const applyRotation = () => {
 
 :deep(.leaflet-container) {
   background-color: inherit;
+}
+
+/* Route Info Panel */
+.route-info-panel {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1001;
+  background: var(--color-background-secondary-alpha-95);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 0.75rem;
+  min-width: 300px;
+  max-width: 400px;
+  box-shadow: 0 4px 12px var(--color-black-alpha-20);
+  backdrop-filter: blur(10px);
+}
+
+.route-info-panel.mobile {
+  position: fixed;
+  top: 70px; /* Below header */
+  left: 10px;
+  right: 10px;
+  transform: none;
+  min-width: auto;
+  max-width: none;
+}
+
+.route-info-panel.route-mode {
+  border-color: var(--color-success);
+  box-shadow: 0 4px 20px var(--color-success-alpha-20);
+}
+
+.route-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.route-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.route-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.route-target {
+  font-weight: 600;
+  color: var(--color-text-primary);
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.route-summary {
+  font-size: 0.75rem;
+  color: var(--color-success);
+  font-weight: 500;
+}
+
+.route-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+
+.mode-toggle-btn,
+.clear-route-btn {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+}
+
+.mode-toggle-btn:hover {
+  background: var(--color-primary-alpha-20);
+  color: var(--color-primary);
+}
+
+.clear-route-btn:hover {
+  background: var(--color-error-alpha-20);
+  color: var(--color-error);
+}
+
+/* Route Mode Indicator */
+.route-mode-indicator {
+  margin-bottom: 0.25rem;
+}
+
+.mode-badge {
+  background: var(--color-success);
+  color: var(--color-text-primary);
+  font-size: 0.625rem;
+  font-weight: 600;
+  padding: 0.125rem 0.375rem;
+  border-radius: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  display: inline-block;
+}
+
+/* Route popup styling */
+:deep(.route-popup) {
+  font-family: inherit;
+  font-size: 0.875rem;
+}
+
+:deep(.route-popup strong) {
+  color: var(--color-text-primary);
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+/* Map popup routing styles */
+:deep(.popup-actions) {
+  margin-top: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--color-border-light);
+}
+
+:deep(.route-popup-btn) {
+  background: var(--color-primary);
+  color: var(--color-text-primary);
+  border: none;
+  border-radius: 4px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+:deep(.route-popup-btn:hover) {
+  background: var(--color-primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px var(--color-black-alpha-20);
+}
+
+:deep(.route-popup-btn.route-active) {
+  background: var(--color-success);
+  color: var(--color-text-primary);
+}
+
+:deep(.route-popup-btn.route-active:hover) {
+  background: var(--color-success-dark);
 }
 </style>
