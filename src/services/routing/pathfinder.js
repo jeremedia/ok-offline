@@ -39,7 +39,17 @@ export class BRCPathfinder {
       const startNode = this.network.findNearestNode(startCoords, options.maxStartDistance || 200)
       console.log(`   Start node search result:`, startNode ? `Found node ${startNode.id}` : 'NOT FOUND')
       
-      const endNode = this.network.findNearestNode(endCoords, options.maxEndDistance || 200)  
+      // 🎯 ENHANCED: Use avenue-aware search for end node (handles mid-block destinations)
+      let endNode = null
+      const detectedAvenue = this.network.detectAvenueFromCoordinates(endCoords)
+      
+      if (detectedAvenue) {
+        console.log(`🏠 Mid-block destination detected on ${detectedAvenue} avenue`)
+        endNode = this.network.findNearestNodeOnAvenue(endCoords, options.maxEndDistance || 200, detectedAvenue)
+      } else {
+        endNode = this.network.findNearestNode(endCoords, options.maxEndDistance || 200)
+      }
+      
       console.log(`   End node search result:`, endNode ? `Found node ${endNode.id}` : 'NOT FOUND')
 
       if (!startNode) {
@@ -51,9 +61,25 @@ export class BRCPathfinder {
 
       if (!endNode) {
         console.warn('⚠️  No end node found within range - expanding search radius')  
-        const endNodeExpanded = this.network.findNearestNode(endCoords, 500)
-        console.warn(`   Expanded search result:`, endNodeExpanded ? `Found at ${500}m: ${endNodeExpanded.id}` : 'Still not found')
-        return null
+        let endNodeExpanded = null
+        
+        // Try avenue-aware search with expanded radius first
+        if (detectedAvenue) {
+          endNodeExpanded = this.network.findNearestNodeOnAvenue(endCoords, 500, detectedAvenue)
+          console.warn(`   Expanded avenue search result:`, endNodeExpanded ? `Found at 500m on ${detectedAvenue}: ${endNodeExpanded.id}` : 'Not found on avenue')
+        }
+        
+        // Fall back to normal expanded search if avenue search failed
+        if (!endNodeExpanded) {
+          endNodeExpanded = this.network.findNearestNode(endCoords, 500)
+          console.warn(`   Expanded general search result:`, endNodeExpanded ? `Found at 500m: ${endNodeExpanded.id}` : 'Still not found')
+        }
+        
+        if (!endNodeExpanded) {
+          return null
+        }
+        
+        endNode = endNodeExpanded
       }
 
       if (startNode.id === endNode.id) {
@@ -211,43 +237,14 @@ export class BRCPathfinder {
   }
 
   /**
-   * BRC-specific speed modifiers for different streets and conditions
+   * DISTANCE-ONLY routing: No business logic, only mathematical distance
+   * ARCHITECTURAL PRINCIPLE: Route selection based ONLY on shortest distance
    */
   _getBRCSpeedModifier(edge, travelMode) {
-    let modifier = 1.0
-    
-    // Street type modifiers
-    if (edge.streetName === 'Esplanade') {
-      modifier *= 1.15 // Esplanade is BRC's primary boundary - fastest for cross-sector routes
-    } else if (edge.streetType === 'radial' && edge.width >= 40) {
-      modifier *= 1.1  // Major radials are faster
-    } else if (edge.streetType === 'arc' && ['Kilgore', 'Jemison'].includes(edge.streetName)) {
-      modifier *= 1.05 // Major arc streets are slightly faster
-    }
-    
-    // Distance from center affects speed (closer = more crowded)
-    const avgCoords = [
-      (edge.coordinates[0][0] + edge.coordinates[edge.coordinates.length - 1][0]) / 2,
-      (edge.coordinates[0][1] + edge.coordinates[edge.coordinates.length - 1][1]) / 2
-    ]
-    const centerDistance = distanceFromCenter(avgCoords)
-    
-    if (centerDistance < 500) {
-      modifier *= 0.8  // Very close to center = very crowded
-    } else if (centerDistance < 1000) {
-      modifier *= 0.9  // Close to center = crowded
-    } else if (centerDistance > 2000) {
-      modifier *= 1.1  // Outer areas = less crowded
-    }
-    
-    // Biking-specific modifiers
-    if (travelMode === 'biking') {
-      if (edge.streetType === 'radial') {
-        modifier *= 1.1 // Radials better for biking (less cross-traffic)
-      }
-    }
-    
-    return modifier
+    // REMOVED ALL BUSINESS LOGIC per user requirement:
+    // "The only criteria of route selection is distance: there should be no other route criteria. 
+    // Nothing to do with 'business' or 'crowds'. The shortest mathematical distance."
+    return 1.0  // No speed modifiers - pure distance-based routing
   }
 
   /**

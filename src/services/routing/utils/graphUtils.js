@@ -190,19 +190,10 @@ export class NetworkEdge {
   }
 
   _getSpeedMultiplier() {
-    // Speed multipliers based on street characteristics
-    if (this.streetType === 'radial') {
-      // Radial streets are generally faster (fewer cross-traffic)
-      if (this.width >= 40) return 1.1 // Major radials
-      return 1.0
-    } else if (this.streetType === 'arc') {
-      // Arc streets may have more cross-traffic and camps
-      if (this.streetName === 'Esplanade') return 1.1 // Primary urban boundary - fastest for playa access
-      if (this.width >= 50) return 1.0 // Major arc streets
-      return 0.95 // Minor arc streets
-    }
-    
-    return 1.0 // Default
+    // DISTANCE-ONLY routing: No speed modifiers based on street characteristics
+    // ARCHITECTURAL PRINCIPLE: Route selection based ONLY on shortest distance
+    // REMOVED ALL business logic about "faster streets", "cross-traffic", etc.
+    return 1.0 // Pure distance-based routing - no speed advantages
   }
 
   getOtherNodeId(nodeId) {
@@ -306,6 +297,114 @@ export class BRCStreetNetwork {
     return nearestNode
   }
 
+  /**
+   * Find nearest node with preference for a specific avenue (for mid-block destinations)
+   * @param {[number, number]} coordinates Target coordinates
+   * @param {number} maxDistance Maximum search distance in meters
+   * @param {string} preferredAvenue Preferred avenue name (e.g., 'E', 'Esplanade')
+   * @returns {Object|null} Nearest node, preferring ones on the specified avenue
+   */
+  findNearestNodeOnAvenue(coordinates, maxDistance = 200, preferredAvenue = null) {
+    if (!preferredAvenue) {
+      return this.findNearestNode(coordinates, maxDistance)
+    }
+
+    console.log(`🎯 Avenue-aware search: Looking for nodes on ${preferredAvenue} avenue`)
+    
+    // First pass: Look for nodes on the preferred avenue
+    let avenueNode = null
+    let avenueMinDistance = maxDistance * 2 // Allow larger search for avenue nodes
+    
+    // Second pass: Normal search as fallback  
+    let anyNode = null
+    let anyMinDistance = maxDistance
+
+    // Use spatial index for efficiency
+    const spatialKeys = this._getNearbySpacialKeys(coordinates, 3) // Larger radius for avenue search
+    
+    for (const key of spatialKeys) {
+      const nodeIds = this.spatialIndex.get(key) || new Set()
+      
+      for (const nodeId of nodeIds) {
+        const node = this.nodes.get(nodeId)
+        if (node) {
+          const distance = haversineDistance(coordinates, node.coordinates)
+          
+          // Check if this node is on the preferred avenue
+          const isOnPreferredAvenue = this._isNodeOnAvenue(node, preferredAvenue)
+          
+          // Update avenue candidate
+          if (isOnPreferredAvenue && distance < avenueMinDistance) {
+            avenueMinDistance = distance
+            avenueNode = node
+            console.log(`   Found avenue candidate: ${node.id} (${distance.toFixed(0)}m)`)
+          }
+          
+          // Update any candidate (fallback)
+          if (distance < anyMinDistance) {
+            anyMinDistance = distance
+            anyNode = node
+          }
+        }
+      }
+    }
+
+    // Prefer avenue node if found, otherwise use any node
+    if (avenueNode) {
+      console.log(`✅ Selected avenue node: ${avenueNode.id} on ${preferredAvenue} (${avenueMinDistance.toFixed(0)}m)`)
+      return avenueNode
+    } else if (anyNode) {
+      console.log(`🔄 No ${preferredAvenue} nodes found, using nearest: ${anyNode.id} (${anyMinDistance.toFixed(0)}m)`)
+      return anyNode
+    }
+
+    return null
+  }
+
+  /**
+   * Check if a node is on a specific avenue
+   * @param {Object} node Network node
+   * @param {string} avenue Avenue name (e.g., 'E', 'Esplanade')
+   * @returns {boolean} True if node is on the specified avenue
+   */
+  _isNodeOnAvenue(node, avenue) {
+    if (!node.id) return false
+    
+    // Node ID format is typically "7:30&E" or "3:00&Esplanade"
+    const nodeId = node.id.toLowerCase()
+    const targetAvenue = avenue.toLowerCase()
+    
+    // Check for exact avenue match
+    if (nodeId.includes(`&${targetAvenue}`)) {
+      return true
+    }
+    
+    // Check for theme name matches (Esplanade, Atwood, etc.)
+    if (targetAvenue === 'esplanade' && nodeId.includes('&esplanade')) {
+      return true
+    }
+    
+    // Handle single letter avenues (A, B, C, etc.)
+    if (targetAvenue.length === 1) {
+      return nodeId.includes(`&${targetAvenue}`)
+    }
+    
+    return false
+  }
+
+  /**
+   * Determine which avenue coordinates belong to (for detecting mid-block locations)
+   * Simple approach: only detect avenue if coordinates are clearly on one avenue
+   * @param {[number, number]} coordinates Target coordinates
+   * @returns {string|null} Avenue name if clearly detected, null otherwise
+   */
+  detectAvenueFromCoordinates(coordinates) {
+    // DISABLED: Complex avenue detection causes more problems than it solves
+    // For mid-block destinations, let the pathfinder use normal nearest-node search
+    console.log(`📍 Avenue detection disabled - using standard pathfinding`)
+    return null
+  }
+
   findEdgesBetweenNodes(nodeId1, nodeId2) {
     const node1 = this.nodes.get(nodeId1)
     if (!node1) return []
@@ -323,10 +422,11 @@ export class BRCStreetNetwork {
 
   _getSpatialKey(coordinates, precision = 0.001) {
     // Create spatial grid key for efficient spatial indexing
-    const [lon, lat] = coordinates
-    const lonKey = Math.floor(lon / precision)
+    // CRITICAL FIX: App internal standard is [lat, lng] format (Leaflet standard)
+    const [lat, lng] = coordinates  // CORRECTED: Use [lat, lng] format consistently
+    const lngKey = Math.floor(lng / precision)
     const latKey = Math.floor(lat / precision)
-    return `${lonKey},${latKey}`
+    return `${lngKey},${latKey}`  // Keep same format for grid keys
   }
 
   _getNearbySpacialKeys(coordinates, radius = 2) {

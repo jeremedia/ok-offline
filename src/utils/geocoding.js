@@ -8,6 +8,7 @@ import { getStreetLines, getGISYear } from '../services/gisData'
 import { getAvenueNameFromLetter, getAvenueLetterFromName, getAvenueDistance } from './avenueMapping'
 import { resolveBRCAddress } from './brcAddressResolver'
 import { parseBRCAddress, calculateDistance } from './brcAddressUtils'
+import { lookupIntersection } from './brcIntersectionLookup'
 
 /**
  * Conditional console logging - only logs in development or when debug is enabled
@@ -110,6 +111,35 @@ function isAvenueLetter(str) {
   return /^[A-L]$/.test(str.toUpperCase())
 }
 
+/**
+ * Check if two street names are clock time variants (e.g., "3:30" vs "03:30")
+ * @param {string} gisName - Name from GIS data
+ * @param {string} searchName - Name we're searching for
+ * @returns {boolean} True if they represent the same clock time
+ */
+function isClockTimeVariant(gisName, searchName) {
+  // Only apply to clock time strings
+  if (!/^\d{1,2}:\d{2}/.test(gisName) || !/^\d{1,2}:\d{2}/.test(searchName)) {
+    return false
+  }
+  
+  // Extract hours and minutes from both
+  const gisMatch = gisName.match(/^(\d{1,2}):(\d{2})/)
+  const searchMatch = searchName.match(/^(\d{1,2}):(\d{2})/)
+  
+  if (!gisMatch || !searchMatch) {
+    return false
+  }
+  
+  // Compare numerical values (handles "3:30" vs "03:30")
+  const gisHour = parseInt(gisMatch[1])
+  const gisMinute = parseInt(gisMatch[2])
+  const searchHour = parseInt(searchMatch[1])
+  const searchMinute = parseInt(searchMatch[2])
+  
+  return gisHour === searchHour && gisMinute === searchMinute
+}
+
 // parseBRCAddress now imported from brcAddressUtils
 
 /**
@@ -124,6 +154,19 @@ function findStreetIntersectionFromGIS(street1, street2, debug = false) {
     console.log('🔍 ===== GIS INTERSECTION LOOKUP DEBUG =====')
     console.log('🔍 Looking for GIS intersection:', street1, '&', street2)
   }
+  
+  // Try fast lookup table first (O(1) operation)
+  const lookupResult = lookupIntersection(street1, street2)
+  if (lookupResult) {
+    if (debug) {
+      console.log('🔍 ✅ FAST LOOKUP SUCCESS:', lookupResult)
+      console.log('🔍 ===== END GIS INTERSECTION DEBUG =====')
+    }
+    return lookupResult
+  }
+  
+  if (debug) console.log('🔍 ⚡ Fast lookup failed, falling back to geometric calculation...')
+  
   const year = getGISYear()
   if (debug) console.log('🔍 Using GIS year:', year)
   
@@ -197,12 +240,18 @@ function findStreetIntersectionFromGIS(street1, street2, debug = false) {
     const normalizedStreet1 = street1Name.toUpperCase()
     const normalizedStreet2 = street2Name.toUpperCase()
     
-    if (normalizedName === normalizedStreet1) {
+    // Enhanced matching: exact match OR flexible clock time matching
+    const matchesStreet1 = normalizedName === normalizedStreet1 || 
+                          (isClockTimeVariant(normalizedName, normalizedStreet1))
+    const matchesStreet2 = normalizedName === normalizedStreet2 || 
+                          (isClockTimeVariant(normalizedName, normalizedStreet2))
+    
+    if (matchesStreet1) {
       features1.push(feature)
-      if (debug) console.log('🔍 ✅ Found exact match for street1:', name)
-    } else if (normalizedName === normalizedStreet2) {
-      features2.push(feature)
-      if (debug) console.log('🔍 ✅ Found exact match for street2:', name)
+      if (debug) console.log('🔍 ✅ Found match for street1:', name, normalizedName === normalizedStreet1 ? '(exact)' : '(variant)')
+    } else if (matchesStreet2) {
+      features2.push(feature)  
+      if (debug) console.log('🔍 ✅ Found match for street2:', name, normalizedName === normalizedStreet2 ? '(exact)' : '(variant)')
     }
   })
   
@@ -401,11 +450,6 @@ function brcAddressToLatLonLegacy(address) {
   }
   const { clock, avenue } = parsed
   
-  // TEMPORARY FIX: Known correct coordinates for testing hybrid routing
-  // TODO: Remove this once smart resolver is working
-  if (clock === '7:30' && avenue === 'E') {
-    return [40.779123, -119.199234] // Known working coordinates
-  }
   
   // First try to find intersection using GIS data
   const gisIntersection = findStreetIntersectionFromGIS(clock, avenue)

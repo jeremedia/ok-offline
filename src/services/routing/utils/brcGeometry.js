@@ -34,17 +34,26 @@ export const BRC_GEOMETRY = {
 
 /**
  * Convert geographic coordinates to BRC clock system
- * @param {[number, number]} coords [longitude, latitude]
+ * @param {[number, number]} coords [latitude, longitude] 
  * @returns {Object} BRC clock representation
  */
 export function coordsToClockSystem(coords) {
-  const [lon, lat] = coords
+  const [lat, lng] = coords  // FIXED: Use [lat, lng] format consistently with rest of codebase
+  
+  // 🚨 DEBUG COORDINATE FORMAT IN REAL SYSTEM
+  console.log(`🚨 coordsToClockSystem DEBUG:`)
+  console.log(`  Input coords: [${coords[0]}, ${coords[1]}]`)
+  console.log(`  Destructured as: lat=${lat}, lng=${lng}`)
+  console.log(`  BRC_CENTER: [${BRC_CENTER[0]}, ${BRC_CENTER[1]}]`)
   
   // CRITICAL FIX: Apply same 45° BRC city orientation offset as main zone classifier
   // BRC is oriented with 12:00 pointing 45° northeast, not true north
   const rawBearing = calculateBearing(BRC_CENTER, coords)
+  console.log(`  Raw bearing: ${rawBearing.toFixed(2)}°`)
+  
   const cityBearingOffset = 45 // BRC is oriented 45° from true north
   const bearing = (rawBearing - cityBearingOffset + 360) % 360
+  console.log(`  Adjusted bearing: ${bearing.toFixed(2)}°`)
   
   const distance = haversineDistance(BRC_CENTER, coords)
   
@@ -143,27 +152,58 @@ function getStreetIntersectionsForSector(sector) {
     sectorClocks.push('1:00')
   }
   
-  // Add quarter-hour streets for this sector
+  // Add half-hour streets for this sector (run from Esplanade outward)
   if (sector <= 10) {
-    sectorClocks.push(`${sector}:15`)
     sectorClocks.push(`${sector}:30`)
-    sectorClocks.push(`${sector}:45`)
   } else if (sector === 11) {
-    sectorClocks.push('11:15')
     sectorClocks.push('11:30')
-    sectorClocks.push('11:45')
   } else if (sector === 12) {
-    sectorClocks.push('12:15')
     sectorClocks.push('12:30')
-    sectorClocks.push('12:45')
   }
   
-  // Define avenues from inner to outer (Esplanade is the primary urban boundary exit)
-  const avenues = ['Esplanade', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L']
+  // Add quarter-hour streets for this sector (run from F outward only - do not intersect Esplanade)
+  const quarterHourClocks = []
+  if (sector <= 10) {
+    quarterHourClocks.push(`${sector}:15`)
+    quarterHourClocks.push(`${sector}:45`)
+  } else if (sector === 11) {
+    quarterHourClocks.push('11:15')
+    quarterHourClocks.push('11:45')
+  } else if (sector === 12) {
+    quarterHourClocks.push('12:15')
+    quarterHourClocks.push('12:45')
+  }
   
-  // Generate intersections for each clock position and avenue
+  // Define avenues from inner to outer
+  const allAvenues = ['Esplanade', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L']
+  const outerAvenues = ['F', 'G', 'H', 'I', 'J', 'K', 'L'] // Quarter-hour streets only reach these
+  
+  // Generate intersections for hour and half-hour streets (all avenues)
   for (const clock of sectorClocks) {
-    for (const avenue of avenues) {
+    for (const avenue of allAvenues) {
+      try {
+        const address = `${clock} & ${avenue}`
+        const coordinates = brcAddressToLatLon(address)
+        
+        if (coordinates && coordinates.length === 2) {
+          intersections.push({
+            id: `${clock}&${avenue}`,
+            coordinates: coordinates,
+            clock: clock,
+            avenue: avenue,
+            address: address
+          })
+        }
+      } catch (error) {
+        // Skip invalid addresses silently
+        console.debug(`Could not resolve intersection: ${clock} & ${avenue}`)
+      }
+    }
+  }
+  
+  // Generate intersections for quarter-hour streets (outer avenues only - F through L)
+  for (const clock of quarterHourClocks) {
+    for (const avenue of outerAvenues) {
       try {
         const address = `${clock} & ${avenue}`
         const coordinates = brcAddressToLatLon(address)
@@ -198,6 +238,12 @@ export function findOptimalExitPoints(startCoords, endCoords, targetSector) {
   const startClock = coordsToClockSystem(startCoords)
   const startSector = startClock.sector
   const boundary = calculateUrbanBoundary(startSector)
+  
+  // 🚨 DEBUG LOGGING for 3:30 & A → 9:00 & C route
+  console.log(`🚪 REAL findOptimalExitPoints DEBUG:`)
+  console.log(`  startCoords: [${startCoords[0]}, ${startCoords[1]}]`)
+  console.log(`  startSector calculated: ${startSector}`)
+  console.log(`  startClock data:`, startClock)
   
   // 🎯 REVOLUTIONARY FIX: Use actual street intersections as exit points
   const candidates = []
@@ -253,7 +299,7 @@ export function findOptimalExitPoints(startCoords, endCoords, targetSector) {
   
   // Score each intersection as an exit point
   for (const intersection of exitIntersections) {
-    const score = calculateExitPointScore(startCoords, intersection.coordinates, targetSector)
+    const score = calculateExitPointScore(startCoords, intersection.coordinates, targetSector, intersection)
     const bearing = calculateBearing(BRC_CENTER, intersection.coordinates)
     
     candidates.push({
@@ -266,8 +312,15 @@ export function findOptimalExitPoints(startCoords, endCoords, targetSector) {
     })
   }
   
-  // Sort by score (higher is better)
-  return candidates.sort((a, b) => b.score - a.score)
+  // Sort by score (higher is better) and log results
+  const sortedCandidates = candidates.sort((a, b) => b.score - a.score)
+  
+  console.log(`🏆 REAL EXIT CANDIDATES (top 3):`)
+  sortedCandidates.slice(0, 3).forEach((candidate, index) => {
+    console.log(`  ${index + 1}. ${candidate.intersection} (score: ${candidate.score.toFixed(4)})`)
+  })
+  
+  return sortedCandidates
 }
 
 /**
@@ -275,23 +328,22 @@ export function findOptimalExitPoints(startCoords, endCoords, targetSector) {
  * @param {[number, number]} startCoords Starting coordinates
  * @param {[number, number]} exitCoords Exit point coordinates  
  * @param {number} targetSector Target sector number
+ * @param {Object} intersection Intersection data with address information
  * @returns {number} Efficiency score (0-1, higher is better)
  */
-function calculateExitPointScore(startCoords, exitCoords, targetSector) {
+function calculateExitPointScore(startCoords, exitCoords, targetSector, intersection) {
   // 🎯 FIXED SCORING: Properly prioritize Esplanade exits for minimal street navigation
   
   // Distance from start to exit (lower is better) - this is the PRIMARY factor
   const exitDistance = haversineDistance(startCoords, exitCoords)
   
-  // 🚪 ESPLANADE BONUS: Heavily favor Esplanade exits as they're the proper urban boundary
-  const isEsplanadeExit = calculateBearing(BRC_CENTER, exitCoords) // Check if this is roughly at Esplanade distance
-  const distanceFromCenter = haversineDistance(BRC_CENTER, exitCoords)
-  const isAtEsplanade = Math.abs(distanceFromCenter - BRC_GEOMETRY.ESPLANADE_RADIUS) < 100 // Within 100m of Esplanade
+  // 🚪 ESPLANADE BONUS: Use intersection address to properly detect Esplanade exits
+  const isAtEsplanade = intersection && intersection.avenue === 'Esplanade'
   
   let bonusMultiplier = 1.0
   if (isAtEsplanade) {
     bonusMultiplier = 3.0 // 3x bonus for Esplanade exits (proper urban boundary)
-    console.log(`🎯 Esplanade exit bonus applied: ${exitCoords} (distance from center: ${distanceFromCenter.toFixed(0)}m vs Esplanade: ${BRC_GEOMETRY.ESPLANADE_RADIUS}m)`)
+    console.log(`🎯 Esplanade exit bonus applied: ${intersection.address} (direct address check)`)
   }
   
   // Simple scoring: minimize street navigation distance with Esplanade bonus
@@ -314,11 +366,18 @@ export function calculateSectorDifference(sector1, sector2) {
 
 /**
  * Check if coordinates are within BRC city boundaries
- * @param {[number, number]} coords [longitude, latitude]
+ * @param {[number, number]} coords [latitude, longitude]
  * @returns {Object} Boundary analysis
  */
 export function analyzeBoundaryLocation(coords) {
+  // 🚨 DEBUG THE BOUNDARY ANALYSIS SECTOR BUG
+  console.log(`🚨 analyzeBoundaryLocation DEBUG:`)
+  console.log(`  Input coords: [${coords[0]}, ${coords[1]}]`)
+  
   const clockData = coordsToClockSystem(coords)
+  console.log(`  clockData result:`, clockData)
+  console.log(`  clockData.sector: ${clockData.sector}`)
+  
   const distance = clockData.distanceFromCenter * 0.3048 // Convert feet to meters
   
   let zone = 'unknown'

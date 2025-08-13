@@ -2,9 +2,9 @@
  * Geographic utility functions for BRC routing system
  */
 
-// BRC-specific constants
-export const BRC_CENTER = [40.7864, -119.2065] // Approximate center of Black Rock City [lat, lng]
-export const BRC_TEMPLE = [40.7964, -119.2065] // Approximate temple location (north of center) [lat, lng]
+// BRC-specific constants - using precise Golden Spike coordinates 
+export const BRC_CENTER = [40.786958, -119.202994] // Golden Spike (precise center of Black Rock City) [lat, lng]
+export const BRC_TEMPLE = [40.791815152314989, -119.19662192527863] // Temple location from 2025 GIS data [lat, lng]
 export const DEGREES_TO_RADIANS = Math.PI / 180
 export const EARTH_RADIUS_METERS = 6371000
 export const FEET_TO_METERS = 0.3048

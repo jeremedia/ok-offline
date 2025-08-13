@@ -59,6 +59,12 @@ export class BRCHybridRouter {
     const startAnalysis = analyzeBoundaryLocation(startCoords)
     const endAnalysis = analyzeBoundaryLocation(endCoords)
     
+    // 🚨 DEBUG SECTOR CALCULATION BUG
+    console.log(`🚨 SECTOR CALCULATION DEBUG:`)
+    console.log(`  startCoords: [${startCoords[0]}, ${startCoords[1]}] → sector ${startAnalysis.sector}`)
+    console.log(`  endCoords: [${endCoords[0]}, ${endCoords[1]}] → sector ${endAnalysis.sector}`)
+    console.log(`  Expected: 3:30&A should be sector 3, 8:30&K should be sector 8`)
+    
     // 🎯 SMART HYBRID DETECTION: Check if hybrid routing is beneficial
     const startAvenue = this._extractAvenueFromCoords(startCoords)
     const endAvenue = this._extractAvenueFromCoords(endCoords)
@@ -215,8 +221,9 @@ export class BRCHybridRouter {
   _getStreetIntersectionsForSector(sector) {
     const intersections = []
     
-    // Define the clock positions for this sector (hour and quarter-hour streets)
-    const sectorClocks = []
+    // Define the clock positions for this sector - SEPARATE hour/half-hour from quarter-hour
+    const sectorClocks = [] // Hour and half-hour streets
+    const quarterHourClocks = [] // Quarter-hour streets
     
     // Add hour streets for this sector
     if (sector <= 10) {
@@ -230,27 +237,34 @@ export class BRCHybridRouter {
       sectorClocks.push('1:00')
     }
     
-    // Add quarter-hour streets for this sector
+    // Add half-hour streets for this sector (run from Esplanade outward)
     if (sector <= 10) {
-      sectorClocks.push(`${sector}:15`)
       sectorClocks.push(`${sector}:30`)
-      sectorClocks.push(`${sector}:45`)
     } else if (sector === 11) {
-      sectorClocks.push('11:15')
       sectorClocks.push('11:30')
-      sectorClocks.push('11:45')
     } else if (sector === 12) {
-      sectorClocks.push('12:15')
       sectorClocks.push('12:30')
-      sectorClocks.push('12:45')
     }
     
-    // Define avenues from inner to outer (good exit points are on outer avenues)
-    const avenues = ['C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L']
+    // Add quarter-hour streets for this sector (run from F outward only - do not intersect Esplanade)
+    if (sector <= 10) {
+      quarterHourClocks.push(`${sector}:15`)
+      quarterHourClocks.push(`${sector}:45`)
+    } else if (sector === 11) {
+      quarterHourClocks.push('11:15')
+      quarterHourClocks.push('11:45')
+    } else if (sector === 12) {
+      quarterHourClocks.push('12:15')
+      quarterHourClocks.push('12:45')
+    }
     
-    // Generate intersections for each clock position and avenue
+    // Define avenues from inner to outer
+    const allAvenues = ['Esplanade', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L']
+    const outerAvenues = ['F', 'G', 'H', 'I', 'J', 'K', 'L'] // Quarter-hour streets only reach these
+    
+    // Generate intersections for hour and half-hour streets (all avenues including Esplanade)
     for (const clock of sectorClocks) {
-      for (const avenue of avenues) {
+      for (const avenue of allAvenues) {
         try {
           const address = `${clock} & ${avenue}`
           const coordinates = brcAddressToLatLon(address)
@@ -259,6 +273,29 @@ export class BRCHybridRouter {
             intersections.push({
               id: `${clock}&${avenue}`,
               coordinates: coordinates, // This is [lat, lng] format
+              clock: clock,
+              avenue: avenue,
+              address: address
+            })
+          }
+        } catch (error) {
+          // Skip invalid addresses silently
+          console.debug(`Could not resolve intersection: ${clock} & ${avenue}`)
+        }
+      }
+    }
+    
+    // Generate intersections for quarter-hour streets (outer avenues only - F through L)
+    for (const clock of quarterHourClocks) {
+      for (const avenue of outerAvenues) {
+        try {
+          const address = `${clock} & ${avenue}`
+          const coordinates = brcAddressToLatLon(address)
+          
+          if (coordinates && coordinates.length === 2) {
+            intersections.push({
+              id: `${clock}&${avenue}`,
+              coordinates: coordinates,
               clock: clock,
               avenue: avenue,
               address: address
@@ -300,6 +337,13 @@ export class BRCHybridRouter {
   _generateEntryCandidates(endCoords, endAnalysis, sourceSector) {
     const endSector = endAnalysis.sector
     const candidates = []
+    
+    // 🚨 DEBUG COORDINATE-TO-SECTOR CALCULATION
+    console.log(`🚨 ENTRY CANDIDATE DEBUG:`)
+    console.log(`  endCoords: [${endCoords[0]}, ${endCoords[1]}]`)
+    console.log(`  endAnalysis:`, endAnalysis)
+    console.log(`  endSector calculated: ${endSector}`)
+    console.log(`  Expected sector for 8:30&D: 8`)
     
     // 🎯 REVOLUTIONARY FIX: Use actual street intersections as entry points
     const availableIntersections = this._getStreetIntersectionsForSector(endSector)
@@ -510,6 +554,16 @@ export class BRCHybridRouter {
     // Efficiency score - how much time we save
     const timeSavings = directStreetTime - totalHybridTime
     const efficiencyScore = timeSavings / directStreetTime
+    
+    // 🚨 DEBUG SCORING CALCULATION
+    if (Math.random() < 0.1) { // Only log 10% of calculations to avoid spam
+      console.log(`🔬 WAYPOINT PAIR SCORING DEBUG:`)
+      console.log(`  Hybrid: ${Math.round(streetDistance1)}ft + ${Math.round(playaDistance)}ft + ${Math.round(streetDistance2)}ft = ${Math.round(streetDistance1 + playaDistance + streetDistance2)}ft`)
+      console.log(`  Direct: ${Math.round(directDistance)}ft`)
+      console.log(`  Hybrid time: ${totalHybridTime.toFixed(1)}min, Direct time: ${directStreetTime.toFixed(1)}min`)
+      console.log(`  Time savings: ${timeSavings.toFixed(1)}min, Efficiency: ${(efficiencyScore * 100).toFixed(1)}%`)
+      console.log(`  Final score: ${Math.max(0, efficiencyScore).toFixed(4)}`)
+    }
     
     return Math.max(0, efficiencyScore) // Return 0 if hybrid is slower
   }

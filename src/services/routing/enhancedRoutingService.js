@@ -270,7 +270,7 @@ export class EnhancedRoutingService {
       type: 'street_following',
       coordinates: route.coordinates, // Already normalized to [lat, lng] in pathfinder
       distance: route.distance, // Already in feet
-      duration: Math.round(route.duration / 60), // Convert to minutes
+      duration: route.duration, // Already in minutes from pathfinder
       mode: mode,
       
       // Street routing specific data
@@ -288,12 +288,12 @@ export class EnhancedRoutingService {
       // Legacy compatibility
       travelTimes: {
         walking: {
-          minutes: mode === 'walking' ? Math.round(route.duration / 60) : Math.round(route.duration / 60 * 1.3),
-          formatted: this._formatDuration(mode === 'walking' ? route.duration : route.duration * 1.3)
+          minutes: mode === 'walking' ? route.duration : Math.round(route.duration * 1.3),
+          formatted: this._formatDuration(mode === 'walking' ? route.duration * 60 : route.duration * 60 * 1.3)
         },
         biking: {
-          minutes: mode === 'biking' ? Math.round(route.duration / 60) : Math.round(route.duration / 60 * 0.7),
-          formatted: this._formatDuration(mode === 'biking' ? route.duration : route.duration * 0.7)
+          minutes: mode === 'biking' ? route.duration : Math.round(route.duration * 0.7),
+          formatted: this._formatDuration(mode === 'biking' ? route.duration * 60 : route.duration * 60 * 0.7)
         }
       },
       
@@ -304,7 +304,7 @@ export class EnhancedRoutingService {
       // Summary for display
       summary: {
         totalDistance: route.distance,
-        totalDuration: Math.round(route.duration / 60),
+        totalDuration: route.duration,
         routeType: 'Street-following navigation',
         streetsUsed: route.summary?.streets || [],
         intersections: route.summary?.intersections || 0,
