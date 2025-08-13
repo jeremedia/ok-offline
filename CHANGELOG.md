@@ -7,6 +7,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.29.0] - 2025-08-13
+
+### Added
+- **🧭 Revolutionary BRC Routing System** - Complete intelligent navigation for Black Rock City
+  - Advanced A* pathfinding with BRC-aware heuristics for optimal street navigation
+  - Three-segment hybrid routing (Urban→Playa→Urban) with mathematical optimization
+  - Proper BRC boundary exit system using Esplanade, 2:00, and 10:00 boundaries
+  - Smart address resolution distinguishing physical intersections from addressing conventions
+  - Interactive route visualization with segment-specific styling and turn-by-turn directions
+  - Zone classification system for intelligent route type selection
+- **📍 Enhanced Route Information Panel** - Comprehensive navigation details
+  - Destination address display with BRC-specific context
+  - Multi-segment route breakdown with cultural landmarks
+  - Travel mode switching with real-time time calculations
+  - Route efficiency indicators and optimization metrics
+- **🗺️ Advanced Coordinate System** - Perfect BRC address handling
+  - Smart interpolation for quarter-hour addresses on inner avenues (e.g., "7:15 & E")
+  - Physical intersection detection vs addressing convention logic
+  - Complete radial street extension mapping for accurate geocoding
+  - Geometric midpoint calculation for convention addresses
+
+### Fixed
+- **⏱️ Route Duration Calculations** - Accurate travel time estimates
+  - Fixed double-conversion bug causing incorrect "1 minute" route times
+  - Proper speed constants for BRC conditions (walking: 4 ft/sec, biking: 10 ft/sec)
+  - Realistic 15-20 minute estimates for typical cross-sector routes
+- **🚪 BRC Exit Point Selection** - Proper boundary routing
+  - Fixed hybrid routing to use correct boundary exits instead of internal intersections
+  - Esplanade-first logic for entry candidate generation
+  - Proper waypoint caching with boundary-aware recalculation
+- **🎯 Route Visualization** - Clear map display
+  - Fixed coordinate conversion pipeline ([lat,lng] format throughout)
+  - Urban segments now display as thick green lines for clarity
+  - Eliminated "NOT FOUND" pathfinder errors with proper network alignment
+
+### Technical
+- **🏗️ Complete Routing Architecture** - 305 intersections, 599 edges
+  - Address-based network generation using BRC geocoding system
+  - NetworkNode/NetworkEdge coordinate format standardization
+  - Comprehensive street network caching with 31ms build times
+  - BRC geometry utilities with polar coordinate optimization
+
 ## [3.28.0] - 2025-08-11
 
 ### Added

@@ -1,10 +1,10 @@
 {
   "marquee": {
-    "title": "Camp Schedule Management",
-    "icon": "🏕️",
-    "description": "Professional event coordination system with team assignments, precise timing, and category organization for comprehensive camp management",
-    "version": "3.28.0",
-    "category": "planning"
+    "title": "Revolutionary BRC Routing System",
+    "icon": "🧭",
+    "description": "Complete intelligent navigation for Black Rock City with A* pathfinding, hybrid routing, and smart address resolution",
+    "version": "3.29.0",
+    "category": "navigation"
   },
   "features": [
     {
@@ -113,6 +113,21 @@
       "category": "navigation"
     },
     {
+      "title": "BRC Intelligent Routing",
+      "icon": "🧭",
+      "description": "Advanced pathfinding system optimized for Black Rock City's unique layout",
+      "details": [
+        "A* pathfinding with BRC-aware heuristics for optimal street navigation",
+        "Three-segment hybrid routing (Urban→Playa→Urban) with mathematical optimization",
+        "Smart address resolution for physical intersections vs addressing conventions",
+        "Interactive route visualization with turn-by-turn directions",
+        "Zone classification system for intelligent route type selection",
+        "Proper boundary exit routing using Esplanade and city perimeter"
+      ],
+      "version": "3.29.0",
+      "category": "navigation"
+    },
+    {
       "title": "Weather & Dust Forecast",
       "icon": "🌪️",
       "description": "Real-time weather with intelligent dust predictions and protection recommendations",
@@ -156,6 +171,20 @@
         "Persistent across sessions"
       ],
       "version": "1.0.0",
+      "category": "planning"
+    },
+    {
+      "title": "Camp Schedule Management",
+      "icon": "🏕️",
+      "description": "Professional event coordination system for comprehensive camp management",
+      "details": [
+        "Six event categories: Public Events, Meals, Arrivals, Departures, Services, Meetings",
+        "Team member assignment with role-specific notes and responsible person designation",
+        "PST timezone handling with precise start/end times and duration calculation",
+        "Category filtering and two-column layout for efficient management",
+        "Enhanced camp editor interface with collapsible sections"
+      ],
+      "version": "3.28.0",
       "category": "planning"
     },
     {

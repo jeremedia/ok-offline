@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ok-offline-v39'; // Safari Service Worker context closure fixes
+const CACHE_NAME = 'ok-offline-v40'; // Revolutionary BRC routing system overhaul
 const urlsToCache = [
   // Core app files
   '/',
