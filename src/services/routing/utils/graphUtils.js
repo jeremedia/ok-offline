@@ -197,7 +197,7 @@ export class NetworkEdge {
       return 1.0
     } else if (this.streetType === 'arc') {
       // Arc streets may have more cross-traffic and camps
-      if (this.streetName === 'Esplanade') return 0.9 // Busy perimeter
+      if (this.streetName === 'Esplanade') return 1.1 // Primary urban boundary - fastest for playa access
       if (this.width >= 50) return 1.0 // Major arc streets
       return 0.95 // Minor arc streets
     }

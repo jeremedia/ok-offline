@@ -218,7 +218,7 @@ export class BRCPathfinder {
     
     // Street type modifiers
     if (edge.streetName === 'Esplanade') {
-      modifier *= 0.85 // Esplanade is busy and crowded
+      modifier *= 1.15 // Esplanade is BRC's primary boundary - fastest for cross-sector routes
     } else if (edge.streetType === 'radial' && edge.width >= 40) {
       modifier *= 1.1  // Major radials are faster
     } else if (edge.streetType === 'arc' && ['Kilgore', 'Jemison'].includes(edge.streetName)) {
@@ -297,12 +297,21 @@ export class BRCPathfinder {
     const destAvenueCircumference = 2 * Math.PI * destAvenueRadius
     const avenueArcDistance = (shortestArc / 12) * destAvenueCircumference
     
-    // CRITICAL: Heavily penalize non-optimal avenue movement
-    // If we're not on the destination avenue, avenue movement should be minimal
+    // ENHANCED: Smart avenue movement strategy for BRC geometry
     let adjustedAvenueDistance = avenueArcDistance
+    
+    // For cross-sector routes (large clock differences), prefer Esplanade routing
+    const isCrossSector = shortestArc >= 2.0 // 2+ hours difference
+    const isEsplanadeRoute = (fromAddress.avenue === 'Esplanade' || toAddress.avenue === 'Esplanade')
+    
     if (fromAvenueNum !== toAvenueNum) {
-      // Cross-avenue routing: heavily penalize avenue movement (favor radial-first)
-      adjustedAvenueDistance *= 0.1 // 90% penalty for cross-avenue movement
+      if (isCrossSector && isEsplanadeRoute) {
+        // Cross-sector + Esplanade: minimal penalty (Esplanade is fastest for cross-sector)
+        adjustedAvenueDistance *= 0.7 // 30% penalty (much better than 90%)
+      } else {
+        // Regular cross-avenue routing: heavily penalize avenue movement (favor radial-first)
+        adjustedAvenueDistance *= 0.1 // 90% penalty for non-Esplanade cross-avenue movement
+      }
     }
     
     return radialDistance + adjustedAvenueDistance // Total distance in meters
@@ -405,12 +414,18 @@ export class BRCPathfinder {
       totalDuration += walkingSegment.duration
     }
     
+    // Debug logging for total route duration
+    const durationMinutes = Math.round((totalDuration || 0) / 60)
+    const distanceFeet = Math.round(totalDistance * 3.28084)
+    
+    console.log(`🔍 Route duration debug: ${segments.length} segments, ${totalDuration.toFixed(1)}sec → ${durationMinutes}min (${distanceFeet}ft)`)
+    
     // Build complete route
     return {
       type: 'street_following',
       coordinates: this._extractRouteCoordinates(segments),
-      distance: Math.round(totalDistance * 3.28084), // Convert to feet
-      duration: Math.round((totalDuration || 0) / 60), // Convert to minutes, handle NaN
+      distance: distanceFeet, // feet
+      duration: durationMinutes, // minutes
       segments,
       nodePath: nodePath.map(node => ({
         id: node.id,
@@ -451,13 +466,20 @@ export class BRCPathfinder {
    * Create street segment between two connected nodes
    */
   _createStreetSegment(fromNode, toNode, edge, travelMode) {
-    const duration = travelMode === 'biking' ? edge.bikeTime : edge.walkTime
+    const baseTime = travelMode === 'biking' ? edge.bikeTime : edge.walkTime
+    const totalDuration = baseTime + this.intersectionDelay
+    
+    // Debug logging for duration calculation issues
+    if (edge.distance > 100 && totalDuration < 10) { // Long edge with short time - suspicious
+      console.warn(`⚠️  Duration calculation issue: ${edge.streetName || 'unnamed'} ${Math.round(edge.distance)}m → ${totalDuration.toFixed(1)}sec`)
+      console.warn(`   Base time: ${baseTime.toFixed(1)}sec, Intersection delay: ${this.intersectionDelay}sec`)
+    }
     
     return {
       type: 'street_following',
       coordinates: edge.coordinates,
       distance: edge.distance, // meters
-      duration: duration + this.intersectionDelay, // Add intersection time
+      duration: totalDuration, // seconds
       streetName: edge.streetName,
       streetType: edge.streetType,
       fromAddress: fromNode.brcAddress,
