@@ -13,6 +13,25 @@
           />
         </div>
         
+        <!-- Date Override Controls -->
+        <div class="date-override-group">
+          <label class="date-override-checkbox">
+            <input 
+              type="checkbox" 
+              :checked="dateOverrideEnabled"
+              @change="toggleDateOverride"
+            />
+            <span>Override Date</span>
+          </label>
+          <input 
+            v-if="dateOverrideEnabled"
+            type="date"
+            :value="overrideDate"
+            @change="setOverrideDate($event.target.value)"
+            class="date-input"
+          />
+        </div>
+
         <!-- Theme Editor Button (Dev Only) -->
         <BaseButton 
           v-if="isDevelopment" 
@@ -37,8 +56,12 @@
 import { computed } from 'vue'
 import BaseButton from '../ui/BaseButton.vue'
 import BaseSelect from '../ui/BaseSelect.vue'
+import { useDateOverride } from '../../composables/useDateOverride'
 
 const isDevelopment = import.meta.env.DEV
+
+// Date override functionality
+const { dateOverrideEnabled, overrideDate, toggleDateOverride, setOverrideDate } = useDateOverride()
 
 const props = defineProps({
   selectedTheme: {
@@ -115,5 +138,45 @@ footer {
   --button-bg: var(--color-error);
   --button-border: var(--color-error);
   --button-text: var(--color-text-primary);
+}
+
+.date-override-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.date-override-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.date-override-checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.date-input {
+  background: var(--color-bg-input);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-heavy);
+  border-radius: 4px;
+  padding: 0.4rem 0.6rem;
+  font-family: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.date-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px var(--color-primary-alpha-20);
 }
 </style>

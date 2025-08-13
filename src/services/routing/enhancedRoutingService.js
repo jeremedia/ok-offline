@@ -7,6 +7,7 @@
 
 import { BRCZoneClassifier } from './zoneClassifier.js'
 import { StreetNetworkBuilder } from './streetNetworkBuilder.js'
+import { AddressBasedNetworkBuilder } from './addressBasedNetworkBuilder.js'
 import { BRCPathfinder } from './pathfinder.js'
 import { BRCDirectionsGenerator } from './directionsGenerator.js'
 import { BRCHybridRouter } from './brcHybridRouter.js'
@@ -22,7 +23,7 @@ export class EnhancedRoutingService {
     this.networkBuilder = null
     this.hybridRouter = null
     this.isInitialized = false
-    this.networkCacheKey = 'brc_street_network_cache_v2' // Updated cache version
+    this.networkCacheKey = 'brc_street_network_cache_address_based_v1' // Address-based network cache
     
     // Travel speed constants (feet per minute)
     this.TRAVEL_SPEEDS = {
@@ -94,26 +95,26 @@ export class EnhancedRoutingService {
     try {
       // Try to load cached network first
       const cachedNetwork = this._loadNetworkFromCache()
-      if (cachedNetwork) {
-        console.log('📦 Loading street network from cache...')
-        this.networkBuilder = new StreetNetworkBuilder()
+      if (cachedNetwork && cachedNetwork.buildMethod === 'address-based') {
+        console.log('📦 Loading address-based street network from cache...')
+        this.networkBuilder = new AddressBasedNetworkBuilder()
         
         try {
-          this.streetNetwork = this.networkBuilder.importNetwork(cachedNetwork)
-          console.log('✅ Street network loaded from cache successfully')
-          return
+          // For now, rebuild since import not implemented yet
+          console.log('🔨 Rebuilding address-based network (import not yet implemented)...')
+          throw new Error('Import not implemented, rebuild required')
         } catch (cacheError) {
-          console.warn('🗑️ Cached street network corrupted, rebuilding from GIS data...', cacheError.message)
-          // Clear corrupted cache
+          console.warn('🗑️ Rebuilding address-based network...', cacheError.message)
+          // Clear cache and rebuild
           this._clearNetworkCache()
           // Fall through to rebuild from GIS data
         }
       }
 
-      // Build network from scratch
-      console.log('🔨 Building street network from GIS data...')
-      this.networkBuilder = new StreetNetworkBuilder()
-      this.streetNetwork = await this.networkBuilder.buildNetworkFromGIS(gisData)
+      // Build address-based network from scratch
+      console.log('🔨 Building address-based street network from GIS data...')
+      this.networkBuilder = new AddressBasedNetworkBuilder()
+      this.streetNetwork = await this.networkBuilder.buildAddressBasedNetwork(gisData)
       
       // Cache the built network for next time
       this._saveNetworkToCache(this.networkBuilder.exportNetwork())
@@ -227,19 +228,27 @@ export class EnhancedRoutingService {
    */
   _shouldUseStreetRouting(startZone, endZone, analysis) {
     // Use street routing when:
-    // 1. Both start and end are in urban areas
-    // 2. Route doesn't require crossing open playa (no hybrid benefit)  
-    // 3. Street network is available
+    // 1. Zone classifier specifically recommends it
+    // 2. Street network is available
     
     if (!this.pathfinder) return false
     
-    // Skip street routing if hybrid is clearly better
-    if (analysis.recommendation === 'hybrid' && analysis.benefits?.distanceSavings > 0.3) {
+    // FIXED: Respect zone classifier's decision completely
+    // If zone classifier says "hybrid", always use hybrid (don't override!)
+    if (analysis.recommendation === 'hybrid') {
+      console.log('🔄 Zone classifier recommends hybrid - skipping street routing')
       return false
     }
     
-    // Use street routing for urban-to-urban routes
-    return (startZone.type === 'urban' || endZone.type === 'urban')
+    // If zone classifier says "street_following", use it
+    if (analysis.recommendation === 'street_following') {
+      console.log('🛣️  Zone classifier recommends street-following')
+      return true
+    }
+    
+    // For straight-line routes, don't use street routing
+    console.log('➡️  Zone classifier recommends direct routing - skipping street routing')
+    return false
   }
 
   /**
@@ -259,7 +268,7 @@ export class EnhancedRoutingService {
     // Convert to standard route format
     return {
       type: 'street_following',
-      coordinates: route.coordinates.map(([lng, lat]) => [lat, lng]), // Convert to [lat, lng]
+      coordinates: route.coordinates, // Already normalized to [lat, lng] in pathfinder
       distance: route.distance, // Already in feet
       duration: Math.round(route.duration / 60), // Convert to minutes
       mode: mode,
@@ -334,6 +343,12 @@ export class EnhancedRoutingService {
     const speed = this.TRAVEL_SPEEDS[mode].playa
     const duration = Math.round(distance * 3.28 / speed) // Convert to minutes
 
+    // DEBUG: Check coordinate format at route generation
+    console.log('🔍 ROUTE GENERATION DEBUG:')
+    console.log('  - startCoords:', startCoords)
+    console.log('  - endCoords:', endCoords)
+    console.log('  - coordinates array:', [startCoords, endCoords])
+
     return {
       type: 'straight_line',
       coordinates: [startCoords, endCoords],
@@ -403,7 +418,23 @@ export class EnhancedRoutingService {
     const hybridRoute = await this.hybridRouter.generateHybridRoute(startCoords, endCoords, mode)
     
     if (!hybridRoute) {
-      console.log('❌ Hybrid router could not generate beneficial route, falling back')
+      console.log('❌ Hybrid router could not generate beneficial route, falling back to street-following')
+      
+      // Try street-following as fallback when hybrid is rejected
+      if (this.pathfinder) {
+        try {
+          const streetRoute = await this._generateStreetFollowingRoute(startCoords, endCoords, mode)
+          if (streetRoute) {
+            console.log('✅ Street-following fallback successful')
+            return streetRoute
+          }
+        } catch (error) {
+          console.warn('⚠️  Street-following fallback failed:', error.message)
+        }
+      }
+      
+      // Final fallback to straight-line only if street-following also fails
+      console.log('🔄 Using straight-line as final fallback')
       return this.generateStraightLineRoute(startCoords, endCoords, mode)
     }
     
@@ -521,6 +552,21 @@ export class EnhancedRoutingService {
    * Get route between coordinates (main interface)
    * Maintains compatibility with existing routing service
    */
+  /**
+   * Main routing interface - delegates to intelligent routing system
+   * @param {Array} startCoords [latitude, longitude]
+   * @param {Array} endCoords [latitude, longitude]  
+   * @param {string} mode 'walking' or 'biking'
+   * @returns {Object} Complete route with path and metadata
+   */
+  async findRoute(startCoords, endCoords, mode = 'walking') {
+    if (!this.isInitialized) {
+      await this.initialize()
+    }
+    
+    return this.calculateIntelligentRoute(startCoords, endCoords, mode)
+  }
+
   async getRoute(startCoords, endCoords, mode = 'walking') {
     try {
       return await this.calculateIntelligentRoute(startCoords, endCoords, mode)

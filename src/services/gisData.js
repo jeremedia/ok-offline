@@ -56,18 +56,75 @@ export function getGISYear() {
   return currentYear;
 }
 
-// Load GeoJSON data from file
+// Load GeoJSON data from file with Safari fallback
 async function loadGeoJSON(filename, year = currentYear) {
+  const gisDataPath = `/data/${year}/gis/`;
+  const url = `${gisDataPath}${filename}`;
+  
   try {
-    const gisDataPath = `/data/${year}/gis/`;
-    const response = await fetch(`${gisDataPath}${filename}`);
+    // Primary attempt with timeout for Safari
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
+    
+    const response = await fetch(url, { 
+      signal: controller.signal,
+      cache: 'no-cache' // Force bypass SW for GIS data if needed
+    });
+    
+    clearTimeout(timeoutId);
+    
     if (!response.ok) {
       throw new Error(`Failed to load ${filename}: ${response.statusText}`);
     }
-    return await response.json();
+    
+    const data = await response.json();
+    console.log(`✅ Loaded GIS data ${filename} for year ${year}`);
+    return data;
+    
   } catch (error) {
-    console.error(`Error loading GIS data ${filename} for year ${year}:`, error);
-    return null;
+    console.warn(`⚠️ Primary fetch failed for ${filename}:`, error.message);
+    
+    // Safari fallback - try with different fetch options
+    try {
+      console.log(`🔄 Retrying ${filename} with fallback method...`);
+      
+      const fallbackResponse = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        },
+        mode: 'same-origin'
+      });
+      
+      if (fallbackResponse.ok) {
+        const data = await fallbackResponse.json();
+        console.log(`✅ Fallback loaded GIS data ${filename} for year ${year}`);
+        return data;
+      } else {
+        throw new Error(`Fallback failed: ${fallbackResponse.statusText}`);
+      }
+      
+    } catch (fallbackError) {
+      console.error(`❌ Both primary and fallback failed for ${filename}:`, fallbackError);
+      
+      // If this is a critical file, try once more with minimal options
+      if (filename === 'street_lines.geojson' || filename === 'city_blocks.geojson') {
+        try {
+          console.log(`🔄 Final attempt for critical file ${filename}...`);
+          const finalResponse = await fetch(url);
+          if (finalResponse.ok) {
+            const data = await finalResponse.json();
+            console.log(`✅ Final attempt succeeded for ${filename}`);
+            return data;
+          }
+        } catch (finalError) {
+          console.error(`❌ Final attempt failed for ${filename}:`, finalError);
+        }
+      }
+      
+      return null;
+    }
   }
 }
 

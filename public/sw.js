@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ok-offline-v38'; // Complete camp schedule management system
+const CACHE_NAME = 'ok-offline-v39'; // Safari Service Worker context closure fixes
 const urlsToCache = [
   // Core app files
   '/',
@@ -141,28 +141,49 @@ self.addEventListener('install', event => {
   console.log('[Service Worker] Install event');
   
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => {
+    Promise.resolve().then(async () => {
+      try {
+        const cache = await caches.open(CACHE_NAME);
         console.log('[Service Worker] Cache opened:', CACHE_NAME);
         
-        // Cache files individually to identify failures
-        return Promise.all(
-          urlsToCache.map(url => {
-            return cache.add(url).catch(error => {
-              console.error('[Service Worker] Failed to cache:', url, error);
-              // Continue with other files even if one fails
-              // This ensures partial caching on install
-            });
-          })
-        );
-      })
-      .then(() => {
-        console.log('[Service Worker] All critical assets cached successfully');
+        // Cache essential files first (Safari-friendly approach)
+        const essentialFiles = ['/', '/index.html', '/manifest.json'];
+        const nonEssentialFiles = urlsToCache.filter(url => !essentialFiles.includes(url));
+        
+        // Cache essential files synchronously
+        for (const url of essentialFiles) {
+          try {
+            await cache.add(url);
+            console.log('[Service Worker] Cached essential:', url);
+          } catch (error) {
+            console.error('[Service Worker] Failed to cache essential:', url, error);
+          }
+        }
+        
+        // Cache non-essential files in smaller batches to avoid context closure
+        const batchSize = 5;
+        for (let i = 0; i < nonEssentialFiles.length; i += batchSize) {
+          const batch = nonEssentialFiles.slice(i, i + batchSize);
+          await Promise.allSettled(
+            batch.map(url => 
+              cache.add(url).catch(error => {
+                console.warn('[Service Worker] Failed to cache:', url, error.message);
+                return null;
+              })
+            )
+          );
+          
+          // Small delay to prevent Safari from terminating context
+          await new Promise(resolve => setTimeout(resolve, 10));
+        }
+        
+        console.log('[Service Worker] All assets processed');
         return self.skipWaiting();
-      })
-      .catch(error => {
+      } catch (error) {
         console.error('[Service Worker] Install failed:', error);
-      })
+        return self.skipWaiting(); // Skip waiting even on failure
+      }
+    })
   );
 });
 
@@ -311,21 +332,46 @@ self.addEventListener('fetch', event => {
       return;
     }
 
-    // For data files (JSON, GeoJSON), use network-first with cache fallback
+    // For data files (JSON, GeoJSON), use cache-first for Safari compatibility
     if (url.pathname.includes('/data/') && 
         (url.pathname.endsWith('.json') || url.pathname.endsWith('.geojson'))) {
       event.respondWith(
-        fetch(request)
+        caches.match(request)
           .then(response => {
-            if (response.status === 200) {
-              const responseToCache = response.clone();
-              caches.open(CACHE_NAME).then(cache => {
-                cache.put(request, responseToCache);
-              });
+            if (response) {
+              return response;
             }
-            return response;
+            
+            // Safari-friendly network request with timeout
+            return Promise.race([
+              fetch(request),
+              new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Timeout')), 10000)
+              )
+            ]).then(networkResponse => {
+              if (networkResponse && networkResponse.status === 200) {
+                // Cache asynchronously to avoid blocking
+                const responseToCache = networkResponse.clone();
+                caches.open(CACHE_NAME).then(cache => {
+                  cache.put(request, responseToCache).catch(err => {
+                    console.warn('Failed to cache data file:', err);
+                  });
+                });
+              }
+              return networkResponse;
+            }).catch(error => {
+              console.warn('Data file fetch failed, using offline mode:', error);
+              throw error;
+            });
           })
-          .catch(() => caches.match(request))
+          .catch(() => {
+            // Return a proper error response instead of undefined
+            return new Response(JSON.stringify({ error: 'Data unavailable offline' }), {
+              status: 503,
+              statusText: 'Service Unavailable',
+              headers: { 'Content-Type': 'application/json' }
+            });
+          })
       );
       return;
     }

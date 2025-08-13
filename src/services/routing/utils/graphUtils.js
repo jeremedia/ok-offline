@@ -108,7 +108,7 @@ export class PriorityQueue {
 export class NetworkNode {
   constructor(id, coordinates, streetNames = []) {
     this.id = id
-    this.coordinates = coordinates // [longitude, latitude]
+    this.coordinates = coordinates // [latitude, longitude] - Leaflet/app format
     this.streetNames = streetNames
     this.connectedEdges = new Set()
     this.nodeType = this._determineNodeType(streetNames)
@@ -152,19 +152,19 @@ export class NetworkEdge {
     this.id = id
     this.fromNodeId = fromNodeId
     this.toNodeId = toNodeId
-    this.coordinates = coordinates // Array of [longitude, latitude] points
+    this.coordinates = coordinates // Array of [latitude, longitude] points - Leaflet/app format
     this.streetName = streetName
     this.streetType = streetType // 'radial' or 'arc'
     this.width = parseInt(width) // Street width in feet
     
-    // Calculate derived properties
+    // Calculate derived properties in correct order
     this.distance = this._calculateDistance()
+    this.speedMultiplier = this._getSpeedMultiplier() // MUST be before time calculations
     this.walkTime = this._calculateWalkTime()
     this.bikeTime = this._calculateBikeTime()
     
     // Routing properties
     this.restrictions = new Set()
-    this.speedMultiplier = this._getSpeedMultiplier()
   }
 
   _calculateDistance() {
@@ -342,6 +342,16 @@ export class BRCStreetNetwork {
     }
     
     return keys
+  }
+
+  /**
+   * Get edges connected to a specific node (required by pathfinder)
+   */
+  getNodeEdges(nodeId) {
+    const node = this.nodes.get(nodeId)
+    if (!node) return []
+    
+    return Array.from(node.connectedEdges).map(edgeId => this.edges.get(edgeId)).filter(Boolean)
   }
 
   getNetworkStats() {

@@ -13,7 +13,7 @@ const BLACK_ROCK_CITY = {
 
 // Rails API endpoint for Apple WeatherKit proxy
 const RAILS_WEATHER_API = import.meta.env.DEV 
-  ? 'http://100.104.170.10:3555/api/v1/weather/current'
+  ? 'https://dev.offline.oknotok.com/api/v1/weather/current'
   : '/api/v1/weather/current'
 
 // Cache keys

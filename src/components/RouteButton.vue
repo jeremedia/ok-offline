@@ -110,16 +110,25 @@ const handleRouteClick = async () => {
     return
   }
 
-  // Create the route
-  const route = createRoute(userLocation.value, props.item, getItemLocation)
-  
-  if (route) {
-    emit('route-created', { item: props.item, route })
+  // Create the route (now async for enhanced routing)
+  try {
+    const route = await createRoute(userLocation.value, props.item, getItemLocation)
     
-    // Navigate to map view if requested (from ListView)
-    if (props.navigateToMap) {
-      await navigateToMapWithRoute()
+    if (route) {
+      emit('route-created', { item: props.item, route })
+      
+      // Navigate to map view if requested (from ListView)
+      if (props.navigateToMap) {
+        await navigateToMapWithRoute()
+      }
+      
+      // Log enhanced route information if available
+      if (route.isIntelligentRoute) {
+        console.log(`✨ Enhanced route created to ${props.item.name || props.item.title}: ${route.routingMethod}`)
+      }
     }
+  } catch (error) {
+    console.error('Failed to create route:', error)
   }
 }
 

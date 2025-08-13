@@ -78,8 +78,8 @@ VITE_WEATHER_API_KEY=your_openweather_key  # Not needed if using Rails API
 
 ### API Integration
 The app connects to the OK-OFFLINE API service for weather data:
-- Development: `http://100.104.170.10:3555/api/v1/`
-- Production: `https://api.offline.oknotok.com/api/v1/` (planned)
+- Development: `https://dev.offline.oknotok.com/api/v1/`
+- Production: `https://offline.oknotok.com/api/v1/`
 
 ## 📱 PWA Installation
 

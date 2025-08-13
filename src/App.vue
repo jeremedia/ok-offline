@@ -86,6 +86,7 @@ const showOnboarding = ref(false)
 const showTour = ref(false)
 const tourType = ref('general')
 const selectedTheme = ref(getCurrentTheme())
+const intendedDestination = ref(null) // Store route user was trying to access
 
 // Check if device is truly mobile (phone, not tablet)
 const checkIfMobile = () => {
@@ -177,8 +178,25 @@ const checkOnboardingStatus = () => {
     return getSyncMetadata(type, selectedYear.value)?.lastSync
   })
   
+  console.log('🔍 Onboarding check:', {
+    onboardingCompleted,
+    hasAnyCachedData,
+    routeFullPath: route?.fullPath,
+    windowLocation: window.location.pathname
+  })
+  
+  const needsOnboarding = !onboardingCompleted && !hasAnyCachedData
+  
+  if (needsOnboarding) {
+    // Capture the current route before showing onboarding
+    intendedDestination.value = route?.fullPath || window.location.pathname
+    console.log('🎯 Preserving intended destination:', intendedDestination.value)
+  }
+  
+  console.log('🔍 Onboarding needed:', needsOnboarding)
+  
   // Show onboarding if never completed AND no cached data exists
-  showOnboarding.value = !onboardingCompleted && !hasAnyCachedData
+  showOnboarding.value = needsOnboarding
 }
 
 // Handle onboarding completion
@@ -198,17 +216,74 @@ const handleOnboardingComplete = (data) => {
     }, 500)
   }
   
-  // Navigate to map view
-  router.push(`/${selectedYear.value}/map`)
+  // Refresh the current page instead of navigating
+  console.log('Refreshing page after onboarding completion')
+  window.location.reload()
+}
+
+// Helper function to determine valid post-onboarding destination
+const getValidDestination = () => {
+  console.log('🔍 getValidDestination called, intendedDestination:', intendedDestination.value)
+  
+  if (!intendedDestination.value) {
+    // No preserved destination, use default
+    console.log('🔍 No intended destination, using default map')
+    return `/${selectedYear.value}/map`
+  }
+  
+  // Check if the intended destination is a year-based route
+  const yearRoutePattern = /^\/(\d{4})\//
+  const match = intendedDestination.value.match(yearRoutePattern)
+  
+  if (match) {
+    // Update year in the route to match selected year
+    const routeWithoutYear = intendedDestination.value.replace(yearRoutePattern, '/')
+    const result = `/${selectedYear.value}${routeWithoutYear}`
+    console.log('🔍 Year-based route detected, updating:', intendedDestination.value, '->', result)
+    return result
+  }
+  
+  // For non-year routes (like /prompts, /settings, /dust), use as-is
+  const yearlessRoutes = ['/prompts', '/settings', '/dust', '/reset', '/components', '/knowledge', '/icon_viewer']
+  const isYearlessRoute = yearlessRoutes.some(route => intendedDestination.value.startsWith(route))
+  
+  if (isYearlessRoute) {
+    console.log('🔍 Yearless route detected, using as-is:', intendedDestination.value)
+    return intendedDestination.value
+  }
+  
+  // Fallback to map if we can't determine the route type
+  console.log('🔍 Unknown route type, fallback to map:', intendedDestination.value)
+  return `/${selectedYear.value}/map`
 }
 
 // Handle guided tour completion
 const handleTourComplete = () => {
   showTour.value = false
+  
+  // If we have an intended destination and we're not already there, navigate to it
+  if (intendedDestination.value && route.fullPath !== intendedDestination.value) {
+    const destination = getValidDestination()
+    console.log('Post-tour navigation to intended destination:', destination)
+    router.push(destination)
+  }
+  
+  // Clear the intended destination after use
+  intendedDestination.value = null
 }
 
 const handleTourSkip = () => {
   showTour.value = false
+  
+  // Same logic as tour completion
+  if (intendedDestination.value && route.fullPath !== intendedDestination.value) {
+    const destination = getValidDestination()
+    console.log('Post-tour-skip navigation to intended destination:', destination)
+    router.push(destination)
+  }
+  
+  // Clear the intended destination after use
+  intendedDestination.value = null
 }
 
 // Handle window resize
@@ -240,6 +315,14 @@ onMounted(async () => {
   // Set up toast notifications after component is fully mounted
   await nextTick()
   setToastRef(toastRef)
+  
+  // APP PATTERN: Handle initial year detection here (not in watch immediate)
+  // Check route for year parameter and update selectedYear if found
+  if (route.params?.year && ['2023', '2024', '2025'].includes(route.params.year)) {
+    selectedYear.value = route.params.year
+    localStorage.setItem('selectedYear', route.params.year)
+    updateLastSyncTime()
+  }
   
   // Delay onboarding check slightly to ensure loading screen shows first
   setTimeout(() => {
@@ -277,14 +360,17 @@ if (savedYear && ['2023', '2024', '2025'].includes(savedYear)) {
   localStorage.setItem('selectedYear', '2024')
 }
 
-// Update year from route
-watch(() => route.params.year, (year) => {
+// Update year from route  
+// IMPORTANT: No { immediate: true } - follows app-wide pattern
+// - onMounted() handles initial year detection (see below)
+// - watch() handles reactive route changes only
+watch(() => route.params?.year, (year) => {
   if (year && ['2023', '2024', '2025'].includes(year)) {
     selectedYear.value = year
     localStorage.setItem('selectedYear', year)
     updateLastSyncTime() // Update sync time when year changes
   }
-}, { immediate: true })
+})
 
 const navigate = (view) => {
   router.push(`/${selectedYear.value}/${view}`)

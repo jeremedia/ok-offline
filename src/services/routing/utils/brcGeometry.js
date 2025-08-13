@@ -6,16 +6,18 @@
  */
 
 import { haversineDistance, calculateBearing, BRC_CENTER } from './geoUtils.js'
+import { brcAddressToLatLon } from '../../../utils/geocoding.js'
 
 // BRC geometric constants
 export const BRC_GEOMETRY = {
   // Center point coordinates (Golden Spike)
   CENTER: BRC_CENTER,
   
-  // City layout parameters (in meters)
+  // City layout parameters (in meters) - UPDATED to match zone classifier boundaries
   INNER_PLAYA_RADIUS: 305,    // ~1000ft - inner circle around Man
-  ESPLANADE_RADIUS: 762,      // ~2500ft - approximate Esplanade distance
-  OUTER_CITY_RADIUS: 1219,    // ~4000ft - typical outer city boundary
+  ESPLANADE_RADIUS: 762,      // ~2500ft - approximate Esplanade distance  
+  URBAN_BOUNDARY_RADIUS: 1768, // ~5800ft - updated to include all avenues A-L (matches zone classifier)
+  OUTER_CITY_RADIUS: 1219,    // ~4000ft - typical outer city boundary (DEPRECATED - use URBAN_BOUNDARY_RADIUS)
   DEEP_PLAYA_RADIUS: 2438,    // ~8000ft - deep playa limit
   
   // Angular parameters  
@@ -37,7 +39,13 @@ export const BRC_GEOMETRY = {
  */
 export function coordsToClockSystem(coords) {
   const [lon, lat] = coords
-  const bearing = calculateBearing(BRC_CENTER, coords)
+  
+  // CRITICAL FIX: Apply same 45° BRC city orientation offset as main zone classifier
+  // BRC is oriented with 12:00 pointing 45° northeast, not true north
+  const rawBearing = calculateBearing(BRC_CENTER, coords)
+  const cityBearingOffset = 45 // BRC is oriented 45° from true north
+  const bearing = (rawBearing - cityBearingOffset + 360) % 360
+  
   const distance = haversineDistance(BRC_CENTER, coords)
   
   // Convert bearing to clock position
@@ -113,34 +121,148 @@ export function calculateUrbanBoundary(sector) {
 }
 
 /**
+ * Get all street intersections for a given sector that can serve as exit/entry points
+ * @param {number} sector Sector number (2-12)
+ * @returns {Array} Array of intersection objects with coordinates and IDs
+ */
+function getStreetIntersectionsForSector(sector) {
+  const intersections = []
+  
+  // Define the clock positions for this sector (hour and quarter-hour streets)
+  const sectorClocks = []
+  
+  // Add hour streets for this sector
+  if (sector <= 10) {
+    sectorClocks.push(`${sector}:00`)
+    sectorClocks.push(`${sector + 1}:00`)
+  } else if (sector === 11) {
+    sectorClocks.push('11:00')
+    sectorClocks.push('12:00')
+  } else if (sector === 12) {
+    sectorClocks.push('12:00')
+    sectorClocks.push('1:00')
+  }
+  
+  // Add quarter-hour streets for this sector
+  if (sector <= 10) {
+    sectorClocks.push(`${sector}:15`)
+    sectorClocks.push(`${sector}:30`)
+    sectorClocks.push(`${sector}:45`)
+  } else if (sector === 11) {
+    sectorClocks.push('11:15')
+    sectorClocks.push('11:30')
+    sectorClocks.push('11:45')
+  } else if (sector === 12) {
+    sectorClocks.push('12:15')
+    sectorClocks.push('12:30')
+    sectorClocks.push('12:45')
+  }
+  
+  // Define avenues from inner to outer (Esplanade is the primary urban boundary exit)
+  const avenues = ['Esplanade', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L']
+  
+  // Generate intersections for each clock position and avenue
+  for (const clock of sectorClocks) {
+    for (const avenue of avenues) {
+      try {
+        const address = `${clock} & ${avenue}`
+        const coordinates = brcAddressToLatLon(address)
+        
+        if (coordinates && coordinates.length === 2) {
+          intersections.push({
+            id: `${clock}&${avenue}`,
+            coordinates: coordinates,
+            clock: clock,
+            avenue: avenue,
+            address: address
+          })
+        }
+      } catch (error) {
+        // Skip invalid addresses silently
+        console.debug(`Could not resolve intersection: ${clock} & ${avenue}`)
+      }
+    }
+  }
+  
+  return intersections
+}
+
+/**
  * Find optimal exit points from urban area for hybrid routing
  * @param {[number, number]} startCoords Starting coordinates in urban area
+ * @param {[number, number]} endCoords Ending coordinates in urban area
  * @param {number} targetSector Target sector number
  * @returns {Array} Array of potential exit points with scores
  */
-export function findOptimalExitPoints(startCoords, targetSector) {
+export function findOptimalExitPoints(startCoords, endCoords, targetSector) {
   const startClock = coordsToClockSystem(startCoords)
   const startSector = startClock.sector
   const boundary = calculateUrbanBoundary(startSector)
   
-  // Generate candidate exit points around the urban boundary
+  // 🎯 REVOLUTIONARY FIX: Use actual street intersections as exit points
   const candidates = []
-  const exitRadius = boundary.outerRadius
   
-  // Consider multiple exit angles around the sector
-  for (let angleOffset = -30; angleOffset <= 30; angleOffset += 10) {
-    const exitBearing = startClock.bearing + angleOffset
-    const exitCoords = calculateDestinationPoint(BRC_CENTER, exitBearing, exitRadius)
-    
-    // Calculate efficiency score for this exit point
-    const score = calculateExitPointScore(startCoords, exitCoords, targetSector)
+  // Get all street intersections in the start sector that can serve as exit points
+  const availableIntersections = getStreetIntersectionsForSector(startSector)
+  
+  // 🚪 CRITICAL ARCHITECTURAL FIX: Implement proper BRC exit point system
+  // Black Rock City has THREE types of exits from urban grid to playa:
+  
+  const directDistance = haversineDistance(startCoords, endCoords) * 3.28084 // Convert to feet
+  const targetBearing = calculateBearing(startCoords, endCoords)
+  
+  console.log(`🚪 BRC Exit Point Analysis for route: ${Math.round(directDistance)}ft`)
+  console.log(`   Start sector: ${startSector}, Target bearing: ${targetBearing.toFixed(1)}°`)
+  
+  // 🎯 OPTION 1: Esplanade Exits (shortest street navigation to urban boundary)
+  const esplanadeExits = availableIntersections.filter(intersection => 
+    intersection.avenue === 'Esplanade'
+  )
+  
+  // 🎯 OPTION 2: Left Boundary Exits (2:00 side - for Temple/left-side destinations)  
+  const leftBoundaryExits = availableIntersections.filter(intersection => 
+    intersection.clock === '2:00'
+  )
+  
+  // 🎯 OPTION 3: Right Boundary Exits (10:00 side - for right-side destinations)
+  const rightBoundaryExits = availableIntersections.filter(intersection => 
+    intersection.clock === '10:00'
+  )
+  
+  // 🧠 INTELLIGENT EXIT SELECTION: Choose exit type based on destination direction
+  let candidateExits = esplanadeExits // Default: use Esplanade (shortest street navigation)
+  let exitStrategy = 'Esplanade (direct radial exit)'
+  
+  // For Temple direction (bearings 315°-45°), consider left boundary exits
+  if ((targetBearing >= 315 || targetBearing <= 45) && leftBoundaryExits.length > 0) {
+    candidateExits = [...esplanadeExits, ...leftBoundaryExits]
+    exitStrategy = 'Esplanade + Left Boundary (Temple direction optimization)'
+  }
+  
+  // For right-side destinations (bearings 315°-45°), consider right boundary exits  
+  if (targetBearing >= 315 && rightBoundaryExits.length > 0) {
+    candidateExits = [...esplanadeExits, ...rightBoundaryExits]
+    exitStrategy = 'Esplanade + Right Boundary (right-side optimization)'
+  }
+  
+  console.log(`   Exit strategy: ${exitStrategy}`)
+  console.log(`   Candidate exits: ${candidateExits.length} (Esplanade: ${esplanadeExits.length}, Left: ${leftBoundaryExits.length}, Right: ${rightBoundaryExits.length})`)
+  
+  // Use the intelligently selected candidate exits (proper boundary exits only)
+  const exitIntersections = candidateExits
+  
+  // Score each intersection as an exit point
+  for (const intersection of exitIntersections) {
+    const score = calculateExitPointScore(startCoords, intersection.coordinates, targetSector)
+    const bearing = calculateBearing(BRC_CENTER, intersection.coordinates)
     
     candidates.push({
-      coordinates: exitCoords,
-      bearing: exitBearing,
-      distance: haversineDistance(startCoords, exitCoords),
+      coordinates: intersection.coordinates,
+      bearing: bearing,
+      distance: haversineDistance(startCoords, intersection.coordinates),
       score,
-      angleOffset
+      angleOffset: bearing - startClock.bearing,
+      intersection: intersection.id // 🎯 Critical: Keep intersection ID for pathfinding
     })
   }
   
@@ -156,19 +278,27 @@ export function findOptimalExitPoints(startCoords, targetSector) {
  * @returns {number} Efficiency score (0-1, higher is better)
  */
 function calculateExitPointScore(startCoords, exitCoords, targetSector) {
-  // Distance from start to exit (lower is better)
+  // 🎯 FIXED SCORING: Properly prioritize Esplanade exits for minimal street navigation
+  
+  // Distance from start to exit (lower is better) - this is the PRIMARY factor
   const exitDistance = haversineDistance(startCoords, exitCoords)
   
-  // Distance from exit to target sector center (lower is better)
-  const targetBearing = (targetSector + 0.5) * 30 // Middle of target sector
-  const targetCoords = calculateDestinationPoint(BRC_CENTER, targetBearing, BRC_GEOMETRY.ESPLANADE_RADIUS)
-  const playaDistance = haversineDistance(exitCoords, targetCoords)
+  // 🚪 ESPLANADE BONUS: Heavily favor Esplanade exits as they're the proper urban boundary
+  const isEsplanadeExit = calculateBearing(BRC_CENTER, exitCoords) // Check if this is roughly at Esplanade distance
+  const distanceFromCenter = haversineDistance(BRC_CENTER, exitCoords)
+  const isAtEsplanade = Math.abs(distanceFromCenter - BRC_GEOMETRY.ESPLANADE_RADIUS) < 100 // Within 100m of Esplanade
   
-  // Weighted score - balance exit effort vs playa efficiency
-  const exitCost = exitDistance / 500 // Normalize to 500m scale
-  const playaCost = playaDistance / 2000 // Normalize to 2km scale
+  let bonusMultiplier = 1.0
+  if (isAtEsplanade) {
+    bonusMultiplier = 3.0 // 3x bonus for Esplanade exits (proper urban boundary)
+    console.log(`🎯 Esplanade exit bonus applied: ${exitCoords} (distance from center: ${distanceFromCenter.toFixed(0)}m vs Esplanade: ${BRC_GEOMETRY.ESPLANADE_RADIUS}m)`)
+  }
   
-  return 1 / (1 + exitCost * 0.3 + playaCost * 0.7) // Favor shorter playa crossing
+  // Simple scoring: minimize street navigation distance with Esplanade bonus
+  const baseScore = 1 / (1 + exitDistance / 300) // Normalize to 300m scale
+  const finalScore = baseScore * bonusMultiplier
+  
+  return finalScore
 }
 
 /**
@@ -197,8 +327,8 @@ export function analyzeBoundaryLocation(coords) {
   if (distance < BRC_GEOMETRY.INNER_PLAYA_RADIUS) {
     zone = 'inner_playa'
     allowStraightLine = true
-  } else if (distance < BRC_GEOMETRY.ESPLANADE_RADIUS) {
-    // Check if within city angular bounds
+  } else if (distance < BRC_GEOMETRY.URBAN_BOUNDARY_RADIUS) {
+    // Check if within city angular bounds  
     const bearing = clockData.bearing
     if (isWithinCityBounds(bearing)) {
       zone = 'urban'
@@ -207,11 +337,8 @@ export function analyzeBoundaryLocation(coords) {
       zone = 'side_playa'  
       allowStraightLine = true
     }
-  } else if (distance < BRC_GEOMETRY.OUTER_CITY_RADIUS) {
-    zone = 'outer_playa'
-    allowStraightLine = true
   } else {
-    zone = 'deep_playa'
+    zone = 'outer_playa'
     allowStraightLine = true
   }
   
@@ -262,9 +389,10 @@ function formatClockTime(hours, minutes) {
   return `${h}:${m}`
 }
 
-function calculateDestinationPoint(origin, bearing, distance) {
+export function calculateDestinationPoint(origin, bearing, distance) {
   // Calculate destination point from origin at given bearing and distance
-  const [originLon, originLat] = origin
+  // FIXED: origin is [lat, lng] format to match BRC_CENTER and rest of codebase
+  const [originLat, originLon] = origin
   const R = 6371000 // Earth's radius in meters
   
   const lat1 = originLat * Math.PI / 180
@@ -277,7 +405,8 @@ function calculateDestinationPoint(origin, bearing, distance) {
   const lon2 = lon1 + Math.atan2(Math.sin(brng) * Math.sin(distance / R) * Math.cos(lat1),
                                 Math.cos(distance / R) - Math.sin(lat1) * Math.sin(lat2))
   
-  return [lon2 * 180 / Math.PI, lat2 * 180 / Math.PI]
+  // Return in [lat, lng] format to match rest of codebase
+  return [lat2 * 180 / Math.PI, lon2 * 180 / Math.PI]
 }
 
 /**
@@ -313,5 +442,6 @@ export default {
   calculateSectorDifference,
   analyzeBoundaryLocation,
   getBRCLandmarks,
+  calculateDestinationPoint,
   BRC_GEOMETRY
 }

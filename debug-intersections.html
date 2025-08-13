@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Street Network Intersections Debug</title>
+    <style>
+        body {
+            font-family: 'Berkeley Mono', monospace;
+            background: #1a1a1a;
+            color: #fff;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .debug-section {
+            background: #2a2a2a;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 3px solid #8B0000;
+            border-radius: 5px;
+        }
+        .success { border-left-color: #00ff00; }
+        .error { border-left-color: #ff0000; }
+        pre {
+            background: #111;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .coord {
+            background: #333;
+            padding: 5px;
+            border-radius: 3px;
+            display: inline-block;
+            margin: 2px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Street Network Intersections Debug</h1>
+    <p>Investigating why pathfinder can't find nearby intersections...</p>
+    
+    <div id="output"></div>
+
+    <script type="module">
+        import { loadAllGISData } from './src/services/gisData.js'
+        import { StreetNetworkBuilder } from './src/services/routing/streetNetworkBuilder.js'
+        import { calculateDistance } from './src/utils/brcAddressUtils.js'
+
+        const output = document.getElementById('output')
+
+        function log(message, type = 'info') {
+            const div = document.createElement('div')
+            div.className = `debug-section ${type}`
+            div.innerHTML = message
+            output.appendChild(div)
+        }
+
+        // Test coordinates from the debug logs
+        const startCoord = [40.779987, -119.197708]  // User's location (should be 3:30&A)
+        const endCoord = [40.785520373563145, -119.21741883553943]  // Shitty Wood (should be E & 7:15)
+
+        async function debugStreetNetwork() {
+            try {
+                log('<h2>🗺️ Loading GIS Data and Building Street Network...</h2>')
+                const gisData = await loadAllGISData(2025)
+                
+                const networkBuilder = new StreetNetworkBuilder()
+                const network = await networkBuilder.buildNetworkFromGIS(gisData)
+                
+                log(`✅ Street network built: ${network.nodes.size} intersections, ${network.edges.size} street segments`, 'success')
+                
+                // Get all intersections
+                const intersections = Array.from(network.nodes.values())
+                log(`<h2>📍 Analyzing ${intersections.length} Street Intersections</h2>`)
+                
+                // Find intersections near our test coordinates
+                log('<h2>🎯 Finding Intersections Near Test Coordinates</h2>')
+                
+                function findNearbyIntersections(coord, label, maxDistance = 500) {
+                    const nearby = intersections
+                        .map(node => ({
+                            ...node,
+                            distance: calculateDistance([node.lat, node.lng], coord)
+                        }))
+                        .filter(node => node.distance <= maxDistance)
+                        .sort((a, b) => a.distance - b.distance)
+                    
+                    log(`
+                        <h3>📍 ${label} [${coord[0]}, ${coord[1]}]</h3>
+                        <div class="coord">Found ${nearby.length} intersections within ${maxDistance}m</div><br>
+                        ${nearby.length > 0 ? 
+                            nearby.slice(0, 10).map(node => 
+                                `<div class="coord">📍 ${node.id}: ${Math.round(node.distance)}m away at [${node.lat.toFixed(6)}, ${node.lng.toFixed(6)}]</div>`
+                            ).join('<br>') :
+                            '<div class="coord">❌ NO INTERSECTIONS FOUND</div>'
+                        }
+                    `)
+                    
+                    return nearby
+                }
+                
+                const startNearby = findNearbyIntersections(startCoord, 'START (should be 3:30&A)', 500)
+                const endNearby = findNearbyIntersections(endCoord, 'END (should be E & 7:15)', 500)
+                
+                // Analyze intersection naming patterns
+                log('<h2>🔤 Street Network Intersection Analysis</h2>')
+                
+                const intersectionsByName = {}
+                intersections.forEach(node => {
+                    const parts = node.id.split('_')
+                    if (parts.length >= 2) {
+                        const key = `${parts[0]}_${parts[1]}`
+                        if (!intersectionsByName[key]) {
+                            intersectionsByName[key] = []
+                        }
+                        intersectionsByName[key].push(node)
+                    }
+                })
+                
+                // Look for quarter-hour intersections specifically
+                const quarterHourPattern = /(2|3|4|5|6|7|8|9|10):(15|45)/
+                const quarterHourIntersections = Object.keys(intersectionsByName)
+                    .filter(key => quarterHourPattern.test(key))
+                    .sort()
+                
+                log(`
+                    <h3>📊 Quarter-Hour Intersections (should include 3:30 and 7:15):</h3>
+                    <div class="coord">Found ${quarterHourIntersections.length} quarter-hour intersection types</div><br>
+                    <pre>${quarterHourIntersections.join('\n')}</pre>
+                `)
+                
+                // List ALL intersections to see what we actually have
+                log('<h2>📋 ALL STREET INTERSECTIONS</h2>')
+                const allIntersectionNames = Array.from(network.nodes.keys()).sort()
+                log(`
+                    <div class="coord">Total intersections: ${allIntersectionNames.length}</div><br>
+                    <h3>First 50 intersection IDs:</h3>
+                    <pre>${allIntersectionNames.slice(0, 50).join('\n')}</pre>
+                    <h3>Random sample of 20 more:</h3>
+                    <pre>${allIntersectionNames.slice(100, 120).join('\n')}</pre>
+                    <h3>Last 20 intersection IDs:</h3>
+                    <pre>${allIntersectionNames.slice(-20).join('\n')}</pre>
+                `)
+                
+                // Check for specific intersections we need
+                const neededIntersections = ['3:30', '7:15']
+                neededIntersections.forEach(time => {
+                    const matching = Object.keys(intersectionsByName)
+                        .filter(key => key.includes(time))
+                    
+                    log(`
+                        <h3>🎯 Looking for ${time} intersections:</h3>
+                        ${matching.length > 0 ? 
+                            `<div class="coord">Found: ${matching.join(', ')}</div>` :
+                            `<div class="coord">❌ NO ${time} intersections found</div>`
+                        }
+                    `)
+                })
+                
+                // Sample intersection coordinates vs camp coordinates
+                log('<h2>📏 Coordinate Comparison Analysis</h2>')
+                if (startNearby.length > 0) {
+                    const nearest = startNearby[0]
+                    log(`
+                        <h3>START coordinate analysis:</h3>
+                        <div class="coord">Camp at: [${startCoord[0]}, ${startCoord[1]}]</div><br>
+                        <div class="coord">Nearest intersection: ${nearest.id} at [${nearest.lat}, ${nearest.lng}]</div><br>
+                        <div class="coord">Distance: ${Math.round(nearest.distance)}m</div><br>
+                        <div class="coord">Why 200m search fails: ${nearest.distance > 200 ? 'Distance > 200m limit' : 'Within 200m - other issue'}</div>
+                    `)
+                }
+                
+                if (endNearby.length > 0) {
+                    const nearest = endNearby[0]
+                    log(`
+                        <h3>END coordinate analysis:</h3>
+                        <div class="coord">Camp at: [${endCoord[0]}, ${endCoord[1]}]</div><br>
+                        <div class="coord">Nearest intersection: ${nearest.id} at [${nearest.lat}, ${nearest.lng}]</div><br>
+                        <div class="coord">Distance: ${Math.round(nearest.distance)}m</div><br>
+                        <div class="coord">Why 200m search fails: ${nearest.distance > 200 ? 'Distance > 200m limit' : 'Within 200m - other issue'}</div>
+                    `)
+                }
+                
+            } catch (error) {
+                log(`❌ Debug failed: ${error.message}`, 'error')
+                log(`<pre>${error.stack}</pre>`, 'error')
+            }
+        }
+
+        debugStreetNetwork()
+    </script>
+</body>
+</html>

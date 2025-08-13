@@ -131,8 +131,7 @@ export class StreetNetworkBuilder {
     let minDistance = this.intersectionThreshold
     
     for (const [existingKey, candidate] of this.intersectionCandidates.entries()) {
-      const [existingLon, existingLat] = candidate.coordinates
-      const distance = haversineDistance(point, [existingLon, existingLat])
+      const distance = haversineDistance(point, candidate.coordinates)
       
       if (distance < minDistance) {
         minDistance = distance
@@ -153,7 +152,7 @@ export class StreetNetworkBuilder {
       // Create new group
       const pointKey = `${lon.toFixed(6)},${lat.toFixed(6)}`
       this.intersectionCandidates.set(pointKey, {
-        coordinates: [lon, lat],
+        coordinates: [lat, lon], // Convert from GeoJSON [lng, lat] to app [lat, lng] format
         streetNames: [edge.streetName],
         connectedEdges: [edge]
       })
@@ -192,11 +191,13 @@ export class StreetNetworkBuilder {
 
       // Create network edge
       const edgeId = this._generateEdgeId()
+      // Convert coordinates from GeoJSON [lng, lat] to app [lat, lng] format
+      const convertedCoords = rawEdge.coordinates.map(([lng, lat]) => [lat, lng])
       const networkEdge = new NetworkEdge(
         edgeId,
         startNode.nodeId,
         endNode.nodeId,
-        rawEdge.coordinates,
+        convertedCoords,
         rawEdge.streetName,
         rawEdge.streetType,
         rawEdge.width

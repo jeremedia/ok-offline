@@ -112,17 +112,32 @@ onUnmounted(() => {
   line-height: 1;
 }
 
-/* Additional positioning for PWA */
-.fab-pwa {
-  bottom: calc(84px + env(safe-area-inset-bottom)); /* Account for extra PWA padding */
-}
+/* Note: PWA positioning now handled by body class selectors below */
 
 /* Tablet and desktop adjustments */
 @media (min-width: 768px) {
   .fab {
-    bottom: 24px;
     right: 24px;
   }
+}
+
+/* Desktop with footer - account for 60px footer height */
+body.desktop-device .fab {
+  bottom: calc(60px + 24px); /* Footer height + spacing */
+}
+
+/* Mobile devices - no footer, use standard spacing */
+body.mobile-device .fab {
+  bottom: calc(70px + env(safe-area-inset-bottom)); /* Above bottom nav */
+}
+
+/* PWA adjustments for both mobile and desktop */
+body.mobile-device .fab.fab-pwa {
+  bottom: calc(84px + env(safe-area-inset-bottom)); /* Extra PWA padding */
+}
+
+body.desktop-device .fab.fab-pwa {
+  bottom: calc(60px + 38px); /* Footer height + extra PWA spacing */
 }
 
 /* Accessibility */

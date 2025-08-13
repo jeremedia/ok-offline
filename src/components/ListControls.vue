@@ -40,6 +40,7 @@
           <option value="avenue">Sort: Avenue (A-L)</option>
           <option value="distance" v-if="userLocation">Sort: Distance</option>
           <option value="date" v-if="type === 'event'">Sort: Date/Time</option>
+          <option value="time-distance" v-if="type === 'event' && userLocation">Sort: Soon + Near</option>
         </select>
       </div>
 
@@ -172,6 +173,19 @@
             ⭐ {{ showFavoritesOnly ? 'Show All' : 'Favorites' }} 
             <span v-if="favoriteCount > 0">({{ favoriteCount }})</span>
           </BaseButton>
+
+          <!-- Past Events Toggle (Events Only) -->
+          <BaseButton
+            v-if="type === 'event'"
+            @click="$emit('togglePastEvents')"
+            variant="secondary"
+            :active="showPastEvents"
+            :uppercase="false"
+            class="past-events-toggle"
+          >
+            🕒 Past Events {{ showPastEvents ? 'Shown' : 'Hidden' }}
+          </BaseButton>
+
           
           <BaseButton 
             v-if="!userLocation"
@@ -257,6 +271,10 @@ const props = defineProps({
   totalItems: {
     type: Number,
     default: 0
+  },
+  showPastEvents: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -272,7 +290,8 @@ const emit = defineEmits([
   'toggleFavorites',
   'enableLocation',
   'clearAllFilters',
-  'update:filtersCollapsed'
+  'update:filtersCollapsed',
+  'togglePastEvents'
 ])
 
 // Computed properties for button states
@@ -482,7 +501,6 @@ const clearAllFilters = () => {
 
 /* Filters Content */
 .filters-content {
-  border-bottom: 1px solid var(--color-border);
   padding-top: 1rem;
   margin-top: 0.5rem;
 }
@@ -521,19 +539,37 @@ const clearAllFilters = () => {
   border-radius: 0 4px 4px 0;
 }
 
-.sector-checkboxes,
-.event-type-checkboxes {
+.sector-checkboxes {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   gap: 0.5rem;
 }
 
-.sector-checkbox,
+.event-type-checkboxes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 0.5rem;
+}
+
+.sector-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
 .event-type-checkbox {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   font-size: 0.85rem;
+  font-weight: bold;
+  text-transform: uppercase;
   color: var(--color-text-secondary);
   cursor: pointer;
   padding: 0.25rem;

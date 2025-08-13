@@ -6,7 +6,7 @@
 import { API_URLS } from '@/config'
 
 // API configuration
-const API_BASE_URL = API_URLS.VECTOR_API || 'http://100.104.170.10:3555/api/v1'
+const API_BASE_URL = API_URLS.VECTOR_API || `${API_URLS.BASE}/api/v1`
 
 // Cache configuration
 const CACHE_DURATION = 60 * 60 * 1000 // 1 hour for camp data

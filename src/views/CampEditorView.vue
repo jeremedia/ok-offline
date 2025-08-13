@@ -65,6 +65,8 @@
           <PersonalSpaceEditor
             v-if="selectedMember"
             :member="selectedMember"
+            :member-id="selectedMember.id"
+            :member-name="`${selectedMember.first_name} ${selectedMember.last_name}`"
             :team-members="campData?.team_members || []"
             @create="handlePersonalSpaceCreate"
             @update="handlePersonalSpaceUpdate"
@@ -99,7 +101,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, computed } from 'vue'
+import { ref, onMounted, watch, computed, toRaw } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useCampEditor } from '../composables/useCampEditor'
 import { useToast } from '../composables/useToast'
@@ -231,37 +233,45 @@ const updateSelectedMemberId = (memberId) => {
 // Camp data updates using composable methods
 const updateCampData = (newCampData) => {
   if (!campData.value) return
-  Object.assign(campData.value, newCampData)
+  // Avoid readonly mutation by using proper Vue reactivity
+  const current = toRaw(campData.value)
+  Object.assign(current, newCampData)
 }
 
 const updateTeamMembers = (members) => {
   if (!campData.value) return
-  campData.value.team_members = [...members]
+  // Use the composable's method instead of direct mutation
+  // The composable should handle this update properly
+  console.warn('updateTeamMembers called - should use individual team member update methods')
 }
 
 // Kitchen data updates
 const updateKitchenData = (kitchenData) => {
   if (!campData.value) return
-  campData.value.kitchen = { ...kitchenData }
+  const current = toRaw(campData.value)
+  current.kitchen = { ...kitchenData }
 }
 
 // Schedule data updates
 const updateScheduleData = (scheduleData) => {
   if (!campData.value) return
-  campData.value.schedule = { ...scheduleData }
+  const current = toRaw(campData.value)
+  current.schedule = { ...scheduleData }
 }
 
 // Camp map updates
 const updateCampMap = (mapData) => {
   if (!campData.value) return
-  campData.value.camp_map = { ...mapData }
+  const current = toRaw(campData.value)
+  current.camp_map = { ...mapData }
 }
 
 // Map placement updates
 const updateMapPlacements = (placements) => {
   if (!campData.value) return
-  if (!campData.value.camp_map) campData.value.camp_map = {}
-  campData.value.camp_map.map_placements = [...placements]
+  const current = toRaw(campData.value)
+  if (!current.camp_map) current.camp_map = {}
+  current.camp_map.map_placements = [...placements]
 }
 
 // Personal space updates

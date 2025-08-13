@@ -49,22 +49,19 @@ export function calculateBearing([lat1, lng1], [lat2, lng2]) {
 export function getClockPosition(coord) {
   const bearing = calculateBearing(BRC_CENTER, coord)
   
-  // CRITICAL BUG FIX: BRC clock system correction
-  // Standard bearing: 0° = North, 90° = East, 180° = South, 270° = West
-  // BRC clock system: 12:00 = North, 3:00 = East, 6:00 = South, 9:00 = West
+  // CRITICAL BUG FIX: Account for BRC city orientation
+  // BRC is oriented with 12:00 pointing 45° northeast, not true north
+  // The bearing gives us angle relative to true north, but BRC clock is rotated 45°
   // 
-  // The issue: We were adding 90° which rotates the clock incorrectly
-  // Correct conversion: bearing directly maps to clock degrees with proper orientation
-  // 
-  // BRC Clock mapping should be:
-  // - 0° bearing (North) = 12:00 (0 minutes)
-  // - 90° bearing (East) = 3:00 (180 minutes)  
-  // - 180° bearing (South) = 6:00 (360 minutes)
-  // - 270° bearing (West) = 9:00 (540 minutes)
+  // Correction: Subtract 45° city bearing offset to align with BRC clock system
+  // Example: 9:45 should be at 292.5° in BRC system
+  // If true bearing is ~323°, then BRC angle = 323° - 45° = 278° ≈ 9:15-9:20
   
-  // Convert bearing directly to clock minutes without the incorrect +90° rotation
-  const clockDegrees = bearing % 360
-  const minutes = Math.round((clockDegrees / 360) * 720) // Convert to minutes (720 minutes in full circle)
+  const cityBearingOffset = 45 // BRC is oriented 45° from true north
+  let brcAngle = (bearing - cityBearingOffset + 360) % 360
+  
+  // Convert BRC angle to clock minutes (720 minutes in full circle)
+  const minutes = Math.round((brcAngle / 360) * 720)
   return minutes
 }
 

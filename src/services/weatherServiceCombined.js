@@ -35,9 +35,9 @@ const CACHE_DURATION = 10 * 60 * 1000 // 10 minutes
 /**
  * Rails API endpoint for weather data
  */
-const RAILS_WEATHER_API_URL = import.meta.env.DEV 
-  ? 'http://100.104.170.10:3555/api/v1/weather/current'
-  : '/api/v1/weather/current'
+import { API_URLS } from '@/config'
+
+const RAILS_WEATHER_API_URL = '/api/v1/weather/current'
 
 /**
  * Check if we should try Apple Weather as fallback

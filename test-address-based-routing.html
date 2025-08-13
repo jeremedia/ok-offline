@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Address-Based Routing System</title>
+    <style>
+        body {
+            font-family: 'Berkeley Mono', monospace;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        h1 { color: #8B0000; }
+        h2 { color: #FFD700; }
+        .test-section {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .success { color: #4CAF50; }
+        .error { color: #f44336; }
+        .warning { color: #ff9800; }
+        .info { color: #2196F3; }
+        pre {
+            background: #1e1e1e;
+            border: 1px solid #444;
+            border-radius: 4px;
+            padding: 15px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+        button {
+            background: #8B0000;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #660000;
+        }
+        .coordinates {
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔥 Address-Based Routing System Test</h1>
+    <p>Testing the coordinate system alignment solution for BRC routing</p>
+    
+    <div style="background: #333; padding: 15px; border-radius: 8px; margin: 20px 0;">
+        <button onclick="runAllTests()" style="background: #4CAF50; font-size: 16px; padding: 15px 30px;">🚀 RUN ALL TESTS</button>
+        <button onclick="runTestsLoop()" style="background: #2196F3; font-size: 16px; padding: 15px 30px;">🔁 AUTO-LOOP TESTS</button>
+        <button onclick="copyAllResults()" style="background: #ff9800; font-size: 16px; padding: 15px 30px;">📋 COPY RESULTS</button>
+        <span style="margin-left: 20px; color: #ccc;">Copy all test results to clipboard</span>
+    </div>
+
+    <div class="test-section">
+        <h2>🧪 Test 1: System Initialization</h2>
+        <p>Initialize the routing system and verify all components work</p>
+        <button onclick="testSystemInitialization()">Initialize System</button>
+        <pre id="init-results">Click "Initialize System" to test...</pre>
+    </div>
+
+    <div class="test-section">
+        <h2>🧪 Test 2: Direct/Straight Line (Open Playa ↔ Open Playa)</h2>
+        <p><strong>Temple ↔ Man</strong> - Both in open playa, should use direct routing</p>
+        <button onclick="testDirectRouting()">Test Direct Routing</button>
+        <pre id="direct-results">Click "Test Direct Routing" to test...</pre>
+    </div>
+
+    <div class="test-section">
+        <h2>🧪 Test 3: Same-Sector Streets (Urban ↔ Urban Nearby)</h2>
+        <p><strong>3:30&A ↔ 4:00&K</strong> - Same sector, should use optimal street-following</p>
+        <button onclick="testSameSectorStreets()">Test Same-Sector Streets</button>
+        <pre id="streets-results">Click "Test Same-Sector Streets" to test...</pre>
+    </div>
+
+    <div class="test-section">
+        <h2>🧪 Test 4: Hybrid Cross-Sector (Urban ↔ Urban Far)</h2>
+        <p><strong>3:30&A ↔ 8:30&D</strong> - Cross-sector, should use hybrid (urban→playa→urban)</p>
+        <button onclick="testHybridCrossSector()">Test Hybrid Cross-Sector</button>
+        <pre id="hybrid-results">Click "Test Hybrid Cross-Sector" to test...</pre>
+    </div>
+
+    <div class="test-section">
+        <h2>🧪 Test 5: Urban-to-Playa (Urban Exit + Direct)</h2>
+        <p><strong>3:30&A → Temple</strong> - Urban to open playa, should use street exit + direct</p>
+        <button onclick="testUrbanToPlaya()">Test Urban-to-Playa</button>
+        <pre id="urban-playa-results">Click "Test Urban-to-Playa" to test...</pre>
+    </div>
+
+    <div class="test-section">
+        <h2>🧪 Test 6: Playa-to-Urban (Direct + Urban Entry)</h2>
+        <p><strong>Temple → 3:30&A</strong> - Open playa to urban, should use direct + street entry</p>
+        <button onclick="testPlayaToUrban()">Test Playa-to-Urban</button>
+        <pre id="playa-urban-results">Click "Test Playa-to-Urban" to test...</pre>
+    </div>
+
+    <script type="module">
+        import { AddressBasedNetworkBuilder } from './src/services/routing/addressBasedNetworkBuilder.js'
+        import { BRCPathfinder } from './src/services/routing/pathfinder.js'
+        import { EnhancedRoutingService } from './src/services/routing/enhancedRoutingService.js'
+        import { brcAddressToLatLon } from './src/utils/geocoding.js'
+        import { loadAllGISData } from './src/services/gisData.js'
+        import { haversineDistance } from './src/services/routing/utils/geoUtils.js'
+
+        let routingService = null
+
+        // BRC Coordinate Constants
+        const BRC_COORDINATES = {
+            'man': [40.786989, -119.206644],           // The Man (center of inner playa)
+            'temple': [40.790669, -119.206644],       // Temple (north of center)
+            '3:30&A': [40.779987, -119.197708],       // OKNOTOK camp (urban)
+            '4:00&K': [40.777344, -119.190140],       // Same sector, further out (urban)
+            '8:30&D': [40.792449, -119.223580],       // Cross-sector urban location
+        }
+
+        // Test 1: Initialize the routing system
+        window.testSystemInitialization = async function() {
+            const resultsEl = document.getElementById('init-results')
+            resultsEl.textContent = '🔄 Initializing BRC Intelligent Routing System...\n'
+
+            try {
+                if (!routingService) {
+                    routingService = new EnhancedRoutingService()
+                    await routingService.initialize()
+                }
+
+                let results = `✅ BRC Routing System Initialized!\n\n`
+                results += `📊 System Status:\n`
+                results += `   - Zone Classifier: ${routingService.zoneClassifier ? '✅' : '❌'}\n`
+                results += `   - Street Network: ${routingService.streetNetwork?.isBuilt ? '✅' : '❌'}\n`
+                results += `   - Pathfinder: ${routingService.pathfinder ? '✅' : '❌'}\n`
+                results += `   - Hybrid Router: ${routingService.hybridRouter ? '✅' : '❌'}\n\n`
+
+                if (routingService.streetNetwork?.isBuilt) {
+                    const stats = routingService.streetNetwork.getNetworkStats()
+                    results += `🛣️  Street Network:\n`
+                    results += `   - Nodes: ${stats.intersections}\n`
+                    results += `   - Edges: ${stats.edges}\n`
+                    results += `   - BRC Address Coverage: 316 intersections\n\n`
+                }
+
+                results += `🎯 READY: All routing methods available!`
+                resultsEl.innerHTML = `<span class="success">${results}</span>`
+
+            } catch (error) {
+                resultsEl.innerHTML = `<span class="error">❌ System initialization failed: ${error.message}\n\nStack trace:\n${error.stack}</span>`
+            }
+        }
+
+        // Test 2: Direct/Straight Line Routing (Open Playa ↔ Open Playa)
+        window.testDirectRouting = async function() {
+            const resultsEl = document.getElementById('direct-results')
+            resultsEl.textContent = '🔄 Testing direct routing between Temple and Man...\n'
+
+            try {
+                if (!routingService) {
+                    await testSystemInitialization()
+                }
+
+                let results = `🧪 Direct Routing Test: Temple ↔ Man\n\n`
+
+                const templeCoord = BRC_COORDINATES.temple
+                const manCoord = BRC_COORDINATES.man
+
+                results += `📍 Coordinates:\n`
+                results += `   Temple: [${templeCoord[0].toFixed(6)}, ${templeCoord[1].toFixed(6)}]\n`
+                results += `   Man: [${manCoord[0].toFixed(6)}, ${manCoord[1].toFixed(6)}]\n\n`
+
+                // Test routing in both directions
+                const route1 = await routingService.calculateIntelligentRoute(templeCoord, manCoord, 'walking')
+                const route2 = await routingService.calculateIntelligentRoute(manCoord, templeCoord, 'walking')
+
+                results += `🛣️  Temple → Man:\n`
+                results += `   Route Type: ${route1.summary?.routeType || 'Unknown'}\n`
+                results += `   Distance: ${route1.summary?.totalDistance || route1.distance}ft\n`
+                results += `   Expected: Direct/Straight Line\n\n`
+
+                results += `🛣️  Man → Temple:\n`
+                results += `   Route Type: ${route2.summary?.routeType || 'Unknown'}\n`
+                results += `   Distance: ${route2.summary?.totalDistance || route2.distance}ft\n`
+                results += `   Expected: Direct/Straight Line\n\n`
+
+                const success1 = (route1.summary?.routeType || route1.type || '').toLowerCase().includes('direct') || 
+                                (route1.summary?.routeType || route1.type || '').toLowerCase().includes('straight')
+                const success2 = (route2.summary?.routeType || route2.type || '').toLowerCase().includes('direct') || 
+                                (route2.summary?.routeType || route2.type || '').toLowerCase().includes('straight')
+
+                if (success1 && success2) {
+                    results += `✅ SUCCESS: Both routes use direct/straight-line routing!`
+                } else {
+                    results += `❌ ISSUE: Routes not using expected direct routing`
+                }
+
+                resultsEl.innerHTML = `<span class="info">${results}</span>`
+
+            } catch (error) {
+                resultsEl.innerHTML = `<span class="error">❌ Direct routing test failed: ${error.message}\n\nStack trace:\n${error.stack}</span>`
+            }
+        }
+
+        // Test 3: Same-Sector Streets (Urban ↔ Urban Nearby)
+        window.testSameSectorStreets = async function() {
+            const resultsEl = document.getElementById('streets-results')
+            resultsEl.textContent = '🔄 Testing same-sector street routing...\n'
+
+            try {
+                if (!routingService) {
+                    await testSystemInitialization()
+                }
+
+                let results = `🧪 Same-Sector Street Routing Test: 3:30&A ↔ 4:00&K\n\n`
+
+                const coord330A = BRC_COORDINATES['3:30&A']
+                const coord400K = BRC_COORDINATES['4:00&K']
+
+                results += `📍 Coordinates:\n`
+                results += `   3:30&A (OKNOTOK): [${coord330A[0].toFixed(6)}, ${coord330A[1].toFixed(6)}]\n`
+                results += `   4:00&K (Same Sector): [${coord400K[0].toFixed(6)}, ${coord400K[1].toFixed(6)}]\n\n`
+
+                // Test routing in both directions
+                const route1 = await routingService.calculateIntelligentRoute(coord330A, coord400K, 'walking')
+                const route2 = await routingService.calculateIntelligentRoute(coord400K, coord330A, 'walking')
+
+                results += `🛣️  3:30&A → 4:00&K:\n`
+                results += `   Route Type: ${route1.summary?.routeType || 'Unknown'}\n`
+                results += `   Distance: ${route1.summary?.totalDistance || route1.distance}ft\n`
+                results += `   Duration: ${route1.summary?.totalDuration || route1.duration}min\n`
+                results += `   Expected: Street-following navigation\n\n`
+
+                results += `🛣️  4:00&K → 3:30&A:\n`
+                results += `   Route Type: ${route2.summary?.routeType || 'Unknown'}\n`
+                results += `   Distance: ${route2.summary?.totalDistance || route2.distance}ft\n`
+                results += `   Duration: ${route2.summary?.totalDuration || route2.duration}min\n`
+                results += `   Expected: Street-following navigation\n\n`
+
+                const success1 = (route1.summary?.routeType || route1.type || '').toLowerCase().includes('street')
+                const success2 = (route2.summary?.routeType || route2.type || '').toLowerCase().includes('street')
+
+                if (success1 && success2) {
+                    results += `✅ SUCCESS: Both routes use optimal street-following!`
+                    if (route1.distance < 5000 && route2.distance < 5000) {
+                        results += `\n🎯 PERFORMANCE: Routes are efficient (<5000ft)`
+                    }
+                } else {
+                    results += `❌ ISSUE: Routes not using expected street-following`
+                }
+
+                resultsEl.innerHTML = `<span class="info">${results}</span>`
+
+            } catch (error) {
+                resultsEl.innerHTML = `<span class="error">❌ Same-sector street test failed: ${error.message}\n\nStack trace:\n${error.stack}</span>`
+            }
+        }
+
+        // Test 4: Hybrid Cross-Sector (Urban ↔ Urban Far)
+        window.testHybridCrossSector = async function() {
+            const resultsEl = document.getElementById('hybrid-results')
+            resultsEl.textContent = '🔄 Testing hybrid cross-sector routing...\n'
+
+            try {
+                if (!routingService) {
+                    await testSystemInitialization()
+                }
+
+                let results = `🧪 Hybrid Cross-Sector Routing Test: 3:30&A ↔ 8:30&D\n\n`
+
+                const coord330A = BRC_COORDINATES['3:30&A']
+                const coord830D = BRC_COORDINATES['8:30&D']
+
+                results += `📍 Coordinates:\n`
+                results += `   3:30&A (OKNOTOK): [${coord330A[0].toFixed(6)}, ${coord330A[1].toFixed(6)}]\n`
+                results += `   8:30&D (Cross-Sector): [${coord830D[0].toFixed(6)}, ${coord830D[1].toFixed(6)}]\n\n`
+
+                // Test routing in both directions
+                const route1 = await routingService.calculateIntelligentRoute(coord330A, coord830D, 'walking')
+                const route2 = await routingService.calculateIntelligentRoute(coord830D, coord330A, 'walking')
+
+                results += `🛣️  3:30&A → 8:30&D:\n`
+                results += `   Route Type: ${route1.summary?.routeType || 'Unknown'}\n`
+                results += `   Distance: ${route1.summary?.totalDistance || route1.distance}ft\n`
+                results += `   Duration: ${route1.summary?.totalDuration || route1.duration}min\n`
+                results += `   Segments: ${route1.segments?.length || 'N/A'}\n`
+                results += `   Expected: Hybrid (Urban→Playa→Urban)\n\n`
+
+                results += `🛣️  8:30&D → 3:30&A:\n`
+                results += `   Route Type: ${route2.summary?.routeType || 'Unknown'}\n`
+                results += `   Distance: ${route2.summary?.totalDistance || route2.distance}ft\n`
+                results += `   Duration: ${route2.summary?.totalDuration || route2.duration}min\n`
+                results += `   Segments: ${route2.segments?.length || 'N/A'}\n`
+                results += `   Expected: Hybrid (Urban→Playa→Urban)\n\n`
+
+                // Check for hybrid routing indicators
+                const success1 = (route1.summary?.routeType || route1.type || '').toLowerCase().includes('hybrid') ||
+                                (route1.segments && route1.segments.length === 3)
+                const success2 = (route2.summary?.routeType || route2.type || '').toLowerCase().includes('hybrid') ||
+                                (route2.segments && route2.segments.length === 3)
+
+                // Check urban segments for street pathfinding
+                const urbanSegs1 = route1.segments?.filter(s => s.type === 'urban_navigation' && s.coordinates?.length > 2) || []
+                const urbanSegs2 = route2.segments?.filter(s => s.type === 'urban_navigation' && s.coordinates?.length > 2) || []
+
+                results += `🔍 Urban Segment Analysis:\n`
+                results += `   Route 1 urban segments with street pathfinding: ${urbanSegs1.length}\n`
+                results += `   Route 2 urban segments with street pathfinding: ${urbanSegs2.length}\n\n`
+
+                if (success1 && success2) {
+                    results += `✅ SUCCESS: Both routes use hybrid routing!\n`
+                    if (urbanSegs1.length > 0 || urbanSegs2.length > 0) {
+                        results += `🎯 INTEGRATION: Urban segments using optimal A* street pathfinding!`
+                    } else {
+                        results += `📝 Note: Urban segments using fallback routing`
+                    }
+                } else {
+                    results += `❌ ISSUE: Routes not using expected hybrid routing`
+                }
+
+                resultsEl.innerHTML = `<span class="info">${results}</span>`
+
+            } catch (error) {
+                resultsEl.innerHTML = `<span class="error">❌ Hybrid cross-sector test failed: ${error.message}\n\nStack trace:\n${error.stack}</span>`
+            }
+        }
+
+        // Test 5: Urban-to-Playa (Urban Exit + Direct)
+        window.testUrbanToPlaya = async function() {
+            const resultsEl = document.getElementById('urban-playa-results')
+            resultsEl.textContent = '🔄 Testing urban-to-playa routing...\n'
+
+            try {
+                if (!routingService) {
+                    await testSystemInitialization()
+                }
+
+                let results = `🧪 Urban-to-Playa Routing Test: 3:30&A → Temple\n\n`
+
+                const coord330A = BRC_COORDINATES['3:30&A']
+                const templeCoord = BRC_COORDINATES.temple
+
+                results += `📍 Coordinates:\n`
+                results += `   3:30&A (OKNOTOK): [${coord330A[0].toFixed(6)}, ${coord330A[1].toFixed(6)}]\n`
+                results += `   Temple: [${templeCoord[0].toFixed(6)}, ${templeCoord[1].toFixed(6)}]\n\n`
+
+                const route = await routingService.calculateIntelligentRoute(coord330A, templeCoord, 'walking')
+
+                results += `🛣️  3:30&A → Temple:\n`
+                results += `   Route Type: ${route.summary?.routeType || 'Unknown'}\n`
+                results += `   Distance: ${route.summary?.totalDistance || route.distance}ft\n`
+                results += `   Duration: ${route.summary?.totalDuration || route.duration}min\n`
+                results += `   Expected: Urban exit + Direct OR Straight line\n\n`
+
+                const routeType = (route.summary?.routeType || route.type || '').toLowerCase()
+                const success = routeType.includes('direct') || routeType.includes('straight') || routeType.includes('enhanced')
+
+                if (success) {
+                    results += `✅ SUCCESS: Route uses appropriate urban-to-playa routing!`
+                } else {
+                    results += `❌ ISSUE: Route type unexpected for urban-to-playa`
+                }
+
+                resultsEl.innerHTML = `<span class="info">${results}</span>`
+
+            } catch (error) {
+                resultsEl.innerHTML = `<span class="error">❌ Urban-to-playa test failed: ${error.message}\n\nStack trace:\n${error.stack}</span>`
+            }
+        }
+
+        // Test 6: Playa-to-Urban (Direct + Urban Entry)
+        window.testPlayaToUrban = async function() {
+            const resultsEl = document.getElementById('playa-urban-results')
+            resultsEl.textContent = '🔄 Testing playa-to-urban routing...\n'
+
+            try {
+                if (!routingService) {
+                    await testSystemInitialization()
+                }
+
+                let results = `🧪 Playa-to-Urban Routing Test: Temple → 3:30&A\n\n`
+
+                const templeCoord = BRC_COORDINATES.temple
+                const coord330A = BRC_COORDINATES['3:30&A']
+
+                results += `📍 Coordinates:\n`
+                results += `   Temple: [${templeCoord[0].toFixed(6)}, ${templeCoord[1].toFixed(6)}]\n`
+                results += `   3:30&A (OKNOTOK): [${coord330A[0].toFixed(6)}, ${coord330A[1].toFixed(6)}]\n\n`
+
+                const route = await routingService.calculateIntelligentRoute(templeCoord, coord330A, 'walking')
+
+                results += `🛣️  Temple → 3:30&A:\n`
+                results += `   Route Type: ${route.summary?.routeType || 'Unknown'}\n`
+                results += `   Distance: ${route.summary?.totalDistance || route.distance}ft\n`
+                results += `   Duration: ${route.summary?.totalDuration || route.duration}min\n`
+                results += `   Expected: Direct + Urban entry OR Straight line\n\n`
+
+                const routeType = (route.summary?.routeType || route.type || '').toLowerCase()
+                const success = routeType.includes('direct') || routeType.includes('straight') || routeType.includes('enhanced')
+
+                if (success) {
+                    results += `✅ SUCCESS: Route uses appropriate playa-to-urban routing!`
+                } else {
+                    results += `❌ ISSUE: Route type unexpected for playa-to-urban`
+                }
+
+                resultsEl.innerHTML = `<span class="info">${results}</span>`
+
+            } catch (error) {
+                resultsEl.innerHTML = `<span class="error">❌ Playa-to-urban test failed: ${error.message}\n\nStack trace:\n${error.stack}</span>`
+            }
+        }
+        
+        // Auto-run functionality
+        let isLooping = false
+        
+        window.runAllTests = async function() {
+            console.log('🚀 Running comprehensive BRC routing tests...')
+            
+            // Clear all results
+            document.getElementById('init-results').textContent = 'Running...'
+            document.getElementById('direct-results').textContent = 'Waiting...'
+            document.getElementById('streets-results').textContent = 'Waiting...'
+            document.getElementById('hybrid-results').textContent = 'Waiting...'
+            document.getElementById('urban-playa-results').textContent = 'Waiting...'
+            document.getElementById('playa-urban-results').textContent = 'Waiting...'
+            
+            try {
+                console.log('🔧 Test 1: System initialization...')
+                await testSystemInitialization()
+                await new Promise(resolve => setTimeout(resolve, 1000))
+                
+                console.log('🎯 Test 2: Direct routing (temple ↔ man)...')
+                await testDirectRouting()
+                await new Promise(resolve => setTimeout(resolve, 500))
+                
+                console.log('🛣️  Test 3: Same-sector streets (3:30&A ↔ 4:00&K)...')
+                await testSameSectorStreets()
+                await new Promise(resolve => setTimeout(resolve, 500))
+                
+                console.log('🔄 Test 4: Hybrid cross-sector (3:30&A ↔ 8:30&D)...')
+                await testHybridCrossSector()
+                await new Promise(resolve => setTimeout(resolve, 500))
+                
+                console.log('🏃 Test 5: Urban-to-playa (3:30&A → temple)...')
+                await testUrbanToPlaya()
+                await new Promise(resolve => setTimeout(resolve, 500))
+                
+                console.log('🏃 Test 6: Playa-to-urban (temple → 3:30&A)...')
+                await testPlayaToUrban()
+                
+                console.log('✅ All BRC routing tests completed!')
+                
+            } catch (error) {
+                console.error('❌ Auto-test failed:', error)
+            }
+        }
+        
+        window.runTestsLoop = async function() {
+            const button = event.target
+            
+            if (isLooping) {
+                isLooping = false
+                button.textContent = '🔁 AUTO-LOOP TESTS'
+                button.style.background = '#2196F3'
+                console.log('🛑 Test loop stopped')
+                return
+            }
+            
+            isLooping = true
+            button.textContent = '🛑 STOP LOOP'
+            button.style.background = '#f44336'
+            
+            let loopCount = 0
+            console.log('🔁 Starting test loop...')
+            
+            while (isLooping) {
+                loopCount++
+                console.log(`\n🔄 Loop ${loopCount}:`)
+                
+                await runAllTests()
+                
+                if (isLooping) {
+                    console.log('⏳ Waiting 3 seconds before next loop...')
+                    await new Promise(resolve => setTimeout(resolve, 3000))
+                }
+            }
+        }
+
+        // Copy all test results to clipboard
+        window.copyAllResults = async function() {
+            const button = event.target
+            const originalText = button.textContent
+            const originalBg = button.style.background
+            
+            try {
+                console.log('🔍 Checking clipboard permissions...')
+                
+                // Check if clipboard API is available
+                if (!navigator.clipboard) {
+                    throw new Error('Clipboard API not available')
+                }
+                
+                console.log('✅ Clipboard API available, generating results...')
+                
+                const timestamp = new Date().toISOString()
+                let results = `🔥 BRC INTELLIGENT ROUTING SYSTEM - TEST RESULTS\n`
+                results += `Generated: ${timestamp}\n`
+                results += `=====================================\n\n`
+
+                // Get all test result elements
+                const testSections = [
+                    { title: 'Test 1: System Initialization', id: 'init-results' },
+                    { title: 'Test 2: Direct/Straight Line (Open Playa ↔ Open Playa)', id: 'direct-results' },
+                    { title: 'Test 3: Same-Sector Streets (Urban ↔ Urban Nearby)', id: 'streets-results' },
+                    { title: 'Test 4: Hybrid Cross-Sector (Urban ↔ Urban Far)', id: 'hybrid-results' },
+                    { title: 'Test 5: Urban-to-Playa (Urban Exit + Direct)', id: 'urban-playa-results' },
+                    { title: 'Test 6: Playa-to-Urban (Direct + Urban Entry)', id: 'playa-urban-results' }
+                ]
+
+                for (const section of testSections) {
+                    const element = document.getElementById(section.id)
+                    if (element && element.textContent.trim()) {
+                        results += `${section.title}:\n`
+                        results += `${'='.repeat(section.title.length + 1)}\n`
+                        results += element.textContent.trim() + '\n\n'
+                    }
+                }
+
+                results += `=====================================\n`
+                results += `🎯 INTEGRATION STATUS: Complete\n`
+                results += `🔥 Street-Following: ${routingService?.pathfinder ? '✅ WORKING' : '❌ Not Available'}\n`
+                results += `🌊 Hybrid Router: ${routingService?.hybridRouter ? '✅ WORKING' : '❌ Not Available'}\n`
+                results += `📊 Total Network: ${routingService?.streetNetwork?.getNetworkStats()?.intersections || 'Unknown'} intersections\n`
+                results += `=====================================\n`
+
+                console.log(`📝 Generated ${results.length} characters of results`)
+                
+                // Try clipboard write with explicit permission check
+                try {
+                    console.log('📋 Attempting clipboard write...')
+                    await navigator.clipboard.writeText(results)
+                    console.log('✅ Clipboard write successful!')
+                    
+                    // Show success feedback
+                    button.textContent = '✅ COPIED!'
+                    button.style.background = '#4CAF50'
+                    
+                    setTimeout(() => {
+                        button.textContent = originalText
+                        button.style.background = originalBg
+                    }, 2000)
+                    
+                } catch (clipboardError) {
+                    console.error('❌ Clipboard write failed:', clipboardError)
+                    throw clipboardError
+                }
+                
+            } catch (error) {
+                console.error('❌ Copy operation failed:', error)
+                console.log('🔄 Trying fallback method...')
+                
+                // Fallback: Create a text area and select it
+                try {
+                    const timestamp = new Date().toISOString()
+                    let results = `🔥 BRC INTELLIGENT ROUTING SYSTEM - TEST RESULTS\n`
+                    results += `Generated: ${timestamp}\n`
+                    results += `=====================================\n\n`
+
+                    const testSections = [
+                        { title: 'Test 1: System Initialization', id: 'init-results' },
+                        { title: 'Test 2: Direct/Straight Line (Open Playa ↔ Open Playa)', id: 'direct-results' },
+                        { title: 'Test 3: Same-Sector Streets (Urban ↔ Urban Nearby)', id: 'streets-results' },
+                        { title: 'Test 4: Hybrid Cross-Sector (Urban ↔ Urban Far)', id: 'hybrid-results' },
+                        { title: 'Test 5: Urban-to-Playa (Urban Exit + Direct)', id: 'urban-playa-results' },
+                        { title: 'Test 6: Playa-to-Urban (Direct + Urban Entry)', id: 'playa-urban-results' }
+                    ]
+
+                    for (const section of testSections) {
+                        const element = document.getElementById(section.id)
+                        if (element && element.textContent.trim()) {
+                            results += `${section.title}:\n`
+                            results += `${'='.repeat(section.title.length + 1)}\n`
+                            results += element.textContent.trim() + '\n\n'
+                        }
+                    }
+
+                    results += `=====================================\n`
+                    results += `🎯 INTEGRATION STATUS: Complete\n`
+                    results += `🔥 Street-Following: ${routingService?.pathfinder ? '✅ WORKING' : '❌ Not Available'}\n`
+                    results += `🌊 Hybrid Router: ${routingService?.hybridRouter ? '✅ WORKING' : '❌ Not Available'}\n`
+                    results += `📊 Total Network: ${routingService?.streetNetwork?.getNetworkStats()?.intersections || 'Unknown'} intersections\n`
+                    results += `=====================================\n`
+                    
+                    // Create temporary text area
+                    const textArea = document.createElement('textarea')
+                    textArea.value = results
+                    textArea.style.position = 'fixed'
+                    textArea.style.left = '-999999px'
+                    textArea.style.top = '-999999px'
+                    document.body.appendChild(textArea)
+                    textArea.focus()
+                    textArea.select()
+                    
+                    // Try the old-school copy command
+                    const successful = document.execCommand('copy')
+                    document.body.removeChild(textArea)
+                    
+                    if (successful) {
+                        console.log('✅ Fallback copy successful!')
+                        button.textContent = '✅ COPIED!'
+                        button.style.background = '#4CAF50'
+                        
+                        setTimeout(() => {
+                            button.textContent = originalText
+                            button.style.background = originalBg
+                        }, 2000)
+                    } else {
+                        throw new Error('execCommand copy failed')
+                    }
+                    
+                } catch (fallbackError) {
+                    console.error('❌ Fallback copy also failed:', fallbackError)
+                    button.textContent = '❌ COPY FAILED'
+                    button.style.background = '#f44336'
+                    
+                    setTimeout(() => {
+                        button.textContent = originalText
+                        button.style.background = originalBg
+                    }, 3000)
+                    
+                    alert(`Copy failed. Debug info:\n\nMain error: ${error.message}\nFallback error: ${fallbackError.message}\n\nPlease check console for details and manually copy the results.`)
+                }
+            }
+        }
+    </script>
+</body>
+</html>

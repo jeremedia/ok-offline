@@ -13,7 +13,7 @@ Created by Jeremy Roush and brought to you by Mr. OK of OKNOTOK.
 - **Dev server is ALWAYS running** - The Vite development server is persistent and automatically hot-reloads all code changes
 - **Never attempt to start the dev server** - It's already running and trying to start it wastes time
 - **Code updates are instant** - Vite ensures browser code is updated immediately with every file save
-- **Access the app at**: http://dev.offline.oknotok.com
+- **Access the app at**: https://dev.offline.oknotok.com
 - No need to restart server for testing or development
 
 ### 🚨 CRITICAL Vue Pattern (Read First)
@@ -595,7 +595,7 @@ Database: bm2025-db (version: 2)
 ## Development Server
 
 **IMPORTANT**: The development server runs on port 8005 (proxied via Caddy).
-- **URL**: http://dev.offline.oknotok.com
+- **URL**: https://dev.offline.oknotok.com
 - **Status**: Always available during development
 - **No need to start**: The server is persistent and ready to use
 - If you need to restart: `npm run dev -- --host 0.0.0.0 --port 8005`
@@ -1062,43 +1062,29 @@ When updating existing components to use the global location state system:
 
 ## Date Handling Best Practices
 
-### PST Timezone Requirement
-**CRITICAL**: All dates and times in the app should display in PST/PDT (America/Los_Angeles timezone) regardless of server timezone. This ensures consistent experience for Burning Man participants.
+### Timezone-Safe Date Parsing
+**CRITICAL**: When working with date inputs (YYYY-MM-DD format), always use timezone-safe parsing to avoid "off by one day" display issues.
 
-#### ✅ CORRECT Pattern (PST Display)
+#### ✅ CORRECT Pattern
 ```javascript
-// PST timezone-aware date parsing and formatting
-const parseDateToPST = (dateStr) => {
+// Safe date parsing - avoids UTC/local timezone conversion
+const parseDate = (dateStr) => {
   if (!dateStr) return null
   const [year, month, day] = dateStr.split('-').map(Number)
-  return new Date(year, month - 1, day, 12, 0, 0) // Use noon to avoid DST issues
-}
-
-const formatDateInPST = (date) => {
-  if (!date) return 'Invalid'
-  return date.toLocaleDateString('en-US', { 
-    month: 'numeric', 
-    day: 'numeric',
-    timeZone: 'America/Los_Angeles' // Force PST/PDT display
-  })
+  return new Date(year, month - 1, day) // Month is 0-indexed, stays in local timezone
 }
 
 // Usage
-const date = parseDateToPST('2025-08-19')
-const displayText = formatDateInPST(date) // Always shows Aug 19 in PST
+const displayDate = parseDate('2025-08-19') // Always shows Aug 19, not Aug 18
 ```
 
-#### ❌ ANTI-PATTERN (Server Timezone Dependent)
+#### ❌ ANTI-PATTERN (Causes Off-By-One Day Errors)
 ```javascript
-// BAD: Shows different dates depending on server timezone
-const displayDate = new Date('2025-08-19').toLocaleDateString() // May show Aug 18!
-
-// BAD: Uses server's local timezone instead of PST
-const date = new Date(year, month - 1, day)
-const display = date.toLocaleDateString() // Not guaranteed to be PST
+// BAD: This can cause timezone conversion issues
+const displayDate = new Date('2025-08-19') // May show Aug 18 in some timezones!
 ```
 
-**Why**: Burning Man happens in Nevada (PST/PDT). All dates should be consistent regardless of where servers are hosted. Use `timeZone: 'America/Los_Angeles'` to force PST display.
+**Why**: `new Date('2025-08-19')` parses as UTC midnight, then converts to local time. In PST/PDT, this shifts to the previous day. The safe parsing method keeps dates in local timezone without conversion.
 
 ## Future Enhancements (from todo list)
 
@@ -1650,10 +1636,10 @@ The app uses a JSON-based feature tracking system (`/public/data/features.json`)
 - **Feature Showcase**: Dynamic features list with 18+ major capabilities
 
 ### 🔧 Development Environment
-- **Frontend Dev**: http://dev.offline.oknotok.com
-- **API Dev**: http://100.104.170.10:3555/api/v1/ (Tailscale IP)
+- **Frontend Dev**: https://dev.offline.oknotok.com
+- **API Dev**: https://dev.offline.oknotok.com/api/v1/
 - **Production**: https://offline.oknotok.com
-
+  **Production API**: https://offline.oknotok.com/api/v1/
 ### 📋 Known Issues
 - Double-scrolling on some mobile devices (fix in progress)
 - API currently proxied through frontend (dedicated hosting planned)

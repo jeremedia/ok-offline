@@ -62,18 +62,15 @@ export default defineConfig({
     allowedHosts: [
       'localhost',
       'dev.offline.oknotok.com',
-      '100.104.170.10',
       '.oknotok.com' // This allows any subdomain of oknotok.com
     ],
     hmr: {
-      host: 'dev.offline.oknotok.com'
+      protocol: 'wss',
+      host: 'dev.offline.oknotok.com',
+      clientPort: 443
     },
     proxy: {
-      '/api/v1': {
-        target: 'http://localhost:3020',
-        changeOrigin: true,
-        secure: false
-      },
+
       '/api': {
         target: 'https://api.burningman.org',
         changeOrigin: true,

@@ -14,10 +14,12 @@ import {
   calculateSectorDifference,
   analyzeBoundaryLocation,
   getBRCLandmarks,
+  calculateDestinationPoint,
   BRC_GEOMETRY 
 } from './utils/brcGeometry.js'
 
-import { haversineDistance, calculateBearing, metersToFeet } from './utils/geoUtils.js'
+import { haversineDistance, calculateBearing, metersToFeet, BRC_CENTER } from './utils/geoUtils.js'
+import { brcAddressToLatLon } from '../../utils/geocoding.js'
 
 
 export class BRCHybridRouter {
@@ -56,6 +58,22 @@ export class BRCHybridRouter {
     // Analyze start and end locations
     const startAnalysis = analyzeBoundaryLocation(startCoords)
     const endAnalysis = analyzeBoundaryLocation(endCoords)
+    
+    // 🎯 SMART HYBRID DETECTION: Check if hybrid routing is beneficial
+    const startAvenue = this._extractAvenueFromCoords(startCoords)
+    const endAvenue = this._extractAvenueFromCoords(endCoords)
+    
+    const innerAvenues = ['A', 'B', 'C', 'D', 'E']
+    const isStartInner = innerAvenues.includes(startAvenue)
+    const isEndInner = innerAvenues.includes(endAvenue)
+    
+    // Skip hybrid routing for inner-to-inner routes
+    if (isStartInner && isEndInner) {
+      console.log(`🚫 Skipping hybrid: ${startAvenue} → ${endAvenue} (inner-to-inner, use street-following)`)
+      return null
+    }
+    
+    console.log(`🎯 Avenue analysis: ${startAvenue} → ${endAvenue} (start inner: ${isStartInner}, end inner: ${isEndInner})`)
     
     // Check if hybrid routing is beneficial
     if (!this._shouldUseHybridRouting(startAnalysis, endAnalysis)) {
@@ -97,24 +115,33 @@ export class BRCHybridRouter {
    * @returns {boolean} True if hybrid routing is beneficial
    */
   _shouldUseHybridRouting(startAnalysis, endAnalysis) {
+    console.log('🔍 HYBRID ROUTER DEBUG:')
+    console.log('  startAnalysis:', startAnalysis)
+    console.log('  endAnalysis:', endAnalysis)
+    
     // Both points should be in or near urban areas for hybrid to be beneficial
     if (startAnalysis.zone === 'deep_playa' || endAnalysis.zone === 'deep_playa') {
+      console.log('❌ Rejected: deep_playa zone detected')
       return false
     }
     
     // Check sector difference - hybrid most beneficial for cross-sector routes
     const sectorDiff = calculateSectorDifference(startAnalysis.sector, endAnalysis.sector)
+    console.log('  sectorDiff:', sectorDiff, 'threshold:', this.OPTIMIZATION_PARAMS.sectorThreshold)
     
     if (sectorDiff < this.OPTIMIZATION_PARAMS.sectorThreshold) {
-      console.log(`📍 Sectors too close (${sectorDiff}) for hybrid benefit`)
+      console.log(`❌ Rejected: Sectors too close (${sectorDiff}) for hybrid benefit`)
       return false
     }
     
     // Both zones should allow hybrid routing
     const startCanHybrid = ['urban', 'outer_playa', 'side_playa'].includes(startAnalysis.zone)
     const endCanHybrid = ['urban', 'outer_playa', 'side_playa'].includes(endAnalysis.zone)
+    console.log('  startCanHybrid:', startCanHybrid, 'endCanHybrid:', endCanHybrid)
     
-    return startCanHybrid && endCanHybrid
+    const result = startCanHybrid && endCanHybrid
+    console.log('  shouldUseHybrid result:', result)
+    return result
   }
   
   /**
@@ -127,21 +154,41 @@ export class BRCHybridRouter {
    */
   _calculateOptimalWaypoints(startCoords, endCoords, startAnalysis, endAnalysis) {
     console.log('🎯 Calculating optimal waypoints...')
+    console.log('  startCoords:', startCoords, 'startAnalysis.sector:', startAnalysis.sector)
+    console.log('  endCoords:', endCoords, 'endAnalysis.sector:', endAnalysis.sector)
     
-    // Check cache first  
+    // 🔄 CLEAR CACHE: Force recalculation for proper Esplanade entry points
     const cacheKey = `${startAnalysis.sector}-${endAnalysis.sector}`
+    this.waypointCache.clear() // Clear cache to force recalculation with fixed entry logic
+    
+    // Check cache first (should be empty now, but keeping for future use)
     if (this.waypointCache.has(cacheKey)) {
       console.log('📦 Using cached waypoints')
       return this.waypointCache.get(cacheKey)
     }
     
     // Generate exit point candidates from start urban area
-    const exitCandidates = this._generateExitCandidates(startCoords, startAnalysis, endAnalysis.sector)
+    console.log('🚪 Generating exit candidates...')
+    const exitCandidates = this._generateExitCandidates(startCoords, endCoords, startAnalysis, endAnalysis.sector)
+    console.log('  exitCandidates count:', exitCandidates?.length || 0)
     
     // Generate entry point candidates for destination urban area  
+    console.log('🚪 Generating entry candidates...')
     const entryCandidates = this._generateEntryCandidates(endCoords, endAnalysis, startAnalysis.sector)
+    console.log('  entryCandidates count:', entryCandidates?.length || 0)
+    
+    if (!exitCandidates || exitCandidates.length === 0) {
+      console.log('❌ No exit candidates found')
+      return null
+    }
+    
+    if (!entryCandidates || entryCandidates.length === 0) {
+      console.log('❌ No entry candidates found')
+      return null
+    }
     
     // Find optimal exit/entry pair through mathematical optimization
+    console.log('🎯 Optimizing waypoint pairs...')
     const optimalWaypoints = this._optimizeWaypointPair(
       startCoords, 
       endCoords,
@@ -153,21 +200,91 @@ export class BRCHybridRouter {
       // Cache the result for future use
       this.waypointCache.set(cacheKey, optimalWaypoints)
       console.log(`✅ Optimal waypoints cached for ${cacheKey}`)
+    } else {
+      console.log('❌ Waypoint optimization failed')
     }
     
     return optimalWaypoints
   }
   
   /**
+   * Get all street intersections for a given sector that can serve as exit/entry points
+   * @param {number} sector Sector number (2-12)
+   * @returns {Array} Array of intersection objects with coordinates and IDs
+   */
+  _getStreetIntersectionsForSector(sector) {
+    const intersections = []
+    
+    // Define the clock positions for this sector (hour and quarter-hour streets)
+    const sectorClocks = []
+    
+    // Add hour streets for this sector
+    if (sector <= 10) {
+      sectorClocks.push(`${sector}:00`)
+      sectorClocks.push(`${sector + 1}:00`)
+    } else if (sector === 11) {
+      sectorClocks.push('11:00')
+      sectorClocks.push('12:00')
+    } else if (sector === 12) {
+      sectorClocks.push('12:00')
+      sectorClocks.push('1:00')
+    }
+    
+    // Add quarter-hour streets for this sector
+    if (sector <= 10) {
+      sectorClocks.push(`${sector}:15`)
+      sectorClocks.push(`${sector}:30`)
+      sectorClocks.push(`${sector}:45`)
+    } else if (sector === 11) {
+      sectorClocks.push('11:15')
+      sectorClocks.push('11:30')
+      sectorClocks.push('11:45')
+    } else if (sector === 12) {
+      sectorClocks.push('12:15')
+      sectorClocks.push('12:30')
+      sectorClocks.push('12:45')
+    }
+    
+    // Define avenues from inner to outer (good exit points are on outer avenues)
+    const avenues = ['C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L']
+    
+    // Generate intersections for each clock position and avenue
+    for (const clock of sectorClocks) {
+      for (const avenue of avenues) {
+        try {
+          const address = `${clock} & ${avenue}`
+          const coordinates = brcAddressToLatLon(address)
+          
+          if (coordinates && coordinates.length === 2) {
+            intersections.push({
+              id: `${clock}&${avenue}`,
+              coordinates: coordinates, // This is [lat, lng] format
+              clock: clock,
+              avenue: avenue,
+              address: address
+            })
+          }
+        } catch (error) {
+          // Skip invalid addresses silently
+          console.debug(`Could not resolve intersection: ${clock} & ${avenue}`)
+        }
+      }
+    }
+    
+    return intersections
+  }
+
+  /**
    * Generate exit point candidates from starting urban area
    * @param {[number, number]} startCoords Starting coordinates
+   * @param {[number, number]} endCoords Ending coordinates
    * @param {Object} startAnalysis Start location analysis
    * @param {number} targetSector Target sector number
    * @returns {Array} Array of exit point candidates
    */
-  _generateExitCandidates(startCoords, startAnalysis, targetSector) {
+  _generateExitCandidates(startCoords, endCoords, startAnalysis, targetSector) {
     // Use BRC geometry utilities to find optimal exit points
-    const exitPoints = findOptimalExitPoints(startCoords, targetSector)
+    const exitPoints = findOptimalExitPoints(startCoords, endCoords, targetSector)
     
     // Limit to top candidates for performance
     return exitPoints.slice(0, this.OPTIMIZATION_PARAMS.maxExitCandidates)
@@ -182,26 +299,45 @@ export class BRCHybridRouter {
    */
   _generateEntryCandidates(endCoords, endAnalysis, sourceSector) {
     const endSector = endAnalysis.sector
-    const boundary = calculateUrbanBoundary(endSector)
-    const entryRadius = boundary.outerRadius
-    
     const candidates = []
-    const endClock = coordsToClockSystem(endCoords)
     
-    // Generate entry points around the destination sector boundary
-    for (let angleOffset = -30; angleOffset <= 30; angleOffset += 10) {
-      const entryBearing = endClock.bearing + angleOffset
-      const entryCoords = this._calculateDestinationPoint(BRC_GEOMETRY.CENTER, entryBearing, entryRadius)
-      
-      // Calculate score for this entry point
-      const score = this._calculateEntryPointScore(endCoords, entryCoords, sourceSector)
+    // 🎯 REVOLUTIONARY FIX: Use actual street intersections as entry points
+    const availableIntersections = this._getStreetIntersectionsForSector(endSector)
+    
+    console.log(`🔍 ENTRY DEBUG for sector ${endSector}:`)
+    console.log(`  Total intersections: ${availableIntersections.length}`)
+    console.log(`  Sample intersections:`, availableIntersections.slice(0, 5).map(i => i.address))
+    
+    // 🚪 ESPLANADE-FIRST LOGIC: Always prioritize proper urban boundary
+    const esplanadeEntries = availableIntersections.filter(intersection => 
+      intersection.avenue === 'Esplanade'
+    )
+    
+    const boundaryEntries = availableIntersections.filter(intersection => 
+      intersection.clock === '2:00' || intersection.clock === '10:00'
+    )
+    
+    console.log(`  Esplanade entries: ${esplanadeEntries.length}`)
+    console.log(`  Boundary entries: ${boundaryEntries.length}`)
+    if (esplanadeEntries.length > 0) {
+      console.log(`  Esplanade addresses:`, esplanadeEntries.map(i => i.address))
+    }
+    
+    // 🎯 ALWAYS USE ESPLANADE if available - NO fallback to boundaries for entry
+    const entryIntersections = esplanadeEntries.length > 0 ? esplanadeEntries : boundaryEntries
+    
+    // Score each intersection as an entry point
+    for (const intersection of entryIntersections) {
+      const score = this._calculateEntryPointScore(endCoords, intersection.coordinates, sourceSector)
+      const bearing = calculateBearing(BRC_CENTER, intersection.coordinates)
       
       candidates.push({
-        coordinates: entryCoords,
-        bearing: entryBearing,
-        distance: haversineDistance(entryCoords, endCoords),
+        coordinates: intersection.coordinates,
+        bearing: bearing,
+        distance: haversineDistance(intersection.coordinates, endCoords),
         score,
-        angleOffset
+        angleOffset: bearing - endAnalysis.clockData?.bearing || 0,
+        intersection: intersection.id // 🎯 Critical: Keep intersection ID for pathfinding
       })
     }
     
@@ -225,6 +361,11 @@ export class BRCHybridRouter {
     
     console.log(`🔬 Optimizing ${exitCandidates.length} × ${entryCandidates.length} waypoint combinations`)
     
+    let scoreCount = 0
+    let totalScore = 0
+    let minScore = Infinity
+    let maxScore = -Infinity
+    
     // Brute force optimization - test all combinations
     for (const exitCandidate of exitCandidates) {
       for (const entryCandidate of entryCandidates) {
@@ -234,6 +375,11 @@ export class BRCHybridRouter {
           exitCandidate,
           entryCandidate
         )
+        
+        scoreCount++
+        totalScore += score
+        minScore = Math.min(minScore, score)
+        maxScore = Math.max(maxScore, score)
         
         if (score > bestScore) {
           bestScore = score
@@ -248,11 +394,86 @@ export class BRCHybridRouter {
       }
     }
     
-    console.log(`🎯 Best waypoint pair score: ${bestScore.toFixed(3)}`)
+    console.log(`📊 Score analysis: min=${minScore.toFixed(3)}, max=${maxScore.toFixed(3)}, avg=${(totalScore/scoreCount).toFixed(3)}`)
+    console.log(`🎯 Best waypoint pair score: ${bestScore.toFixed(3)} (${scoreCount} combinations tested)`)
     
-    return bestScore > this.OPTIMIZATION_PARAMS.efficiencyThreshold ? bestWaypoints : null
+    // 🧠 INTELLIGENT DYNAMIC THRESHOLD: Lower thresholds for longer cross-sector routes
+    const dynamicThreshold = this._calculateDynamicEfficiencyThreshold(startCoords, endCoords, exitCandidates, entryCandidates)
+    console.log(`🎯 Dynamic efficiency threshold: ${(dynamicThreshold*100).toFixed(1)}% (vs static ${(this.OPTIMIZATION_PARAMS.efficiencyThreshold*100).toFixed(1)}%)`)
+    
+    return bestScore > dynamicThreshold ? bestWaypoints : null
   }
   
+  /**
+   * Calculate dynamic efficiency threshold based on route characteristics
+   * Longer cross-sector routes get lower thresholds since even small gains are worthwhile
+   * @param {[number, number]} startCoords Start coordinates
+   * @param {[number, number]} endCoords End coordinates
+   * @param {Array} exitCandidates Exit point candidates
+   * @param {Array} entryCandidates Entry point candidates
+   * @returns {number} Dynamic efficiency threshold (0.0-1.0)
+   */
+  _calculateDynamicEfficiencyThreshold(startCoords, endCoords, exitCandidates, entryCandidates) {
+    const directDistance = haversineDistance(startCoords, endCoords) * 3.28084 // Convert to feet
+    
+    // Calculate sector difference for cross-sector assessment
+    const startClock = coordsToClockSystem(startCoords)
+    const endClock = coordsToClockSystem(endCoords)
+    const sectorDiff = calculateSectorDifference(startClock.sector, endClock.sector)
+    
+    // Base threshold starts at static value (15%)
+    let threshold = this.OPTIMIZATION_PARAMS.efficiencyThreshold
+    
+    // 🧠 DISTANCE-BASED THRESHOLD ADJUSTMENT
+    // Longer routes deserve lower thresholds - even small efficiency gains matter
+    if (directDistance > 8000) {
+      // Very long routes (>8000ft): Accept 5% efficiency gains
+      threshold = Math.min(threshold, 0.05)
+      console.log(`📏 Very long route (${Math.round(directDistance)}ft): Threshold lowered to 5%`)
+    } else if (directDistance > 6000) {
+      // Long routes (6000-8000ft): Accept 7% efficiency gains  
+      threshold = Math.min(threshold, 0.07)
+      console.log(`📏 Long route (${Math.round(directDistance)}ft): Threshold lowered to 7%`)
+    } else if (directDistance > 4000) {
+      // Medium routes (4000-6000ft): Accept 9% efficiency gains
+      threshold = Math.min(threshold, 0.09)
+      console.log(`📏 Medium route (${Math.round(directDistance)}ft): Threshold lowered to 9%`)
+    }
+    
+    // 🎯 SECTOR-BASED THRESHOLD ADJUSTMENT
+    // Cross-sector routes benefit more from hybrid routing
+    if (sectorDiff >= 4) {
+      // Major cross-sector: Very low threshold (3%)
+      threshold = Math.min(threshold, 0.03)
+      console.log(`🎯 Major cross-sector route (${sectorDiff} sectors): Threshold lowered to 3%`)
+    } else if (sectorDiff >= 3) {
+      // Cross-sector: Lower threshold (6%)
+      threshold = Math.min(threshold, 0.06)
+      console.log(`🎯 Cross-sector route (${sectorDiff} sectors): Threshold lowered to 6%`)
+    }
+    
+    // 🌟 CANDIDATE QUALITY ADJUSTMENT
+    // If we have many good candidates, we can be more selective
+    const avgExitCandidates = exitCandidates.length
+    const avgEntryCandidates = entryCandidates.length
+    const totalCombinations = avgExitCandidates * avgEntryCandidates
+    
+    if (totalCombinations > 30) {
+      // Many combinations available: slightly higher threshold
+      threshold = Math.min(threshold * 1.2, this.OPTIMIZATION_PARAMS.efficiencyThreshold)
+      console.log(`🎲 Many candidates (${totalCombinations} combinations): Threshold raised to ${(threshold*100).toFixed(1)}%`)
+    } else if (totalCombinations < 10) {
+      // Few combinations: lower threshold to avoid rejecting limited options
+      threshold = threshold * 0.8
+      console.log(`🎲 Few candidates (${totalCombinations} combinations): Threshold lowered to ${(threshold*100).toFixed(1)}%`)
+    }
+    
+    // Ensure threshold never goes below 1% or above original 15%
+    threshold = Math.max(0.01, Math.min(threshold, this.OPTIMIZATION_PARAMS.efficiencyThreshold))
+    
+    return threshold
+  }
+
   /**
    * Calculate optimization score for a waypoint pair
    * @param {[number, number]} startCoords Start coordinates
@@ -264,6 +485,11 @@ export class BRCHybridRouter {
   _calculateWaypointPairScore(startCoords, endCoords, exitCandidate, entryCandidate) {
     const exitCoords = exitCandidate.coordinates
     const entryCoords = entryCandidate.coordinates
+    
+    if (!exitCoords || !entryCoords) {
+      console.log('❌ Missing coordinates in candidates')
+      return 0
+    }
     
     // Calculate segment distances
     const streetDistance1 = haversineDistance(startCoords, exitCoords) * 3.28084 // to feet
@@ -345,7 +571,7 @@ export class BRCHybridRouter {
       type: 'hybrid',
       coordinates: this._extractRouteCoordinates(segments),
       distance: Math.round(totalDistance),
-      duration: Math.round(totalDuration / 60), // Convert to minutes
+      duration: Math.round(totalDuration), // Already in minutes from segment calculations
       mode: travelMode,
       segments,
       
@@ -397,27 +623,21 @@ export class BRCHybridRouter {
     if (this.streetPathfinder) {
       // 🚀 REVOLUTIONARY INTEGRATION: Connect A* Street Pathfinder with Hybrid Router!
       try {
-        // Only attempt street pathfinding for reasonable distances (< 1000ft)
-        if (distance > 1000) {
-          console.log('🚫 Distance too large for street pathfinding, using fallback')
+        // Use revolutionary A* street pathfinder for all urban segments
+        console.log(`🎯 Attempting street pathfinding for ${segmentType} (${Math.round(distance)}ft)`)
+        const streetRoute = await this.streetPathfinder.findRoute(fromCoords, toCoords, travelMode, { maxNodes: 100 })
+        if (streetRoute && streetRoute.coordinates && streetRoute.coordinates.length > 1 && streetRoute.duration) {
+          // Use actual street pathfinding results - convert duration from seconds to minutes
+          duration = streetRoute.duration / 60 // Convert seconds to minutes to match playa segment format
+          coordinates = streetRoute.coordinates // Already in [lat, lng] format
+          instructions = streetRoute.segments?.map(s => s.instruction).join(' → ') || 
+                        `Navigate ${streetRoute.summary?.streets?.join(', ') || 'streets'} (${Math.round(distance)}ft)`
+          console.log(`✅ Street pathfinding successful: ${coordinates.length} points, ${Math.round(duration)}min`)
+        } else {
+          console.log('🔄 Street pathfinding returned invalid route, using fallback')
           duration = distance / (240 * 0.75)
           coordinates = [fromCoords, toCoords]
-          instructions = `Navigate toward ${segmentType.replace('urban_', '')} (${Math.round(distance)}ft)`
-        } else {
-          const streetRoute = await this.streetPathfinder.findRoute(fromCoords, toCoords, travelMode, { maxNodes: 100 })
-          if (streetRoute && streetRoute.coordinates && streetRoute.coordinates.length > 1 && streetRoute.duration) {
-            // Use actual street pathfinding results - convert duration from seconds to minutes
-            duration = streetRoute.duration / 60 // Convert seconds to minutes to match playa segment format
-            coordinates = streetRoute.coordinates // Already in [lat, lng] format
-            instructions = streetRoute.segments?.map(s => s.instruction).join(' → ') || 
-                          `Navigate ${streetRoute.summary?.streets?.join(', ') || 'streets'} (${Math.round(distance)}ft)`
-            console.log(`✅ Street pathfinding successful: ${coordinates.length} points, ${Math.round(duration)}min`)
-          } else {
-            console.log('🔄 Street pathfinding returned invalid route, using fallback')
-            duration = distance / (240 * 0.75)
-            coordinates = [fromCoords, toCoords]
-            instructions = `Direct navigation to ${segmentType.replace('urban_', '')} (${Math.round(distance)}ft)`
-          }
+          instructions = `Direct navigation to ${segmentType.replace('urban_', '')} (${Math.round(distance)}ft)`
         }
       } catch (error) {
         console.warn('🔄 Street pathfinder failed, using fallback:', error.message)
@@ -601,6 +821,43 @@ export class BRCHybridRouter {
     }
     
     return [...new Set(landmarkNames)] // Remove duplicates
+  }
+  
+  /**
+   * Extract avenue from coordinates based on distance from BRC center
+   * @param {[number, number]} coords [latitude, longitude]
+   * @returns {string} Avenue letter (A-L) or 'Unknown'
+   */
+  _extractAvenueFromCoords(coords) {
+    const clockData = coordsToClockSystem(coords)
+    const distanceFromCenter = clockData.distanceFromCenter // Distance in feet
+    
+    // Avenue distance thresholds based on BRC layout (in feet)
+    const avenueThresholds = [
+      { avenue: 'Esplanade', maxDistance: 2750 },
+      { avenue: 'A', maxDistance: 1400 },
+      { avenue: 'B', maxDistance: 1800 },
+      { avenue: 'C', maxDistance: 2200 },
+      { avenue: 'D', maxDistance: 2600 },
+      { avenue: 'E', maxDistance: 3000 },
+      { avenue: 'F', maxDistance: 3400 },
+      { avenue: 'G', maxDistance: 3800 },
+      { avenue: 'H', maxDistance: 4200 },
+      { avenue: 'I', maxDistance: 4600 },
+      { avenue: 'J', maxDistance: 5000 },
+      { avenue: 'K', maxDistance: 5400 },
+      { avenue: 'L', maxDistance: 5800 }
+    ]
+    
+    // Find the closest avenue based on distance
+    for (const threshold of avenueThresholds) {
+      if (distanceFromCenter <= threshold.maxDistance) {
+        return threshold.avenue
+      }
+    }
+    
+    // If beyond all known avenues
+    return 'Unknown'
   }
   
   /**

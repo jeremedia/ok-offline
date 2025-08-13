@@ -84,6 +84,38 @@
         </div>
       </div>
       
+      <!-- Device Location Section -->
+      <div class="info-section">
+        <h5>Device Location</h5>
+        <div v-if="userLocation" class="info-item">
+          <span class="label">Coordinates:</span>
+          <span class="value">{{ userLocation[0].toFixed(6) }}, {{ userLocation[1].toFixed(6) }}</span>
+        </div>
+        <div class="location-actions">
+          <BaseButton 
+            v-if="userLocation"
+            @click="$emit('center-on-location')"
+            variant="secondary"
+            size="sm"
+            :uppercase="false"
+            class="center-btn"
+          >
+            🎯 Center on Location
+          </BaseButton>
+          <BaseButton 
+            v-else
+            @click="$emit('enable-location')"
+            variant="secondary"
+            size="sm"
+            :uppercase="false"
+            :disabled="locationLoading"
+            class="enable-location-btn"
+          >
+            📍 {{ locationLoading ? 'Getting Location...' : 'Enable Location' }}
+          </BaseButton>
+        </div>
+      </div>
+
       <!-- Performance Stats -->
       <div class="info-section">
         <h5>Performance</h5>
@@ -117,8 +149,18 @@ const props = defineProps({
   layerStatus: {
     type: Object,
     required: true
+  },
+  userLocation: {
+    type: Array,
+    default: null
+  },
+  locationLoading: {
+    type: Boolean,
+    default: false
   }
 })
+
+const emit = defineEmits(['center-on-location', 'enable-location'])
 
 const infoEl = ref(null)
 const isCollapsed = ref(false)
@@ -216,21 +258,11 @@ onMounted(() => {
       } catch (e) {
         console.error('Failed to load info position:', e)
         // Reset to default bottom-right position
-        const mapContainer = infoEl.value?.closest('#map-section')
-        if (mapContainer) {
-          const mapRect = mapContainer.getBoundingClientRect()
-          position.x = mapRect.width - 270
-          position.y = mapRect.height - 420
-        }
+        setDefaultPosition()
       }
     } else {
       // No saved position, set default bottom-right
-      const mapContainer = infoEl.value?.closest('#map-section')
-      if (mapContainer) {
-        const mapRect = mapContainer.getBoundingClientRect()
-        position.x = mapRect.width - 270
-        position.y = mapRect.height - 420
-      }
+      setDefaultPosition()
     }
   }
 })
@@ -332,19 +364,40 @@ const endDrag = () => {
 
 // Ensure info panel stays within viewport
 const constrainToViewport = () => {
-  if (!infoEl.value) return
+  if (!infoEl.value || props.isMobile) return
   
-  const rect = infoEl.value.getBoundingClientRect()
-  // Get the parent map container bounds
+  // Get the parent map container bounds (relative positioning)
   const mapContainer = infoEl.value.closest('#map-section')
   if (!mapContainer) return
   
   const mapRect = mapContainer.getBoundingClientRect()
-  const maxX = mapRect.width - rect.width - 10
-  const maxY = mapRect.height - rect.height - 10
+  const panelWidth = 300 // max-width of panel
+  const panelHeight = isCollapsed.value ? 50 : 450 // estimated height
   
-  position.x = Math.max(10, Math.min(position.x, maxX))
-  position.y = Math.max(10, Math.min(position.y, maxY))
+  const maxX = mapRect.width - panelWidth - 20
+  const maxY = mapRect.height - panelHeight - 20
+  
+  position.x = Math.max(20, Math.min(position.x, maxX))
+  position.y = Math.max(20, Math.min(position.y, maxY))
+}
+
+// Set default bottom-right position
+const setDefaultPosition = () => {
+  if (props.isMobile) return
+  
+  const mapContainer = infoEl.value?.closest('#map-section')
+  if (!mapContainer) {
+    // Fallback if no map container found
+    position.x = window.innerWidth - 320
+    position.y = window.innerHeight - 470
+    return
+  }
+  
+  const mapRect = mapContainer.getBoundingClientRect()
+  position.x = mapRect.width - 320  // 300px panel width + 20px margin
+  position.y = mapRect.height - 470 // estimated panel height + 20px margin
+  
+  constrainToViewport()
 }
 
 // Update position on window resize
@@ -458,6 +511,17 @@ window.addEventListener('resize', constrainToViewport)
 .info-item .value.small {
   font-size: 0.625rem;
   white-space: pre-line;
+}
+
+/* Location Actions */
+.location-actions {
+  margin-top: 0.5rem;
+}
+
+.center-btn,
+.enable-location-btn {
+  width: 100%;
+  font-size: 0.675rem;
 }
 
 /* Scrollbar styling */

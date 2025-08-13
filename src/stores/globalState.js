@@ -58,9 +58,9 @@ export function updateShowLocationFlag(year = null) {
     
     // For 2025, apply the policy
     if (yr === '2025') {
-      // In development, always show location data if available
+      // In development, always show location data (don't wait for sync detection)
       if (IS_DEV) {
-        globalState.show_location_data['2025'] = globalState.location_data_available['2025']
+        globalState.show_location_data['2025'] = true
         return
       }
       

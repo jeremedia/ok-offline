@@ -207,25 +207,35 @@ export function getRouteWaypoints(route) {
   if (route.enhancedRoute?.segments && route.enhancedRoute.segments.length > 1) {
     console.log('🎨 Generating enhanced route visualization with', route.enhancedRoute.segments.length, 'segments')
     
-    return route.enhancedRoute.segments.map((segment, index) => ({
-      id: `segment-${index}`,
-      type: segment.type,
-      subType: segment.subType || segment.type,
-      coordinates: segment.coordinates.map(([lng, lat]) => [lat, lng]), // Convert to [lat, lng]
-      distance: segment.distance,
-      duration: segment.duration,
-      instructions: segment.instructions || segment.instruction,
-      style: getSegmentStyle(segment.type, route.mode || 'walking'),
-      isWaypoint: index > 0 && index < route.enhancedRoute.segments.length - 1
-    }))
+    return route.enhancedRoute.segments.map((segment, index) => {
+      // DEBUG: Check segment coordinates format
+      console.log(`🔍 SEGMENT ${index} WAYPOINT DEBUG:`)
+      console.log('  - segment.coordinates:', segment.coordinates)
+      
+      return {
+        id: `segment-${index}`,
+        type: segment.type,
+        subType: segment.subType || segment.type,
+        coordinates: segment.coordinates, // Already in [lat, lng] format from route generation
+        distance: segment.distance,
+        duration: segment.duration,
+        instructions: segment.instructions || segment.instruction,
+        style: getSegmentStyle(segment.type, route.mode || 'walking'),
+        isWaypoint: index > 0 && index < route.enhancedRoute.segments.length - 1
+      }
+    })
   }
 
   // Legacy straight-line routes
   if (route.geometry) {
+    // DEBUG: Check legacy route coordinates format
+    console.log('🔍 LEGACY ROUTE DEBUG:')
+    console.log('  - route.geometry:', route.geometry)
+    
     return [{
       id: 'straight-line',
       type: 'straight_line',
-      coordinates: route.geometry,
+      coordinates: route.geometry, // Already in [lat, lng] format
       style: getRouteStyle(route.mode || 'walking'),
       isWaypoint: false
     }]
@@ -258,8 +268,9 @@ export function getRouteStyle(mode = 'walking') {
 
   return {
     ...baseStyle,
-    color: '#ff6b00', // Orange for walking
-    weight: 4
+    color: '#00FF00', // Bright green for high visibility testing
+    weight: 6, // Thicker for better visibility
+    opacity: 1.0 // Full opacity for testing
   }
 }
 
@@ -280,12 +291,13 @@ export function getSegmentStyle(segmentType, mode = 'walking') {
   // Revolutionary hybrid route colors following UI guidelines
   switch (segmentType) {
     case 'urban_navigation':
+      // 🎯 CLARITY FIX: Use same thick green as pure urban routes for visual consistency
       return {
         ...baseStyle,
-        color: mode === 'biking' ? '#E74C3C' : '#D32F2F', // Red/orange for urban streets
-        weight: mode === 'biking' ? 5 : 4,
-        dashArray: '5, 3', // Dashed for urban complexity
-        opacity: 0.85
+        color: '#00FF00', // Same bright green as pure urban routes
+        weight: 6, // Same thick weight as pure urban routes  
+        dashArray: null, // Solid line like pure urban routes
+        opacity: 1.0 // Same full opacity as pure urban routes
       }
       
     case 'playa_crossing':
@@ -387,8 +399,8 @@ export async function calculateStreetRoute(from, to, mode = 'walking') {
  * Convert enhanced route format to legacy route format for compatibility
  */
 function convertToLegacyRoute(enhancedRoute, originalFrom, originalTo) {
-  // Convert coordinates back to [lat, lng] format
-  const convertedGeometry = enhancedRoute.coordinates.map(([lng, lat]) => [lat, lng])
+  // Enhanced route coordinates are already in [lat, lng] format
+  const convertedGeometry = enhancedRoute.coordinates
   
   // Calculate distance and times using legacy format
   const distance = {

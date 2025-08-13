@@ -1,5 +1,6 @@
 import { ref, computed } from 'vue'
 import { calculateDistance, formatDistance, brcAddressToLatLon } from '../utils/geocoding'
+import { useSimulation } from './useSimulation'
 
 // Store user's current location
 const userLocation = ref(null)
@@ -7,6 +8,35 @@ const locationError = ref(null)
 const locationLoading = ref(false)
 
 export function useGeolocation() {
+  const { getSimulatedLocation, isSimulating } = useSimulation()
+  
+  // Get effective user location (real or simulated)
+  const getEffectiveLocation = () => {
+    const simulated = getSimulatedLocation()
+    return simulated || userLocation.value
+  }
+  
+  // Check if geolocation permission was previously granted and auto-restore location
+  const checkLocationPermission = async () => {
+    if (!navigator.geolocation) return
+    
+    try {
+      // Check permission status
+      if (navigator.permissions) {
+        const result = await navigator.permissions.query({name: 'geolocation'})
+        if (result.state === 'granted') {
+          // Permission was granted, automatically get fresh location
+          console.log('Geolocation permission granted, getting current location...')
+          getCurrentLocation().catch(err => {
+            console.warn('Failed to auto-restore location:', err)
+          })
+        }
+      }
+    } catch (err) {
+      // Permissions API not supported or failed, that's ok
+      console.warn('Could not check geolocation permission:', err)
+    }
+  }
   
   // Get user's current location
   const getCurrentLocation = () => {
@@ -44,12 +74,13 @@ export function useGeolocation() {
   
   // Calculate distance to a BRC address
   const getDistanceTo = (brcAddress) => {
-    if (!userLocation.value || !brcAddress) return null
+    const effectiveLocation = getEffectiveLocation()
+    if (!effectiveLocation || !brcAddress) return null
     
     const targetCoords = brcAddressToLatLon(brcAddress)
     if (!targetCoords) return null
     
-    const distanceFeet = calculateDistance(userLocation.value, targetCoords)
+    const distanceFeet = calculateDistance(effectiveLocation, targetCoords)
     return {
       feet: distanceFeet,
       formatted: formatDistance(distanceFeet)
@@ -58,12 +89,13 @@ export function useGeolocation() {
   
   // Calculate bearing to a location
   const getBearingTo = (brcAddress) => {
-    if (!userLocation.value || !brcAddress) return null
+    const effectiveLocation = getEffectiveLocation()
+    if (!effectiveLocation || !brcAddress) return null
     
     const targetCoords = brcAddressToLatLon(brcAddress)
     if (!targetCoords) return null
     
-    const [lat1, lon1] = userLocation.value
+    const [lat1, lon1] = effectiveLocation
     const [lat2, lon2] = targetCoords
     
     const dLon = (lon2 - lon1) * Math.PI / 180
@@ -87,7 +119,8 @@ export function useGeolocation() {
   
   // Sort items by distance
   const sortByDistance = (items, getLocation) => {
-    if (!userLocation.value) return items
+    const effectiveLocation = getEffectiveLocation()
+    if (!effectiveLocation) return items
     
     return [...items].sort((a, b) => {
       const locA = getLocation(a)
@@ -104,13 +137,16 @@ export function useGeolocation() {
   }
   
   return {
-    userLocation: computed(() => userLocation.value),
+    userLocation: computed(() => getEffectiveLocation()),
     locationError: computed(() => locationError.value),
     locationLoading: computed(() => locationLoading.value),
     getCurrentLocation,
     getDistanceTo,
     getBearingTo,
     getCompassDirection,
-    sortByDistance
+    sortByDistance,
+    checkLocationPermission,
+    // Simulation functions
+    isSimulating: computed(() => isSimulating.value)
   }
 }

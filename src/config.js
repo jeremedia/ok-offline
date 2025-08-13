@@ -10,6 +10,9 @@ export const IS_DEV = import.meta.env.DEV || window.location.hostname === 'dev.o
 
 // API URLs configuration - use relative paths, Caddy handles proxying
 export const API_URLS = {
+  // Base API URL - all API calls go through proxy
+  BASE: '',  // Empty for relative paths that get proxied
+  
   // Vector search API
   VECTOR_API: '/api/v1',
   

@@ -54,6 +54,31 @@
           <input type="checkbox" v-model="controls.showEvents" @change="updateControls" :disabled="!locationsAvailable">
           <span class="control-label">🎉 Events</span>
         </label>
+        
+        <!-- Soon & Near Events (only when location enabled) -->
+        <label v-if="userLocation" class="control-item" :class="{ disabled: !locationsAvailable || !controls.showEvents }">
+          <input type="checkbox" v-model="controls.showEventsSoonAndNear" @change="updateControls" :disabled="!locationsAvailable || !controls.showEvents">
+          <span class="control-label">⏰ Soon & Near Events</span>
+        </label>
+        
+        <!-- Radius Slider (only when Soon & Near is enabled) -->
+        <div v-if="userLocation && controls.showEventsSoonAndNear" class="radius-control">
+          <label class="control-label-small">📐 Radius: {{ soonAndNearRadius }}ft</label>
+          <input 
+            type="range" 
+            min="50" 
+            max="1000" 
+            step="25"
+            :value="soonAndNearRadius" 
+            @input="handleRadiusChange"
+            class="radius-slider"
+          />
+          <div class="slider-labels">
+            <span>50ft</span>
+            <span>1000ft</span>
+          </div>
+        </div>
+        
         <label class="control-item">
           <input type="checkbox" v-model="controls.showFavoritesOnly" @change="updateControls">
           <span class="control-label">⭐ Favorites Only</span>
@@ -231,6 +256,7 @@
 <script setup>
 import { ref, reactive, onMounted, watch, nextTick, computed } from 'vue'
 import { canShowLocations } from '@/stores/globalState'
+import { useSoonAndNear } from '@/composables/useSoonAndNear'
 import BaseButton from '@/components/ui/BaseButton.vue'
 
 const props = defineProps({
@@ -238,10 +264,14 @@ const props = defineProps({
   year: String,
   gisLoadingState: Object,
   initialControls: Object,
-  showResetView: Boolean
+  showResetView: Boolean,
+  userLocation: Object // For Soon & Near features
 })
 
 const emit = defineEmits(['update:controls', 'reset-view', 'close'])
+
+// Soon & Near shared state
+const { radius: soonAndNearRadius, setRadius: setSoonAndNearRadius } = useSoonAndNear()
 
 // Tab configuration
 const tabs = [
@@ -400,6 +430,12 @@ const updateControls = () => {
   
   // Emit changes to parent
   emit('update:controls', { ...controls })
+}
+
+// Handle radius slider changes
+const handleRadiusChange = (event) => {
+  const newRadius = parseInt(event.target.value, 10)
+  setSoonAndNearRadius(newRadius)
 }
 
 // Handle reset view click
@@ -576,6 +612,15 @@ const toggleCollapse = () => {
   user-select: none;
 }
 
+.control-sublabel {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+  display: block;
+  margin-top: 2px;
+  margin-left: 1.5rem; /* Align with checkbox */
+}
+
 /* Infrastructure Categories */
 .infra-categories {
   background: var(--color-overlay-lighter);
@@ -696,6 +741,64 @@ const toggleCollapse = () => {
 .location-warning .warning-note {
   font-size: 0.688rem;
   opacity: 0.9;
+}
+
+/* Radius Control Styling */
+.radius-control {
+  margin: 0.5rem 0;
+  padding: 0.5rem;
+  background: var(--color-bg-elevated);
+  border-radius: 4px;
+  border: 1px solid var(--color-border-medium);
+}
+
+.control-label-small {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.radius-slider {
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--color-border-medium);
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  margin: 0.5rem 0;
+}
+
+.radius-slider::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  cursor: pointer;
+  border: 2px solid var(--color-bg-base);
+  box-shadow: 0 2px 4px var(--color-black-alpha-20);
+}
+
+.radius-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  cursor: pointer;
+  border: 2px solid var(--color-bg-base);
+  box-shadow: 0 2px 4px var(--color-black-alpha-20);
+}
+
+.slider-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.625rem;
+  color: var(--color-text-muted);
+  margin-top: 0.25rem;
 }
 
 /* Reset View Button */

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>BRC Coordinate Debug Test</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #1a1a1a; color: #00ff00; }
+        .result { margin: 10px 0; padding: 10px; background: #333; border-left: 3px solid #00ff00; }
+        .error { border-left-color: #ff0000; color: #ff6666; }
+        .success { border-left-color: #00ff00; color: #66ff66; }
+        .warning { border-left-color: #ffaa00; color: #ffcc66; }
+    </style>
+</head>
+<body>
+    <h1>🔬 BRC Coordinate Mapping Debug Test</h1>
+    
+    <div id="results"></div>
+    
+    <script type="module">
+        // Import the geocoding function
+        import { brcAddressToLatLon } from './src/utils/geocoding.js'
+        
+        const resultsDiv = document.getElementById('results')
+        
+        function addResult(message, type = 'result') {
+            const div = document.createElement('div')
+            div.className = `result ${type}`
+            div.innerHTML = message
+            resultsDiv.appendChild(div)
+            console.log(message.replace(/<[^>]*>/g, '')) // Also log to console
+        }
+        
+        async function runCoordinateTest() {
+            addResult('<h2>🎯 Testing Coordinate Mapping Issue</h2>')
+            addResult('=' .repeat(60))
+            
+            // Known working coordinates from successful test
+            const WORKING_COORDS = [40.779123, -119.199234] // [lat, lng]
+            addResult(`<strong>Working coordinates:</strong> ${WORKING_COORDS[0].toFixed(6)}, ${WORKING_COORDS[1].toFixed(6)}`, 'success')
+            
+            try {
+                // Test geocoding function
+                addResult('<h3>📍 Testing brcAddressToLatLon("7:30 & E")</h3>')
+                const geocoded = brcAddressToLatLon('7:30 & E')
+                
+                if (geocoded) {
+                    const [gLat, gLng] = geocoded
+                    addResult(`<strong>Geocoded result:</strong> ${gLat.toFixed(6)}, ${gLng.toFixed(6)}`, 'warning')
+                    
+                    // Calculate differences
+                    const latDiff = Math.abs(gLat - WORKING_COORDS[0])
+                    const lngDiff = Math.abs(gLng - WORKING_COORDS[1])
+                    const totalDiff = Math.sqrt(latDiff*latDiff + lngDiff*lngDiff)
+                    
+                    addResult('<h3>📏 Coordinate Differences:</h3>')
+                    addResult(`Latitude difference: ${latDiff.toFixed(6)}`)
+                    addResult(`Longitude difference: ${lngDiff.toFixed(6)}`)
+                    addResult(`Total distance: ${totalDiff.toFixed(6)} degrees`)
+                    
+                    // Convert to feet (approximate)
+                    const feetDiff = totalDiff * 364000 // rough conversion for lat/lng to feet
+                    addResult(`<strong>Estimated distance difference: ~${Math.round(feetDiff)} feet</strong>`, 
+                             feetDiff > 500 ? 'error' : 'warning')
+                    
+                    if (feetDiff > 500) {
+                        addResult('<h3>❌ PROBLEM IDENTIFIED</h3>', 'error')
+                        addResult('The geocoded coordinates are significantly different from working coordinates!', 'error')
+                        addResult('This explains why BRCHybridRouter says "sectors too close" - it\'s using wrong coordinates.', 'error')
+                        
+                        // Test different potential fixes
+                        addResult('<h3>🔧 Testing Potential Fixes:</h3>')
+                        
+                        // Test nearby addresses
+                        const testAddresses = ['7:30 & D', '7:00 & E', '8:00 & E', '7:30 & Esplanade']
+                        for (const addr of testAddresses) {
+                            const testCoords = brcAddressToLatLon(addr)
+                            if (testCoords) {
+                                const [tLat, tLng] = testCoords
+                                const testDiff = Math.sqrt(
+                                    Math.pow(tLat - WORKING_COORDS[0], 2) + 
+                                    Math.pow(tLng - WORKING_COORDS[1], 2)
+                                ) * 364000
+                                addResult(`${addr}: ${tLat.toFixed(6)}, ${tLng.toFixed(6)} (${Math.round(testDiff)}ft diff)`,
+                                         testDiff < 200 ? 'success' : 'warning')
+                            }
+                        }
+                    } else {
+                        addResult('<h3>✅ MINOR DIFFERENCE</h3>', 'success')
+                        addResult('Coordinate difference is small - should not affect hybrid routing.', 'success')
+                        addResult('The issue may be elsewhere in the routing pipeline.', 'warning')
+                    }
+                    
+                } else {
+                    addResult('<strong>❌ Geocoding returned null for "7:30 & E"</strong>', 'error')
+                    addResult('The geocoding function could not parse or locate this address.', 'error')
+                }
+                
+            } catch (error) {
+                addResult(`<strong>❌ Error during testing:</strong> ${error.message}`, 'error')
+                console.error('Test error:', error)
+            }
+            
+            addResult('=' .repeat(60))
+            addResult('<h3>🎯 Next Steps:</h3>')
+            addResult('1. If coordinates differ significantly: Fix geocoding function')
+            addResult('2. If coordinates are close: Debug routing service integration')
+            addResult('3. If geocoding fails: Check address parsing or GIS data')
+        }
+        
+        // Run the test
+        runCoordinateTest().catch(error => {
+            addResult(`<strong>Failed to run test:</strong> ${error.message}`, 'error')
+            console.error('Test runner error:', error)
+        })
+    </script>
+</body>
+</html>

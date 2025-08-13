@@ -16,7 +16,8 @@ import {
   lineIntersectsPolygon,
   BRC_CENTER,
   BRC_TEMPLE,
-  feetToMeters
+  feetToMeters,
+  EARTH_RADIUS_METERS
 } from './utils/geoUtils.js'
 
 export class BRCZoneClassifier {
@@ -91,10 +92,10 @@ export class BRCZoneClassifier {
     const centerDistance = distanceFromCenter(BRC_CENTER)
     const urbanZones = []
     
-    // Dense urban ring: roughly between D street and Esplanade
-    // This is where most camps are packed tightly
-    const innerUrbanRadius = feetToMeters(1200) // ~D street distance
-    const outerUrbanRadius = feetToMeters(2400) // ~Esplanade distance
+    // Dense urban ring: extends to Avenue L (outermost camp avenue)
+    // This is where most camps are placed and street navigation is required
+    const innerUrbanRadius = feetToMeters(1200) // Inner city boundary (Avenue A area)
+    const outerUrbanRadius = feetToMeters(6300) // Avenue L distance - outermost camp boundary
     
     // Create sector-based urban zones (avoiding center playa)
     for (let clockHour = 2; clockHour <= 10; clockHour++) {
@@ -134,7 +135,7 @@ export class BRCZoneClassifier {
   defineOuterPlayaArea() {
     return {
       center: BRC_CENTER, 
-      innerRadius: feetToMeters(2500), // Beyond Esplanade
+      innerRadius: feetToMeters(5900), // Beyond Avenue L (where urban zone ends)
       outerRadius: feetToMeters(8000), // Deep playa limit
       type: 'outer_playa',
       allowStraightLine: true
@@ -180,65 +181,86 @@ export class BRCZoneClassifier {
     const centerDist = distanceFromCenter(coord)
     const clockSector = getClockSector(coord)
     const clockPosition = getClockPosition(coord)
+    
+    // 🔍 DEBUG: Zone classification logging
+    console.log('🔍 ZONE DEBUG:', {
+      coord: coord,
+      centerDistance: centerDist,
+      centerDistanceFeet: centerDist / 0.3048, // Convert meters to feet
+      urbanBoundaries: { min: 1200, max: 6300 },
+      expectedUrban: 'Avenue A-L should be urban'
+    })
 
     // Check restricted areas first
     const restrictedZone = this.checkRestrictedZones(coord)
     if (restrictedZone) {
-      return {
+      const result = {
         type: 'restricted',
         zone: restrictedZone,
         allowStraightLine: false,
         requiresDetour: true
       }
+      console.log('🚫 ZONE RESULT: restricted', result)
+      return result
     }
 
     // Check if in inner playa (always straight-line OK)
     if (centerDist <= this.zones.openPlaya.innerPlaya.radius) {
-      return {
+      const result = {
         type: 'inner_playa',
         allowStraightLine: true,
         zone: this.zones.openPlaya.innerPlaya
       }
+      console.log('🎯 ZONE RESULT: inner_playa', result, { centerDist, innerPlayaRadius: this.zones.openPlaya.innerPlaya.radius })
+      return result
     }
 
     // Check if in outer playa (beyond city)
     const outerPlaya = this.zones.openPlaya.outerPlaya
     if (centerDist >= outerPlaya.innerRadius) {
-      return {
+      const result = {
         type: 'outer_playa', 
         allowStraightLine: true,
         zone: outerPlaya
       }
+      console.log('🌌 ZONE RESULT: outer_playa', result, { centerDist, outerPlayaInnerRadius: outerPlaya.innerRadius })
+      return result
     }
 
     // Check if in empty sector gaps
     const sectorGap = this.checkSectorGaps(coord, clockPosition, centerDist)
     if (sectorGap) {
-      return {
+      const result = {
         type: 'sector_gap',
         allowStraightLine: true,
         zone: sectorGap
       }
+      console.log('🕳️ ZONE RESULT: sector_gap', result)
+      return result
     }
 
     // Check if in urban zones (dense city blocks)
     const urbanZone = this.checkUrbanZones(coord)
     if (urbanZone) {
-      return {
+      const result = {
         type: 'urban',
         allowStraightLine: false,
         requiresStreets: true,
         zone: urbanZone,
         density: urbanZone.density
       }
+      console.log('✅ ZONE RESULT: urban', result)
+      return result
     }
 
     // Default: assume open playa if not clearly urban
-    return {
+    const result = {
       type: 'open_playa',
       allowStraightLine: true, 
       zone: { type: 'default_open', certainty: 'medium' }
     }
+    console.log('❌ ZONE RESULT: open_playa (default)', result)
+    return result
   }
 
   /**
@@ -298,7 +320,22 @@ export class BRCZoneClassifier {
       if (zone.type === 'sector_urban') {
         const centerDist = distanceFromCenter(coord)
         const clockPos = getClockPosition(coord)
+        
+        // Convert clock position (minutes) to angle degrees
+        // getClockPosition now returns corrected minutes accounting for BRC city orientation
         const angle = (clockPos / 720) * 360
+        
+        // DEBUG: Log zone checking for Avenue H
+        if (Math.abs(centerDist - 1531.809683850287) < 1) {
+          console.log(`🔍 CHECKING ZONE: ${zone.sector}`)
+          console.log(`  - Distance: ${centerDist} (${centerDist / 0.3048}ft)`)
+          console.log(`  - Zone distance range: ${zone.centerDistance.min}-${zone.centerDistance.max}`)
+          console.log(`  - Clock position: ${clockPos} minutes (corrected for BRC orientation)`)
+          console.log(`  - Calculated angle: ${angle}°`)
+          console.log(`  - Zone angle range: ${zone.angleRange.start}°-${zone.angleRange.end}°`)
+          console.log(`  - Distance match: ${centerDist >= zone.centerDistance.min && centerDist <= zone.centerDistance.max}`)
+          console.log(`  - Angle match: ${this.angleInRange(angle, zone.angleRange.start, zone.angleRange.end)}`)
+        }
         
         if (centerDist >= zone.centerDistance.min && 
             centerDist <= zone.centerDistance.max &&
@@ -356,25 +393,32 @@ export class BRCZoneClassifier {
     const directDistance = haversineDistance(startCoord, endCoord)
     const startSector = getClockSector(startCoord) 
     const endSector = getClockSector(endCoord)
-    const sectorDifference = Math.abs(startSector - endSector)
     
-    // Hybrid routing is beneficial when:
-    // 1. Crossing multiple sectors (>2 hour difference)
-    // 2. Route would pass through center playa
-    // 3. Distance savings > 20%
+    // Calculate circular sector difference (account for clock wrapping)
+    const rawDiff = Math.abs(startSector - endSector)
+    const sectorDifference = Math.min(rawDiff, 12 - rawDiff)
     
-    const routeCrossesCenter = this.routeCrossesCenter(startCoord, endCoord)
-    const potentialSavings = this.estimateHybridSavings(startCoord, endCoord)
+    console.log('🔍 HYBRID ANALYSIS:', {
+      startSector, endSector, rawDiff, sectorDifference,
+      startZone: startZone.type, endZone: endZone.type
+    })
     
-    if (sectorDifference > 2 && routeCrossesCenter && potentialSavings > 0.2) {
+    // FIXED LOGIC: Smart routing decision based on zone types and sector separation
+    
+    // 1. HYBRID: Cross-sector urban routes (major playa crossing benefit)
+    if (startZone.type === 'urban' && endZone.type === 'urban' && sectorDifference > 2) {
+      const potentialSavings = this.estimateHybridSavings(startCoord, endCoord)
+      console.log('✅ HYBRID: Cross-sector urban route detected')
       return {
         allowed: false, // Not pure straight-line
         recommendation: 'hybrid',
         confidence: 'high',
+        reason: 'cross_sector_urban_route',
         benefits: {
           distanceSavings: potentialSavings,
-          crossesOpenPlaya: routeCrossesCenter,
-          avoidsDenseUrban: true
+          crossesOpenPlaya: true,
+          avoidsDenseUrban: true,
+          sectorDifference
         },
         hybridRoute: {
           startUrbanExit: this.findUrbanExit(startCoord),
@@ -384,11 +428,35 @@ export class BRCZoneClassifier {
       }
     }
     
+    // 2. STREET-FOLLOWING: Same-sector urban routes
+    if (startZone.type === 'urban' && endZone.type === 'urban' && sectorDifference <= 2) {
+      console.log('✅ STREET-FOLLOWING: Same-sector urban route detected')
+      return {
+        allowed: false,
+        recommendation: 'street_following', 
+        confidence: 'high',
+        reason: 'same_sector_urban_route'
+      }
+    }
+    
+    // 3. DIRECT: One or both points in open playa
+    if (startZone.type !== 'urban' || endZone.type !== 'urban') {
+      console.log('✅ DIRECT: Open playa route detected')
+      return {
+        allowed: true,
+        recommendation: 'straight_line',
+        confidence: 'high', 
+        reason: 'open_playa_route'
+      }
+    }
+    
+    // 4. FALLBACK: Street-following for any other case
+    console.log('🔄 FALLBACK: Using street-following')
     return {
       allowed: false,
       recommendation: 'street_following', 
       confidence: 'medium',
-      reason: 'urban_zones_require_streets'
+      reason: 'fallback_urban_navigation'
     }
   }
 

@@ -15,7 +15,7 @@ export class BRCPathfinder {
     // Pathfinding parameters
     this.intersectionDelay = 5 // seconds added for each intersection
     this.turnPenalty = 3       // seconds added for each turn
-    this.heuristicWeight = 1.1 // A* heuristic weighting (>1 = faster but suboptimal)
+    this.heuristicWeight = 1.5 // A* heuristic weighting - increased for BRC radial-first routing
   }
 
   /**
@@ -35,16 +35,24 @@ export class BRCPathfinder {
 
     try {
       // Step 1: Find nearest nodes to start and end points
+      console.log(`🔍 Step 1: Finding nearest nodes...`)
       const startNode = this.network.findNearestNode(startCoords, options.maxStartDistance || 200)
-      const endNode = this.network.findNearestNode(endCoords, options.maxEndDistance || 200)
+      console.log(`   Start node search result:`, startNode ? `Found node ${startNode.id}` : 'NOT FOUND')
+      
+      const endNode = this.network.findNearestNode(endCoords, options.maxEndDistance || 200)  
+      console.log(`   End node search result:`, endNode ? `Found node ${endNode.id}` : 'NOT FOUND')
 
       if (!startNode) {
-        console.warn('⚠️  No start node found within range')
+        console.warn('⚠️  No start node found within range - expanding search radius')
+        const startNodeExpanded = this.network.findNearestNode(startCoords, 500)
+        console.warn(`   Expanded search result:`, startNodeExpanded ? `Found at ${500}m: ${startNodeExpanded.id}` : 'Still not found')
         return null
       }
 
       if (!endNode) {
-        console.warn('⚠️  No end node found within range')
+        console.warn('⚠️  No end node found within range - expanding search radius')  
+        const endNodeExpanded = this.network.findNearestNode(endCoords, 500)
+        console.warn(`   Expanded search result:`, endNodeExpanded ? `Found at ${500}m: ${endNodeExpanded.id}` : 'Still not found')
         return null
       }
 
@@ -54,10 +62,14 @@ export class BRCPathfinder {
       }
 
       // Step 2: Run A* pathfinding
+      console.log(`🔍 Step 2: Running A* pathfinding between ${startNode.id} and ${endNode.id}...`)
       const nodePath = this._aStarSearch(startNode, endNode, travelMode, options)
+      console.log(`   A* search result:`, nodePath ? `Found path with ${nodePath.length} nodes` : 'NO PATH FOUND')
       
       if (!nodePath || nodePath.length === 0) {
-        console.warn('⚠️  No route found between nodes')
+        console.warn('⚠️  No route found between nodes - checking network connectivity')
+        console.warn(`   Start node ${startNode.id} edges: ${this.network.getNodeEdges(startNode.id)?.length || 0}`)
+        console.warn(`   End node ${endNode.id} edges: ${this.network.getNodeEdges(endNode.id)?.length || 0}`)
         return null
       }
 
@@ -131,6 +143,16 @@ export class BRCPathfinder {
           const heuristic = this._calculateHeuristic(neighbor, endNode, travelMode)
           const f = tentativeGScore + heuristic * this.heuristicWeight
           fScore.set(neighborId, f)
+          
+          // DEBUG: Log actual A* decisions for critical nodes
+          if (current.id === '3:30&A' && (neighborId === '4:00&A' || neighborId === '3:30&B')) {
+            console.log(`🚨 A* DECISION: ${current.id} → ${neighborId}`)
+            console.log(`   moveCost: ${moveCost.toFixed(1)}`)
+            console.log(`   heuristic: ${heuristic.toFixed(1)}`)
+            console.log(`   heuristicWeight: ${this.heuristicWeight}`)
+            console.log(`   weighted heuristic: ${(heuristic * this.heuristicWeight).toFixed(1)}`)
+            console.log(`   f-score: ${f.toFixed(1)}`)
+          }
           
           if (!openSet.contains(neighbor)) {
             openSet.enqueue(neighbor, f)
@@ -230,37 +252,91 @@ export class BRCPathfinder {
 
   /**
    * Calculate A* heuristic (estimated cost to goal)
-   * Uses BRC-specific knowledge to guide search
+   * Uses BRC-aware routing distance, converted to time to match edge costs
    */
   _calculateHeuristic(node, goalNode, travelMode) {
-    // Base heuristic: straight-line distance
+    const baseSpeed = travelMode === 'biking' ? 12 : 4 // ft/sec (same as original)
+    
+    // Parse BRC addresses to calculate optimal routing distance
+    const nodeAddress = this._parseBRCAddress(node.brcAddress || node.id)
+    const goalAddress = this._parseBRCAddress(goalNode.brcAddress || goalNode.id)
+    
+    if (nodeAddress && goalAddress) {
+      // Calculate BRC optimal routing distance in meters
+      const brcDistanceMeters = this._calculateBRCRoutingDistance(nodeAddress, goalAddress)
+      // Convert to time to match edge cost units (edge costs are in seconds)
+      return (brcDistanceMeters * 3.28084) / baseSpeed // Convert m→ft→seconds
+    }
+    
+    // Fallback to straight-line distance for non-BRC addresses  
     const straightLineDistance = haversineDistance(node.coordinates, goalNode.coordinates)
-    const baseSpeed = travelMode === 'biking' ? 12 : 4 // ft/sec
-    let heuristic = straightLineDistance * 3.28084 / baseSpeed // Convert to seconds
+    return (straightLineDistance * 3.28084) / baseSpeed
+  }
+  
+  /**
+   * Calculate optimal routing distance in BRC polar coordinate system
+   * Strategy: radial-first movement, then avenue movement at destination
+   */
+  _calculateBRCRoutingDistance(fromAddress, toAddress) {
+    const fromAvenueNum = this._getAvenueNumber(fromAddress.avenue)
+    const toAvenueNum = this._getAvenueNumber(toAddress.avenue)
+    const fromClock = this._parseClockTime(fromAddress.clock)
+    const toClock = this._parseClockTime(toAddress.clock)
     
-    // BRC-specific heuristic adjustments
-    const nodeSector = getClockSector(node.coordinates)
-    const goalSector = getClockSector(goalNode.coordinates)
-    const sectorDifference = Math.abs(nodeSector - goalSector)
+    // Step 1: Radial distance (avenue-to-avenue movement)
+    const avenueSteps = Math.abs(toAvenueNum - fromAvenueNum)
+    const radialDistance = avenueSteps * 85 // ~85m per avenue step (from test data)
     
-    // If nodes are in very different sectors, route likely needs to go through center
-    if (sectorDifference > 3) {
-      const nodeDistance = distanceFromCenter(node.coordinates)
-      const goalDistance = distanceFromCenter(goalNode.coordinates)
-      
-      // If both nodes are in outer areas, routing through center might be faster
-      if (nodeDistance > 1000 && goalDistance > 1000) {
-        heuristic *= 0.9 // Encourage center routing
-      }
+    // Step 2: Avenue arc distance (clock position movement)
+    // Calculate shortest arc around the destination avenue
+    const clockDifference = Math.abs(toClock - fromClock)
+    const shortestArc = Math.min(clockDifference, 12 - clockDifference) // Shortest way around
+    
+    // Avenue circumference increases with distance from center
+    const destAvenueRadius = 200 + (toAvenueNum * 150) // Estimated radius
+    const destAvenueCircumference = 2 * Math.PI * destAvenueRadius
+    const avenueArcDistance = (shortestArc / 12) * destAvenueCircumference
+    
+    // CRITICAL: Heavily penalize non-optimal avenue movement
+    // If we're not on the destination avenue, avenue movement should be minimal
+    let adjustedAvenueDistance = avenueArcDistance
+    if (fromAvenueNum !== toAvenueNum) {
+      // Cross-avenue routing: heavily penalize avenue movement (favor radial-first)
+      adjustedAvenueDistance *= 0.1 // 90% penalty for cross-avenue movement
     }
     
-    // Nodes on same or adjacent radial/arc are generally easier to route
-    const sharedStreets = node.streetNames.filter(name => goalNode.streetNames.includes(name))
-    if (sharedStreets.length > 0) {
-      heuristic *= 0.8 // Encourage direct street connections
-    }
+    return radialDistance + adjustedAvenueDistance // Total distance in meters
+  }
+  
+  /**
+   * Parse clock time string to decimal hours
+   */
+  _parseClockTime(clockStr) {
+    const [hours, minutes] = clockStr.split(':').map(Number)
+    return hours + (minutes / 60)
+  }
+  
+  /**
+   * Parse BRC address string into components
+   * Made public for debugging
+   */
+  _parseBRCAddress(address) {
+    if (!address || typeof address !== 'string') return null
     
-    return heuristic
+    const match = address.match(/^(\d{1,2}:\d{2})\s*&\s*([A-L])$/)
+    if (!match) return null
+    
+    return {
+      clock: match[1],
+      avenue: match[2]
+    }
+  }
+  
+  /**
+   * Get numeric value for avenue (A=1, B=2, etc.)
+   */
+  _getAvenueNumber(avenue) {
+    return avenue.charCodeAt(0) - 'A'.charCodeAt(0) + 1
   }
 
   /**
@@ -334,7 +410,7 @@ export class BRCPathfinder {
       type: 'street_following',
       coordinates: this._extractRouteCoordinates(segments),
       distance: Math.round(totalDistance * 3.28084), // Convert to feet
-      duration: Math.round(totalDuration), // In seconds
+      duration: Math.round((totalDuration || 0) / 60), // Convert to minutes, handle NaN
       segments,
       nodePath: nodePath.map(node => ({
         id: node.id,
@@ -443,6 +519,7 @@ export class BRCPathfinder {
     
     return coordinates
   }
+  
 
   /**
    * Create simple direct route when start and end are at same intersection

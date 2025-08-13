@@ -76,7 +76,10 @@
           <div class="route-mode-indicator" v-if="isInRouteMode">
             <span class="mode-badge">🎯 ROUTE MODE</span>
           </div>
-          <div class="route-target">{{ routeDetails?.target.name }}</div>
+          <div class="route-target">
+            <span v-if="destinationAddress" class="destination-address">{{ destinationAddress }}</span>
+            {{ routeDetails?.target.name }}
+          </div>
           <div class="route-summary">{{ routeSummary }}</div>
         </div>
         <div class="route-controls">
@@ -166,6 +169,25 @@ const isMobile = ref(checkIfMobile())
 console.log('MapView: isMobile initial value:', isMobile.value)
 const year = computed(() => route.params.year || localStorage.getItem('selectedYear') || '2025')
 
+// Get destination address for route info panel
+const destinationAddress = computed(() => {
+  if (!routeDetails.value?.target?.item) return null
+  
+  const item = routeDetails.value.target.item
+  const location = getItemLocation(item)
+  
+  // Only show address if it's a proper street address (not lat/lon or error messages)
+  if (location && 
+      location !== 'Location Not Released' && 
+      location !== 'Unknown Location' && 
+      !location.includes('°') && // Exclude lat/lon coordinates
+      !location.includes('loading...')) {
+    return location
+  }
+  
+  return null
+})
+
 // Helper function to get CSS variable values for JavaScript
 const getCSSColor = (varName) => {
   return getComputedStyle(document.documentElement).getPropertyValue(varName).trim()
@@ -189,13 +211,15 @@ const {
   routeModeInfo,
   toggleRouteMode,
   isInRouteMode,
-  isInBrowseMode
+  isInBrowseMode,
+  routeTarget
 } = useRouting()
 
-// User location marker, radius circle, and route line
+// User location marker, radius circle, and route visualization
 let userLocationMarker = null
 let radiusCircle = null
-let routeLine = null
+let routeLine = null // Legacy single route line
+let routeSegments = [] // Revolutionary hybrid route segments
 
 // Performance optimization: Cache nearby events with pre-calculated distances
 let cachedNearbyEvents = []
@@ -424,39 +448,139 @@ const updateRadiusCircle = () => {
 const updateRouteLine = () => {
   if (!map) return
   
-  // Remove existing route line
+  // Remove existing route visualization
   if (routeLine) {
     map.removeLayer(routeLine)
     routeLine = null
   }
   
-  // Add route line if route exists
-  if (hasActiveRoute.value && routeWaypoints.value.length > 1) {
-    routeLine = L.polyline(routeWaypoints.value, {
-      ...routeStyle.value,
-      zIndexOffset: 1000 // Ensure route appears on top
-    })
+  // Remove existing route segments
+  routeSegments.forEach(segment => {
+    if (segment.layer) {
+      map.removeLayer(segment.layer)
+    }
+  })
+  routeSegments = []
+  
+  // Add revolutionary hybrid route visualization
+  if (hasActiveRoute.value && routeWaypoints.value.length > 0) {
+    const segments = routeWaypoints.value
     
-    // Add popup with route info
-    const routeInfo = routeDetails.value
-    if (routeInfo) {
-      routeLine.bindPopup(`
-        <div class="route-popup">
-          <strong>Route to ${routeInfo.target.name}</strong><br>
-          <div style="margin-top: 0.5rem;">
-            📏 ${routeInfo.distance}<br>
-            🚶 ${routeInfo.walkingTime}<br>
-            🚴 ${routeInfo.bikingTime}<br>
-          </div>
-          <div style="margin-top: 0.5rem; font-size: 0.875rem; color: #666;">
-            Current mode: ${routeInfo.currentMode.icon} ${routeInfo.currentMode.label}
-          </div>
-        </div>
-      `)
+    console.log(`🚀 ROUTE VISUALIZATION STARTING:`)
+    console.log(`  - hasActiveRoute: ${hasActiveRoute.value}`)
+    console.log(`  - routeWaypoints length: ${routeWaypoints.value.length}`)
+    console.log(`  - Raw routeWaypoints:`, routeWaypoints.value)
+    
+    // Check if we have enhanced segments (hybrid routes) or simple geometry
+    if (segments.length > 0 && segments[0].coordinates && segments[0].style) {
+      // 🔥 REVOLUTIONARY HYBRID ROUTE VISUALIZATION
+      console.log(`🎨 Creating ${segments.length}-segment hybrid route visualization`)
+      
+      segments.forEach((segment, index) => {
+        console.log(`🔍 SEGMENT ${index + 1} DEBUG:`)
+        console.log(`  - Type: ${segment.type}`)
+        console.log(`  - Coordinates array length: ${segment.coordinates?.length || 0}`)
+        console.log(`  - First coordinate: ${segment.coordinates?.[0]}`)
+        console.log(`  - Last coordinate: ${segment.coordinates?.[segment.coordinates?.length - 1]}`)
+        console.log(`  - Full coordinates:`, segment.coordinates)
+        console.log(`  - Style:`, segment.style)
+        
+        if (segment.coordinates && segment.coordinates.length > 1) {
+          console.log(`  ✅ Creating polyline with ${segment.coordinates.length} points`)
+          const segmentLine = L.polyline(segment.coordinates, {
+            ...segment.style,
+            zIndexOffset: 1000 + index // Layer segments properly
+          })
+          console.log(`  ✅ Polyline created:`, segmentLine)
+          
+          // Add segment info popup
+          const segmentType = segment.type === 'urban_navigation' ? 'Urban Streets' : 
+                            segment.type === 'playa_crossing' ? 'Playa Crossing' : 
+                            'Route Segment'
+          
+          segmentLine.bindPopup(`
+            <div class="route-segment-popup">
+              <strong>${segmentType}</strong><br>
+              <div style="margin-top: 0.5rem; font-size: 0.875rem;">
+                📏 ${Math.round(segment.distance || 0)}ft<br>
+                ⏱️ ${segment.duration || 0} min<br>
+                ${segment.instructions || 'Continue along this route'}
+              </div>
+            </div>
+          `)
+          
+          segmentLine.addTo(map)
+          console.log(`  ✅ Polyline added to map successfully`)
+          routeSegments.push({ 
+            id: segment.id, 
+            type: segment.type, 
+            layer: segmentLine 
+          })
+        } else {
+          console.log(`  ❌ SKIPPING segment - invalid coordinates (length: ${segment.coordinates?.length || 0})`)
+        }
+      })
+      
+      console.log(`🔥 Revolutionary ${segments.length}-segment route displayed!`)
+      
+    } else {
+      // Fallback: Legacy single polyline for simple routes
+      console.log(`🔄 LEGACY ROUTE FALLBACK DEBUG:`)
+      console.log(`  - Segments array length: ${segments.length}`)
+      console.log(`  - Segments[0] is array: ${Array.isArray(segments[0])}`)
+      console.log(`  - Segments[0]:`, segments[0])
+      
+      const coordinates = segments.length > 0 && Array.isArray(segments[0]) ? segments : 
+                         segments[0]?.coordinates || []
+      
+      console.log(`  - Final coordinates array length: ${coordinates.length}`)
+      console.log(`  - First coordinate: ${coordinates[0]}`)
+      console.log(`  - Last coordinate: ${coordinates[coordinates.length - 1]}`)
+      console.log(`  - Full coordinates:`, coordinates)
+      console.log(`  - Route style:`, routeStyle.value)
+      
+      if (coordinates.length > 1) {
+        console.log(`  ✅ Creating legacy polyline with ${coordinates.length} points`)
+        routeLine = L.polyline(coordinates, {
+          ...routeStyle.value,
+          zIndexOffset: 1000
+        })
+        console.log(`  ✅ Legacy polyline created:`, routeLine)
+        routeLine.addTo(map)
+        console.log(`  ✅ Legacy route line added to map successfully`)
+      } else {
+        console.log(`  ❌ SKIPPING legacy route - invalid coordinates (length: ${coordinates.length})`)
+      }
     }
     
-    routeLine.addTo(map)
-    console.log(`🗺️ Route line added: ${routeWaypoints.value.length} waypoints`)
+    // Add comprehensive route info popup for the entire route
+    const routeInfo = routeDetails.value
+    if (routeInfo && (routeSegments.length > 0 || routeLine)) {
+      const routeType = currentRoute.value?.routingMethod || 'Route'
+      const totalSegments = routeSegments.length
+      
+      let routeInfoPopup = `
+        <div class="route-popup revolutionary-route">
+          <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+            <strong style="color: #ff6b00;">${routeType}</strong>
+            ${totalSegments > 1 ? `<span style="background: #333; color: #00ff00; padding: 0.2rem 0.4rem; border-radius: 3px; font-size: 0.75rem;">🔥 ${totalSegments} SEGMENTS</span>` : ''}
+          </div>
+          <div style="margin: 0.5rem 0;">
+            <strong>📍 ${routeInfo.target.name}</strong>
+          </div>
+          <div style="font-size: 0.875rem; color: #333; line-height: 1.4;">
+            📏 ${routeInfo.distance} • ⏱️ ${routeInfo.currentTime}<br>
+            ${routeType.includes('Hybrid') ? '🎯 Optimized cross-sector route with playa shortcut' : '🚶 Direct navigation route'}
+          </div>
+        </div>
+      `
+      
+      // Add popup to the first segment or main route line
+      const targetLayer = routeSegments[0]?.layer || routeLine
+      if (targetLayer) {
+        targetLayer.bindPopup(routeInfoPopup)
+      }
+    }
   }
 }
 
@@ -1164,8 +1288,11 @@ onMounted(async () => {
     setTimeout(() => map.invalidateSize(), 200)
   })
   
-  // Create global function for popup route buttons
-  window.createRouteFromPopup = (itemId, itemType) => {
+  // Create global function for popup route buttons (now async for enhanced routing)
+  window.createRouteFromPopup = async (itemId, itemType) => {
+    console.log('🎯 MAP PIN CLICKED - Starting Route Creation Pipeline')
+    console.log('🆔 Item ID:', itemId, 'Type:', itemType)
+    
     // Find the item by ID in the correct array
     let item = null
     if (itemType === 'camp' && items.camps) {
@@ -1181,12 +1308,52 @@ onMounted(async () => {
       return
     }
     
-    // Create the route
-    const route = createRoute(userLocation.value, item, getItemLocation, mapControls)
-    if (route) {
-      console.log(`🗺️ Route created from popup to ${item.name || item.title}`)
-      // Update markers to reflect new route state
-      loadData()
+    // Log the raw item data
+    console.log('🏠 ITEM DATA FOUND:')
+    console.log('  - Name:', item.name || item.title)
+    console.log('  - Raw location_string:', item.location_string)
+    console.log('  - Raw location object:', item.location)
+    console.log('  - Raw address:', item.address)
+    
+    // Test getItemLocation function
+    const itemLocationResult = getItemLocation(item)
+    console.log('📍 GET_ITEM_LOCATION RESULT:', itemLocationResult)
+    
+    // Test address-to-coordinate conversion
+    if (itemLocationResult && itemLocationResult !== 'Location Not Released' && itemLocationResult !== 'Unknown Location') {
+      const { brcAddressToLatLon, latLonToBRCAddress } = await import('../utils/geocoding')
+      const convertedCoords = brcAddressToLatLon(itemLocationResult)
+      console.log('🗺️ ADDRESS-TO-COORDINATE CONVERSION:')
+      console.log('  - Input address:', itemLocationResult)
+      console.log('  - Output coordinates:', convertedCoords)
+      
+      // Test reverse conversion
+      if (convertedCoords) {
+        const reverseAddress = latLonToBRCAddress(convertedCoords)
+        console.log('🔄 REVERSE CONVERSION TEST:')
+        console.log('  - Original address:', itemLocationResult)
+        console.log('  - Converted coordinates:', convertedCoords)
+        console.log('  - Reverse conversion:', reverseAddress)
+        console.log('  - Match:', itemLocationResult === reverseAddress ? '✅ PERFECT' : '❌ MISMATCH')
+      }
+    }
+    
+    console.log('🚀 USER LOCATION:', userLocation.value)
+    
+    // Create the route (now async for enhanced routing)
+    try {
+      const route = await createRoute(userLocation.value, item, getItemLocation, mapControls)
+      if (route) {
+        console.log(`🗺️ Route created from popup to ${item.name || item.title}`)
+        // Log enhanced route information if available
+        if (route.isIntelligentRoute) {
+          console.log(`✨ Using ${route.routingMethod} for optimal navigation`)
+        }
+        // Update markers to reflect new route state
+        loadData()
+      }
+    } catch (error) {
+      console.error('Failed to create route from popup:', error)
     }
   }
   
@@ -1670,6 +1837,56 @@ const addMarker = (item, type, icon, color = null) => {
   `, {
     autoClose: false,
     closeOnClick: false  // Prevent popup from closing when clicking inside it
+  })
+  
+  // Add marker click logging for debugging coordinate conversions
+  marker.on('click', async () => {
+    console.log('🎯 MARKER CLICKED - Starting Coordinate Analysis')
+    console.log('🆔 Item ID:', item.uid, 'Type:', type)
+    
+    // Log the raw item data
+    console.log('🏠 ITEM DATA:')
+    console.log('  - Name:', item.name || item.title)
+    console.log('  - Raw location_string:', item.location_string)
+    console.log('  - Raw location object:', item.location)
+    console.log('  - Raw address:', item.address)
+    
+    // Test getItemLocation function
+    const itemLocationResult = getItemLocation(item)
+    console.log('📍 GET_ITEM_LOCATION RESULT:', itemLocationResult)
+    
+    // Test address-to-coordinate conversion WITH DEBUG
+    if (itemLocationResult && itemLocationResult !== 'Location Not Released' && itemLocationResult !== 'Unknown Location') {
+      const { brcAddressToLatLonDebug, latLonToBRCAddress } = await import('../utils/geocoding')
+      
+      console.log('🗺️ ADDRESS-TO-COORDINATE CONVERSION WITH FULL GIS DEBUG:')
+      console.log('  - Input address:', itemLocationResult)
+      
+      const convertedCoords = brcAddressToLatLonDebug(itemLocationResult)
+      console.log('  - Output coordinates:', convertedCoords)
+      
+      // Compare with actual marker coordinates
+      console.log('📍 MARKER COORDINATE COMPARISON:')
+      console.log('  - Marker coordinates:', coords)
+      console.log('  - Converted coordinates:', convertedCoords)
+      if (convertedCoords) {
+        const latDiff = Math.abs(coords[0] - convertedCoords[0])
+        const lonDiff = Math.abs(coords[1] - convertedCoords[1])
+        console.log('  - Latitude difference:', latDiff)
+        console.log('  - Longitude difference:', lonDiff)
+        console.log('  - Coordinates match:', latDiff < 0.001 && lonDiff < 0.001 ? '✅ CLOSE' : '❌ DIFFERENT')
+        
+        // Test reverse conversion
+        const reverseAddress = latLonToBRCAddress(convertedCoords)
+        console.log('🔄 REVERSE CONVERSION:')
+        console.log('  - Original address:', itemLocationResult)
+        console.log('  - Reverse conversion:', reverseAddress)
+        console.log('  - Round-trip match:', itemLocationResult === reverseAddress ? '✅ PERFECT' : '❌ MISMATCH')
+      }
+    }
+    
+    console.log('🚀 USER LOCATION:', userLocation.value)
+    console.log('─'.repeat(80))
   })
   
   // Handle popup open/close events for countdown management
@@ -2413,6 +2630,12 @@ const applyRotation = () => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.destination-address {
+  color: var(--color-text-secondary);
+  font-weight: 400;
+  margin-right: 0.5rem;
 }
 
 .route-summary {

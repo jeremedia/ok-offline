@@ -1,4 +1,5 @@
 import { shouldShowLocation } from './stores/globalState'
+import { useSimulation } from './composables/useSimulation'
 
 export function getItemName(item) {
   return item.name || item.title || item.camp || item.artist || 'Unnamed'
@@ -186,7 +187,8 @@ function isSameDay(date1, date2) {
 export function getNextOccurrence(event) {
   if (!event.occurrence_set || event.occurrence_set.length === 0) return null
   
-  const now = new Date()
+  const { getCurrentTime } = useSimulation()
+  const now = getCurrentTime()
   for (const occurrence of event.occurrence_set) {
     const startTime = new Date(occurrence.start_time)
     if (startTime > now) {
@@ -202,7 +204,8 @@ export function getNextOccurrence(event) {
 export function isHappeningNow(event) {
   if (!event.occurrence_set) return false
   
-  const now = new Date()
+  const { getCurrentTime } = useSimulation()
+  const now = getCurrentTime()
   for (const occurrence of event.occurrence_set) {
     const start = new Date(occurrence.start_time)
     const end = occurrence.end_time ? new Date(occurrence.end_time) : new Date(start.getTime() + 60 * 60 * 1000) // Default 1 hour
@@ -213,4 +216,27 @@ export function isHappeningNow(event) {
   }
   
   return false
+}
+
+// Check if event is completely in the past (all occurrences finished)
+export function isEventPast(event) {
+  if (!event.occurrence_set || event.occurrence_set.length === 0) return false
+  
+  const { getCurrentTime } = useSimulation()
+  const now = getCurrentTime()
+  
+  // Event is past only if ALL occurrences have ended
+  for (const occurrence of event.occurrence_set) {
+    const endTime = occurrence.end_time 
+      ? new Date(occurrence.end_time) 
+      : new Date(new Date(occurrence.start_time).getTime() + 60 * 60 * 1000) // Default 1 hour
+    
+    // If any occurrence hasn't ended yet, event is not past
+    if (endTime > now) {
+      return false
+    }
+  }
+  
+  // All occurrences have ended
+  return true
 }

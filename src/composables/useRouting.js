@@ -1,5 +1,5 @@
 import { ref, computed } from 'vue'
-import { calculateRouteToItem, formatRouteInfo, getRouteWaypoints, getRouteStyle } from '../services/routingService'
+import { calculateRouteToItem, formatRouteInfo, getRouteWaypoints, getRouteStyle, getSegmentStyle, getWaypointStyle } from '../services/routingService'
 
 // Global route state
 const currentRoute = ref(null)
@@ -16,39 +16,60 @@ if (savedRouteMode && ['walking', 'biking'].includes(savedRouteMode)) {
 
 export function useRouting() {
   /**
-   * Create a route from user location to an item
+   * Create a route from user location to an item (enhanced with intelligent routing)
    * @param {Array} userLocation - [lat, lng] of user
    * @param {Object} item - Target item (camp, art, event)
    * @param {Function} getItemLocation - Function to extract location from item
    * @param {Object} mapControls - Current map control state to save
-   * @returns {Object|null} Route object or null if route cannot be created
+   * @returns {Promise<Object>|null} Route object or null if route cannot be created
    */
-  const createRoute = (userLocation, item, getItemLocation, mapControls = null) => {
-    const route = calculateRouteToItem(userLocation, item, getItemLocation)
-    
-    if (route) {
-      // Save current map state before entering route mode
-      if (mapControls && !isInRouteMode.value) {
-        savedMapState.value = { ...mapControls }
-        console.log('💾 Saved map state for route mode:', savedMapState.value)
+  const createRoute = async (userLocation, item, getItemLocation, mapControls = null) => {
+    try {
+      // Use enhanced routing with current travel mode
+      const route = await calculateRouteToItem(userLocation, item, getItemLocation, routeMode.value)
+      
+      if (route) {
+        // Save current map state before entering route mode
+        if (mapControls && !isInRouteMode.value) {
+          savedMapState.value = { ...mapControls }
+          console.log('💾 Saved map state for route mode:', savedMapState.value)
+        }
+        
+        currentRoute.value = route
+        routeTarget.value = {
+          uid: item.uid,
+          name: item.name || item.title,
+          type: item.event_type ? 'event' : (item.artist ? 'art' : 'camp'),
+          item: item
+        }
+        
+        // Enter route mode
+        isInRouteMode.value = true
+        
+        // Enhanced logging for intelligent routes
+        if (route.isIntelligentRoute) {
+          console.log(`🧠 Enhanced route to ${routeTarget.value.name}: ${route.routingMethod}`)
+          console.log(`🗺️ Route distance: ${route.distanceText} • Time: ${route.travelTimes[routeMode.value].formatted}`)
+          
+          if (route.enhancedRoute?.segments) {
+            console.log(`📋 Route segments: ${route.enhancedRoute.segments.length}`)
+            route.enhancedRoute.segments.forEach((segment, i) => {
+              console.log(`   ${i + 1}. ${segment.type}: ${segment.distance}ft, ${segment.duration}min`)
+            })
+          }
+        } else {
+          console.log(`🗺️ Route created to ${routeTarget.value.name}:`, route.distanceText)
+        }
+        
+        console.log('🎯 Entering Route Mode - minimizing distractions')
       }
       
-      currentRoute.value = route
-      routeTarget.value = {
-        uid: item.uid,
-        name: item.name || item.title,
-        type: item.event_type ? 'event' : (item.artist ? 'art' : 'camp'),
-        item: item
-      }
+      return route
       
-      // Enter route mode
-      isInRouteMode.value = true
-      
-      console.log(`🗺️ Route created to ${routeTarget.value.name}:`, route.distanceText)
-      console.log('🎯 Entering Route Mode - minimizing distractions')
+    } catch (error) {
+      console.error('Failed to create enhanced route:', error)
+      return null
     }
-    
-    return route
   }
 
   /**
@@ -198,6 +219,10 @@ export function useRouting() {
     toggleRouteMode,
     hasRouteToItem,
     canRoute,
+    
+    // Enhanced visualization functions
+    getSegmentStyle,
+    getWaypointStyle,
     
     // Helper computed
     hasActiveRoute: computed(() => Boolean(currentRoute.value)),

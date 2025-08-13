@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zone Classification Debug</title>
+    <style>
+        body {
+            font-family: 'Berkeley Mono', monospace;
+            background: #1a1a1a;
+            color: #fff;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .debug-section {
+            background: #2a2a2a;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 3px solid #8B0000;
+            border-radius: 5px;
+        }
+        .success { border-left-color: #00ff00; }
+        .error { border-left-color: #ff0000; }
+        .warning { border-left-color: #ffaa00; }
+        pre {
+            background: #111;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        .coord {
+            background: #333;
+            padding: 5px;
+            border-radius: 3px;
+            display: inline-block;
+            margin: 2px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Zone Classification Debug</h1>
+    <p>Debugging the routing system's zone classification issues...</p>
+    
+    <div id="output"></div>
+
+    <script type="module">
+        // Import necessary modules
+        import { BRCZoneClassifier } from './src/services/routing/zoneClassifier.js'
+        import { loadAllGISData } from './src/services/gisData.js'
+        import { getClockAddress, distanceFromCenter, getClockPosition, getClockSector } from './src/services/routing/utils/geoUtils.js'
+        import { latLonToBRCAddress } from './src/utils/geocoding.js'
+
+        const output = document.getElementById('output')
+
+        function log(message, type = 'info') {
+            const div = document.createElement('div')
+            div.className = `debug-section ${type}`
+            div.innerHTML = message
+            output.appendChild(div)
+        }
+
+        // Test coordinates from the debug logs
+        const startCoord = [40.779987, -119.197708]  // User's location (3:30&A)
+        const endCoord = [40.785520373563145, -119.21741883553943]  // Shitty Wood (E & 7:15)
+
+        // Debug individual coordinate details
+        function debugCoordinate(coord, label) {
+            const distance = Math.round(distanceFromCenter(coord))
+            const clockPos = getClockPosition(coord)
+            const clockSector = getClockSector(coord)
+            const clockAddress = getClockAddress(coord)
+            const reverseGeocode = latLonToBRCAddress(coord)
+
+            return `
+                <h3>📍 ${label}</h3>
+                <div class="coord">Coordinates: [${coord[0]}, ${coord[1]}]</div><br>
+                <div class="coord">Distance from center: ${distance}m</div><br>
+                <div class="coord">Clock position: ${clockPos} minutes</div><br>
+                <div class="coord">Clock sector: ${clockSector}</div><br>
+                <div class="coord">Clock address: ${clockAddress}</div><br>
+                <div class="coord">Reverse geocode: ${reverseGeocode}</div>
+            `
+        }
+
+        async function runDebugTest() {
+            try {
+                log('<h2>🗺️ Coordinate Analysis</h2>')
+                
+                // Debug individual coordinates
+                log(debugCoordinate(startCoord, 'START - User Location (should be 3:30&A)'))
+                log(debugCoordinate(endCoord, 'END - Shitty Wood (should be E & 7:15)'))
+                
+                // Initialize zone classifier with GIS data
+                log('<h2>🗺️ Loading GIS Data...</h2>')
+                const gisData = await loadAllGISData(2025)
+                const zoneClassifier = new BRCZoneClassifier(gisData)
+                log('✅ GIS data loaded and zone classifier initialized', 'success')
+                
+                // Test zone classification
+                log('<h2>🔍 Zone Classification Results</h2>')
+                const startZone = zoneClassifier.classifyCoordinate(startCoord)
+                const endZone = zoneClassifier.classifyCoordinate(endCoord)
+                
+                log(`
+                    <h3>📊 START ZONE (${getClockAddress(startCoord)}):</h3>
+                    <div class="coord">Type: ${startZone.type}</div><br>
+                    <div class="coord">Allow straight line: ${startZone.allowStraightLine}</div><br>
+                    <div class="coord">Requires streets: ${startZone.requiresStreets || false}</div><br>
+                    <pre>${JSON.stringify(startZone.zone, null, 2)}</pre>
+                `)
+                
+                log(`
+                    <h3>📊 END ZONE (${getClockAddress(endCoord)}):</h3>
+                    <div class="coord">Type: ${endZone.type}</div><br>
+                    <div class="coord">Allow straight line: ${endZone.allowStraightLine}</div><br>
+                    <div class="coord">Requires streets: ${endZone.requiresStreets || false}</div><br>
+                    <pre>${JSON.stringify(endZone.zone, null, 2)}</pre>
+                `)
+                
+                // Test straight-line analysis
+                log('<h2>🧭 Route Analysis</h2>')
+                const straightLineAnalysis = zoneClassifier.canStraightLine(startCoord, endCoord)
+                log(`
+                    <div class="coord">Recommendation: ${straightLineAnalysis.recommendation}</div><br>
+                    <div class="coord">Allowed: ${straightLineAnalysis.allowed}</div><br>
+                    <div class="coord">Confidence: ${straightLineAnalysis.confidence}</div><br>
+                    ${straightLineAnalysis.reason ? `<div class="coord">Reason: ${straightLineAnalysis.reason}</div><br>` : ''}
+                    <pre>${JSON.stringify(straightLineAnalysis, null, 2)}</pre>
+                `)
+                
+                // Expected vs Actual analysis
+                log('<h2>❓ EXPECTED vs ACTUAL</h2>')
+                log(`
+                    <div class="coord">Expected: Both coordinates should be classified as 'urban'</div><br>
+                    <div class="coord">Expected: Route recommendation should be 'street_following' or 'hybrid'</div><br>
+                    <div class="coord">Actual Start: ${startZone.type}</div><br>
+                    <div class="coord">Actual End: ${endZone.type}</div><br>
+                    <div class="coord">Actual Recommendation: ${straightLineAnalysis.recommendation}</div>
+                `)
+                
+                // Issue analysis
+                log('<h2>🔍 ISSUE ANALYSIS</h2>')
+                
+                let issuesFound = []
+                
+                if (startZone.type !== 'urban') {
+                    const issue = `START incorrectly classified as '${startZone.type}' instead of 'urban'`
+                    log(`❌ ${issue}`, 'error')
+                    issuesFound.push(issue)
+                } else {
+                    log('✅ START correctly classified as urban', 'success')
+                }
+                
+                if (endZone.type !== 'urban') {
+                    const issue = `END incorrectly classified as '${endZone.type}' instead of 'urban'`
+                    log(`❌ ${issue}`, 'error')
+                    issuesFound.push(issue)
+                } else {
+                    log('✅ END correctly classified as urban', 'success')
+                }
+                
+                if (straightLineAnalysis.recommendation === 'straight_line') {
+                    const issue = `ROUTE incorrectly recommending 'straight_line' for urban-to-urban route`
+                    log(`❌ ${issue}`, 'error')
+                    issuesFound.push(issue)
+                } else {
+                    log(`✅ ROUTE correctly recommending '${straightLineAnalysis.recommendation}'`, 'success')
+                }
+                
+                // Summary
+                log('<h2>📋 SUMMARY</h2>')
+                if (issuesFound.length === 0) {
+                    log('🎉 All zone classifications are working correctly!', 'success')
+                } else {
+                    log(`🚨 Found ${issuesFound.length} issue(s):`, 'error')
+                    issuesFound.forEach(issue => {
+                        log(`• ${issue}`, 'error')
+                    })
+                }
+                
+            } catch (error) {
+                log(`❌ Debug test failed: ${error.message}`, 'error')
+                log(`<pre>${error.stack}</pre>`, 'error')
+            }
+        }
+
+        // Run the debug test
+        runDebugTest()
+    </script>
+</body>
+</html>
