@@ -144,9 +144,14 @@ export function formatEventTime(event) {
   const start = new Date(occurrence.start_time)
   const end = occurrence.end_time ? new Date(occurrence.end_time) : null
   
-  // Format day of week
+  // Format day of week in Pacific Time
   const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-  const day = days[start.getDay()]
+  // Get the day in Pacific Time
+  const pacificDateStr = start.toLocaleDateString('en-US', {
+    timeZone: 'America/Los_Angeles',
+    weekday: 'short'
+  })
+  const day = pacificDateStr
   
   // Format time
   const startTime = formatTime(start)
@@ -157,30 +162,54 @@ export function formatEventTime(event) {
   }
   
   if (endTime && !isSameDay(start, end)) {
-    // Multi-day event
-    const endDay = days[end.getDay()]
+    // Multi-day event - get end day in Pacific Time
+    const pacificEndDateStr = end.toLocaleDateString('en-US', {
+      timeZone: 'America/Los_Angeles',
+      weekday: 'short'
+    })
+    const endDay = pacificEndDateStr
     return `${day} ${startTime} - ${endDay} ${endTime}`
   }
   
   return endTime ? `${day} ${startTime}-${endTime}` : `${day} ${startTime}`
 }
 
-// Format time as 12-hour with am/pm
+// Format time as 12-hour with am/pm in Pacific Time
 function formatTime(date) {
-  let hours = date.getHours()
-  const minutes = date.getMinutes()
+  // Convert to Pacific Time string and parse the time components
+  const pacificTime = date.toLocaleString('en-US', {
+    timeZone: 'America/Los_Angeles',
+    hour12: false,
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+  
+  const [hoursStr, minutesStr] = pacificTime.split(':')
+  let hours = parseInt(hoursStr)
+  const minutes = parseInt(minutesStr)
+  
   const ampm = hours >= 12 ? 'pm' : 'am'
   hours = hours % 12
   hours = hours ? hours : 12 // 0 should be 12
-  const minutesStr = minutes < 10 ? '0' + minutes : minutes
-  return minutes === 0 ? `${hours}${ampm}` : `${hours}:${minutesStr}${ampm}`
+  
+  return minutes === 0 ? `${hours}${ampm}` : `${hours}:${minutesStr.padStart(2, '0')}${ampm}`
 }
 
-// Check if two dates are on the same day
+// Check if two dates are on the same day in Pacific Time
 function isSameDay(date1, date2) {
-  return date1.getFullYear() === date2.getFullYear() &&
-         date1.getMonth() === date2.getMonth() &&
-         date1.getDate() === date2.getDate()
+  const pacific1 = date1.toLocaleDateString('en-US', {
+    timeZone: 'America/Los_Angeles',
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric'
+  })
+  const pacific2 = date2.toLocaleDateString('en-US', {
+    timeZone: 'America/Los_Angeles',
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric'
+  })
+  return pacific1 === pacific2
 }
 
 // Get next occurrence of an event

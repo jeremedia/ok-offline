@@ -76,6 +76,23 @@
               <p v-else class="no-members">No team members found</p>
             </div>
             
+            <!-- Wallpaper Builder Section -->
+            <div class="section-card">
+              <h4>Team Wallpapers</h4>
+              <p class="section-description">Create personalized phone wallpapers for team members</p>
+              <div class="wallpaper-actions">
+                <BaseButton 
+                  variant="primary" 
+                  size="md"
+                  @click="showWallpaperBuilder = true"
+                  class="wallpaper-btn"
+                >
+                  🎨 Create Wallpaper
+                </BaseButton>
+                <p class="wallpaper-info">Generate custom home screens with camp info and member names</p>
+              </div>
+            </div>
+            
             <div class="section-card">
               <div class="timeline-header">
                 <h4>Arrive & Depart</h4>
@@ -130,6 +147,25 @@
         </div>
       </div>
     </div>
+    
+    <!-- Wallpaper Builder Modal -->
+    <div v-if="showWallpaperBuilder" class="modal-overlay" @click="closeWallpaperBuilder">
+      <div class="modal-container" @click.stop>
+        <div class="modal-header">
+          <h2>Create Team Wallpaper</h2>
+          <button class="modal-close" @click="closeWallpaperBuilder">✕</button>
+        </div>
+        <div class="modal-body">
+          <WallpaperBuilder 
+            :camp-data="{
+              name: camp?.name || 'OKNOTOK',
+              location: campLocation
+            }"
+            @close="closeWallpaperBuilder"
+          />
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -138,6 +174,7 @@ import { ref, onMounted, watch, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getThemeCamp } from '../services/campService'
 import BaseButton from '../components/ui/BaseButton.vue'
+import WallpaperBuilder from '../components/camp-editor/WallpaperBuilder.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -158,6 +195,7 @@ const props = defineProps({
 const loading = ref(false)
 const error = ref(null)
 const camp = ref(null)
+const showWallpaperBuilder = ref(false)
 
 // Real camp data loading following DetailView pattern
 const loadCamp = async (slug) => {
@@ -191,6 +229,15 @@ onMounted(() => {
   if (props.slug) {
     loadCamp(props.slug)
   }
+})
+
+// Computed camp location - for 2025 it's at 3:30 & A
+const campLocation = computed(() => {
+  // OKNOTOK is at 3:30 & A for 2025
+  if (props.slug === 'oknotok' || camp.value?.name === 'OKNOTOK') {
+    return '3:30 & A'
+  }
+  return camp.value?.location || 'Location TBD'
 })
 
 // Computed properties for team member display
@@ -304,6 +351,11 @@ const navigateToTimeline = () => {
 
 const navigateToEditor = () => {
   router.push(`/${props.year}/camp/${props.slug}/edit`)
+}
+
+// Wallpaper builder functions
+const closeWallpaperBuilder = () => {
+  showWallpaperBuilder.value = false
 }
 </script>
 
@@ -744,6 +796,98 @@ const navigateToEditor = () => {
   
   .timeline-date {
     min-width: auto;
+  }
+}
+
+/* Wallpaper Section Styles */
+.section-description {
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.wallpaper-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.wallpaper-btn {
+  font-size: 1rem;
+}
+
+.wallpaper-info {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal-container {
+  background: var(--color-bg-base);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 1400px;
+  height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid var(--color-border-medium);
+  background: var(--color-bg-elevated);
+}
+
+.modal-header h2 {
+  margin: 0;
+  color: var(--color-text-primary);
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 5px;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.modal-close:hover {
+  color: var(--color-text-primary);
+}
+
+.modal-body {
+  flex: 1;
+  overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  .modal-container {
+    max-width: 100%;
+    height: 100vh;
+    border-radius: 0;
   }
 }
 </style>
