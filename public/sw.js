@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ok-offline-v41'; // Fixed BRC hybrid routing exit points - production ready
+const CACHE_NAME = 'ok-offline-v42'; // Fixed BRC hybrid routing exit points - production ready
 const urlsToCache = [
   // Core app files
   '/',

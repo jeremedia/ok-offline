@@ -1,4 +1,4 @@
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 
 export function useWallpaperCanvas() {
   // Canvas and context refs
@@ -40,7 +40,7 @@ export function useWallpaperCanvas() {
     line2Size: 0.04,
     
     // Layout
-    topMargin: 0.15, // Safe area for notch
+    topMargin: 0.25, // Safe area for notch
     bottomMargin: 0.1,
     textSpacing: 0.02
   })
@@ -266,11 +266,15 @@ export function useWallpaperCanvas() {
   }, { deep: true })
   
   // Watch for device type changes
+  
+  // Watch for device type changes
   watch(() => settings.value.deviceType, () => {
     updateCanvasSize()
-    renderWallpaper()
+    // Small delay to ensure canvas is ready after resize
+    setTimeout(() => {
+      renderWallpaper()
+    }, 10)
   })
-  
   return {
     canvas,
     ctx,

@@ -315,8 +315,8 @@
               <input 
                 type="range" 
                 v-model.number="settings.topMargin"
-                min="0.05" 
-                max="0.3" 
+                min="0.15" 
+                max="0.45" 
                 step="0.01"
               />
               <span>{{ Math.round(settings.topMargin * 100) }}%</span>
