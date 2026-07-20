@@ -32,5 +32,7 @@ jobs:
           git fetch origin main --tags
           git merge-base --is-ancestor '${{ inputs.commit_sha }}' origin/main
           ! git rev-parse "v${{ inputs.version }}" >/dev/null 2>&1
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git tag -a "v${{ inputs.version }}" '${{ inputs.commit_sha }}' -m "OK-OFFLINE v${{ inputs.version }}"
           git push origin "v${{ inputs.version }}"
