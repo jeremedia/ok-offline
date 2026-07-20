@@ -25,9 +25,7 @@
               @change="handleYearChange"
               class="menu-select"
             >
-              <option value="2023">2023</option>
-              <option value="2024">2024</option>
-              <option value="2025">2025</option>
+              <option v-for="year in SUPPORTED_YEARS" :key="year" :value="year">{{ year }}</option>
             </select>
           </div>
           
@@ -97,6 +95,7 @@ import { useRouter } from 'vue-router'
 import packageJson from '../../../package.json'
 import { getCurrentTheme, applyTheme } from '../../services/themeService'
 import { BaseButton, ButtonGroup } from '../ui'
+import { SUPPORTED_YEARS } from '../../config/seasons'
 
 const appVersion = packageJson.version
 

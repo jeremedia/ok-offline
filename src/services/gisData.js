@@ -1,38 +1,20 @@
-// GIS data service for loading and managing Burning Man geospatial data
+// GIS data service for loading and managing official, pinned season geometry.
+import { CURRENT_YEAR, SUPPORTED_YEARS, getSeason } from '../config/seasons'
 
-// Default to 2025 but allow year override
-let currentYear = 2025;
+// Default to the canonical current season but allow historical override.
+let currentYear = Number(CURRENT_YEAR);
 
 // Cache for loaded GIS data (per year)
-const gisDataCache = {
-  2023: {
+const gisDataCache = Object.fromEntries(SUPPORTED_YEARS.map(year => [year, {
     streetLines: null,
     trashFence: null,
     cpns: null,
+    dmz: null,
     plazas: null,
     cityBlocks: null,
     toilets: null,
     streetOutlines: null,
-  },
-  2024: {
-    streetLines: null,
-    trashFence: null,
-    cpns: null,
-    plazas: null,
-    cityBlocks: null,
-    toilets: null,
-    streetOutlines: null,
-  },
-  2025: {
-    streetLines: null,
-    trashFence: null,
-    cpns: null,
-    plazas: null,
-    cityBlocks: null,
-    toilets: null,
-    streetOutlines: null,
-  }
-};
+  }]));
 
 // Loading state
 const loadingState = {
@@ -44,7 +26,7 @@ const loadingState = {
 // Set the current year for GIS data loading
 export function setGISYear(year) {
   if (gisDataCache[year]) {
-    currentYear = year;
+    currentYear = Number(year);
     return true;
   }
   console.warn(`GIS data not available for year ${year}`);
@@ -77,7 +59,14 @@ async function loadGeoJSON(filename, year = currentYear) {
       throw new Error(`Failed to load ${filename}: ${response.statusText}`);
     }
     
+    const contentType = response.headers.get('content-type') || '';
+    if (!contentType.toLowerCase().includes('json') && !filename.endsWith('.geojson')) {
+      throw new Error(`${filename} returned invalid Content-Type ${contentType || '(missing)'}`);
+    }
     const data = await response.json();
+    if (data?.type !== 'FeatureCollection' || !Array.isArray(data.features)) {
+      throw new Error(`${filename} is not a FeatureCollection`);
+    }
     console.log(`✅ Loaded GIS data ${filename} for year ${year}`);
     return data;
     
@@ -163,6 +152,7 @@ export async function loadAllGISData(year = currentYear) {
         yearCache.streetLines = data2024.streetLines;
         yearCache.trashFence = data2024.trashFence;
         yearCache.cpns = data2024.cpns;
+        yearCache.dmz = null;
         yearCache.plazas = data2024.plazas;
         yearCache.cityBlocks = data2024.cityBlocks;
         yearCache.toilets = data2024.toilets;
@@ -182,20 +172,23 @@ export async function loadAllGISData(year = currentYear) {
     }
     
     // Load files with consistent naming conventions (all years use lowercase with underscores)
+    const availableFiles = new Set(getSeason(year).map.gisFiles)
     const fileNames = {
       streetLines: 'street_lines.geojson',
       trashFence: 'trash_fence.geojson',
       cpns: 'cpns.geojson',
+      dmz: availableFiles.has('dmz') ? 'dmz.geojson' : null,
       plazas: 'plazas.geojson',
       cityBlocks: 'city_blocks.geojson',
       toilets: 'toilets.geojson',
       streetOutlines: 'street_outlines.geojson'
     };
     
-    const [streetLines, trashFence, cpns, plazas, cityBlocks, toilets, streetOutlines] = await Promise.all([
+    const [streetLines, trashFence, cpns, dmz, plazas, cityBlocks, toilets, streetOutlines] = await Promise.all([
       loadGeoJSON(fileNames.streetLines, year),
       loadGeoJSON(fileNames.trashFence, year),
       loadGeoJSON(fileNames.cpns, year),
+      fileNames.dmz ? loadGeoJSON(fileNames.dmz, year) : Promise.resolve(null),
       loadGeoJSON(fileNames.plazas, year),
       loadGeoJSON(fileNames.cityBlocks, year),
       fileNames.toilets ? loadGeoJSON(fileNames.toilets, year) : Promise.resolve(null),
@@ -205,6 +198,7 @@ export async function loadAllGISData(year = currentYear) {
     yearCache.streetLines = streetLines;
     yearCache.trashFence = trashFence;
     yearCache.cpns = cpns;
+    yearCache.dmz = dmz;
     yearCache.plazas = plazas;
     yearCache.cityBlocks = cityBlocks;
     yearCache.toilets = toilets;
@@ -214,6 +208,7 @@ export async function loadAllGISData(year = currentYear) {
     if (streetLines) loadingState.loadedLayers.add(`${year}-streetLines`);
     if (trashFence) loadingState.loadedLayers.add(`${year}-trashFence`);
     if (cpns) loadingState.loadedLayers.add(`${year}-cpns`);
+    if (dmz) loadingState.loadedLayers.add(`${year}-dmz`);
     if (plazas) loadingState.loadedLayers.add(`${year}-plazas`);
     if (cityBlocks) loadingState.loadedLayers.add(`${year}-cityBlocks`);
     if (toilets) loadingState.loadedLayers.add(`${year}-toilets`);
@@ -223,6 +218,7 @@ export async function loadAllGISData(year = currentYear) {
       streetLines: streetLines?.features?.length || 0,
       trashFence: trashFence?.features?.length || 0,
       cpns: cpns?.features?.length || 0,
+      dmz: dmz?.features?.length || 0,
       plazas: plazas?.features?.length || 0,
       cityBlocks: cityBlocks?.features?.length || 0,
       toilets: toilets?.features?.length || 0,
@@ -254,6 +250,10 @@ export function getCPNs(year = currentYear) {
   return gisDataCache[year]?.cpns || null;
 }
 
+export function getDMZ(year = currentYear) {
+  return gisDataCache[year]?.dmz || null;
+}
+
 // Get plaza data
 export function getPlazas(year = currentYear) {
   return gisDataCache[year]?.plazas || null;
@@ -272,6 +272,17 @@ export function getToilets(year = currentYear) {
 // Get street outlines data
 export function getStreetOutlines(year = currentYear) {
   return gisDataCache[year]?.streetOutlines || null;
+}
+
+// Explicit hydration seam for deterministic routing tests and imported bundles.
+export function setGISLayerData(year, layer, featureCollection) {
+  const yearCache = gisDataCache[year];
+  if (!yearCache || !(layer in yearCache)) throw new Error(`Unsupported GIS cache target ${year}/${layer}`);
+  if (featureCollection?.type !== 'FeatureCollection' || !Array.isArray(featureCollection.features)) {
+    throw new Error(`${year}/${layer} is not a FeatureCollection`);
+  }
+  yearCache[layer] = featureCollection;
+  loadingState.loadedLayers.add(`${year}-${layer}`);
 }
 
 

@@ -4,6 +4,7 @@
  */
 
 import { API_URLS } from '@/config'
+import { CURRENT_YEAR } from '../config/seasons'
 
 // API configuration
 const API_BASE_URL = API_URLS.VECTOR_API
@@ -116,10 +117,10 @@ export const searchPreferences = {
  */
 export const vectorSearch = async (query, options = {}) => {
   const {
-    year = 2024,
+    year = CURRENT_YEAR,
     types = ['camp', 'art', 'event'],
     limit = 20,
-    threshold = 0.7,
+    threshold = 0.4,
     useCache = true
   } = options
   
@@ -183,7 +184,7 @@ export const vectorSearch = async (query, options = {}) => {
  */
 export const hybridSearch = async (query, options = {}) => {
   const {
-    year = 2024,
+    year = CURRENT_YEAR,
     types = ['camp', 'art', 'event'],
     limit = 20,
     useCache = true
@@ -244,7 +245,7 @@ export const hybridSearch = async (query, options = {}) => {
  */
 export const entitySearch = async (entities, options = {}) => {
   const {
-    year = 2024,
+    year = CURRENT_YEAR,
     types = ['camp', 'art', 'event'],
     limit = 20,
     useCache = true
@@ -378,8 +379,17 @@ export const getSearchAnalytics = async () => {
 /**
  * Check if vector search is available
  */
-export const isVectorSearchAvailable = async () => {
-  return await isOnlineAndApiAvailable()
+export const isVectorSearchAvailable = async (year = localStorage.getItem('selectedYear') || CURRENT_YEAR) => {
+  if (!navigator.onLine) return false
+  try {
+    const response = await fetch(`${API_BASE_URL}/search/status?year=${encodeURIComponent(year)}`, {
+      signal: AbortSignal.timeout(2000)
+    })
+    if (!response.ok) return false
+    return Boolean((await response.json()).available)
+  } catch {
+    return false
+  }
 }
 
 /**

@@ -56,8 +56,8 @@
 <script setup>
 import { computed, defineEmits, defineProps } from 'vue'
 import { getItemName, getItemLocation } from '../../utils.js'
-import { canShowLocations } from '../../stores/globalState.js'
 import BaseButton from '../ui/BaseButton.vue'
+import { CURRENT_YEAR } from '../../config/seasons.js'
 
 const props = defineProps({
   result: {
@@ -78,7 +78,7 @@ const props = defineProps({
   },
   year: {
     type: String,
-    default: '2025'
+    default: CURRENT_YEAR
   }
 })
 

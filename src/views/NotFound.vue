@@ -68,7 +68,7 @@ const currentPath = computed(() => route.fullPath)
 
 // Get selected year from localStorage
 const selectedYear = computed(() => {
-  return localStorage.getItem('selectedYear') || '2025'
+  return localStorage.getItem('selectedYear') || '2026'
 })
 
 // Navigate to home (map view)

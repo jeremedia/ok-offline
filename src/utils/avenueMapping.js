@@ -2,6 +2,27 @@
 // Maps theme names to traditional avenue letters
 
 const avenueMappings = {
+  2026: {
+    nameToLetter: {
+      'Ararat': 'A', 'Bodhi': 'B', 'Ceiba': 'C', 'Delphi': 'D',
+      'Eternal': 'E', 'Fulcrum': 'F', 'Great Oak': 'G', 'Heiau': 'H',
+      'Iroko': 'I', 'Jiba': 'J', 'Kundalini': 'K',
+      'Esplanade': 'Esplanade', 'ESP': 'Esplanade'
+    },
+    letterToName: {
+      'A': 'Ararat', 'B': 'Bodhi', 'C': 'Ceiba', 'D': 'Delphi',
+      'E': 'Eternal', 'F': 'Fulcrum', 'G': 'Great Oak', 'H': 'Heiau',
+      'I': 'Iroko', 'J': 'Jiba', 'K': 'Kundalini',
+      'Esplanade': 'Esplanade'
+    },
+    // Used only for convention-address interpolation; physical intersections
+    // come directly from the pinned GIS lines.
+    avenueDistances: {
+      'Esplanade': 2500, 'A': 2940, 'B': 3220, 'C': 3500, 'D': 3780,
+      'E': 4060, 'F': 4340, 'G': 4620, 'H': 4900, 'I': 5180,
+      'J': 5460, 'K': 5740
+    }
+  },
   2024: {
     // Wonder/amazement themed names
     nameToLetter: {

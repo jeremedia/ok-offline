@@ -1,461 +1,148 @@
-const CACHE_NAME = 'ok-offline-v42'; // Fixed BRC hybrid routing exit points - production ready
-const urlsToCache = [
-  // Core app files
+const buildRevision = new URL(self.location.href).searchParams.get('build') || 'development'
+const APP_CACHE = `ok-offline-app-${buildRevision}`
+const DATA_CACHE = `ok-offline-data-${buildRevision}`
+const TILE_CACHE = `ok-offline-tiles-${buildRevision}`
+const SHELL = [
   '/',
   '/index.html',
   '/manifest.json',
-  
-  // PWA icons (all sizes for various devices)
-  '/images/icon-16.png',
-  '/images/icon-32.png',
   '/images/icon-192.png',
   '/images/icon-512.png',
-  '/images/icon-1024.png',
-  '/images/apple-touch-icon.png',
-  
-  // Data files for all years
-  '/data/2023/camps.json',
-  '/data/2023/art.json',
-  '/data/2023/events.json',
-  '/data/2024/camps.json',
-  '/data/2024/art.json',
-  '/data/2024/events.json',
-  '/data/2025/camps.json',
-  '/data/2025/art.json',
-  '/data/2025/events.json',
-  
-  // GIS data for map functionality
-  '/data/2025/gis/city_blocks.geojson',
-  '/data/2025/gis/cpns.geojson',
-  '/data/2025/gis/plazas.geojson',
-  '/data/2025/gis/street_lines.geojson',
-  '/data/2025/gis/trash_fence.geojson',
-  
-  // Leaflet map icons
-  '/images/marker-icon.png',
-  '/images/marker-icon-2x.png',
-  '/images/marker-shadow.png',
-  '/images/layers.png',
-  '/images/layers-2x.png',
-  
-  // Note: The following assets have hashed filenames and are handled by
-  // the service worker's runtime caching strategy:
-  // - /assets/index-[hash].js (main app bundle)
-  // - /assets/index-[hash].css (main styles)
-  // - /assets/BerkeleyMono-*.woff2 (fonts)
-];
+  '/images/apple-touch-icon.png'
+]
+const MAX_TILE_CACHE_SIZE = 500
 
-// Map tile cache name (separate to manage size)
-const TILE_CACHE_NAME = 'ok-offline-tiles-v2';
-const MAX_TILE_CACHE_SIZE = 500; // Increased for full BRC coverage
-
-// Black Rock City bounding box
-const BRC_BOUNDS = {
-  north: 40.807,
-  south: 40.764,
-  east: -119.176,
-  west: -119.233
+async function cacheShell() {
+  const cache = await caches.open(APP_CACHE)
+  await cache.addAll(SHELL)
 }
 
-// Check IndexedDB for pre-downloaded tiles
-async function checkIndexedDBForTile(url) {
-  try {
-    // Extract z/x/y from URL
-    const match = url.pathname.match(/\/(\d+)\/(\d+)\/(\d+)\.png/);
-    if (!match) return null;
-    
-    const [, z, x, y] = match;
-    const key = `${z}-${x}-${y}`;
-    
-    return new Promise((resolve) => {
-      const request = indexedDB.open('leaflet.offline', 2);
-      
-      request.onsuccess = (event) => {
-        const db = event.target.result;
-        
-        if (!db.objectStoreNames.contains('tileStore')) {
-          resolve(null);
-          return;
-        }
-        
-        const transaction = db.transaction(['tileStore'], 'readonly');
-        const objectStore = transaction.objectStore('tileStore');
-        const getRequest = objectStore.get(key);
-        
-        getRequest.onsuccess = () => {
-          const result = getRequest.result;
-          if (result && result.blob) {
-            // console.log(`[SW] Found tile in IndexedDB: ${key}`);
-            // Return the blob as a Response
-            resolve(new Response(result.blob, {
-              status: 200,
-              statusText: 'OK',
-              headers: {
-                'Content-Type': 'image/png',
-                'X-Tile-Source': 'IndexedDB'
-              }
-            }));
-          } else {
-            // console.log(`[SW] Tile NOT found in IndexedDB: ${key}`);
-            resolve(null);
-          }
-        };
-        
-        getRequest.onerror = () => {
-          resolve(null);
-        };
-      };
-      
-      request.onerror = () => {
-        resolve(null);
-      };
-    });
-  } catch (error) {
-    console.error('[SW] Error checking IndexedDB for tile:', error);
-    return null;
-  }
-}
-
-// Check if a tile is within BRC bounds
-function isTileInBRC(url) {
-  // Extract z/x/y from tile URL
-  const match = url.match(/\/(\d+)\/(\d+)\/(\d+)\.png/);
-  if (!match) return false;
-  
-  const [, z, x, y] = match.map(Number);
-  
-  // Convert tile coordinates to lat/lon bounds
-  const n = Math.pow(2, z);
-  const lon_min = (x / n) * 360 - 180;
-  const lon_max = ((x + 1) / n) * 360 - 180;
-  const lat_max = Math.atan(Math.sinh(Math.PI * (1 - 2 * y / n))) * 180 / Math.PI;
-  const lat_min = Math.atan(Math.sinh(Math.PI * (1 - 2 * (y + 1) / n))) * 180 / Math.PI;
-  
-  // Check if tile overlaps with BRC bounds
-  return !(lon_max < BRC_BOUNDS.west || lon_min > BRC_BOUNDS.east ||
-           lat_max < BRC_BOUNDS.south || lat_min > BRC_BOUNDS.north);
-}
-
-// Install event - cache static assets
 self.addEventListener('install', event => {
-  console.log('[Service Worker] Install event');
-  
-  event.waitUntil(
-    Promise.resolve().then(async () => {
-      try {
-        const cache = await caches.open(CACHE_NAME);
-        console.log('[Service Worker] Cache opened:', CACHE_NAME);
-        
-        // Cache essential files first (Safari-friendly approach)
-        const essentialFiles = ['/', '/index.html', '/manifest.json'];
-        const nonEssentialFiles = urlsToCache.filter(url => !essentialFiles.includes(url));
-        
-        // Cache essential files synchronously
-        for (const url of essentialFiles) {
-          try {
-            await cache.add(url);
-            console.log('[Service Worker] Cached essential:', url);
-          } catch (error) {
-            console.error('[Service Worker] Failed to cache essential:', url, error);
-          }
-        }
-        
-        // Cache non-essential files in smaller batches to avoid context closure
-        const batchSize = 5;
-        for (let i = 0; i < nonEssentialFiles.length; i += batchSize) {
-          const batch = nonEssentialFiles.slice(i, i + batchSize);
-          await Promise.allSettled(
-            batch.map(url => 
-              cache.add(url).catch(error => {
-                console.warn('[Service Worker] Failed to cache:', url, error.message);
-                return null;
-              })
-            )
-          );
-          
-          // Small delay to prevent Safari from terminating context
-          await new Promise(resolve => setTimeout(resolve, 10));
-        }
-        
-        console.log('[Service Worker] All assets processed');
-        return self.skipWaiting();
-      } catch (error) {
-        console.error('[Service Worker] Install failed:', error);
-        return self.skipWaiting(); // Skip waiting even on failure
-      }
-    })
-  );
-});
+  event.waitUntil(cacheShell().then(() => self.skipWaiting()))
+})
 
-// Activate event - clean up old caches
 self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          // Keep tile cache separate from main cache
-          if (cacheName !== CACHE_NAME && cacheName !== TILE_CACHE_NAME) {
-            console.log('Deleting old cache:', cacheName);
-            return caches.delete(cacheName);
-          }
-          // Clean up old tile caches
-          if (cacheName.startsWith('ok-offline-tiles-') && cacheName !== TILE_CACHE_NAME) {
-            console.log('Deleting old tile cache:', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    }).then(() => self.clients.claim())
-  );
-});
-
-// Fetch event - serve from cache, fallback to network
-self.addEventListener('fetch', event => {
-  const { request } = event;
-  const url = new URL(request.url);
-
-  // Skip API requests (let them go to network)
-  if (url.pathname.includes('/api/')) {
-    return;
-  }
-
-  // Handle Burning Man CDN images
-  if (url.hostname.includes('burningman.widen.net')) {
-    event.respondWith(
-      caches.open(CACHE_NAME).then(cache => {
-        return cache.match(request).then(response => {
-          if (response) {
-            // Serve from cache if available
-            return response;
-          }
-          
-          // Network request with cache fallback
-          return fetch(request).then(networkResponse => {
-            // Only cache successful image responses
-            if (networkResponse.status === 200 && 
-                networkResponse.type === 'cors' &&
-                networkResponse.headers.get('content-type')?.includes('image')) {
-              const responseToCache = networkResponse.clone();
-              cache.put(request, responseToCache);
-            }
-            return networkResponse;
-          }).catch(() => {
-            // Return a placeholder response when offline
-            return new Response('', { 
-              status: 503, 
-              statusText: 'Image unavailable offline' 
-            });
-          });
-        });
-      })
-    );
-    return;
-  }
-  
-  // Handle OpenStreetMap tiles for Black Rock City area
-  if (url.hostname.includes('tile.openstreetmap.org')) {
-    // console.log(`[SW] Tile request: ${url.href}`);
-    event.respondWith(
-      // First check IndexedDB for pre-downloaded tiles
-      checkIndexedDBForTile(url).then(idbResponse => {
-        if (idbResponse) {
-          return idbResponse;
-        }
-        
-        // Then check service worker cache
-        return caches.open(TILE_CACHE_NAME).then(cache => {
-          return cache.match(request).then(response => {
-            if (response) {
-              // console.log('[SW] Tile served from cache:', url.pathname);
-              return response;
-            }
-          
-          // Only cache tiles within BRC bounds
-          if (!isTileInBRC(url.href)) {
-            // Fetch but don't cache tiles outside BRC
-            return fetch(request).catch(() => {
-              return new Response('', { status: 503, statusText: 'Offline' });
-            });
-          }
-          
-          // Fetch and cache BRC tiles
-          return fetch(request).then(response => {
-            if (response.status === 200) {
-              // Clone response before caching
-              const responseToCache = response.clone();
-              
-              // Implement LRU cache eviction
-              cache.keys().then(keys => {
-                if (keys.length >= MAX_TILE_CACHE_SIZE) {
-                  // Remove least recently used tiles
-                  const toDelete = keys.slice(0, Math.max(1, keys.length - MAX_TILE_CACHE_SIZE + 1));
-                  toDelete.forEach(key => cache.delete(key));
-                }
-                cache.put(request, responseToCache);
-                // console.log('[SW] Tile cached:', url.pathname);
-              });
-            }
-            return response;
-          }).catch(() => {
-            // Return a fallback tile or empty response when offline
-            console.log('[SW] Tile offline, no cache:', url.pathname);
-            return new Response('', { status: 503, statusText: 'Offline' });
-          });
-        });
-      });
-      })
-    );
-    return;
-  }
-
-  // Cache strategy based on resource type
-  if (request.method === 'GET') {
-    // For hashed assets (immutable), use cache-first
-    if (url.pathname.startsWith('/assets/')) {
-      event.respondWith(
-        caches.match(request)
-          .then(response => {
-            if (response) {
-              return response;
-            }
-            return fetch(request).then(response => {
-              if (response.status === 200) {
-                const responseToCache = response.clone();
-                caches.open(CACHE_NAME).then(cache => {
-                  cache.put(request, responseToCache);
-                });
-              }
-              return response;
-            });
-          })
-      );
-      return;
+  event.waitUntil((async () => {
+    for (const name of await caches.keys()) {
+      if (name.startsWith('ok-offline-') && ![APP_CACHE, DATA_CACHE, TILE_CACHE].includes(name)) {
+        await caches.delete(name)
+      }
     }
+    await self.clients.claim()
+  })())
+})
 
-    // For data files (JSON, GeoJSON), use cache-first for Safari compatibility
-    if (url.pathname.includes('/data/') && 
-        (url.pathname.endsWith('.json') || url.pathname.endsWith('.geojson'))) {
-      event.respondWith(
-        caches.match(request)
-          .then(response => {
-            if (response) {
-              return response;
-            }
-            
-            // Safari-friendly network request with timeout
-            return Promise.race([
-              fetch(request),
-              new Promise((_, reject) => 
-                setTimeout(() => reject(new Error('Timeout')), 10000)
-              )
-            ]).then(networkResponse => {
-              if (networkResponse && networkResponse.status === 200) {
-                // Cache asynchronously to avoid blocking
-                const responseToCache = networkResponse.clone();
-                caches.open(CACHE_NAME).then(cache => {
-                  cache.put(request, responseToCache).catch(err => {
-                    console.warn('Failed to cache data file:', err);
-                  });
-                });
-              }
-              return networkResponse;
-            }).catch(error => {
-              console.warn('Data file fetch failed, using offline mode:', error);
-              throw error;
-            });
-          })
-          .catch(() => {
-            // Return a proper error response instead of undefined
-            return new Response(JSON.stringify({ error: 'Data unavailable offline' }), {
-              status: 503,
-              statusText: 'Service Unavailable',
-              headers: { 'Content-Type': 'application/json' }
-            });
-          })
-      );
-      return;
-    }
-
-    // For navigation requests, use network-first
-    if (request.mode === 'navigate') {
-      event.respondWith(
-        fetch(request)
-          .catch(() => caches.match('/'))
-      );
-      return;
-    }
-
-    // Default strategy: cache-first with network fallback
-    event.respondWith(
-      caches.match(request)
-        .then(response => {
-          if (response) {
-            return response;
-          }
-
-          return fetch(request).then(response => {
-            // Check if valid response
-            if (!response || response.status !== 200 || response.type !== 'basic') {
-              return response;
-            }
-
-            // Cache successful GET requests
-            const responseToCache = response.clone();
-            caches.open(CACHE_NAME).then(cache => {
-              cache.put(request, responseToCache);
-            });
-
-            return response;
-          });
-        })
-        .catch(() => {
-          // Offline fallback for navigation
-          if (request.mode === 'navigate') {
-            return caches.match('/');
-          }
-        })
-    );
+async function networkFirst(request, cacheName, fallback = null) {
+  const cache = await caches.open(cacheName)
+  try {
+    const response = await fetch(request)
+    if (response.ok) await cache.put(request, response.clone())
+    return response
+  } catch (error) {
+    return (await cache.match(request, { ignoreVary: true })) || fallback || Promise.reject(error)
   }
-});
-
-// Background sync for data updates
-self.addEventListener('sync', event => {
-  if (event.tag === 'sync-data') {
-    event.waitUntil(syncData());
-  }
-});
-
-async function syncData() {
-  // This would be called when the device comes back online
-  // The actual sync logic is handled by the app
-  console.log('Background sync triggered');
 }
 
-// Push notifications for event reminders
-self.addEventListener('push', event => {
-  if (event.data) {
-    const data = event.data.json();
-    const options = {
-      body: data.body,
-      icon: '/icon-192.png',
-      badge: '/icon-96.png',
-      vibrate: [200, 100, 200],
-      data: {
-        dateOfArrival: Date.now(),
-        primaryKey: 1
-      }
-    };
+async function cacheFirst(request, cacheName) {
+  const cache = await caches.open(cacheName)
+  // These caches contain only same-origin, revisioned resources. Preview and
+  // proxy servers may add `Vary: Origin`; ignoring it prevents an equivalent
+  // offline subresource request from missing the response cached by the worker.
+  const cached = await cache.match(request, { ignoreVary: true })
+  if (cached) return cached
+  const response = await fetch(request)
+  if (response.ok) await cache.put(request, response.clone())
+  return response
+}
 
-    event.waitUntil(
-      self.registration.showNotification(data.title, options)
-    );
+async function tileResponse(request) {
+  const cache = await caches.open(TILE_CACHE)
+  const cached = await cache.match(request)
+  if (cached) return cached
+  try {
+    const response = await fetch(request)
+    if (response.ok) {
+      const keys = await cache.keys()
+      const overflow = keys.length - MAX_TILE_CACHE_SIZE + 1
+      if (overflow > 0) await Promise.all(keys.slice(0, overflow).map(key => cache.delete(key)))
+      await cache.put(request, response.clone())
+    }
+    return response
+  } catch {
+    return new Response('', { status: 503, statusText: 'Tile unavailable offline' })
   }
-});
+}
 
-// Notification click handler
-self.addEventListener('notificationclick', event => {
-  event.notification.close();
-  event.waitUntil(
-    clients.openWindow('/')
-  );
-});
+self.addEventListener('fetch', event => {
+  const { request } = event
+  if (request.method !== 'GET') return
+  const url = new URL(request.url)
+
+  if (url.pathname.startsWith('/api/')) return
+
+  if (url.hostname.includes('tile.openstreetmap.org')) {
+    event.respondWith(tileResponse(request))
+    return
+  }
+
+  // Published season files may change at each release phase. Always try the
+  // network first and fall back to the selected-season cache when offline.
+  if (url.origin === self.location.origin && url.pathname.startsWith('/data/')) {
+    const unavailable = new Response(JSON.stringify({ error: 'Data unavailable offline' }), {
+      status: 503,
+      headers: { 'Content-Type': 'application/json' }
+    })
+    event.respondWith(networkFirst(request, DATA_CACHE, unavailable))
+    return
+  }
+
+  // Vite assets are content-hashed and immutable.
+  if (url.origin === self.location.origin && url.pathname.startsWith('/assets/')) {
+    event.respondWith(cacheFirst(request, APP_CACHE))
+    return
+  }
+
+  if (request.mode === 'navigate') {
+    event.respondWith(networkFirst(request, APP_CACHE, caches.match('/')))
+    return
+  }
+
+  if (url.origin === self.location.origin || url.hostname.includes('burningman.widen.net')) {
+    event.respondWith(cacheFirst(request, APP_CACHE).catch(() => new Response('', { status: 503 })))
+  }
+})
+
+self.addEventListener('message', event => {
+  const respond = payload => event.ports?.[0]?.postMessage(payload)
+  const message = event.data || {}
+  event.waitUntil((async () => {
+    try {
+      if (message.type === 'CACHE_DATA') {
+        const cache = await caches.open(DATA_CACHE)
+        await Promise.all(message.data.map(async url => {
+          const response = await fetch(url, { cache: 'no-store' })
+          if (!response.ok) throw new Error(`${url} returned ${response.status}`)
+          await cache.put(url, response)
+        }))
+      } else if (message.type === 'CACHE_ASSETS') {
+        const cache = await caches.open(APP_CACHE)
+        await Promise.all(message.data.map(async rawUrl => {
+          const url = new URL(rawUrl, self.location.origin)
+          if (url.origin !== self.location.origin || !url.pathname.startsWith('/assets/')) {
+            throw new Error(`Refusing to cache non-build asset: ${url.pathname}`)
+          }
+          const response = await fetch(url, { cache: 'no-store' })
+          if (!response.ok) throw new Error(`${url.pathname} returned ${response.status}`)
+          await cache.put(url, response)
+        }))
+      } else if (message.type === 'CLEAR_CACHE') {
+        await caches.delete(message.data === 'data' ? DATA_CACHE : APP_CACHE)
+      } else if (message.type === 'SKIP_WAITING') {
+        await self.skipWaiting()
+      }
+      respond({ ok: true, buildRevision })
+    } catch (error) {
+      respond({ error: error.message })
+    }
+  })())
+})

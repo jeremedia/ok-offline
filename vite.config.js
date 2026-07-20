@@ -4,6 +4,8 @@ import { version } from './package.json'
 import { copyFileSync, mkdirSync } from 'fs'
 import { resolve } from 'path'
 
+const buildRevision = process.env.GITHUB_SHA || process.env.VITE_BUILD_REVISION || 'local'
+
 export default defineConfig({
   resolve: {
     alias: {
@@ -49,11 +51,21 @@ export default defineConfig({
           console.error('Error copying Leaflet images:', err)
         }
       }
+    },
+    {
+      name: 'release-metadata',
+      generateBundle() {
+        this.emitFile({
+          type: 'asset',
+          fileName: 'release.json',
+          source: `${JSON.stringify({ version, commit: buildRevision, builtAt: new Date().toISOString() }, null, 2)}\n`
+        })
+      }
     }
   ],
   define: {
     __APP_VERSION__: JSON.stringify(version),
-    __BUILD_TIME__: JSON.stringify(new Date().toISOString())
+    __BUILD_REVISION__: JSON.stringify(buildRevision)
   },
   server: {
     port: 8005,
@@ -70,20 +82,10 @@ export default defineConfig({
       clientPort: 443
     },
     proxy: {
-
-      '/api': {
-        target: 'https://api.burningman.org',
+      '/api/v1': {
+        target: 'http://127.0.0.1:3555',
         changeOrigin: true,
-        secure: false,
-        configure: (proxy, options) => {
-          proxy.on('proxyReq', (proxyReq, req, res) => {
-            // Forward the API key header
-            const apiKey = req.headers['x-api-key'];
-            if (apiKey) {
-              proxyReq.setHeader('X-API-Key', apiKey);
-            }
-          });
-        }
+        secure: false
       }
     }
   }

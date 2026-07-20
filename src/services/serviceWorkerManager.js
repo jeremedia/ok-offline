@@ -1,3 +1,5 @@
+import { getSeason } from '../config/seasons'
+
 /**
  * Service Worker Manager
  * Provides interface for communicating with the enhanced service worker
@@ -33,12 +35,17 @@ class ServiceWorkerManager {
    * @param {string} year - Year to cache data for
    */
   async preCacheDataForYear(year) {
-    if (!this.registration) return
+    if (!this.registration && !await this.init()) {
+      throw new Error('Service Worker is unavailable')
+    }
 
+    const gisFiles = getSeason(year).map.gisFiles.map(file => `/data/${year}/gis/${file}.geojson`)
     const dataFiles = [
+      `/data/${year}/metadata.json`,
       `/data/${year}/camps.json`,
       `/data/${year}/art.json`,
-      `/data/${year}/events.json`
+      `/data/${year}/events.json`,
+      ...gisFiles
     ]
 
     await this.sendMessage({
@@ -47,6 +54,29 @@ class ServiceWorkerManager {
     })
 
     console.log(`Pre-cached data for ${year}`)
+  }
+
+  /**
+   * Cache the immutable build assets already loaded by this document. The
+   * worker is installed after the first page load, so those initial requests
+   * cannot be captured by its fetch handler.
+   */
+  async cacheLoadedAppAssets() {
+    if (!this.registration && !await this.init()) {
+      throw new Error('Service Worker is unavailable')
+    }
+
+    const urls = [...new Set(performance.getEntriesByType('resource')
+      .map(entry => new URL(entry.name, window.location.origin))
+      .filter(url => url.origin === window.location.origin && url.pathname.startsWith('/assets/'))
+      .map(url => url.href))]
+
+    if (urls.length === 0) {
+      throw new Error('No immutable build assets were discovered')
+    }
+
+    await this.sendMessage({ type: 'CACHE_ASSETS', data: urls })
+    console.log(`Cached ${urls.length} immutable app assets`)
   }
 
   /**
@@ -113,7 +143,7 @@ class ServiceWorkerManager {
 
     // Check for essential caches
     const hasStaticCache = cacheStatus.caches.some(cache => 
-      cache.name.includes('static') && cache.entries > 0
+      cache.name.includes('app') && cache.entries > 0
     )
     
     const hasDataCache = cacheStatus.caches.some(cache => 

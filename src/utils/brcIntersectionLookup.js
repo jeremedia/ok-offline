@@ -4173,7 +4173,8 @@ export const BRC_INTERSECTIONS_2025 = {
  * @param {string} street2 - Second street name  
  * @returns {[number, number]|null} - [lat, lon] or null if not found
  */
-export function lookupIntersection(street1, street2) {
+export function lookupIntersection(street1, street2, year = 2025) {
+  if (Number(year) !== 2025) return null;
   const key = `${street1}&${street2}`;
   return BRC_INTERSECTIONS_2025[key] || null;
 }

@@ -1,6 +1,7 @@
 import { onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import Hammer from 'hammerjs'
+import { CURRENT_YEAR } from '../config/seasons'
 
 export function useSwipeGestures() {
   const router = useRouter()
@@ -26,7 +27,7 @@ export function useSwipeGestures() {
   const handleSwipeLeft = () => {
     const currentIndex = getCurrentIndex()
     if (currentIndex !== -1) {
-      const year = route.params.year || localStorage.getItem('selectedYear') || '2024'
+      const year = route.params.year || localStorage.getItem('selectedYear') || CURRENT_YEAR
       navigateToIndex(currentIndex + 1, year)
     }
   }
@@ -34,7 +35,7 @@ export function useSwipeGestures() {
   const handleSwipeRight = () => {
     const currentIndex = getCurrentIndex()
     if (currentIndex !== -1) {
-      const year = route.params.year || localStorage.getItem('selectedYear') || '2024'
+      const year = route.params.year || localStorage.getItem('selectedYear') || CURRENT_YEAR
       navigateToIndex(currentIndex - 1, year)
     }
   }

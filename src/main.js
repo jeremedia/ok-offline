@@ -1,6 +1,8 @@
 import { createApp, nextTick } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import App from './App.vue'
+import { CURRENT_YEAR, SEASON_DEFAULTS, isSupportedYear } from './config/seasons'
+import { serviceWorkerManager } from './services/serviceWorkerManager'
 
 // Initialize theme system
 import { initializeTheme } from './services/themeService'
@@ -37,7 +39,9 @@ const routes = [
   {
     path: '/',
     redirect: () => {
-      const year = localStorage.getItem('selectedYear') || '2025'
+      const savedYear = localStorage.getItem('selectedYear')
+      const hasAppliedCurrentDefault = localStorage.getItem(SEASON_DEFAULTS.upgradeMarker) === 'true'
+      const year = hasAppliedCurrentDefault && isSupportedYear(savedYear) ? savedYear : CURRENT_YEAR
       return `/${year}/map`
     }
   },
@@ -244,9 +248,14 @@ nextTick(() => {
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     // Add cache-busting parameter to force service worker update
-    navigator.serviceWorker.register('/sw.js?v=3.9.0')
-      .then(registration => {
+    const serviceWorkerBuild = `${__APP_VERSION__}-${__BUILD_REVISION__}`
+    navigator.serviceWorker.register(`/sw.js?build=${encodeURIComponent(serviceWorkerBuild)}`, { updateViaCache: 'none' })
+      .then(async registration => {
         console.log('Enhanced ServiceWorker registration successful:', registration)
+
+        await serviceWorkerManager.init()
+        await serviceWorkerManager.cacheLoadedAppAssets()
+        window.updateLoadingStatus('App cached for offline use', 80)
         
         // Listen for service worker updates
         registration.addEventListener('updatefound', () => {

@@ -217,7 +217,7 @@ watch(() => props.tips, (newTips) => {
   } else {
     stopTipRotation()
   }
-}, { immediate: true })
+})
 
 onMounted(() => {
   if (props.tips && props.tips.length > 1) {

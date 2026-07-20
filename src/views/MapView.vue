@@ -118,7 +118,7 @@ import { useRouting } from '../composables/useRouting'
 import L from 'leaflet'
 import 'leaflet-rotate'
 import 'leaflet.offline'
-import { BRC_CENTER } from '../config'
+import { getSeason, getSeasonCenter } from '../config/seasons'
 import { getFromCache } from '../services/storage'
 import { isFavorite } from '../services/favorites'
 import { getItemName, getItemLocation, getNextOccurrence, isHappeningNow } from '../utils'
@@ -130,6 +130,7 @@ import {
   getCityBlocks,
   getPlazas,
   getCPNs,
+  getDMZ,
   getToilets,
   getStreetOutlines,
   getLoadingState,
@@ -167,7 +168,7 @@ const checkIfMobile = () => {
 
 const isMobile = ref(checkIfMobile())
 console.log('MapView: isMobile initial value:', isMobile.value)
-const year = computed(() => route.params.year || localStorage.getItem('selectedYear') || '2025')
+const year = computed(() => route.params.year || localStorage.getItem('selectedYear') || '2026')
 
 // Get destination address for route info panel
 const destinationAddress = computed(() => {
@@ -712,7 +713,7 @@ const gisLoadingState = ref({ isLoading: false, error: null })
 // Track if we're at default view
 const isDefaultView = ref(true)
 const defaultZoom = 15  // Zoom level that shows city streets on base map
-const defaultCenter = BRC_CENTER
+const defaultCenter = getSeasonCenter(year.value)
 const defaultBearing = 0
 
 // Computed property to show reset view button
@@ -844,6 +845,7 @@ let markersLayer = null
 let basemapLayer = null
 let gisLayers = {
   streetLines: null,
+  dmz: null,
   trashFence: null,
   cityBlocks: null,
   plazas: null
@@ -992,12 +994,11 @@ watch(year, async (newYear, oldYear) => {
   
   console.log(`Year changed from ${oldYear} to ${newYear}, reloading map data...`)
   
-  // Update basemap availability (only 2025 has basemap)
-  if (newYear !== '2025' && mapControls.showBasemap) {
+  const hasGis = getSeason(newYear).map.gisFiles.length > 0
+  if (!hasGis && mapControls.showBasemap) {
     mapControls.showBasemap = false
     toggleBasemap()
-  } else if (newYear === '2025' && !mapControls.showBasemap) {
-    // Optionally enable basemap for 2025
+  } else if (hasGis && !mapControls.showBasemap) {
     mapControls.showBasemap = true
     toggleBasemap()
   }
@@ -1007,6 +1008,7 @@ watch(year, async (newYear, oldYear) => {
   
   // Update GIS data year
   setGISYear(parseInt(newYear))
+  map.setView(getSeasonCenter(newYear), defaultZoom)
   
   // Reload GIS layers with new year's data
   updateGISLayers()
@@ -1135,8 +1137,10 @@ onMounted(async () => {
   // Check for location permission for Soon & Near features
   checkLocationPermission()
   
-  // Load saved control state from localStorage
-  const savedState = localStorage.getItem('mapControlState')
+  const cacheNamespace = `${year.value}:${getSeason(year.value).map.gisRevision}`
+  const mapControlKey = `mapControlState:${cacheNamespace}`
+  const mapPositionKey = `mapPosition:${cacheNamespace}`
+  const savedState = localStorage.getItem(mapControlKey)
   if (savedState) {
     try {
       const parsed = JSON.parse(savedState)
@@ -1146,8 +1150,7 @@ onMounted(async () => {
     }
   }
   
-  // Enable basemap by default for 2025
-  if (year.value === '2025') {
+  if (getSeason(year.value).map.gisFiles.length > 0) {
     // If no saved state exists, or saved state doesn't have showBasemap property, default to true
     const parsed = savedState ? JSON.parse(savedState) : null
     if (!parsed || !parsed.hasOwnProperty('showBasemap')) {
@@ -1156,11 +1159,11 @@ onMounted(async () => {
   }
   
   // Try to restore saved map position
-  let initialCenter = BRC_CENTER
+  let initialCenter = getSeasonCenter(year.value)
   let initialZoom = defaultZoom
   let initialBearing = 0
   
-  const savedPosition = localStorage.getItem('mapPosition')
+  const savedPosition = localStorage.getItem(mapPositionKey)
   if (savedPosition) {
     try {
       const position = JSON.parse(savedPosition)
@@ -1199,8 +1202,7 @@ onMounted(async () => {
     crossOrigin: true
   })
   
-  // Add basemap if enabled and year is 2025
-  if (mapControls.showBasemap && year.value === '2025') {
+  if (mapControls.showBasemap && getSeason(year.value).map.gisFiles.length > 0) {
     basemapLayer.addTo(map)
   }
   
@@ -1216,7 +1218,7 @@ onMounted(async () => {
     const zoom = map.getZoom()
     const bearing = map.getBearing() || 0
     
-    localStorage.setItem('mapPosition', JSON.stringify({
+    localStorage.setItem(mapPositionKey, JSON.stringify({
       lat: center.lat,
       lng: center.lng,
       zoom: zoom,
@@ -1585,7 +1587,7 @@ const addInfrastructureMarkers = () => {
   })
   
   // Add toilet polygons and markers from GIS data
-  if (mapControls.showInfrastructure && mapControls.showToilets && year.value === '2025') {
+  if (mapControls.showInfrastructure && mapControls.showToilets && getSeason(year.value).map.gisFiles.includes('toilets')) {
     const toiletData = getToilets()
     if (toiletData && toiletData.features) {
       // Create a layer group for toilets if it doesn't exist
@@ -1971,6 +1973,17 @@ const updateGISLayers = () => {
     }
   }
   
+  // Render the official DMZ polygon without inferring routing semantics.
+  if (mapControls.showDMZ) {
+    const dmzData = getDMZ()
+    if (dmzData) {
+      gisLayers.dmz = L.geoJSON(dmzData, {
+        style: { color: '#d946ef', weight: 2, opacity: 0.9, fillColor: '#d946ef', fillOpacity: 0.14 },
+        onEachFeature: (_feature, layer) => layer.bindPopup('<strong>Official DMZ</strong>')
+      }).addTo(map)
+    }
+  }
+
   // Add trash fence
   if (mapControls.showTrashFence) {
     const trashFenceData = getTrashFence()
@@ -2165,7 +2178,7 @@ onUnmounted(() => {
 })
 
 const toggleBasemap = () => {
-  if (year.value !== '2025') return // Don't allow toggle for non-2025 years
+  if (getSeason(year.value).map.gisFiles.length === 0) return
   
   if (mapControls.showBasemap) {
     basemapLayer.addTo(map)

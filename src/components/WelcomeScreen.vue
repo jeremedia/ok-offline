@@ -4,6 +4,7 @@
       <header class="welcome-header">
         <h1>🔥 Welcome to OK-OFFLINE</h1>
         <p class="tagline">Your offline-first guide to Burning Man</p>
+        <p class="disclaimer">This app is not affiliated, endorsed, or verified by Burning Man Project.</p>
       </header>
 
       <div class="step-container">
@@ -50,7 +51,7 @@
         <div v-show="currentStep === 2" class="step-content">
           <ProgressiveLoader
             :title="syncStarted ? '📥 Downloading Burning Man Data' : '🌐 Sync Your Burning Man Data'"
-            :message="syncStarted ? syncStatusText : `We'll download all Burning Man data (2023-2025) for offline use. This happens once, then you're set for your entire burn!`"
+            :message="syncStarted ? syncStatusText : `We'll download the official ${CURRENT_YEAR} snapshot and map for offline use. Historical seasons remain available from the year selector.`"
             loading-type="sync"
             :show-progress="syncStarted"
             :progress="syncProgress"
@@ -70,8 +71,8 @@
             <h2>You're All Set!</h2>
             <p>{{ syncResultMessage }}</p>
             
-            <div v-if="!globalState.location_data_available['2025']" class="location-notice">
-              <p>📍 2025 camp locations will be available 3 weeks before the event</p>
+            <div v-if="!canShowLocations(CURRENT_YEAR, 'camp') || !canShowLocations(CURRENT_YEAR, 'art')" class="location-notice">
+              <p>📍 2026 camp placements publish August 23; art placements publish August 30.</p>
             </div>
             
             <div class="next-steps">
@@ -150,13 +151,15 @@ import { useToast } from '../composables/useToast'
 import ProgressiveLoader from './ProgressiveLoader.vue'
 import { preCacheData, optimizeForCurrentYear } from '../services/serviceWorkerManager'
 import { globalState, debugLocationState } from '../stores/globalState'
+import { canShowLocations } from '../stores/globalState'
+import { CURRENT_YEAR } from '../config/seasons'
 
 const emit = defineEmits(['complete'])
 const router = useRouter()
 const { showError } = useToast()
 
 const currentStep = ref(1)
-const selectedYear = ref('2025') // Default year for navigation after onboarding
+const selectedYear = ref(CURRENT_YEAR)
 const syncing = ref(false)
 const syncProgress = ref(0)
 const syncStatusText = ref('')
@@ -178,28 +181,28 @@ const syncTips = [
 
 const previewSteps = computed(() => [
   { 
-    title: '2025 Data', 
-    description: globalState.location_data_available['2025'] 
-      ? 'Latest year camps, art, and events' 
-      : 'Latest year (locations TBA 3 weeks before event)', 
+    title: `${CURRENT_YEAR} Data`,
+    description: canShowLocations(CURRENT_YEAR, 'camp')
+      ? 'Official camps, art, and events'
+      : 'Official content snapshot (placements follow the release schedule)',
     status: 'pending', 
-    count: '~2800+', 
+    count: '~3700+',
     countLabel: 'items' 
   },
-  { title: '2024 Data', description: 'Complete previous year with locations', status: 'pending', count: '~2800+', countLabel: 'items' },
-  { title: '2023 Data', description: 'Historical reference with locations', status: 'pending', count: '~2800+', countLabel: 'items' },
+  { title: 'Snapshot Validation', description: 'Verifying metadata and release phase', status: 'pending' },
+  { title: 'Official 2026 GIS', description: 'Eight pinned city layers', status: 'pending' },
   { title: 'Enhancement', description: 'Processing relationships', status: 'pending' },
   { title: 'Optimization', description: 'Preparing for offline use', status: 'pending' },
   { title: 'Offline Map Tiles', description: 'Map tiles for zero-connectivity', status: 'pending', count: '~640', countLabel: 'tiles' },
 ])
 
 const previewTips = [
-  'Downloads complete data from all years (2023, 2024, 2025)',
+  `Downloads the selected ${CURRENT_YEAR} season during onboarding`,
   'All data works without internet connectivity',
   'Only ~10-15MB for data + ~20MB for map tiles',
-  'Reference past years and plan for future events',  
+  'Historical seasons remain available on demand',
   'Creates your comprehensive offline Burning Man guide',
-  'Over 8,400 camps, art pieces, and events total',
+  'Official camps, art pieces, events, and GIS layers',
   'Interactive maps work completely offline'
 ]
 
@@ -210,7 +213,7 @@ const syncResultMessage = computed(() => {
     .filter(r => r.success)
     .reduce((sum, r) => sum + r.count, 0)
   
-  return `Downloaded ${totalCount} items from all years (2023-2025) and cached for offline use. You're ready to explore Burning Man with complete historical data!`
+  return `Downloaded ${totalCount} official ${CURRENT_YEAR} items and cached the selected season for offline use.`
 })
 
 // Watch for step changes to auto-start sync
@@ -231,9 +234,9 @@ const startDataSync = async () => {
   
   // Initialize sync steps with 6 steps as requested
   syncSteps.value = [
-    { title: `2025 Data`, description: 'Loading camps, art & events', status: 'pending', count: 0, countLabel: 'items' },
-    { title: `2024 Data`, description: 'Loading camps, art & events', status: 'pending', count: 0, countLabel: 'items' },
-    { title: `2023 Data`, description: 'Loading camps, art & events', status: 'pending', count: 0, countLabel: 'items' },
+    { title: `${CURRENT_YEAR} Data`, description: 'Loading camps, art & events', status: 'pending', count: 0, countLabel: 'items' },
+    { title: 'Snapshot Validation', description: 'Checking release metadata', status: 'pending' },
+    { title: 'Official 2026 GIS', description: 'Caching eight pinned layers', status: 'pending' },
     { title: 'Enhancement', description: 'Processing relationships', status: 'pending' },
     { title: 'Optimization', description: 'Preparing for offline use', status: 'pending' },
     { title: 'Offline Map Tiles', description: 'Downloading map tiles', status: 'pending', count: 0, countLabel: 'tiles' }
@@ -257,56 +260,36 @@ const startDataSync = async () => {
       
       onCountUpdate: (year, totalCount, type, typeCount) => {
         // Update the appropriate step count based on the year
-        if (year === '2025' && syncSteps.value[0]) {
+        if (year === CURRENT_YEAR && syncSteps.value[0]) {
           syncSteps.value[0].count = totalCount
           // Update description to show what's being loaded
           if (type && typeCount !== undefined) {
             syncSteps.value[0].description = `${typeCount} ${type}s loaded`
-          }
-        } else if (year === '2024' && syncSteps.value[1]) {
-          syncSteps.value[1].count = totalCount
-          if (type && typeCount !== undefined) {
-            syncSteps.value[1].description = `${typeCount} ${type}s loaded`
-          }
-        } else if (year === '2023' && syncSteps.value[2]) {
-          syncSteps.value[2].count = totalCount
-          if (type && typeCount !== undefined) {
-            syncSteps.value[2].description = `${typeCount} ${type}s loaded`
           }
         }
       },
       
       onStageChange: (stage, message) => {
         // Handle year start events
-        if (stage === '2025_start') {
+        if (stage === `${CURRENT_YEAR}_start`) {
           syncSteps.value[0].status = 'active'
-          syncStatusText.value = '📥 Downloading 2025 data...'
-        } else if (stage === '2024_start') {
           syncSteps.value[1].status = 'active'
-          syncStatusText.value = '📥 Downloading 2024 data...'
-        } else if (stage === '2023_start') {
-          syncSteps.value[2].status = 'active'
-          syncStatusText.value = '📥 Downloading 2023 data...'
+          syncStatusText.value = `📥 Downloading ${CURRENT_YEAR} data...`
         }
         
         // Handle year completion events
-        else if (stage === '2025_complete') {
+        else if (stage === `${CURRENT_YEAR}_complete`) {
           syncSteps.value[0].status = 'completed'
+          syncSteps.value[1].status = 'completed'
+          syncSteps.value[2].status = 'active'
           // We'll update the description in onComplete when we know if locations exist
           syncSteps.value[0].description = 'Latest year camps, art & events'
-          syncStatusText.value = '✅ 2025 data complete'
-        } else if (stage === '2024_complete') {
-          syncSteps.value[1].status = 'completed'
-          syncSteps.value[1].description = 'Complete previous year'
-          syncStatusText.value = '✅ 2024 data complete'
-        } else if (stage === '2023_complete') {
-          syncSteps.value[2].status = 'completed'
-          syncSteps.value[2].description = 'Historical reference'
-          syncStatusText.value = '✅ 2023 data complete'
+          syncStatusText.value = `✅ ${CURRENT_YEAR} data complete`
         }
         
         // Handle enrichment and optimization stages
         else if (stage === 'enrichment_start') {
+          syncSteps.value[2].status = 'completed'
           syncSteps.value[3].status = 'active'
           syncStatusText.value = '🔄 ' + message
         } else if (stage === 'optimization_start') {
@@ -358,40 +341,20 @@ const startDataSync = async () => {
           step.status = 'completed'
         })
         
-        // Calculate total counts from all years
-        let total2025Camps = 0, total2025Other = 0, total2024 = 0, total2023 = 0
-        let has2025Locations = false
-        
+        let currentYearTotal = 0
         Object.entries(results).forEach(([key, result]) => {
-          if (result.success && result.count) {
-            if (key.includes('camp_2025')) {
-              total2025Camps += result.count
-              // Check if 2025 camps have location data
-              if (result.hasLocations !== undefined) {
-                has2025Locations = result.hasLocations
-              }
-            } else if (key.includes('2025')) {
-              total2025Other += result.count
-            } else if (key.includes('2024')) {
-              total2024 += result.count
-            } else if (key.includes('2023')) {
-              total2023 += result.count
-            }
-          }
+          if (result.success && result.count && key.includes(CURRENT_YEAR)) currentYearTotal += result.count
         })
         
         // Update step counts
         if (syncSteps.value[0]) {
-          syncSteps.value[0].count = total2025Camps + total2025Other
-          // Update description based on whether locations are available (using global state)
-          if (!globalState.location_data_available['2025']) {
-            syncSteps.value[0].description = 'Latest year (locations TBA 3 weeks before event)'
+          syncSteps.value[0].count = currentYearTotal
+          if (!canShowLocations(CURRENT_YEAR, 'camp')) {
+            syncSteps.value[0].description = 'Official content; placements follow release schedule'
           } else {
             syncSteps.value[0].description = 'Latest year camps, art & events'
           }
         }
-        if (syncSteps.value[1]) syncSteps.value[1].count = total2024
-        if (syncSteps.value[2]) syncSteps.value[2].count = total2023
         
         // Optimize service worker caches for better performance
         try {
@@ -430,9 +393,9 @@ const startDataSync = async () => {
       }
     })
     
-    // Start progressive sync with 2025 as priority year
+    // Cache only the selected season during onboarding.
     // The stage handlers will manage step activation
-    await progressiveSync.syncWithPriority('2025')
+    await progressiveSync.syncWithPriority(CURRENT_YEAR)
     
   } catch (error) {
     showError(`Sync failed: ${error.message}`)

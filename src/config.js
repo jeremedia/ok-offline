@@ -1,12 +1,13 @@
-// API configuration
-export const API_KEY = import.meta.env.VITE_BM_API_KEY || 'demo_key'
+import { CURRENT_YEAR, getSeasonCenter } from './config/seasons'
+
+// API configuration. Burning Man credentials are intentionally server/build-time only.
 export const API_BASE = '/api'
 
 // Black Rock City coordinates (Golden Spike)
-export const BRC_CENTER = [40.786958, -119.202994]
+export const BRC_CENTER = getSeasonCenter(CURRENT_YEAR)
 
 // Determine if we're in development environment
-export const IS_DEV = import.meta.env.DEV || window.location.hostname === 'dev.offline.oknotok.com'
+export const IS_DEV = import.meta.env.DEV || globalThis.window?.location?.hostname === 'dev.offline.oknotok.com'
 
 // API URLs configuration - use relative paths, Caddy handles proxying
 export const API_URLS = {

@@ -89,26 +89,17 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import BaseButton from '../components/ui/BaseButton.vue'
+import { CURRENT_YEAR, getSeasonDays } from '../config/seasons'
 
 const route = useRoute()
-const year = computed(() => route.params.year || localStorage.getItem('selectedYear') || '2025')
+const year = computed(() => route.params.year || localStorage.getItem('selectedYear') || CURRENT_YEAR)
 
 const SCHEDULE_KEY = 'bm_schedule'
 
-// Days of Burning Man (typically late August to early September)
-const days = ref([
-  { date: '2025-08-25', label: 'Mon 8/25' },
-  { date: '2025-08-26', label: 'Tue 8/26' },
-  { date: '2025-08-27', label: 'Wed 8/27' },
-  { date: '2025-08-28', label: 'Thu 8/28' },
-  { date: '2025-08-29', label: 'Fri 8/29' },
-  { date: '2025-08-30', label: 'Sat 8/30' },
-  { date: '2025-08-31', label: 'Sun 8/31' },
-  { date: '2025-09-01', label: 'Mon 9/1' }
-])
+const days = ref(getSeasonDays(CURRENT_YEAR))
 
 const selectedDay = ref(days.value[0].date)
 const schedule = ref({})
@@ -309,32 +300,13 @@ const generateScheduleText = () => {
 
 onMounted(() => {
   loadSchedule()
-  
-  // Update year-specific days if needed
-  if (year.value === '2024') {
-    days.value = [
-      { date: '2024-08-26', label: 'Mon 8/26' },
-      { date: '2024-08-27', label: 'Tue 8/27' },
-      { date: '2024-08-28', label: 'Wed 8/28' },
-      { date: '2024-08-29', label: 'Thu 8/29' },
-      { date: '2024-08-30', label: 'Fri 8/30' },
-      { date: '2024-08-31', label: 'Sat 8/31' },
-      { date: '2024-09-01', label: 'Sun 9/1' },
-      { date: '2024-09-02', label: 'Mon 9/2' }
-    ]
-  } else if (year.value === '2023') {
-    days.value = [
-      { date: '2023-08-28', label: 'Mon 8/28' },
-      { date: '2023-08-29', label: 'Tue 8/29' },
-      { date: '2023-08-30', label: 'Wed 8/30' },
-      { date: '2023-08-31', label: 'Thu 8/31' },
-      { date: '2023-09-01', label: 'Fri 9/1' },
-      { date: '2023-09-02', label: 'Sat 9/2' },
-      { date: '2023-09-03', label: 'Sun 9/3' },
-      { date: '2023-09-04', label: 'Mon 9/4' }
-    ]
-  }
-  
+  days.value = getSeasonDays(year.value)
+  selectedDay.value = days.value[0].date
+})
+
+// Initial work stays in onMounted; this watcher handles later route changes.
+watch(year, newYear => {
+  days.value = getSeasonDays(newYear)
   selectedDay.value = days.value[0].date
 })
 </script>

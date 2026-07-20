@@ -377,7 +377,7 @@ export class BRCDirectionsGenerator {
    */
   _generateRouteOverview(route, steps, travelMode) {
     const totalDistance = Math.round(route.distance)
-    const totalDuration = Math.round(route.duration / 60)
+    const totalDuration = Math.round(route.duration)
     
     const streetsSummary = route.summary?.streets || []
     const majorStreets = streetsSummary.slice(0, 3) // First 3 streets

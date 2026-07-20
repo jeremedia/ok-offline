@@ -11,8 +11,7 @@
  */
 
 import { NetworkNode, NetworkEdge, BRCStreetNetwork } from './utils/graphUtils.js'
-import { brcAddressToLatLon } from '../../utils/geocoding.js'
-import { isPhysicalIntersection, RADIAL_STREET_REACH, AVENUE_ORDER } from '../../utils/radialStreetMapping.js'
+import { findStreetIntersectionFromGIS } from '../../utils/geocoding.js'
 import { getStreetLines, getGISYear } from '../../services/gisData.js'
 import { haversineDistance } from './utils/geoUtils.js'
 
@@ -28,6 +27,8 @@ export class AddressBasedNetworkBuilder {
     
     // Store GIS street data for edge generation
     this.gisStreetData = null
+    this.radialStreets = []
+    this.avenues = []
   }
 
   /**
@@ -44,6 +45,24 @@ export class AddressBasedNetworkBuilder {
 
     const startTime = performance.now()
     this.gisStreetData = gisData.streetLines
+    const features = this.gisStreetData.features
+    this.radialStreets = [...new Set(features
+      .filter(feature => feature.properties?.source === 'radial')
+      .map(feature => feature.properties.name)
+      .filter(name => /^\d{1,2}:\d{2}$/.test(name))
+      .filter(name => {
+        const [hour] = name.split(':').map(Number)
+        return hour >= 2 && hour <= 10
+      }))]
+      .sort((a, b) => {
+        const [aHour, aMinute] = a.split(':').map(Number)
+        const [bHour, bMinute] = b.split(':').map(Number)
+        return (aHour * 60 + aMinute) - (bHour * 60 + bMinute)
+      })
+    const annularOrder = ['ESP', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K']
+    this.avenues = [...new Set(features.filter(feature => feature.properties?.kind === 'annular').map(feature => feature.properties.name))]
+      .sort((a, b) => annularOrder.indexOf(a) - annularOrder.indexOf(b))
+      .map(name => name === 'ESP' ? 'Esplanade' : name)
     
     try {
       // Step 1: Generate all valid BRC intersection nodes
@@ -82,16 +101,11 @@ export class AddressBasedNetworkBuilder {
     const failedAddresses = []
     
     // Generate nodes for all valid radial/avenue combinations
-    Object.keys(RADIAL_STREET_REACH).forEach(clockTime => {
-      AVENUE_ORDER.forEach(avenue => {
-        // Check if this is a valid physical intersection
-        if (isPhysicalIntersection(clockTime, avenue)) {
+    this.radialStreets.forEach(clockTime => {
+      this.avenues.forEach(avenue => {
+        const coords = findStreetIntersectionFromGIS(clockTime, avenue)
+        if (coords) {
           const address = `${clockTime} & ${avenue}`
-          
-          // Use the SAME geocoding function as camp placement
-          const coords = brcAddressToLatLon(address)
-          
-          if (coords) {
             // Create meaningful node ID based on address
             const nodeId = `${clockTime}&${avenue}`
             const streetNames = [clockTime, avenue]
@@ -104,10 +118,9 @@ export class AddressBasedNetworkBuilder {
             this.nodeIdToAddress.set(nodeId, address)
             
             successfulNodes++
-          } else {
-            failedNodes++
-            failedAddresses.push(address)
-          }
+        } else {
+          failedNodes++
+          failedAddresses.push(`${clockTime} & ${avenue}`)
         }
       })
     })
@@ -145,22 +158,14 @@ export class AddressBasedNetworkBuilder {
   _connectRadialStreets() {
     let edgesCreated = 0
     
-    // For each radial street, connect intersections in avenue order
-    Object.keys(RADIAL_STREET_REACH).forEach(clockTime => {
-      const streetReach = RADIAL_STREET_REACH[clockTime]
-      const startIndex = AVENUE_ORDER.indexOf(streetReach.innerLimit)
-      const endIndex = AVENUE_ORDER.indexOf(streetReach.outerLimit)
-      
-      // Connect consecutive intersections along this radial
-      for (let i = startIndex; i < endIndex; i++) {
-        const fromAvenue = AVENUE_ORDER[i]
-        const toAvenue = AVENUE_ORDER[i + 1]
-        
-        const fromNodeId = `${clockTime}&${fromAvenue}`
-        const toNodeId = `${clockTime}&${toAvenue}`
-        
-        const fromNode = this.network.getNode(fromNodeId)
-        const toNode = this.network.getNode(toNodeId)
+    this.radialStreets.forEach(clockTime => {
+      const radialNodes = this.avenues
+        .map(avenue => this.network.getNode(`${clockTime}&${avenue}`))
+        .filter(Boolean)
+
+      for (let i = 0; i < radialNodes.length - 1; i++) {
+        const fromNode = radialNodes[i]
+        const toNode = radialNodes[i + 1]
         
         if (fromNode && toNode) {
           // Create edge from inner to outer
@@ -217,10 +222,9 @@ export class AddressBasedNetworkBuilder {
   _connectAvenueStreets() {
     let edgesCreated = 0
     
-    // For each avenue, connect intersections in clock order
-    AVENUE_ORDER.forEach(avenue => {
-      const radialOrder = Object.keys(RADIAL_STREET_REACH)
-        .filter(clockTime => isPhysicalIntersection(clockTime, avenue))
+    this.avenues.forEach(avenue => {
+      const radialOrder = this.radialStreets
+        .filter(clockTime => this.network.getNode(`${clockTime}&${avenue}`))
         .sort((a, b) => {
           // Sort by clock time (2:00, 2:15, 2:30, etc.)
           const [aHour, aMin] = a.split(':').map(Number)
@@ -350,11 +354,9 @@ export class AddressBasedNetworkBuilder {
   _calculateExpectedIntersections() {
     let count = 0
     
-    Object.keys(RADIAL_STREET_REACH).forEach(clockTime => {
-      AVENUE_ORDER.forEach(avenue => {
-        if (isPhysicalIntersection(clockTime, avenue)) {
-          count++
-        }
+    this.radialStreets.forEach(clockTime => {
+      this.avenues.forEach(avenue => {
+        if (this.network.getNode(`${clockTime}&${avenue}`)) count++
       })
     })
     
@@ -368,10 +370,10 @@ export class AddressBasedNetworkBuilder {
     const nodeAddresses = Array.from(this.nodeIdToAddress.values())
     
     // Check coverage of hour streets
-    const hourStreets = Object.keys(RADIAL_STREET_REACH).filter(time => 
+    const hourStreets = this.radialStreets.filter(time =>
       time.includes(':00') || time.includes(':30')
     )
-    const quarterHourStreets = Object.keys(RADIAL_STREET_REACH).filter(time => 
+    const quarterHourStreets = this.radialStreets.filter(time =>
       time.includes(':15') || time.includes(':45')
     )
     
@@ -394,12 +396,12 @@ export class AddressBasedNetworkBuilder {
     
     // Validate avenue coverage
     let avenueCoverage = 0
-    AVENUE_ORDER.forEach(avenue => {
+    this.avenues.forEach(avenue => {
       const hasNodes = nodeAddresses.some(addr => addr.includes(avenue))
       if (hasNodes) avenueCoverage++
     })
     
-    console.log(`   Avenue coverage: ${avenueCoverage}/${AVENUE_ORDER.length}`)
+    console.log(`   Avenue coverage: ${avenueCoverage}/${this.avenues.length}`)
   }
 
   /**

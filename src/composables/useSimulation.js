@@ -1,14 +1,13 @@
 import { ref } from 'vue'
-import { brcAddressToLatLon } from '../utils/geocoding'
 import { useDateOverride } from './useDateOverride'
+import { CURRENT_YEAR, getSeasonCenter } from '../config/seasons'
 
 // Location simulation state (kept separate from date override)
 const isSimulating = ref(false)
 
-// OKNOTOK camp location at 3:30 & A - actual camp placement for 2025
-// This is where Jeremy and the crew are based during Burning Man
-// Use the geocoding system to get accurate coordinates
-const OKNOTOK_LOCATION = brcAddressToLatLon("3:30 & A") || [40.785200, -119.208100]
+// Current-season simulation uses the official city center. It must not imply a
+// 2026 OKNOTOK placement before an authoritative camp record exists.
+const SIMULATED_LOCATION = getSeasonCenter(CURRENT_YEAR)
 
 export function useSimulation() {
   // Use the global date override system
@@ -18,12 +17,12 @@ export function useSimulation() {
     isSimulating.value = !isSimulating.value
     console.log(`🎭 Location Simulation ${isSimulating.value ? 'ENABLED' : 'DISABLED'}`)
     if (isSimulating.value) {
-      console.log(`📍 Simulated location: 3:30 & A (OKNOTOK camp)`)
+      console.log(`📍 Simulated location: ${CURRENT_YEAR} city center`)
     }
   }
   
   const getSimulatedLocation = () => {
-    return isSimulating.value ? OKNOTOK_LOCATION : null
+    return isSimulating.value ? SIMULATED_LOCATION : null
   }
   
   const getCurrentTime = () => {

@@ -133,6 +133,7 @@ import { clearCache } from '../services/storage'
 import { serviceWorkerManager, getCacheInfo } from '../services/serviceWorkerManager'
 import { useToast } from '../composables/useToast'
 import { BaseCard, BaseButton } from '@/components/ui'
+import { CURRENT_YEAR, SUPPORTED_YEARS } from '../config/seasons'
 
 const props = defineProps({
   autoReset: {
@@ -148,7 +149,7 @@ const resetting = ref(false)
 const resetLog = ref([])
 const onboardingStatus = ref({ completed: false })
 const dataStatus = ref({ hasData: false, totalItems: 0 })
-const currentYear = ref('2024')
+const currentYear = ref(CURRENT_YEAR)
 const swStatus = ref({ active: false })
 const storageInfo = ref({ usage: 0, quota: 0 })
 
@@ -198,8 +199,7 @@ const clearCachedData = async () => {
     await clearCache()
     
     // Clear sync metadata for all years
-    const years = ['2023', '2024', '2025']
-    await Promise.all(years.map(year => clearYear(year)))
+    await Promise.all(SUPPORTED_YEARS.map(year => clearYear(year)))
     
     addLogEntry('Cached data cleared', 'success')
     showSuccess('Cached data cleared - sync will be required')
@@ -475,7 +475,7 @@ const refreshStatus = async () => {
     onboardingStatus.value.completed = !!localStorage.getItem('onboarding_completed')
     
     // Check data status
-    const years = ['2023', '2024', '2025']
+    const years = SUPPORTED_YEARS
     let totalItems = 0
     let hasData = false
     
@@ -489,7 +489,7 @@ const refreshStatus = async () => {
     dataStatus.value = { hasData, totalItems }
     
     // Check current year
-    currentYear.value = localStorage.getItem('selectedYear') || '2024'
+    currentYear.value = localStorage.getItem('selectedYear') || CURRENT_YEAR
     
     // Check service worker status
     swStatus.value.active = 'serviceWorker' in navigator && 

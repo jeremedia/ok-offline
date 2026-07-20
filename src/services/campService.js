@@ -1,5 +1,5 @@
 /**
- * Camp Management Service - OKNOTOK 2025
+ * Camp Management Service - year-aware OKNOTOK coordination
  * Provides API integration for theme camp management, team coordination, and 3D mapping
  */
 

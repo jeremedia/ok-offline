@@ -1,5 +1,5 @@
-import { API_KEY, API_BASE } from '../config'
-import { getFromCache, saveToCache } from './storage'
+import { getFromCache } from './storage'
+import { syncType } from './staticDataSync'
 
 /**
  * Get events for a specific camp
@@ -22,7 +22,8 @@ export async function getCampEvents(campId, year) {
       return campEvents
     }
     
-    // No cache, fetch from API
+    // No cache, fetch the validated public snapshot. Official API credentials
+    // are build/CI secrets and are never available to the browser.
     return await fetchAndFilterEvents(campId, year)
   } catch (err) {
     console.error('Error getting camp events:', err)
@@ -32,19 +33,8 @@ export async function getCampEvents(campId, year) {
 
 async function fetchAndFilterEvents(campId, year) {
   try {
-    const response = await fetch(`${API_BASE}/event?year=${year}`, {
-      headers: { 'X-API-Key': API_KEY }
-    })
-    
-    if (!response.ok) {
-      throw new Error(`Failed to fetch events: ${response.status}`)
-    }
-    
-    const data = await response.json()
-    const events = Array.isArray(data) ? data : []
-    
-    // Save all events to cache
-    await saveToCache('event', year, events)
+    await syncType('event', year)
+    const events = await getFromCache('event', year)
     
     // Filter for this camp
     return filterEventsByCamp(events, campId)

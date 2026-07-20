@@ -72,7 +72,7 @@
             required
           >
         </div>
-        <small class="form-text">Burning Man 2025: Aug 25 - Sep 2</small>
+        <small class="form-text">Black Rock City {{ props.year }}: {{ minDate }} – {{ maxDate }}</small>
       </div>
       
       <div class="form-group">
@@ -99,6 +99,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import CustomEntryForm from './CustomEntryForm.vue'
+import { getSeason } from '../../config/seasons'
 
 const props = defineProps({
   modelValue: {
@@ -124,9 +125,8 @@ const eventDate = ref('')
 const eventTime = ref('')
 const eventDuration = ref('60')
 
-// Burning Man 2025 dates
-const minDate = '2025-08-25'
-const maxDate = '2025-09-02'
+const minDate = computed(() => getSeason(props.year).eventStart)
+const maxDate = computed(() => getSeason(props.year).eventEnd)
 
 const eventTypeMap = {
   work: 'Class/Workshop',

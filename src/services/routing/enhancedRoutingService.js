@@ -12,7 +12,8 @@ import { BRCPathfinder } from './pathfinder.js'
 import { BRCDirectionsGenerator } from './directionsGenerator.js'
 import { BRCHybridRouter } from './brcHybridRouter.js'
 import { haversineDistance, metersToFeet, getClockAddress } from './utils/geoUtils.js'
-import { loadAllGISData } from '../gisData.js'
+import { loadAllGISData, getGISYear } from '../gisData.js'
+import { getSeason } from '../../config/seasons.js'
 
 export class EnhancedRoutingService {
   constructor() {
@@ -23,7 +24,8 @@ export class EnhancedRoutingService {
     this.networkBuilder = null
     this.hybridRouter = null
     this.isInitialized = false
-    this.networkCacheKey = 'brc_street_network_cache_address_based_v1' // Address-based network cache
+    const year = getGISYear()
+    this.networkCacheKey = `brc_street_network:${year}:${getSeason(year).map.gisRevision}:v2`
     
     // Travel speed constants (feet per minute)
     this.TRAVEL_SPEEDS = {

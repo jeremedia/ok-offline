@@ -1,0 +1,75 @@
+{
+  "currentYear": "2026",
+  "supportedYears": ["2026", "2025", "2024", "2023"],
+  "defaults": {
+    "newInstallYear": "2026",
+    "upgradeMarker": "season_default_2026_applied",
+    "releasePhase": "content-public",
+    "safetyFloors": { "camp": 1000, "art": 250, "event": 1800 }
+  },
+  "seasons": {
+    "2026": {
+      "year": "2026",
+      "timezone": "America/Los_Angeles",
+      "eventStart": "2026-08-30",
+      "eventEnd": "2026-09-07",
+      "locationRelease": {
+        "developer": "2026-08-09T00:00:00-07:00",
+        "camp": "2026-08-23T00:00:00-07:00",
+        "art": "2026-08-30T00:00:00-07:00"
+      },
+      "map": {
+        "center": [40.783247448, -119.207884096],
+        "temple": [40.788099423, -119.201499636],
+        "centerCamp": [40.777372264, -119.215611561],
+        "gisRevision": "3c69f43ef58a55f6cb5f5c6c99a64f4ec5966145",
+        "gisFiles": ["city_blocks", "cpns", "dmz", "plazas", "street_lines", "street_outlines", "toilets", "trash_fence"]
+      },
+      "avenues": {
+        "Esplanade": "Esplanade",
+        "A": "Ararat",
+        "B": "Bodhi",
+        "C": "Ceiba",
+        "D": "Delphi",
+        "E": "Eternal",
+        "F": "Fulcrum",
+        "G": "Great Oak",
+        "H": "Heiau",
+        "I": "Iroko",
+        "J": "Jiba",
+        "K": "Kundalini"
+      }
+    },
+    "2025": {
+      "year": "2025",
+      "timezone": "America/Los_Angeles",
+      "eventStart": "2025-08-24",
+      "eventEnd": "2025-09-01",
+      "locationRelease": { "developer": "2025-08-03T00:00:00-07:00", "camp": "2025-08-17T00:00:00-07:00", "art": "2025-08-24T00:00:00-07:00" },
+      "map": {
+        "center": [40.786958, -119.202994],
+        "gisRevision": "historical-2025",
+        "gisFiles": ["city_blocks", "cpns", "plazas", "street_lines", "street_outlines", "toilets", "trash_fence"]
+      },
+      "avenues": { "Esplanade": "Esplanade", "A": "Atwood", "B": "Bradbury", "C": "Cherryh", "D": "Dick", "E": "Ellison", "F": "Farmer", "G": "Gibson", "H": "Herbert", "I": "Ishiguro", "J": "Jemison", "K": "Kilgore" }
+    },
+    "2024": {
+      "year": "2024",
+      "timezone": "America/Los_Angeles",
+      "eventStart": "2024-08-25",
+      "eventEnd": "2024-09-02",
+      "locationRelease": { "developer": "2024-01-01T00:00:00-08:00", "camp": "2024-01-01T00:00:00-08:00", "art": "2024-01-01T00:00:00-08:00" },
+      "map": { "center": [40.786958, -119.202994], "gisRevision": "historical-2024", "gisFiles": ["city_blocks", "cpns", "plazas", "street_lines", "street_outlines", "toilets", "trash_fence"] },
+      "avenues": { "Esplanade": "Esplanade", "A": "Agog", "B": "Baffle", "C": "Captivate", "D": "Delight", "E": "Enchant", "F": "Fascinate", "G": "Gobsmack", "H": "Hypnotic", "I": "Intriguing", "J": "Jabberwock", "K": "Kelter", "L": "Route 66" }
+    },
+    "2023": {
+      "year": "2023",
+      "timezone": "America/Los_Angeles",
+      "eventStart": "2023-08-27",
+      "eventEnd": "2023-09-04",
+      "locationRelease": { "developer": "2023-01-01T00:00:00-08:00", "camp": "2023-01-01T00:00:00-08:00", "art": "2023-01-01T00:00:00-08:00" },
+      "map": { "center": [40.786958, -119.202994], "gisRevision": "historical-2023", "gisFiles": [] },
+      "avenues": {}
+    }
+  }
+}

@@ -1,0 +1,48 @@
+name: Roll back PWA release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_id:
+        description: Existing immutable release directory, for example 4.0.0-0123456789ab
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ok-offline-production
+  cancel-in-progress: false
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Atomically restore an existing release
+        uses: appleboy/ssh-action@v1.2.0
+        env:
+          RELEASE_ID: ${{ inputs.release_id }}
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          envs: RELEASE_ID
+          script: |
+            set -eu
+            echo "$RELEASE_ID" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+-[0-9a-f]{12}$'
+            root=/var/www/offline.oknotok.com
+            test -f "$root/releases/$RELEASE_ID/index.html"
+            test -f "$root/releases/$RELEASE_ID/release.json"
+            ln -sfn "releases/$RELEASE_ID" "$root/.rollback-$RELEASE_ID"
+            mv -Tf "$root/.rollback-$RELEASE_ID" "$root/current"
+            test "$(readlink "$root/current")" = "releases/$RELEASE_ID"
+      - name: Verify the restored public identity
+        env:
+          RELEASE_ID: ${{ inputs.release_id }}
+        run: |
+          expected="${RELEASE_ID#*-}"
+          actual="$(curl --fail --silent --show-error https://offline.oknotok.com/release.json | jq -r .commit)"
+          test "${actual:0:12}" = "$expected"
+          curl --fail --silent --show-error https://offline.oknotok.com/data/2026/metadata.json | jq -e '.publishedCounts.camps > 1000 and .publishedCounts.art > 250 and .publishedCounts.events > 1800'

@@ -9,6 +9,7 @@ import { getAvenueNameFromLetter, getAvenueLetterFromName, getAvenueDistance } f
 import { resolveBRCAddress } from './brcAddressResolver'
 import { parseBRCAddress, calculateDistance } from './brcAddressUtils'
 import { lookupIntersection } from './brcIntersectionLookup'
+import { getSeason } from '../config/seasons'
 
 /**
  * Conditional console logging - only logs in development or when debug is enabled
@@ -149,14 +150,15 @@ function isClockTimeVariant(gisName, searchName) {
  * @param {boolean} debug - Enable detailed debugging logs (default: false)
  * @returns {array|null} [latitude, longitude] or null if not found
  */
-function findStreetIntersectionFromGIS(street1, street2, debug = false) {
+export function findStreetIntersectionFromGIS(street1, street2, debug = false) {
   if (debug) {
     console.log('🔍 ===== GIS INTERSECTION LOOKUP DEBUG =====')
     console.log('🔍 Looking for GIS intersection:', street1, '&', street2)
   }
   
-  // Try fast lookup table first (O(1) operation)
-  const lookupResult = lookupIntersection(street1, street2)
+  const year = getGISYear()
+  // The generated adapter is intentionally retained only for historical 2025.
+  const lookupResult = lookupIntersection(street1, street2, year)
   if (lookupResult) {
     if (debug) {
       console.log('🔍 ✅ FAST LOOKUP SUCCESS:', lookupResult)
@@ -167,7 +169,6 @@ function findStreetIntersectionFromGIS(street1, street2, debug = false) {
   
   if (debug) console.log('🔍 ⚡ Fast lookup failed, falling back to geometric calculation...')
   
-  const year = getGISYear()
   if (debug) console.log('🔍 Using GIS year:', year)
   
   const streetData = getStreetLines(year)
@@ -178,9 +179,13 @@ function findStreetIntersectionFromGIS(street1, street2, debug = false) {
   
   if (debug) console.log('🔍 ✅ GIS data loaded. Total features:', streetData.features.length)
   
-  // Convert avenue letters to theme names for the current year
-  const street1Name = isAvenueLetter(street1) ? getAvenueNameFromLetter(street1, year) : street1
-  const street2Name = isAvenueLetter(street2) ? getAvenueNameFromLetter(street2, year) : street2
+  // Official 2026 geometry uses A–K and ESP. Older geometry used theme names.
+  const gisStreetName = street => {
+    if (Number(year) === 2026) return street.toUpperCase() === 'ESPLANADE' ? 'ESP' : street
+    return isAvenueLetter(street) ? getAvenueNameFromLetter(street, year) : street
+  }
+  const street1Name = gisStreetName(street1)
+  const street2Name = gisStreetName(street2)
   
   if (debug) {
     console.log('🔍 Name conversion:')
@@ -574,11 +579,12 @@ export function latLonToBRCAddress(coordinates) {
  * Get coordinates for special locations
  */
 export function getSpecialLocationCoords(name) {
+  const season = getSeason(getGISYear())
   const specialLocations = {
-    'CENTER CAMP': [40.78108859485657, -119.210735421], // Center Camp from 2025 GIS data
-    'THE MAN': BRC_CONFIG.center,
-    'GOLDEN SPIKE': BRC_CONFIG.center,
-    'TEMPLE': [40.791815152314989, -119.19662192527863], // Temple location from 2025 GIS data
+    'CENTER CAMP': season.map.centerCamp || [40.78108859485657, -119.210735421],
+    'THE MAN': season.map.center,
+    'GOLDEN SPIKE': season.map.center,
+    'TEMPLE': season.map.temple || [40.791815152314989, -119.19662192527863],
     'AIRPORT': [40.764261391285487, -119.205226911], // Airport from GIS data
     'DPOW': brcAddressToLatLon('5:30 & H'), // DPW location
     'MEDICAL': [40.780065841922166, -119.20676566604881], // Legacy medical location (same as Rampart)

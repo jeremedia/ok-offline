@@ -86,6 +86,7 @@
 import { ref, onMounted, watch, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getThemeCamp } from '../services/campService'
+import { getSeasonDays } from '../config/seasons'
 import BaseButton from '../components/ui/BaseButton.vue'
 
 const route = useRoute()
@@ -131,29 +132,15 @@ watch(() => props.slug, (newSlug) => {
   if (newSlug) {
     loadCamp(newSlug)
   }
-}, { immediate: true })
+})
 
 // Navigation
 const goBack = () => {
   router.push(`/${props.year}/camp/${props.slug}`)
 }
 
-// Date range computation - Fixed date range from Aug 18 to Sep 2 (PST)
 const dateRange = computed(() => {
-  const dates = []
-  
-  // Burning Man 2025: August 18 - September 2 (PST)
-  const startDate = new Date(2025, 7, 18, 12, 0, 0) // Aug 18 noon PST
-  const endDate = new Date(2025, 8, 2, 12, 0, 0)    // Sep 2 noon PST
-  
-  // Generate date range
-  const current = new Date(startDate)
-  while (current <= endDate) {
-    dates.push(new Date(current))
-    current.setDate(current.getDate() + 1)
-  }
-  
-  return dates
+  return getSeasonDays(props.year).map(({ date }) => new Date(`${date}T12:00:00`))
 })
 
 // Sorted members (camp lead first, then by arrival date)

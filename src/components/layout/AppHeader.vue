@@ -21,9 +21,7 @@
             @change="$emit('update:selectedYear', $event.target.value)"
             class="unified-select"
           >
-            <option value="2023">2023</option>
-            <option value="2024">2024</option>
-            <option value="2025">2025</option>
+            <option v-for="year in SUPPORTED_YEARS" :key="year" :value="year">{{ year }}</option>
           </select>
         </div>
         <nav class="main-nav">
@@ -80,6 +78,7 @@
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import BaseButton from '../ui/BaseButton.vue'
+import { SUPPORTED_YEARS } from '../../config/seasons'
 
 const props = defineProps({
   selectedYear: {

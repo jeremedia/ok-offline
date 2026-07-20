@@ -121,12 +121,13 @@ import { useToast } from '../../composables/useToast'
 import { getErrorMessage } from '../../utils/errorHandler'
 import tileDownloader from '../../services/tileDownloader'
 import { BaseButton } from '@/components/ui'
+import { SUPPORTED_YEARS } from '../../config/seasons'
 
 // Toast notifications
 const { showSuccess, showError, showWarning, showInfo } = useToast()
 
 // Data configuration
-const years = ['2023', '2024', '2025']
+const years = SUPPORTED_YEARS
 const types = ['camp', 'art', 'event']
 
 // State
@@ -167,9 +168,9 @@ const hasData = (year) => {
 
 // Load sync status for all years
 const loadSyncStatus = async () => {
-  years.forEach(year => {
-    syncStatus.value[year] = getSyncStatus(year)
-  })
+  await Promise.all(years.map(async year => {
+    syncStatus.value[year] = await getSyncStatus(year)
+  }))
   
   // Also load tile stats
   tileStats.value = await tileDownloader.getStorageStats()

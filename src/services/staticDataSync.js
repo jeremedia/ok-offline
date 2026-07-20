@@ -1,5 +1,34 @@
 import { saveToCache, getFromCache } from './storage'
 import { AppError, handleError } from '../utils/errorHandler'
+import { applySnapshotMetadata } from '../stores/globalState'
+import { CURRENT_YEAR } from '../config/seasons'
+
+const DATA_TYPES = {
+  camp: { fileName: 'camps', minimum: 1 },
+  art: { fileName: 'art', minimum: 1 },
+  event: { fileName: 'events', minimum: 1 }
+}
+
+async function fetchValidatedJson(url, validate) {
+  const response = await fetch(url, { cache: 'no-store' })
+  if (!response.ok) throw new AppError(`Failed to load ${url}: ${response.status}`, 'DATA_ERROR', 'Unable to load data. Please try again.')
+  const contentType = response.headers.get('content-type') || ''
+  if (!contentType.toLowerCase().includes('json')) {
+    throw new AppError(`${url} returned ${contentType || 'no Content-Type'}`, 'INVALID_SNAPSHOT', 'The data server returned an invalid file.')
+  }
+  const data = await response.json()
+  if (!validate(data)) throw new AppError(`${url} has an invalid shape`, 'INVALID_SNAPSHOT', 'The downloaded data failed validation.')
+  return data
+}
+
+export async function syncSnapshotMetadata(year) {
+  const metadata = await fetchValidatedJson(`/data/${year}/metadata.json`, value =>
+    value && String(value.year) === String(year) && (String(year) !== CURRENT_YEAR || (value.publishedCounts && value.phase))
+  )
+  applySnapshotMetadata(year, metadata)
+  localStorage.setItem(`snapshot_metadata_${year}`, JSON.stringify(metadata))
+  return metadata
+}
 
 /**
  * Sync all data for a given year from static JSON files
@@ -13,6 +42,7 @@ export async function syncYear(year, onProgress = () => {}) {
   
   console.log('[StaticDataSync] Starting sync for year:', year)
   
+  await syncSnapshotMetadata(year)
   // First sync all data types
   for (let i = 0; i < types.length; i++) {
     const type = types[i]
@@ -45,39 +75,17 @@ export async function syncYear(year, onProgress = () => {}) {
 export async function syncType(type, year) {
   try {
     // Construct the path to the static JSON file
-    const fileName = type === 'camp' ? 'camps' : type === 'art' ? 'art' : 'events'
+    const typeConfig = DATA_TYPES[type]
+    if (!typeConfig) throw new AppError(`Unknown data type ${type}`, 'INVALID_SNAPSHOT', 'The requested data type is invalid.')
+    const fileName = typeConfig.fileName
     const url = `/data/${year}/${fileName}.json`
     
     console.log(`Loading ${type}s for year ${year} from ${url}`)
     
-    const response = await fetch(url)
-    
-    if (!response.ok) {
-      if (response.status === 404) {
-        throw new AppError(
-          `Data file not found for ${year} ${type}s`,
-          'NO_DATA',
-          `No ${year} ${type} data available yet.`
-        )
-      }
-      throw new AppError(
-        `Failed to load ${type} data: ${response.status}`,
-        'DATA_ERROR',
-        'Unable to load data. Please try again.'
-      )
-    }
-    
-    const data = await response.json()
-    let items = Array.isArray(data) ? data : []
-    
-    // Handle different data formats (just in case)
-    if (!Array.isArray(data) && data && typeof data === 'object') {
-      if (data.data && Array.isArray(data.data)) {
-        items = data.data
-      } else if (data[type] && Array.isArray(data[type])) {
-        items = data[type]
-      }
-    }
+    const data = await fetchValidatedJson(url, value => Array.isArray(value) && value.length >= typeConfig.minimum && value.every(item =>
+      item && typeof item === 'object' && !Array.isArray(item) && item.uid && Number(item.year) === Number(year)
+    ))
+    let items = data
     
     // Ensure each item has a year
     items = items.map(item => ({ ...item, year: parseInt(year) }))
@@ -142,8 +150,8 @@ async function enrichAndSaveEvents(year, syncResults) {
         }
       }
       
-      if (event.hosted_by_art) {
-        const artPiece = artMap.get(event.hosted_by_art)
+      if (event.located_at_art) {
+        const artPiece = artMap.get(event.located_at_art)
         if (artPiece && artPiece.location_string) {
           return {
             ...event,

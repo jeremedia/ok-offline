@@ -1,5 +1,6 @@
 import { onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { CURRENT_YEAR, SUPPORTED_YEARS } from '../config/seasons'
 
 export function useKeyboardShortcuts() {
   const router = useRouter()
@@ -11,7 +12,7 @@ export function useKeyboardShortcuts() {
       return
     }
     
-    const year = route.params.year || localStorage.getItem('selectedYear') || '2025'
+    const year = route.params.year || localStorage.getItem('selectedYear') || CURRENT_YEAR
     
     // Navigation shortcuts
     switch(event.key.toLowerCase()) {
@@ -62,10 +63,9 @@ export function useKeyboardShortcuts() {
     }
     
     // Year switching
-    if (event.key >= '1' && event.key <= '3' && (event.ctrlKey || event.metaKey)) {
+    if (event.key >= '1' && event.key <= String(SUPPORTED_YEARS.length) && (event.ctrlKey || event.metaKey)) {
       event.preventDefault()
-      const years = ['2023', '2024', '2025']
-      const newYear = years[parseInt(event.key) - 1]
+      const newYear = [...SUPPORTED_YEARS].reverse()[parseInt(event.key) - 1]
       if (newYear) {
         localStorage.setItem('selectedYear', newYear)
         const currentPath = route.path
@@ -96,6 +96,7 @@ Year Switching:
 • Ctrl/Cmd + 1 - 2023
 • Ctrl/Cmd + 2 - 2024
 • Ctrl/Cmd + 3 - 2025
+• Ctrl/Cmd + 4 - 2026
 
 Other:
 • ? - Show this help

@@ -183,28 +183,6 @@
       }
     };
     
-    // Service worker registration with progress updates
-    if ('serviceWorker' in navigator) {
-      window.updateLoadingStatus('Registering service worker...', 10);
-      
-      navigator.serviceWorker.register('/sw.js')
-        .then(registration => {
-          window.updateLoadingStatus('Caching app resources...', 30);
-          
-          // Listen for service worker state changes
-          if (registration.installing) {
-            registration.installing.addEventListener('statechange', function() {
-              if (this.state === 'installed') {
-                window.updateLoadingStatus('App cached for offline use', 80);
-              }
-            });
-          }
-        })
-        .catch(error => {
-          console.error('Service worker registration failed:', error);
-          window.updateLoadingStatus('Loading app...', 50);
-        });
-    }
   </script>
   
   <script type="module" src="/src/main.js"></script>

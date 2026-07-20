@@ -234,7 +234,7 @@ const loadingMessage = ref('Searching...')
 const results = ref([])
 const currentPage = ref(1)
 const pageSize = 20
-const year = ref(route.params.year || localStorage.getItem('selectedYear') || '2025')
+const year = ref(route.params.year || localStorage.getItem('selectedYear') || '2026')
 const isOnline = ref(navigator.onLine)
 const searchStatus = ref('')
 const searchExecutionTime = ref(null)
@@ -653,6 +653,7 @@ const performSearch = async () => {
   currentPage.value = 1
   const startTime = Date.now()
   totalItemsSearched.value = 0
+  let fallbackStatus = ''
   
   try {
     let searchResults = []
@@ -765,7 +766,7 @@ const performSearch = async () => {
           year: parseInt(year.value),
           types: typesToSearch.value,
           limit: 20,
-          threshold: 0.7
+          threshold: 0.4
         })
         apiResults = response.results
         fromCache.value = response.cached || false
@@ -800,17 +801,27 @@ const performSearch = async () => {
     
   } catch (error) {
     console.error('Search error:', error)
-    searchStatus.value = `Search error: ${error.message}`
-    results.value = []
+    if (searchMode.value !== 'keyword') {
+      const requestedMode = searchMode.value
+      searchMode.value = 'keyword'
+      await performSearch()
+      searchMode.value = requestedMode
+      fallbackStatus = 'AI search unavailable - showing offline keyword results'
+    } else {
+      searchStatus.value = `Search error: ${error.message}`
+      results.value = []
+    }
   } finally {
     loading.value = false
     const endTime = Date.now()
     const duration = ((endTime - startTime) / 1000).toFixed(2)
     
     // Update execution time display
-    if (searchMode.value !== 'keyword' && searchExecutionTime.value) {
+    if (fallbackStatus) {
+      searchStatus.value = fallbackStatus
+    } else if (searchMode.value !== 'keyword' && searchExecutionTime.value) {
       searchStatus.value = `Search completed in ${searchExecutionTime.value}s`
-    } else {
+    } else if (!searchStatus.value.startsWith('Search error:')) {
       searchStatus.value = ''
     }
   }

@@ -33,3 +33,6 @@ vite.log
 
 # API Keys (if stored in separate file)
 config.local.js
+
+# Browser test artifacts
+output/playwright/

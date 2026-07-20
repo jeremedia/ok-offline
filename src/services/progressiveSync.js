@@ -1,7 +1,6 @@
-import { saveToCache, getFromCache } from './storage'
+import { getFromCache } from './storage'
 import { syncType, getSyncMetadata } from './staticDataSync'
 import tileDownloader from './tileDownloader'
-import { updateLocationDataAvailability } from '../stores/globalState'
 
 /**
  * Progressive sync service that prioritizes essential data first
@@ -37,8 +36,8 @@ export class ProgressiveSync {
 
   /**
    * Sync data with prioritized loading strategy
-   * Downloads all years (2023, 2024, 2025) with current year prioritized
-   * Priority: Current year camps first, then all other data
+   * Downloads the selected season. Historical seasons remain available through
+   * the year selector and are cached only when the user selects/syncs them.
    */
   async syncWithPriority(currentYear) {
     if (this.isActive) {
@@ -46,11 +45,10 @@ export class ProgressiveSync {
     }
 
     this.isActive = true
-    const years = ['2025', '2024', '2023']  // Order matters for sequential processing
+    const years = [String(currentYear)]
     const types = ['camp', 'art', 'event']
     
-    // Calculate total steps: current year (3 types) + other years (6 types) + processing (3 stages) + tiles (1 stage)
-    this.progress.total = 13 // 9 sync stages + 3 processing stages + 1 tile stage
+    this.progress.total = types.length + 3
     this.progress.current = 0
 
     const results = {}
@@ -60,15 +58,15 @@ export class ProgressiveSync {
       // Emit start event for current year
       this.callbacks.onStageChange(`${currentYear}_start`, `Starting ${currentYear} data download`)
       
-      let total2025Count = 0
+      let currentYearCount = 0
       for (const type of types) {
         const priority = type === 'camp' ? 'high' : 'medium'
         const result = await this.syncStage(type, currentYear, `${currentYear} ${type}s`, priority)
         results[`${type}_${currentYear}`] = { success: true, priority: priority, count: result.count }
-        total2025Count += result.count
+        currentYearCount += result.count
         
         // Emit count update with both individual type count and total
-        this.callbacks.onCountUpdate('2025', total2025Count, type, result.count)
+        this.callbacks.onCountUpdate(String(currentYear), currentYearCount, type, result.count)
         
         // Emit completion event in same format as other years
         this.callbacks.onStageChange(`${type}_${currentYear}_complete`, `${currentYear} ${type} data ready`)
@@ -82,36 +80,7 @@ export class ProgressiveSync {
       // Emit completion for the entire year
       this.callbacks.onStageChange(`${currentYear}_complete`, `${currentYear} data complete`)
 
-      // Stage 3: Sync other years in background with count tracking
-      for (const year of years) {
-        if (year === currentYear) continue // Already synced
-        
-        // Emit start event for this year
-        this.callbacks.onStageChange(`${year}_start`, `Starting ${year} data download`)
-        
-        let yearCount = 0
-        for (const type of types) {
-          try {
-            const result = await this.syncStage(type, year, `${year} ${type}s`, 'low')
-            results[`${type}_${year}`] = { success: true, priority: 'low', count: result.count }
-            yearCount += result.count
-            
-            // Emit count update with both individual type count and total
-            this.callbacks.onCountUpdate(year, yearCount, type, result.count)
-            
-            // Emit completion event for each type
-            this.callbacks.onStageChange(`${type}_${year}_complete`, `${year} ${type} data ready`)
-          } catch (error) {
-            console.warn(`Failed to sync ${type} for ${year}:`, error)
-            results[`${type}_${year}`] = { success: false, error: error.message }
-          }
-        }
-        
-        // Emit completion for the entire year
-        this.callbacks.onStageChange(`${year}_complete`, `${year} data complete`)
-      }
-
-      // Stage 4: Enrich and optimize data for all years
+      // The published event snapshot is already safely enriched server-side.
       for (const year of years) {
         await this.enrichmentStage(year)
       }
@@ -173,21 +142,6 @@ export class ProgressiveSync {
     try {
       const result = await syncType(type, year)
       
-      // Check if location data exists for camps (only relevant for 2025)
-      if (type === 'camp' && year === '2025') {
-        const camps = await getFromCache('camp', '2025')
-        if (camps && camps.length > 0) {
-          const hasLocations = camps.some(camp => 
-            camp.location_string && camp.location_string !== '' && 
-            camp.location_string !== 'TBD' && camp.location_string !== 'Unknown'
-          )
-          result.hasLocations = hasLocations
-          
-          // Update global state
-          updateLocationDataAvailability('2025', hasLocations)
-        }
-      }
-      
       this.progress.current++
       this.updateProgress(`Processed ${result.count} ${type}s`, this.progress.current, this.progress.total)
       
@@ -207,56 +161,17 @@ export class ProgressiveSync {
    * Enrichment stage - enhance data relationships
    */
   async enrichmentStage(year) {
-    this.updateProgress('Enhancing data relationships...', this.progress.current, this.progress.total)
+    this.updateProgress('Validating published relationships...', this.progress.current, this.progress.total)
     
     // Notify when enrichment starts
-    if (this.progress.current === 10) { // First enrichment
-      this.callbacks.onStageChange('enrichment_start', 'Processing data relationships')
-    }
+    this.callbacks.onStageChange('enrichment_start', 'Validating published relationships')
     
     try {
-      // Get all cached data
-      const [camps, art, events] = await Promise.all([
-        getFromCache('camp', year),
-        getFromCache('art', year),
-        getFromCache('event', year)
-      ])
-
-      // Create efficient lookup maps
-      const campMap = new Map(camps.map(camp => [camp.uid, camp]))
-      const artMap = new Map(art.map(piece => [piece.uid, piece]))
-
-      // Enrich events with location data
-      let enrichedCount = 0
-      const enrichedEvents = events.map(event => {
-        if (event.hosted_by_camp && campMap.has(event.hosted_by_camp)) {
-          const camp = campMap.get(event.hosted_by_camp)
-          enrichedCount++
-          return {
-            ...event,
-            camp_name: camp.name,
-            enriched_location: camp.location_string
-          }
-        }
-        
-        if (event.hosted_by_art && artMap.has(event.hosted_by_art)) {
-          const artPiece = artMap.get(event.hosted_by_art)
-          enrichedCount++
-          return {
-            ...event,
-            art_name: artPiece.name,
-            enriched_location: artPiece.location_string
-          }
-        }
-        
-        return event
-      })
-
-      // Save enriched data
-      await saveToCache('event', year, enrichedEvents)
+      const events = await getFromCache('event', year)
+      const enrichedCount = events.filter(event => event.enriched_location).length
       
       this.progress.current++
-      this.updateProgress(`Enhanced ${enrichedCount} event locations`, this.progress.current, this.progress.total)
+      this.updateProgress(`Validated ${enrichedCount} published event locations`, this.progress.current, this.progress.total)
       
     } catch (error) {
       this.progress.current++

@@ -9,12 +9,15 @@
       </p>
       
       <p>
-        Brought to you by <strong><a href="/2025/camps/a1XVI000009ssUT2AY" class="camp-link">Mr. OK of OKNOTOK</a></strong>.
+        Created by Jeremy Roush and brought to you by <strong>Mr. OK of OKNOTOK</strong>.
+        The 2026 camp placement is currently unset pending an authoritative record.
       </p>
+
+      <p><strong>This app is not affiliated, endorsed, or verified by Burning Man Project.</strong></p>
       
       <p class="version-info">
         Version: <strong>{{ appVersion }}</strong><br>
-        <span class="build-time">Built: {{ buildTime }}</span>
+        <span class="build-time">Build: {{ buildRevision }}</span>
       </p>
       
       <BaseButton @click="openReleaseNotes" variant="primary" :loading="loadingReleases">
@@ -144,14 +147,7 @@ const props = defineProps({
 
 // Version info
 const appVersion = __APP_VERSION__
-const buildTime = new Date(__BUILD_TIME__).toLocaleDateString('en-US', {
-  month: 'long',
-  day: 'numeric', 
-  year: 'numeric',
-  hour: 'numeric',
-  minute: '2-digit',
-  hour12: true
-})
+const buildRevision = __BUILD_REVISION__.slice(0, 12)
 
 // Modal state
 const showReleaseNotes = ref(false)

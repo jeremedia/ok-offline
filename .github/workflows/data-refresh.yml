@@ -1,0 +1,82 @@
+name: Review 2026 data refresh
+
+on:
+  schedule:
+    - cron: '17 09 * * *'
+  workflow_dispatch:
+    inputs:
+      phase:
+        description: Automatic observes official gates; explicit phases still fail closed against the current clock.
+        required: true
+        default: automatic
+        type: choice
+        options: [automatic, content-public, private-locations, camp-public, all-public]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: 2026-data-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    env:
+      BM_API_KEY: ${{ secrets.BM_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Select phase without exceeding the release clock
+        id: phase
+        shell: bash
+        run: |
+          requested='${{ inputs.phase || 'automatic' }}'
+          if [[ "$requested" != automatic ]]; then
+            phase="$requested"
+          elif [[ "$(date -u +%s)" -ge "$(date -u -d '2026-08-30 07:00:00Z' +%s)" ]]; then
+            phase=all-public
+          elif [[ "$(date -u +%s)" -ge "$(date -u -d '2026-08-23 07:00:00Z' +%s)" ]]; then
+            phase=camp-public
+          elif [[ "$(date -u +%s)" -ge "$(date -u -d '2026-08-09 07:00:00Z' +%s)" ]]; then
+            phase=private-locations
+          else
+            phase=content-public
+          fi
+          echo "phase=$phase" >> "$GITHUB_OUTPUT"
+      - name: Validate private locations without retaining responses
+        if: steps.phase.outputs.phase == 'private-locations'
+        run: node scripts/sync-season-data.js --year 2026 --phase private-locations > "$RUNNER_TEMP/private-location-validation.json"
+      - name: Upload count-only private validation
+        if: steps.phase.outputs.phase == 'private-locations'
+        uses: actions/upload-artifact@v4
+        with:
+          name: private-location-validation-${{ github.run_id }}
+          path: ${{ runner.temp }}/private-location-validation.json
+          if-no-files-found: error
+          retention-days: 14
+      - name: Build sanitized authoritative snapshot
+        if: steps.phase.outputs.phase != 'private-locations'
+        run: node scripts/sync-season-data.js --year 2026 --phase "${{ steps.phase.outputs.phase }}"
+      - name: Prove no embargo leakage
+        if: steps.phase.outputs.phase != 'private-locations'
+        run: node scripts/verify-season-artifact.js --year 2026 --phase "${{ steps.phase.outputs.phase }}"
+      - name: Open or update review PR
+        if: steps.phase.outputs.phase != 'private-locations'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: automation/2026-data-refresh
+          delete-branch: true
+          commit-message: 'data: refresh sanitized 2026 snapshot (${{ steps.phase.outputs.phase }})'
+          title: 'data: review 2026 ${{ steps.phase.outputs.phase }} snapshot'
+          body: |
+            Automated authoritative refresh. This PR never deploys directly.
+
+            Phase: `${{ steps.phase.outputs.phase }}`
+            Review `public/data/2026/metadata.json` for source-count drift, duplicate rows, unresolved references, locations, GIS revision, and hashes.
+          labels: data-refresh,2026

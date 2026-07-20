@@ -102,7 +102,7 @@ export class BRCPathfinder {
       // Step 3: Convert node path to coordinate path and directions
       const route = this._buildRouteFromPath(nodePath, startCoords, endCoords, travelMode)
       
-      console.log(`✅ Route found: ${route.distance}ft, ${Math.round(route.duration / 60)}min, ${route.segments.length} segments`)
+      console.log(`✅ Route found: ${route.distance}ft, ${route.duration}min, ${route.segments.length} segments`)
       
       return route
       
@@ -552,7 +552,7 @@ export class BRCPathfinder {
       type: 'street_following',
       coordinates: [startCoords, endCoords],
       distance: Math.round(distance * 3.28084),
-      duration: Math.round(duration),
+      duration: Math.max(1, Math.round(duration / 60)),
       segments: [{
         type: 'same_intersection',
         coordinates: [startCoords, endCoords],

@@ -369,8 +369,7 @@ const availableMembers = computed(() => {
   }))
 })
 
-// Watch for changes in selected item to split datetime fields
-watch(selectedScheduleItem, (newItem) => {
+const initializeSelectedDateFields = newItem => {
   if (newItem && newItem.start_datetime) {
     // Split datetime into separate date and time fields for easier editing
     const startDate = new Date(newItem.start_datetime)
@@ -387,7 +386,10 @@ watch(selectedScheduleItem, (newItem) => {
       }
     }
   }
-}, { immediate: true })
+}
+
+// Reactive changes run after initialization; the initial pass happens on mount.
+watch(selectedScheduleItem, initializeSelectedDateFields)
 
 // Methods
 const toggleCollapse = () => {
@@ -609,6 +611,7 @@ onMounted(() => {
   if (saved !== null) {
     isCollapsed.value = saved === 'true'
   }
+  initializeSelectedDateFields(selectedScheduleItem.value)
 })
 </script>
 

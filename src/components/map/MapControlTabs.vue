@@ -32,22 +32,22 @@
       <!-- Content Tab -->
       <div v-show="activeTab === 'content'" class="tab-panel">
         <!-- Location Data Warning -->
-        <div v-if="!locationsAvailable" class="location-warning">
+        <div v-if="!campLocationsAvailable || !artLocationsAvailable" class="location-warning">
           <div class="warning-title">📍 Location Data Not Yet Released for {{ year }}</div>
           <div v-if="timeUntilRelease" class="warning-countdown">
             Available in {{ timeUntilRelease }}
           </div>
           <div class="warning-note">
-            Camp locations visible first Sunday of build week (12:01am)
+            Camp placements publish August 23; art placements publish August 30.
           </div>
         </div>
         
-        <label class="control-item" :class="{ disabled: !locationsAvailable }">
-          <input type="checkbox" v-model="controls.showCamps" @change="updateControls" :disabled="!locationsAvailable">
+        <label class="control-item" :class="{ disabled: !campLocationsAvailable }">
+          <input type="checkbox" v-model="controls.showCamps" @change="updateControls" :disabled="!campLocationsAvailable">
           <span class="control-label">🏠 Camps</span>
         </label>
-        <label class="control-item" :class="{ disabled: !locationsAvailable }">
-          <input type="checkbox" v-model="controls.showArt" @change="updateControls" :disabled="!locationsAvailable">
+        <label class="control-item" :class="{ disabled: !artLocationsAvailable }">
+          <input type="checkbox" v-model="controls.showArt" @change="updateControls" :disabled="!artLocationsAvailable">
           <span class="control-label">🎨 Art</span>
         </label>
         <label class="control-item" :class="{ disabled: !locationsAvailable }">
@@ -181,14 +181,14 @@
       
       <!-- Display Tab -->
       <div v-show="activeTab === 'display'" class="tab-panel">
-        <label class="control-item" :class="{ disabled: year !== '2025' }">
+        <label class="control-item" :class="{ disabled: !hasGis }">
           <input 
             type="checkbox" 
             v-model="controls.showBasemap" 
             @change="updateControls"
-            :disabled="year !== '2025'"
+            :disabled="!hasGis"
           >
-          <span class="control-label">🗺️ Base Map {{ year !== '2025' ? '(2025 only)' : '' }}</span>
+          <span class="control-label">🗺️ Base Map {{ !hasGis ? '(unavailable)' : '' }}</span>
         </label>
         <label class="control-item">
           <input type="checkbox" v-model="controls.cityAligned" @change="updateControls">
@@ -258,6 +258,7 @@ import { ref, reactive, onMounted, watch, nextTick, computed } from 'vue'
 import { canShowLocations } from '@/stores/globalState'
 import { useSoonAndNear } from '@/composables/useSoonAndNear'
 import BaseButton from '@/components/ui/BaseButton.vue'
+import { getSeason } from '@/config/seasons'
 
 const props = defineProps({
   isMobile: Boolean,
@@ -313,7 +314,7 @@ const controls = reactive({
   showPlazas: true,
   showCPNs: false,
   // Display controls
-  showBasemap: props.year === '2025', // Default to true for 2025
+  showBasemap: getSeason(props.year).map.gisFiles.length > 0,
   cityAligned: false,
   rotationAngle: 0,
   showLegend: true,
@@ -322,18 +323,20 @@ const controls = reactive({
 })
 
 // Check if locations are available for the current year
-const locationsAvailable = computed(() => {
-  return canShowLocations(props.year)
-})
+const campLocationsAvailable = computed(() => canShowLocations(props.year, 'camp'))
+const artLocationsAvailable = computed(() => canShowLocations(props.year, 'art'))
+const locationsAvailable = computed(() => campLocationsAvailable.value || artLocationsAvailable.value)
+const hasGis = computed(() => getSeason(props.year).map.gisFiles.length > 0)
+const controlStateKey = computed(() => `mapControlState:${props.year}:${getSeason(props.year).map.gisRevision}`)
 
 // Calculate time until location data is released
 const timeUntilRelease = computed(() => {
-  if (props.year !== '2025' || locationsAvailable.value) {
+  if (props.year !== '2026' || campLocationsAvailable.value) {
     return null
   }
   
   const now = new Date()
-  const buildWeekSunday = new Date(2025, 7, 17, 0, 1) // Aug 17, 2025 at 12:01am
+  const buildWeekSunday = new Date(getSeason(props.year).locationRelease.camp)
   
   if (now >= buildWeekSunday) {
     return null
@@ -367,14 +370,13 @@ watch(locationsAvailable, (available) => {
 // Watch for year changes to update location-based controls
 watch(() => props.year, (newYear) => {
   // Handle location-based controls
-  if (!canShowLocations(newYear)) {
-    controls.showCamps = false
+  if (!canShowLocations(newYear, 'camp')) controls.showCamps = false
+  if (!canShowLocations(newYear, 'art')) {
     controls.showArt = false
     controls.showEvents = false
   }
   
-  // Handle basemap control (only available for 2025)
-  if (newYear !== '2025' && controls.showBasemap) {
+  if (getSeason(newYear).map.gisFiles.length === 0 && controls.showBasemap) {
     controls.showBasemap = false
   }
   
@@ -383,21 +385,20 @@ watch(() => props.year, (newYear) => {
 
 // Load saved state from localStorage
 onMounted(() => {
-  const savedState = localStorage.getItem('mapControlState')
+  const savedState = localStorage.getItem(controlStateKey.value)
   if (savedState) {
     try {
       const parsed = JSON.parse(savedState)
       Object.assign(controls, parsed)
       
       // Check location availability and disable controls if needed
-      if (!canShowLocations(props.year)) {
-        controls.showCamps = false
+      if (!canShowLocations(props.year, 'camp')) controls.showCamps = false
+      if (!canShowLocations(props.year, 'art')) {
         controls.showArt = false
         controls.showEvents = false
       }
       
-      // Disable basemap for non-2025 years
-      if (props.year !== '2025' && controls.showBasemap) {
+      if (!hasGis.value && controls.showBasemap) {
         controls.showBasemap = false
       }
       
@@ -426,7 +427,7 @@ onMounted(() => {
 // Save state changes
 const updateControls = () => {
   // Save to localStorage
-  localStorage.setItem('mapControlState', JSON.stringify(controls))
+  localStorage.setItem(controlStateKey.value, JSON.stringify(controls))
   
   // Emit changes to parent
   emit('update:controls', { ...controls })
@@ -465,7 +466,7 @@ const setRotation = (angle) => {
   controls.rotationAngle = angle
   
   // Save to localStorage
-  localStorage.setItem('mapControlState', JSON.stringify(controls))
+  localStorage.setItem(controlStateKey.value, JSON.stringify(controls))
   
   // Emit ONLY the rotationAngle change to avoid triggering toggleRotation
   emit('update:controls', { rotationAngle: angle })

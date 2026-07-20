@@ -1,0 +1,53 @@
+{
+  "year": "2026",
+  "phase": "content-public",
+  "fetchedAt": "2026-07-20T14:51:32.791Z",
+  "sourceCounts": {
+    "camps": 1201,
+    "art": 323,
+    "eventRows": 2231,
+    "uniqueEvents": 2205
+  },
+  "duplicateEventRows": 26,
+  "rawLocationCounts": {
+    "camp": 0,
+    "art": 0
+  },
+  "missingCampReferences": [
+    "a1XVI00000FJ1B32AL"
+  ],
+  "missingArtReferences": [],
+  "publishedCounts": {
+    "camps": 1201,
+    "art": 323,
+    "events": 2205
+  },
+  "publishedLocationCounts": {
+    "camp": 0,
+    "art": 0,
+    "enrichedEvents": 0
+  },
+  "source": {
+    "api": "https://api.burningman.org/api",
+    "gisRepository": "https://raw.githubusercontent.com/burningmantech/innovate-GIS-data",
+    "gisRevision": "3c69f43ef58a55f6cb5f5c6c99a64f4ec5966145"
+  },
+  "locationRelease": {
+    "developer": "2026-08-09T00:00:00-07:00",
+    "camp": "2026-08-23T00:00:00-07:00",
+    "art": "2026-08-30T00:00:00-07:00"
+  },
+  "hashes": {
+    "camps.json": "8e8763721d5662a7826987f0922c218dfd61c7c370f1dbc8cef7f6e30a74f2d5",
+    "art.json": "de96b3be50d00e01b167e5280adff015d3b0030b9b4402adf94473ee0d48053f",
+    "events.json": "718a2c004e3880f044b2761bad8dee86fabc5ae6b45aa44c1d137866d1bfb665",
+    "gis/city_blocks.geojson": "b789e6114c5975c28fb1a8b9c8ba77e7065b5c3532730244df0039aa2f99d877",
+    "gis/cpns.geojson": "46f032be87308d35d8ec0b35b044e2da2533501c373f92662669e66261ba3454",
+    "gis/dmz.geojson": "b64b7f0f484026970077963e4962909ce6a0c1852e9715fa62260c3dc198029b",
+    "gis/plazas.geojson": "9f3a5fba2f8070d3b7357f627699805287177108b590c9ce95b62150f4a52e20",
+    "gis/street_lines.geojson": "10ce8fdb42880e170c6efd272a1b91399e5bab6e0454a014c93ff22157e6032a",
+    "gis/street_outlines.geojson": "97b728754fad1d11ab180fe43786813aa88df5ac2a5a1e76dddeabb0f1f6d885",
+    "gis/toilets.geojson": "a230c385d3844d5dc11fa4db979fcf38d0d858a4184d7fa4de71d8d4f2f4c64b",
+    "gis/trash_fence.geojson": "0f4d55b3078e76147e1a57c01f642cc4e83684c2e77cc3400437a1a0e61a782b"
+  }
+}

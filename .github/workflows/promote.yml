@@ -1,0 +1,98 @@
+name: Promote exact PWA commit
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit_sha:
+        description: Full 40-character commit SHA from main
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ok-offline-production
+  cancel-in-progress: false
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.commit_sha }}
+          fetch-depth: 0
+      - name: Verify exact main-branch commit
+        shell: bash
+        run: |
+          [[ '${{ inputs.commit_sha }}' =~ ^[0-9a-f]{40}$ ]]
+          test "$(git rev-parse HEAD)" = '${{ inputs.commit_sha }}'
+          git fetch origin main
+          git merge-base --is-ancestor '${{ inputs.commit_sha }}' origin/main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npx playwright install --with-deps chromium webkit
+      - run: npm run test:browser
+        env:
+          VITE_BUILD_REVISION: ${{ inputs.commit_sha }}
+      - name: Build promotable release
+        id: release
+        shell: bash
+        env:
+          VITE_BUILD_REVISION: ${{ inputs.commit_sha }}
+        run: |
+          npm run build
+          version="$(node -p "require('./package.json').version")"
+          exact_sha="$(git rev-parse HEAD)"
+          release_id="${version}-${exact_sha:0:12}"
+          test "$(node -p "require('./dist/release.json').commit")" = "$exact_sha"
+          node scripts/verify-season-artifact.js --year 2026 --phase "$(node -p "require('./public/data/2026/metadata.json').phase")"
+          echo "release_id=$release_id" >> "$GITHUB_OUTPUT"
+      - name: Upload immutable release directory
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          source: dist/*
+          target: /var/www/offline.oknotok.com/releases/${{ steps.release.outputs.release_id }}
+          strip_components: 1
+          overwrite: false
+      - name: Atomically switch Caddy-served symlink
+        uses: appleboy/ssh-action@v1.2.0
+        env:
+          RELEASE_ID: ${{ steps.release.outputs.release_id }}
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          envs: RELEASE_ID
+          script: |
+            set -eu
+            root=/var/www/offline.oknotok.com
+            test -f "$root/releases/$RELEASE_ID/index.html"
+            test -f "$root/releases/$RELEASE_ID/release.json"
+            ln -sfn "releases/$RELEASE_ID" "$root/.current-$RELEASE_ID"
+            mv -Tf "$root/.current-$RELEASE_ID" "$root/current"
+            test "$(readlink "$root/current")" = "releases/$RELEASE_ID"
+      - name: Verify public release identity and data boundary
+        env:
+          EXPECTED_SHA: ${{ inputs.commit_sha }}
+        run: |
+          test "$(curl --fail --silent --show-error https://offline.oknotok.com/release.json | jq -r .commit)" = "$EXPECTED_SHA"
+          curl --fail --silent --show-error --head https://offline.oknotok.com/data/2026/metadata.json | grep -qi '^content-type: application/json'
+          test "$(curl --fail --silent --show-error https://offline.oknotok.com/data/2026/camps.json | jq length)" -gt 1000
+          test "$(curl --fail --silent --show-error https://offline.oknotok.com/data/2026/art.json | jq length)" -gt 250
+          test "$(curl --fail --silent --show-error https://offline.oknotok.com/data/2026/events.json | jq length)" -gt 1800
+      - uses: actions/upload-artifact@v4
+        with:
+          name: promoted-${{ steps.release.outputs.release_id }}
+          path: dist/
+          if-no-files-found: error
+          retention-days: 90

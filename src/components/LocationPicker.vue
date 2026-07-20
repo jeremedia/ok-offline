@@ -136,7 +136,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 
 const props = defineProps({
   modelValue: {
@@ -220,8 +220,7 @@ const getCurrentLocation = async () => {
   }
 }
 
-// Initialize from modelValue
-watch(() => props.modelValue, (value) => {
+const initializeFromModel = value => {
   if (value && value.intersection) {
     mode.value = 'intersection'
     intersection.value = {
@@ -236,7 +235,11 @@ watch(() => props.modelValue, (value) => {
       longitude: value.gps_longitude
     }
   }
-}, { immediate: true })
+}
+
+watch(() => props.modelValue, initializeFromModel)
+
+onMounted(() => initializeFromModel(props.modelValue))
 </script>
 
 <style scoped>

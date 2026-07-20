@@ -2,7 +2,7 @@ name: Notify on Deployment Failure
 
 on:
   workflow_run:
-    workflows: ["Deploy to Production"]
+    workflows: ["Promote exact PWA commit", "Roll back PWA release"]
     types:
       - completed
 

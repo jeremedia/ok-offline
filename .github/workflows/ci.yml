@@ -1,0 +1,58 @@
+name: Verify PWA
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - name: Build exact revision
+        run: npm run build
+        env:
+          VITE_BUILD_REVISION: ${{ github.sha }}
+      - name: Verify release metadata
+        run: |
+          test "$(node -p "require('./dist/release.json').commit")" = "${GITHUB_SHA}"
+          test "$(node -p "require('./dist/release.json').version")" = "$(node -p "require('./package.json').version")"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ok-offline-${{ github.sha }}
+          path: dist/
+          if-no-files-found: error
+          retention-days: 30
+
+  browser-smoke:
+    needs: test-and-build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium webkit
+      - run: npm run test:browser
+        env:
+          VITE_BUILD_REVISION: ${{ github.sha }}
+      - name: Upload browser evidence on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-failure-${{ github.sha }}
+          path: output/playwright/
+          if-no-files-found: ignore
+          retention-days: 14

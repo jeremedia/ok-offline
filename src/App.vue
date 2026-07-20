@@ -15,7 +15,7 @@
     <AppHeader 
       :selected-year="selectedYear"
       :is-online="isOnline"
-      @update:selected-year="selectedYear = $event"
+      @update:selected-year="handleYearSelection"
       @navigate="handleHeaderNavigate"
       @toggle-menu="toggleMobileMenu"
     />
@@ -24,7 +24,7 @@
       :show="showMobileMenu"
       :selected-year="selectedYear"
       @close="closeMobileMenu"
-      @update:selected-year="selectedYear = $event"
+      @update:selected-year="handleYearSelection"
     />
     
     <main :class="{ 
@@ -70,6 +70,7 @@ import packageJson from '../package.json'
 import { getCurrentTheme, applyTheme } from './services/themeService'
 import { availableThemes as storeAvailableThemes } from './stores/themeStore'
 import ThemeEditor from './components/ThemeEditor.vue'
+import { CURRENT_YEAR, SEASON_DEFAULTS, isSupportedYear } from './config/seasons'
 
 const route = useRoute()
 const router = useRouter()
@@ -79,7 +80,7 @@ const appVersion = packageJson.version
 
 // Toast notification ref
 const toastRef = ref(null)
-const selectedYear = ref('2024')
+const selectedYear = ref(CURRENT_YEAR)
 const isOnline = ref(navigator.onLine)
 const lastSyncTime = ref(null)
 const showOnboarding = ref(false)
@@ -318,10 +319,23 @@ onMounted(async () => {
   
   // APP PATTERN: Handle initial year detection here (not in watch immediate)
   // Check route for year parameter and update selectedYear if found
-  if (route.params?.year && ['2023', '2024', '2025'].includes(route.params.year)) {
+  const savedYear = localStorage.getItem('selectedYear')
+  const hasApplied2026Default = localStorage.getItem(SEASON_DEFAULTS.upgradeMarker) === 'true'
+  if (route.params?.year && isSupportedYear(route.params.year)) {
     selectedYear.value = route.params.year
     localStorage.setItem('selectedYear', route.params.year)
+    if (!hasApplied2026Default && route.params.year === CURRENT_YEAR) {
+      localStorage.setItem(SEASON_DEFAULTS.upgradeMarker, 'true')
+    }
     updateLastSyncTime()
+  } else if (!hasApplied2026Default) {
+    // Move every existing installation to the new current edition exactly once.
+    // The IndexedDB compatibility name and all stored years remain untouched.
+    selectedYear.value = CURRENT_YEAR
+    localStorage.setItem('selectedYear', CURRENT_YEAR)
+    localStorage.setItem(SEASON_DEFAULTS.upgradeMarker, 'true')
+  } else if (savedYear && isSupportedYear(savedYear)) {
+    selectedYear.value = savedYear
   }
   
   // Delay onboarding check slightly to ensure loading screen shows first
@@ -350,22 +364,12 @@ onUnmounted(() => {
   }
 })
 
-// Load saved year from localStorage (default to 2024)
-const savedYear = localStorage.getItem('selectedYear')
-if (savedYear && ['2023', '2024', '2025'].includes(savedYear)) {
-  selectedYear.value = savedYear
-} else {
-  // Default to 2024 if no saved year
-  selectedYear.value = '2024'
-  localStorage.setItem('selectedYear', '2024')
-}
-
 // Update year from route  
 // IMPORTANT: No { immediate: true } - follows app-wide pattern
 // - onMounted() handles initial year detection (see below)
 // - watch() handles reactive route changes only
 watch(() => route.params?.year, (year) => {
-  if (year && ['2023', '2024', '2025'].includes(year)) {
+  if (year && isSupportedYear(year)) {
     selectedYear.value = year
     localStorage.setItem('selectedYear', year)
     updateLastSyncTime() // Update sync time when year changes
@@ -376,10 +380,15 @@ const navigate = (view) => {
   router.push(`/${selectedYear.value}/${view}`)
 }
 
-const onYearChange = () => {
-  localStorage.setItem('selectedYear', selectedYear.value)
-  const currentView = route.name || 'map'
-  router.push(`/${selectedYear.value}/${currentView}`)
+const handleYearSelection = year => {
+  if (!isSupportedYear(year)) return
+  selectedYear.value = year
+  localStorage.setItem('selectedYear', year)
+  if (route.params?.year && route.name) {
+    router.push({ name: route.name, params: { ...route.params, year } })
+  } else {
+    router.push(`/${year}/map`)
+  }
 }
 
 const isActive = (view) => {

@@ -3,6 +3,7 @@ import { useRouter } from 'vue-router'
 import { getFromCache } from '../services/storage'
 import { syncYear, syncType } from '../services/staticDataSync'
 import { useToast } from './useToast'
+import { CURRENT_YEAR } from '../config/seasons'
 
 export function useAutoSync() {
   const router = useRouter()
@@ -58,7 +59,7 @@ export function useAutoSync() {
    * Check if any data exists at all
    * If not, sync all data for the default year
    */
-  const checkAndAutoSyncAll = async (year = '2024') => {
+  const checkAndAutoSyncAll = async (year = CURRENT_YEAR) => {
     try {
       // Check if we have any data
       const camps = await getFromCache('camp', year)

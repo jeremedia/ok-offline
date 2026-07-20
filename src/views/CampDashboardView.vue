@@ -5,7 +5,7 @@
         <div class="header-nav">
           <div class="header-titles">
             <h2 class="view-title">OKNOTOK Camp Management</h2>
-            <p class="view-subtitle">Team coordination for Burning Man 2025</p>
+            <p class="view-subtitle">Team coordination for {{ year }}</p>
           </div>
           <div class="header-actions">
             <BaseButton 
@@ -222,7 +222,7 @@ watch(() => props.slug, (newSlug) => {
   if (newSlug) {
     loadCamp(newSlug)
   }
-}, { immediate: true })
+})
 
 // Load on mount
 onMounted(() => {
@@ -231,13 +231,12 @@ onMounted(() => {
   }
 })
 
-// Computed camp location - for 2025 it's at 3:30 & A
 const campLocation = computed(() => {
-  // OKNOTOK is at 3:30 & A for 2025
-  if (props.slug === 'oknotok' || camp.value?.name === 'OKNOTOK') {
+  // Preserve the historical placement without carrying it into 2026.
+  if (props.year === '2025' && (props.slug === 'oknotok' || camp.value?.name === 'OKNOTOK')) {
     return '3:30 & A'
   }
-  return camp.value?.location || 'Location TBD'
+  return camp.value?.location || camp.value?.location_string || 'Placement not set'
 })
 
 // Computed properties for team member display
