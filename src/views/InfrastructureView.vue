@@ -109,11 +109,12 @@ import BaseButton from '../components/ui/BaseButton.vue'
 import ButtonGroup from '../components/ui/ButtonGroup.vue'
 import InfrastructureCard from '../components/infrastructure/InfrastructureCard.vue'
 import { 
-  getAllInfrastructure, 
+  getAllInfrastructureForYear,
   getCategories, 
   searchInfrastructure,
   sortByDistance as sortItemsByDistance
 } from '../services/infrastructure'
+import { loadAllGISData } from '../services/gisData'
 
 const props = defineProps({
   year: {
@@ -150,7 +151,7 @@ const totalCount = computed(() => allItems.value.length)
 // Filtered items based on search and category
 const filteredItems = computed(() => {
   let items = searchQuery.value 
-    ? searchInfrastructure(searchQuery.value)
+    ? searchInfrastructure(searchQuery.value, allItems.value)
     : allItems.value
     
   if (selectedCategory.value) {
@@ -209,9 +210,15 @@ const toggleIntro = () => {
 }
 
 // Load data on mount
-onMounted(() => {
-  allItems.value = getAllInfrastructure()
-  categories.value = getCategories()
+onMounted(async () => {
+  let gisData = null
+  try {
+    gisData = await loadAllGISData(Number(props.year))
+  } catch (error) {
+    console.error(`Failed to load ${props.year} infrastructure GIS locations:`, error)
+  }
+  allItems.value = getAllInfrastructureForYear(Number(props.year), gisData?.cpns)
+  categories.value = getCategories(allItems.value)
   
   // Check for user location
   if (hasLocation.value) {

@@ -5,6 +5,7 @@
 
 import infrastructureData from '../data/infrastructure.json'
 import { API_URLS } from '../config'
+import { applyOfficialInfrastructureLocations } from './infrastructureLocations'
 
 // Cache management
 const CACHE_KEY = 'infrastructure_data'
@@ -62,6 +63,14 @@ export function getAllInfrastructure() {
   return infrastructureCache || infrastructureData.infrastructure || []
 }
 
+/**
+ * Return infrastructure with season-specific official GIS locations applied.
+ * The source records are cloned; cached and bundled historical data is not mutated.
+ */
+export function getAllInfrastructureForYear(year, cpnData) {
+  return applyOfficialInfrastructureLocations(getAllInfrastructure(), cpnData, year)
+}
+
 // Cache helper functions
 function getCachedData() {
   try {
@@ -105,6 +114,10 @@ export function getInfrastructureById(id) {
   return items.find(item => item.id === id) || null
 }
 
+export function getInfrastructureByIdForYear(id, year, cpnData) {
+  return getAllInfrastructureForYear(year, cpnData).find(item => item.id === id) || null
+}
+
 /**
  * Get infrastructure by category
  * @param {string} category - Category to filter by (civic, services, commerce, infrastructure)
@@ -119,8 +132,7 @@ export function getInfrastructureByCategory(category) {
  * Get all categories with counts
  * @returns {Array} Array of category objects with name and count
  */
-export function getCategories() {
-  const items = getAllInfrastructure()
+export function getCategories(items = getAllInfrastructure()) {
   const categories = {}
   
   items.forEach(item => {
@@ -158,15 +170,15 @@ export function getCategoryDisplayName(category) {
 /**
  * Search infrastructure by text
  * @param {string} searchText - Text to search for
+ * @param {Array} items - Optional season-hydrated source items
  * @returns {Array} Array of matching infrastructure objects
  */
-export function searchInfrastructure(searchText) {
+export function searchInfrastructure(searchText, items = getAllInfrastructure()) {
   if (!searchText || searchText.trim() === '') {
-    return getAllInfrastructure()
+    return items
   }
   
   const search = searchText.toLowerCase()
-  const items = getAllInfrastructure()
   
   return items.filter(item => {
     return (

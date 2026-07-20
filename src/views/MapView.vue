@@ -128,6 +128,10 @@ import { getFromCache } from '../services/storage'
 import { isFavorite } from '../services/favorites'
 import { getItemName, getItemLocation, getNextOccurrence, isHappeningNow } from '../utils'
 import { brcAddressToLatLon, getSpecialLocationCoords, calculateCityAlignmentAngle, analyzeCityGeometry } from '../utils/geocoding'
+import {
+  getInfrastructureCPNNames,
+  resolveInfrastructureCoordinates
+} from '../services/infrastructureLocations'
 import { 
   initializeGISData, 
   getStreetLines, 
@@ -860,6 +864,7 @@ let items = {
   art: [],
   events: []
 }
+const reportedMissingInfrastructure = new Set()
 
 // Function to check if we're at default view
 const checkDefaultView = () => {
@@ -1405,122 +1410,124 @@ const addInfrastructureMarkers = () => {
     return
   }
   
+  const markerYear = Number(year.value)
+  const cpnData = getCPNs(markerYear)
   const specialLocations = [
     { 
       name: 'The Man', 
-      coords: getSeasonCenter(year.value),
+      legacyCoords: getSeasonCenter(year.value),
       icon: '🔥',
       description: 'The heart of Black Rock City - our iconic effigy and gathering place',
       controlKey: 'showTheMan'
     },
     { 
       name: 'Center Camp', 
-      coords: getSpecialLocationCoords('CENTER CAMP'), 
+      legacyCoords: getSpecialLocationCoords('CENTER CAMP'),
       icon: '⛺',
       description: 'Central hub with cafe, performances, and community services',
       controlKey: 'showCenterCamp'
     },
     { 
       name: 'Temple', 
-      coords: getSpecialLocationCoords('TEMPLE'), 
+      legacyCoords: getSpecialLocationCoords('TEMPLE'),
       icon: '🏛',
       description: 'Sacred space for reflection, remembrance, and healing',
       controlKey: 'showTemple'
     },
     { 
       name: 'Airport', 
-      coords: getSpecialLocationCoords('AIRPORT'), 
+      legacyCoords: getSpecialLocationCoords('AIRPORT'),
       icon: '✈️',
       description: 'Black Rock City Municipal Airport - scenic flights and aviation services',
       controlKey: 'showAirport'
     },
     {
       name: 'Rampart',
-      coords: getSpecialLocationCoords('RAMPART'),
+      legacyCoords: getSpecialLocationCoords('RAMPART'),
       icon: '🏥',
       description: 'Field hospital - Emergency medical services',
       controlKey: 'showMedical'
     },
     {
       name: 'Station 3',
-      coords: [40.779913445324667, -119.19410428430447],
+      legacyCoords: [40.779913445324667, -119.19410428430447],
       icon: '🏥',
       description: 'Emergency services station - 3:00 sector',
       controlKey: 'showMedical'
     },
     {
       name: 'Station 6',
-      coords: [40.780509618833086, -119.20652384845459],
+      legacyCoords: [40.780509618833086, -119.20652384845459],
       icon: '🏥',
       description: 'Emergency services station - 6:00 sector',
       controlKey: 'showMedical'
     },
     {
       name: 'Station 9',
-      coords: [40.794090422669733, -119.21197232230189],
+      legacyCoords: [40.794090422669733, -119.21197232230189],
       icon: '🏥',
       description: 'Emergency services station - 9:00 sector',
       controlKey: 'showMedical'
     },
     {
       name: 'Ranger HQ',
-      coords: getSpecialLocationCoords('RANGER HQ'),
+      legacyCoords: getSpecialLocationCoords('RANGER HQ'),
       icon: '🎯',
       description: 'Black Rock Rangers headquarters',
       controlKey: 'showRangers'
     },
     {
       name: 'Ranger Station Berlin',
-      coords: [40.780198273707583, -119.19373531464844],
+      legacyCoords: [40.780198273707583, -119.19373531464844],
       icon: '🎯',
       description: 'Black Rock Rangers station - 3:00 sector',
       controlKey: 'showRangers'
     },
     {
       name: 'Ranger Station Tokyo', 
-      coords: [40.793802980792094, -119.21231514202253],
+      legacyCoords: [40.793802980792094, -119.21231514202253],
       icon: '🎯',
       description: 'Black Rock Rangers station - 9:00 sector',
       controlKey: 'showRangers'
     },
     {
       name: 'DPW Depot',
-      coords: getSpecialLocationCoords('DPOW'),
+      legacyCoords: getSpecialLocationCoords('DPOW'),
       icon: '🔧',
       description: 'Department of Public Works - city infrastructure and operations',
       controlKey: 'showDPW'
     },
     {
       name: 'DMZ',
-      coords: [40.801877800966253, -119.19912198324673],
+      legacyCoords: [40.801877800966253, -119.19912198324673],
       icon: '🎵',
       description: 'Deep Playa Music Zone - sound camps and art cars',
       controlKey: 'showDMZ'
     },
     {
       name: 'Hell Station',
-      coords: [40.803639907073524, -119.20864863758413],
+      legacyCoords: [40.803639907073524, -119.20864863758413],
       icon: '⛽',
       description: 'Fuel depot for mutant vehicles and art cars',
       controlKey: 'showHellStation'
     },
     {
       name: 'Arctica Center Camp',
-      coords: [40.781994283666222, -119.21188689559813],
+      legacyCoords: [40.781994283666222, -119.21188689559813],
       icon: '🧊',
       description: 'Ice sales - Center Camp area',
       controlKey: 'showArctica'
     },
     {
       name: 'Ice Cubed (Arctica 3)',
-      coords: [40.777479126910642, -119.19003308126543],
+      legacyCoords: [40.777479126910642, -119.19003308126543],
       icon: '🧊',
       description: 'Ice sales - 3:00 sector',
       controlKey: 'showArctica'
     },
     {
       name: 'Ice Nine (Arctica 9)',
-      coords: [40.796433491680219, -119.21595443147025],
+      legacyCoords: [40.796433491680219, -119.21595443147025],
       icon: '🧊',
       description: 'Ice sales - 9:00 sector',
       controlKey: 'showArctica'
@@ -1528,7 +1535,7 @@ const addInfrastructureMarkers = () => {
     // Fence Points
     {
       name: 'Point 1',
-      coords: [40.783393446220742, -119.23273810046453],
+      legacyCoords: [40.783393446220742, -119.23273810046453],
       icon: '1️⃣',
       description: 'Pentagon fence perimeter point',
       controlKey: 'showPoints',
@@ -1536,7 +1543,7 @@ const addInfrastructureMarkers = () => {
     },
     {
       name: 'Point 2',
-      coords: [40.80735944960697, -119.21663410121627],
+      legacyCoords: [40.80735944960697, -119.21663410121627],
       icon: '2️⃣',
       description: 'Pentagon fence perimeter point',
       controlKey: 'showPoints',
@@ -1544,7 +1551,7 @@ const addInfrastructureMarkers = () => {
     },
     {
       name: 'Point 3',
-      coords: [40.803105452153233, -119.18168009473446],
+      legacyCoords: [40.803105452153233, -119.18168009473446],
       icon: '3️⃣',
       description: 'Pentagon fence perimeter point',
       controlKey: 'showPoints',
@@ -1552,7 +1559,7 @@ const addInfrastructureMarkers = () => {
     },
     {
       name: 'Point 4',
-      coords: [40.776562450338268, -119.17619408999123],
+      legacyCoords: [40.776562450338268, -119.17619408999123],
       icon: '4️⃣',
       description: 'Pentagon fence perimeter point',
       controlKey: 'showPoints',
@@ -1560,7 +1567,7 @@ const addInfrastructureMarkers = () => {
     },
     {
       name: 'Point 5',
-      coords: [40.764368446673565, -119.20773209353284],
+      legacyCoords: [40.764368446673565, -119.20773209353284],
       icon: '5️⃣',
       description: 'Pentagon fence perimeter point',
       controlKey: 'showPoints',
@@ -1572,8 +1579,15 @@ const addInfrastructureMarkers = () => {
     // Check if this specific infrastructure is enabled
     if (!mapControls[loc.controlKey]) return
     
-    if (loc.coords) {
-      const marker = L.marker(loc.coords, {
+    const coords = resolveInfrastructureCoordinates({
+      cpnData,
+      infrastructureName: loc.name,
+      year: markerYear,
+      fallback: loc.legacyCoords
+    })
+
+    if (coords) {
+      const marker = L.marker(coords, {
         icon: L.divIcon({
           className: loc.isPoint ? 'point-marker' : 'infrastructure-marker',
           html: `<div class="marker-icon">${loc.icon}</div>`,
@@ -1589,6 +1603,9 @@ const addInfrastructureMarkers = () => {
         </div>
       `)
       markersLayer.addLayer(marker)
+    } else if (markerYear >= 2026 && !reportedMissingInfrastructure.has(loc.name)) {
+      reportedMissingInfrastructure.add(loc.name)
+      console.warn(`Skipping ${loc.name}: no official ${markerYear} CPN location is available`)
     }
   })
   
@@ -2094,25 +2111,15 @@ const updateGISLayers = () => {
     if (cpnData && cpnData.features) {
       // Infrastructure items that should not be shown as CPNs (already handled by infrastructure layer)
       // Filter out all infrastructure items now shown in infrastructure layer
-      const infrastructureNames = [
-        'The Man', 'The Temple', 'Center Camp', 'Airport', 
-        'DMV', 'Media Mecca', 'Playa Info', 'HEaT', 'DMZ', 'Hell Station',
-        // Medical/Emergency services
-        'Rampart', 'Station 3', 'Station 6', 'Station 9',
-        // Ranger stations
-        'Ranger HQ', 'Ranger Station Berlin', 'Ranger Station Tokyo',
-        // Ice/Arctica locations
-        'Arctica', 'Arctica Center Camp', 'Ice Cubed Arctica 3', 'Ice Nine Arctica',
-        // Fence points
-        'Point 1', 'Point 2', 'Point 3', 'Point 4', 'Point 5'
-      ]
+      const infrastructureNames = getInfrastructureCPNNames()
+      ;['DMV', 'Media Mecca', 'Playa Info', 'HEaT'].forEach(name => infrastructureNames.add(name))
       
       cpnData.features.forEach(feature => {
         if (feature.geometry && feature.geometry.coordinates) {
           const cpnName = feature.properties.NAME || ''
           
           // Skip if this is an infrastructure item or a portal (handled separately)
-          if (infrastructureNames.includes(cpnName) || cpnName.includes('Portal')) {
+          if (infrastructureNames.has(cpnName) || cpnName.includes('Portal')) {
             return
           }
           

@@ -137,7 +137,8 @@ import { ref, onMounted, nextTick, onUnmounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import L from 'leaflet'
 import InfrastructureHero from '../components/infrastructure/InfrastructureHero.vue'
-import { getInfrastructureById } from '../services/infrastructure'
+import { getInfrastructureByIdForYear } from '../services/infrastructure'
+import { loadAllGISData } from '../services/gisData'
 
 const props = defineProps({
   year: {
@@ -264,12 +265,18 @@ const initMap = async () => {
 }
 
 // Lifecycle
-onMounted(() => {
+onMounted(async () => {
   // Scroll to top
   window.scrollTo(0, 0)
   
   // Load infrastructure data
-  item.value = getInfrastructureById(props.id)
+  let gisData = null
+  try {
+    gisData = await loadAllGISData(Number(props.year))
+  } catch (error) {
+    console.error(`Failed to load ${props.year} infrastructure GIS locations:`, error)
+  }
+  item.value = getInfrastructureByIdForYear(props.id, Number(props.year), gisData?.cpns)
   
   // Initialize map when overview tab is active
   if (item.value && activeTab.value === 'overview') {
