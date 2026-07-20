@@ -221,27 +221,26 @@ const router = createRouter({
 const app = createApp(App)
 app.use(router)
 
-// Initialize theme asynchronously before mounting
-initializeTheme().then(() => {
+const mountApp = async () => {
   app.mount('#app')
-}).catch(error => {
-  console.error('Failed to initialize theme:', error)
-  // Mount anyway with fallback
-  app.mount('#app')
-})
+  await nextTick()
 
-// Hide the initial loader once Vue app is mounted
-// But delay slightly more to ensure smooth transition
-nextTick(() => {
-  window.updateLoadingStatus('App ready!', 100)
-  // Check if we need to show onboarding
   const onboardingCompleted = localStorage.getItem('onboarding_completed')
   const message = onboardingCompleted ? 'Loading app...' : 'Preparing first-time setup...'
   window.updateLoadingStatus(message, 100)
-  
+
   setTimeout(() => {
     window.hideInitialLoader()
-  }, 1000) // Increased delay for smoother transition
+  }, 300)
+}
+
+// Theme failure is recoverable; a mount failure is not.
+initializeTheme().catch(error => {
+  console.error('Failed to initialize theme:', error)
+  window.updateLoadingStatus('Using the default theme...', 40)
+}).then(mountApp).catch(error => {
+  console.error('Failed to mount OK-OFFLINE:', error)
+  window.showInitialLoaderError(error, { phase: 'Vue application mount' })
 })
 
 // Register enhanced service worker for better onboarding experience

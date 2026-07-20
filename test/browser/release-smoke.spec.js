@@ -26,10 +26,25 @@ async function waitForServiceWorker(page) {
 test('fresh installation presents the 2026 onboarding policy and disclaimer', async ({ page }) => {
   await page.goto('/')
   await expect(page).toHaveURL(/\/2026\/map$/)
+  await expect(page.locator('#initial-loader')).toBeHidden()
   await expect(page.getByRole('heading', { name: '🔥 Welcome to OK-OFFLINE' })).toBeVisible()
   await expect(page.getByText('This app is not affiliated, endorsed, or verified by Burning Man Project.')).toBeVisible()
   await expect(page.getByText('Official 2026 city layers cached for zero-connectivity use')).toBeVisible()
   await expect(page.getByText('2026 camp placements publish August 23; art placements publish August 30.')).not.toBeVisible()
+})
+
+test('startup failures replace the indefinite spinner with recovery actions', async ({ page }) => {
+  await page.route(/\/assets\/index-[^/]+\.js$/, route => route.abort('failed'))
+  await page.goto('/', { waitUntil: 'domcontentloaded' })
+
+  const loader = page.locator('#initial-loader')
+  await expect(loader).toHaveAttribute('role', 'alert')
+  await expect(page.getByRole('heading', { name: 'OK-OFFLINE couldn’t start' })).toBeVisible()
+  await expect(page.getByText('The application entry module could not be loaded.')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Try again' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Copy details' })).toBeVisible()
+  await expect(page.locator('.loader-spinner')).toBeHidden()
+  await expect(page.getByText('Your downloaded data, favorites, and schedule have not been deleted.')).toBeVisible()
 })
 
 test('2026 onboarding caches official GIS without requesting the 2025 raster package', async ({ page }) => {
@@ -101,7 +116,7 @@ test.describe('desktop release behavior', () => {
 
     await page.goto('/')
     await expect(page).toHaveURL(/\/2026\/map$/)
-    expect(await page.evaluate(() => localStorage.getItem('selectedYear'))).toBe('2026')
+    await expect.poll(() => page.evaluate(() => localStorage.getItem('selectedYear'))).toBe('2026')
     expect(await page.evaluate(() => localStorage.getItem('favorite_probe'))).toBe('preserved')
     const preserved = await page.evaluate(() => new Promise((resolve, reject) => {
       const request = indexedDB.open('bm2025-db', 2)
