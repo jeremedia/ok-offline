@@ -1,4 +1,8 @@
 import { expect, test } from '@playwright/test'
+import { readFileSync } from 'node:fs'
+
+const seasonRegistry = JSON.parse(readFileSync(new URL('../../config/seasons.json', import.meta.url), 'utf8'))
+const MAP_CONTROL_STATE_2026 = `mapControlState:2026:${seasonRegistry.seasons['2026'].map.gisRevision}`
 
 async function setInstalledState(page, values = {}) {
   await page.goto('/manifest.json')
@@ -24,7 +28,21 @@ test('fresh installation presents the 2026 onboarding policy and disclaimer', as
   await expect(page).toHaveURL(/\/2026\/map$/)
   await expect(page.getByRole('heading', { name: '🔥 Welcome to OK-OFFLINE' })).toBeVisible()
   await expect(page.getByText('This app is not affiliated, endorsed, or verified by Burning Man Project.')).toBeVisible()
+  await expect(page.getByText('Official 2026 city layers cached for zero-connectivity use')).toBeVisible()
   await expect(page.getByText('2026 camp placements publish August 23; art placements publish August 30.')).not.toBeVisible()
+})
+
+test('2026 onboarding caches official GIS without requesting the 2025 raster package', async ({ page }) => {
+  const tilePackageRequests = []
+  page.on('request', request => {
+    if (request.url().includes('/tiles/package.zip')) tilePackageRequests.push(request.url())
+  })
+
+  await page.goto('/')
+  await page.getByRole('button', { name: 'Start Data Sync →' }).click()
+  await expect(page.getByText('Official 2026 GIS; raster basemap not yet available')).toBeVisible()
+  await expect(page.getByRole('heading', { name: "You're All Set!" })).toBeVisible({ timeout: 60_000 })
+  expect(tilePackageRequests).toEqual([])
 })
 
 test.describe('desktop release behavior', () => {
@@ -139,6 +157,36 @@ test.describe('desktop release behavior', () => {
     await expect(page.locator('#app .app-title')).toBeVisible()
     expect(await page.evaluate(() => navigator.onLine)).toBe(false)
     await context.setOffline(false)
+  })
+
+  test('2026 disables stale basemap state and hydrates infrastructure without page errors', async ({ page }) => {
+    const pageErrors = []
+    page.on('pageerror', error => pageErrors.push(error.message))
+
+    await setInstalledState(page, {
+      [MAP_CONTROL_STATE_2026]: JSON.stringify({
+        showBasemap: true
+      })
+    })
+    await page.goto('/2026/map')
+
+    await expect(page.locator('.leaflet-marker-icon').first()).toBeVisible()
+    await page.getByRole('button', { name: /Display/ }).click()
+    const basemap = page.getByRole('checkbox', { name: /Base Map/ })
+    await expect(basemap).not.toBeChecked()
+    await expect(basemap).toBeDisabled()
+
+    await page.locator('#year-selector').selectOption('2025')
+    await expect(page).toHaveURL(/\/2025\/map$/)
+    await expect(basemap).toBeChecked()
+    await expect(basemap).toBeEnabled()
+
+    const savedControls = await page.evaluate(
+      key => JSON.parse(localStorage.getItem(key)),
+      MAP_CONTROL_STATE_2026
+    )
+    expect(savedControls.showBasemap).toBe(false)
+    expect(pageErrors).toEqual([])
   })
 
   test('a newly installed worker removes stale build caches', async ({ page }) => {

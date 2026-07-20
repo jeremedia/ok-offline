@@ -58,9 +58,10 @@
       </div>
     </div>
     
-    <!-- Map Tiles Section -->
+    <!-- Historical raster tile section -->
     <div class="settings-section">
-      <h3>🗺️ Offline Map Tiles</h3>
+      <h3>🗺️ Historical 2025 Map Tiles</h3>
+      <p>The 2026 map uses the official offline GIS layers. These optional raster tiles are retained for the 2025 map.</p>
       <div v-if="tileStats" class="tile-stats">
         <div class="stat-row">
           <span class="stat-label">Cached tiles:</span>

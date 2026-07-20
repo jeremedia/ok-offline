@@ -6,7 +6,9 @@ import {
   canPublishLocation,
   getMaximumPublicLocationPhase,
   getSeason,
-  getSeasonDays
+  getSeasonDays,
+  isBasemapAvailable,
+  isBasemapVisibleByDefault
 } from '../src/config/seasons.js'
 
 describe('canonical season policy', () => {
@@ -34,5 +36,12 @@ describe('canonical season policy', () => {
     expect(canPublishLocation('camp', '2026', campRelease)).toBe(true)
     expect(canPublishLocation('art', '2026', campRelease)).toBe(false)
     expect(canPublishLocation('art', '2026', artRelease)).toBe(true)
+  })
+
+  it('keeps the legacy raster basemap off until a season publishes one', () => {
+    expect(isBasemapAvailable('2026')).toBe(false)
+    expect(isBasemapVisibleByDefault('2026')).toBe(false)
+    expect(isBasemapAvailable('2025')).toBe(true)
+    expect(isBasemapVisibleByDefault('2025')).toBe(true)
   })
 })

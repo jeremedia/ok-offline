@@ -118,7 +118,12 @@ import { useRouting } from '../composables/useRouting'
 import L from 'leaflet'
 import 'leaflet-rotate'
 import 'leaflet.offline'
-import { getSeason, getSeasonCenter } from '../config/seasons'
+import {
+  getSeason,
+  getSeasonCenter,
+  isBasemapAvailable,
+  isBasemapVisibleByDefault
+} from '../config/seasons'
 import { getFromCache } from '../services/storage'
 import { isFavorite } from '../services/favorites'
 import { getItemName, getItemLocation, getNextOccurrence, isHappeningNow } from '../utils'
@@ -701,7 +706,7 @@ const mapControls = reactive({
   showPortals: true,
   showCPNs: false, // Hidden by default
   // Display controls
-  showBasemap: false,
+  showBasemap: isBasemapVisibleByDefault(year.value),
   cityAligned: false,
   rotationAngle: 0,
   showLegend: !isMobile.value,
@@ -994,12 +999,8 @@ watch(year, async (newYear, oldYear) => {
   
   console.log(`Year changed from ${oldYear} to ${newYear}, reloading map data...`)
   
-  const hasGis = getSeason(newYear).map.gisFiles.length > 0
-  if (!hasGis && mapControls.showBasemap) {
+  if (!isBasemapAvailable(newYear) && mapControls.showBasemap) {
     mapControls.showBasemap = false
-    toggleBasemap()
-  } else if (hasGis && !mapControls.showBasemap) {
-    mapControls.showBasemap = true
     toggleBasemap()
   }
   
@@ -1141,21 +1142,26 @@ onMounted(async () => {
   const mapControlKey = `mapControlState:${cacheNamespace}`
   const mapPositionKey = `mapPosition:${cacheNamespace}`
   const savedState = localStorage.getItem(mapControlKey)
+  let parsedState = null
   if (savedState) {
     try {
-      const parsed = JSON.parse(savedState)
-      Object.assign(mapControls, parsed)
+      parsedState = JSON.parse(savedState)
+      Object.assign(mapControls, parsedState)
     } catch (e) {
       console.error('Failed to load map control state:', e)
     }
   }
   
-  if (getSeason(year.value).map.gisFiles.length > 0) {
-    // If no saved state exists, or saved state doesn't have showBasemap property, default to true
-    const parsed = savedState ? JSON.parse(savedState) : null
-    if (!parsed || !parsed.hasOwnProperty('showBasemap')) {
-      mapControls.showBasemap = true
+  if (!isBasemapAvailable(year.value)) {
+    mapControls.showBasemap = false
+    if (parsedState?.showBasemap === true) {
+      localStorage.setItem(mapControlKey, JSON.stringify({
+        ...parsedState,
+        showBasemap: false
+      }))
     }
+  } else if (!parsedState || !Object.prototype.hasOwnProperty.call(parsedState, 'showBasemap')) {
+    mapControls.showBasemap = isBasemapVisibleByDefault(year.value)
   }
   
   // Try to restore saved map position
@@ -1202,7 +1208,7 @@ onMounted(async () => {
     crossOrigin: true
   })
   
-  if (mapControls.showBasemap && getSeason(year.value).map.gisFiles.length > 0) {
+  if (mapControls.showBasemap && isBasemapAvailable(year.value)) {
     basemapLayer.addTo(map)
   }
   
@@ -1402,7 +1408,7 @@ const addInfrastructureMarkers = () => {
   const specialLocations = [
     { 
       name: 'The Man', 
-      coords: BRC_CENTER, 
+      coords: getSeasonCenter(year.value),
       icon: '🔥',
       description: 'The heart of Black Rock City - our iconic effigy and gathering place',
       controlKey: 'showTheMan'
@@ -2178,7 +2184,11 @@ onUnmounted(() => {
 })
 
 const toggleBasemap = () => {
-  if (getSeason(year.value).map.gisFiles.length === 0) return
+  if (!isBasemapAvailable(year.value)) {
+    mapControls.showBasemap = false
+    if (map && basemapLayer && map.hasLayer(basemapLayer)) map.removeLayer(basemapLayer)
+    return
+  }
   
   if (mapControls.showBasemap) {
     basemapLayer.addTo(map)

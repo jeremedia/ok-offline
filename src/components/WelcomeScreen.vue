@@ -42,7 +42,7 @@
               <div class="feature-card">
                 <span class="feature-icon">🗺️</span>
                 <h3>Offline Maps</h3>
-                <p>Full Black Rock City map tiles cached for zero-connectivity use</p>
+                <p>Official {{ CURRENT_YEAR }} city layers cached for zero-connectivity use</p>
               </div>
             </div>
           </div>
@@ -152,7 +152,7 @@ import ProgressiveLoader from './ProgressiveLoader.vue'
 import { preCacheData, optimizeForCurrentYear } from '../services/serviceWorkerManager'
 import { globalState, debugLocationState } from '../stores/globalState'
 import { canShowLocations } from '../stores/globalState'
-import { CURRENT_YEAR } from '../config/seasons'
+import { CURRENT_YEAR, isBasemapAvailable } from '../config/seasons'
 
 const emit = defineEmits(['complete'])
 const router = useRouter()
@@ -168,6 +168,7 @@ const showTour = ref(false)
 const syncSteps = ref([])
 const syncStarted = ref(false)
 const syncCompleted = ref(false)
+const currentBasemapAvailable = isBasemapAvailable(CURRENT_YEAR)
 
 const syncTips = [
   'Use the search feature to find specific camps or events',
@@ -175,7 +176,9 @@ const syncTips = [
   'Enable location services for distance-based sorting',
   'Star your favorites to create a personal burn guide',
   'The app works completely offline once data is synced',
-  'Map tiles ensure navigation works without connectivity',
+  currentBasemapAvailable
+    ? 'Map tiles ensure navigation works without connectivity'
+    : `Official ${CURRENT_YEAR} GIS layers work without connectivity`,
   'First sync downloads everything needed for the playa'
 ]
 
@@ -193,13 +196,17 @@ const previewSteps = computed(() => [
   { title: 'Official 2026 GIS', description: 'Eight pinned city layers', status: 'pending' },
   { title: 'Enhancement', description: 'Processing relationships', status: 'pending' },
   { title: 'Optimization', description: 'Preparing for offline use', status: 'pending' },
-  { title: 'Offline Map Tiles', description: 'Map tiles for zero-connectivity', status: 'pending', count: '~640', countLabel: 'tiles' },
+  currentBasemapAvailable
+    ? { title: 'Offline Map Tiles', description: 'Map tiles for zero-connectivity', status: 'pending', count: '~640', countLabel: 'tiles' }
+    : { title: 'Offline Map', description: `Official ${CURRENT_YEAR} GIS; raster basemap not yet available`, status: 'pending' },
 ])
 
 const previewTips = [
   `Downloads the selected ${CURRENT_YEAR} season during onboarding`,
   'All data works without internet connectivity',
-  'Only ~10-15MB for data + ~20MB for map tiles',
+  currentBasemapAvailable
+    ? 'Only ~10-15MB for data + ~20MB for map tiles'
+    : 'Only the current official data and GIS are cached',
   'Historical seasons remain available on demand',
   'Creates your comprehensive offline Burning Man guide',
   'Official camps, art pieces, events, and GIS layers',
@@ -239,7 +246,9 @@ const startDataSync = async () => {
     { title: 'Official 2026 GIS', description: 'Caching eight pinned layers', status: 'pending' },
     { title: 'Enhancement', description: 'Processing relationships', status: 'pending' },
     { title: 'Optimization', description: 'Preparing for offline use', status: 'pending' },
-    { title: 'Offline Map Tiles', description: 'Downloading map tiles', status: 'pending', count: 0, countLabel: 'tiles' }
+    currentBasemapAvailable
+      ? { title: 'Offline Map Tiles', description: 'Downloading map tiles', status: 'pending', count: 0, countLabel: 'tiles' }
+      : { title: 'Offline Map', description: `Official ${CURRENT_YEAR} GIS; raster basemap not yet available`, status: 'pending' }
   ]
   
   try {
@@ -301,6 +310,10 @@ const startDataSync = async () => {
           syncSteps.value[5].status = 'active'
           syncStatusText.value = '🗺️ ' + message
         } else if (stage === 'tiles_ready') {
+          syncSteps.value[5].status = 'completed'
+          syncStatusText.value = '✅ ' + message
+        } else if (stage === 'tiles_skipped') {
+          syncSteps.value[4].status = 'completed'
           syncSteps.value[5].status = 'completed'
           syncStatusText.value = '✅ ' + message
         } else if (stage === 'tiles_error') {

@@ -23,6 +23,11 @@
         "temple": [40.788099423, -119.201499636],
         "centerCamp": [40.777372264, -119.215611561],
         "gisRevision": "3c69f43ef58a55f6cb5f5c6c99a64f4ec5966145",
+        "basemap": {
+          "available": false,
+          "defaultVisible": false,
+          "status": "awaiting-2026-raster"
+        },
         "gisFiles": ["city_blocks", "cpns", "dmz", "plazas", "street_lines", "street_outlines", "toilets", "trash_fence"]
       },
       "avenues": {
@@ -49,6 +54,11 @@
       "map": {
         "center": [40.786958, -119.202994],
         "gisRevision": "historical-2025",
+        "basemap": {
+          "available": true,
+          "defaultVisible": true,
+          "status": "historical"
+        },
         "gisFiles": ["city_blocks", "cpns", "plazas", "street_lines", "street_outlines", "toilets", "trash_fence"]
       },
       "avenues": { "Esplanade": "Esplanade", "A": "Atwood", "B": "Bradbury", "C": "Cherryh", "D": "Dick", "E": "Ellison", "F": "Farmer", "G": "Gibson", "H": "Herbert", "I": "Ishiguro", "J": "Jemison", "K": "Kilgore" }
@@ -59,7 +69,7 @@
       "eventStart": "2024-08-25",
       "eventEnd": "2024-09-02",
       "locationRelease": { "developer": "2024-01-01T00:00:00-08:00", "camp": "2024-01-01T00:00:00-08:00", "art": "2024-01-01T00:00:00-08:00" },
-      "map": { "center": [40.786958, -119.202994], "gisRevision": "historical-2024", "gisFiles": ["city_blocks", "cpns", "plazas", "street_lines", "street_outlines", "toilets", "trash_fence"] },
+      "map": { "center": [40.786958, -119.202994], "gisRevision": "historical-2024", "basemap": { "available": false, "defaultVisible": false, "status": "unavailable" }, "gisFiles": ["city_blocks", "cpns", "plazas", "street_lines", "street_outlines", "toilets", "trash_fence"] },
       "avenues": { "Esplanade": "Esplanade", "A": "Agog", "B": "Baffle", "C": "Captivate", "D": "Delight", "E": "Enchant", "F": "Fascinate", "G": "Gobsmack", "H": "Hypnotic", "I": "Intriguing", "J": "Jabberwock", "K": "Kelter", "L": "Route 66" }
     },
     "2023": {
@@ -68,7 +78,7 @@
       "eventStart": "2023-08-27",
       "eventEnd": "2023-09-04",
       "locationRelease": { "developer": "2023-01-01T00:00:00-08:00", "camp": "2023-01-01T00:00:00-08:00", "art": "2023-01-01T00:00:00-08:00" },
-      "map": { "center": [40.786958, -119.202994], "gisRevision": "historical-2023", "gisFiles": [] },
+      "map": { "center": [40.786958, -119.202994], "gisRevision": "historical-2023", "basemap": { "available": false, "defaultVisible": false, "status": "unavailable" }, "gisFiles": [] },
       "avenues": {}
     }
   }

@@ -1,6 +1,7 @@
 import { getFromCache } from './storage'
 import { syncType, getSyncMetadata } from './staticDataSync'
 import tileDownloader from './tileDownloader'
+import { isBasemapAvailable } from '../config/seasons'
 
 /**
  * Progressive sync service that prioritizes essential data first
@@ -88,8 +89,8 @@ export class ProgressiveSync {
       // Stage 5: Final optimizations
       await this.optimizationStage(currentYear)
 
-      // Stage 6: Download map tiles for offline use
-      await this.tileDownloadStage()
+      // Stage 6: Download a raster basemap only when this season publishes one.
+      await this.tileDownloadStage(currentYear)
 
       this.progress.percentage = 100
       this.callbacks.onComplete(results)
@@ -220,8 +221,15 @@ export class ProgressiveSync {
   /**
    * Tile download stage - download map tiles for offline use
    */
-  async tileDownloadStage() {
+  async tileDownloadStage(year) {
     this.updateProgress('Preparing offline maps...', this.progress.current, this.progress.total)
+
+    if (!isBasemapAvailable(year)) {
+      this.progress.current++
+      this.updateProgress('Official GIS cached; no current raster basemap', this.progress.current, this.progress.total)
+      this.callbacks.onStageChange('tiles_skipped', `${year} official GIS is ready offline; raster basemap not yet available`)
+      return
+    }
     
     try {
       // Check if tiles are already downloaded

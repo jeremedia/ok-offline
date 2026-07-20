@@ -19,6 +19,15 @@ export function getSeasonCenter(year = CURRENT_YEAR) {
   return [...getSeason(year).map.center]
 }
 
+export function isBasemapAvailable(year = CURRENT_YEAR) {
+  return getSeason(year).map.basemap?.available === true
+}
+
+export function isBasemapVisibleByDefault(year = CURRENT_YEAR) {
+  const basemap = getSeason(year).map.basemap
+  return basemap?.available === true && basemap.defaultVisible === true
+}
+
 export function getSeasonDays(year = CURRENT_YEAR) {
   const { eventStart, eventEnd, timezone } = getSeason(year)
   const dates = []

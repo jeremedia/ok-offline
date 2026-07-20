@@ -181,14 +181,14 @@
       
       <!-- Display Tab -->
       <div v-show="activeTab === 'display'" class="tab-panel">
-        <label class="control-item" :class="{ disabled: !hasGis }">
+        <label class="control-item" :class="{ disabled: !basemapAvailable }">
           <input 
             type="checkbox" 
             v-model="controls.showBasemap" 
             @change="updateControls"
-            :disabled="!hasGis"
+            :disabled="!basemapAvailable"
           >
-          <span class="control-label">🗺️ Base Map {{ !hasGis ? '(unavailable)' : '' }}</span>
+          <span class="control-label">🗺️ Base Map {{ !basemapAvailable ? '(not yet available)' : '' }}</span>
         </label>
         <label class="control-item">
           <input type="checkbox" v-model="controls.cityAligned" @change="updateControls">
@@ -258,7 +258,7 @@ import { ref, reactive, onMounted, watch, nextTick, computed } from 'vue'
 import { canShowLocations } from '@/stores/globalState'
 import { useSoonAndNear } from '@/composables/useSoonAndNear'
 import BaseButton from '@/components/ui/BaseButton.vue'
-import { getSeason } from '@/config/seasons'
+import { getSeason, isBasemapAvailable, isBasemapVisibleByDefault } from '@/config/seasons'
 
 const props = defineProps({
   isMobile: Boolean,
@@ -314,7 +314,7 @@ const controls = reactive({
   showPlazas: true,
   showCPNs: false,
   // Display controls
-  showBasemap: getSeason(props.year).map.gisFiles.length > 0,
+  showBasemap: isBasemapVisibleByDefault(props.year),
   cityAligned: false,
   rotationAngle: 0,
   showLegend: true,
@@ -326,8 +326,34 @@ const controls = reactive({
 const campLocationsAvailable = computed(() => canShowLocations(props.year, 'camp'))
 const artLocationsAvailable = computed(() => canShowLocations(props.year, 'art'))
 const locationsAvailable = computed(() => campLocationsAvailable.value || artLocationsAvailable.value)
-const hasGis = computed(() => getSeason(props.year).map.gisFiles.length > 0)
+const basemapAvailable = computed(() => isBasemapAvailable(props.year))
 const controlStateKey = computed(() => `mapControlState:${props.year}:${getSeason(props.year).map.gisRevision}`)
+
+const applySeasonControlPolicy = (year) => {
+  if (!canShowLocations(year, 'camp')) controls.showCamps = false
+  if (!canShowLocations(year, 'art')) {
+    controls.showArt = false
+    controls.showEvents = false
+  }
+
+  if (!isBasemapAvailable(year)) controls.showBasemap = false
+}
+
+const loadSavedControlState = (year) => {
+  const savedState = localStorage.getItem(controlStateKey.value)
+  if (savedState) {
+    try {
+      Object.assign(controls, JSON.parse(savedState))
+    } catch (error) {
+      console.error('Failed to load map control state:', error)
+    }
+  } else {
+    controls.showBasemap = isBasemapVisibleByDefault(year)
+  }
+
+  applySeasonControlPolicy(year)
+  return savedState !== null
+}
 
 // Calculate time until location data is released
 const timeUntilRelease = computed(() => {
@@ -369,45 +395,15 @@ watch(locationsAvailable, (available) => {
 
 // Watch for year changes to update location-based controls
 watch(() => props.year, (newYear) => {
-  // Handle location-based controls
-  if (!canShowLocations(newYear, 'camp')) controls.showCamps = false
-  if (!canShowLocations(newYear, 'art')) {
-    controls.showArt = false
-    controls.showEvents = false
-  }
-  
-  if (getSeason(newYear).map.gisFiles.length === 0 && controls.showBasemap) {
-    controls.showBasemap = false
-  }
-  
+  loadSavedControlState(newYear)
   updateControls()
 })
 
 // Load saved state from localStorage
 onMounted(() => {
-  const savedState = localStorage.getItem(controlStateKey.value)
-  if (savedState) {
-    try {
-      const parsed = JSON.parse(savedState)
-      Object.assign(controls, parsed)
-      
-      // Check location availability and disable controls if needed
-      if (!canShowLocations(props.year, 'camp')) controls.showCamps = false
-      if (!canShowLocations(props.year, 'art')) {
-        controls.showArt = false
-        controls.showEvents = false
-      }
-      
-      if (!hasGis.value && controls.showBasemap) {
-        controls.showBasemap = false
-      }
-      
-      // Emit the loaded state to parent
-      emit('update:controls', { ...controls })
-    } catch (e) {
-      console.error('Failed to load map control state:', e)
-    }
-  }
+  const hadSavedState = loadSavedControlState(props.year)
+  if (hadSavedState) localStorage.setItem(controlStateKey.value, JSON.stringify(controls))
+  emit('update:controls', { ...controls })
   
   // Load active tab preference
   const savedTab = localStorage.getItem('mapActiveTab')

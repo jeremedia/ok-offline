@@ -31,7 +31,7 @@
       <ul>
         <li><strong>Layer Toggles</strong> - Show/hide streets, city blocks, trash fence, and points of interest</li>
         <li><strong>City Alignment</strong> - Rotate the map to align gate at bottom, temple at top</li>
-        <li><strong>Base Map Toggle</strong> - Show/hide satellite imagery for better visibility</li>
+        <li><strong>Base Map Toggle</strong> - Show/hide the historical raster when one is published for the selected season</li>
         <li><strong>Interactive Legend</strong> - Understand what each symbol and color represents</li>
       </ul>
     </div>
