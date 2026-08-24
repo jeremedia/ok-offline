@@ -1,31 +1,33 @@
 {
   "year": "2026",
-  "phase": "content-public",
-  "fetchedAt": "2026-07-20T14:51:32.791Z",
+  "phase": "camp-public",
+  "fetchedAt": "2026-08-24T10:03:16.090Z",
   "sourceCounts": {
-    "camps": 1201,
-    "art": 323,
-    "eventRows": 2231,
-    "uniqueEvents": 2205
+    "camps": 1184,
+    "art": 329,
+    "eventRows": 3413,
+    "uniqueEvents": 3413
   },
-  "duplicateEventRows": 26,
+  "duplicateEventRows": 0,
   "rawLocationCounts": {
-    "camp": 0,
-    "art": 0
+    "camp": 1184,
+    "art": 329
   },
   "missingCampReferences": [
     "a1XVI00000FJ1B32AL"
   ],
-  "missingArtReferences": [],
+  "missingArtReferences": [
+    "a2IVI000002kh0n2AA"
+  ],
   "publishedCounts": {
-    "camps": 1201,
-    "art": 323,
-    "events": 2205
+    "camps": 1184,
+    "art": 329,
+    "events": 3413
   },
   "publishedLocationCounts": {
-    "camp": 0,
+    "camp": 1184,
     "art": 0,
-    "enrichedEvents": 0
+    "enrichedEvents": 3174
   },
   "source": {
     "api": "https://api.burningman.org/api",
@@ -38,9 +40,9 @@
     "art": "2026-08-30T00:00:00-07:00"
   },
   "hashes": {
-    "camps.json": "8e8763721d5662a7826987f0922c218dfd61c7c370f1dbc8cef7f6e30a74f2d5",
-    "art.json": "de96b3be50d00e01b167e5280adff015d3b0030b9b4402adf94473ee0d48053f",
-    "events.json": "718a2c004e3880f044b2761bad8dee86fabc5ae6b45aa44c1d137866d1bfb665",
+    "camps.json": "838638f582e65352f4087c9f838f07a1afa40cd758b5542262ad8dd79ef39734",
+    "art.json": "5365fbffb0fc788abc0a1621021495afdefbe9638d97ec86c352088b3007c767",
+    "events.json": "61ede11d4d31742b14527ea517ff83448f9dc0e06bb2aac529bef072fe2805b3",
     "gis/city_blocks.geojson": "b789e6114c5975c28fb1a8b9c8ba77e7065b5c3532730244df0039aa2f99d877",
     "gis/cpns.geojson": "46f032be87308d35d8ec0b35b044e2da2533501c373f92662669e66261ba3454",
     "gis/dmz.geojson": "b64b7f0f484026970077963e4962909ce6a0c1852e9715fa62260c3dc198029b",
